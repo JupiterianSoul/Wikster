@@ -484,6 +484,8 @@ const STRINGS = {
     help_season_tip: 'A rung reached can be claimed after the season ends; a rung not reached cannot.',
 
     // the atelier and Ink
+    friendBadgesLabel: 'Badges',
+    friendBadgesEmpty: '{name} has not earned a badge yet.',
     tabAtelier: 'Atelier',
     atelierLead: 'Themes, frames and card effects, bought with Ink. What you buy here turns up in Customization.',
     atelierPurse: 'Your Ink',
@@ -1673,6 +1675,8 @@ const STRINGS = {
     help_season_4: '*Le classement de saison* est une quatrième fenêtre, pour les joueurs et pour les guildes, classée par saison et gardée pour toujours.',
     help_season_tip: 'Un palier atteint se réclame même après la fin de la saison ; un palier non atteint, jamais.',
 
+    friendBadgesLabel: 'Badges',
+    friendBadgesEmpty: '{name} n’a pas encore gagné de badge.',
     // l’atelier et l’Encre
     tabAtelier: 'Atelier',
     atelierLead: 'Thèmes, cadres et effets de carte, achetés avec de l’Encre. Ce que vous achetez ici apparaît dans Personnalisation.',

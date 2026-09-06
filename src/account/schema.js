@@ -62,6 +62,8 @@ export function isSchemaGap(error) {
 /** The v2 columns on `profiles`, asked for only where they exist. */
 
 export const SOCIAL_COLS = 'avatar, presence, last_seen_at, visibility, showcase';
+/** The badge shelf a friend sees (V12), asked for on its own so an older project keeps the rest. */
+export const BADGE_COLS = 'badges';
 /**
  * Run a profiles read that WANTS the social columns. `build` is handed the
  * column list to use; on a pre-social project it is called again with the
@@ -70,6 +72,16 @@ export const SOCIAL_COLS = 'avatar, presence, last_seen_at, visibility, showcase
 
 export async function readProfiles(baseCols, build) {
   if (live.socialColumns !== false) {
+    if (live.badgeColumn !== false) {
+      const { data, error } = await build(`${baseCols}, ${SOCIAL_COLS}, ${BADGE_COLS}`);
+      if (!error) {
+        live.socialColumns = true;
+        live.badgeColumn = true;
+        return data ?? [];
+      }
+      if (!isSchemaGap(error)) throw error;
+      live.badgeColumn = false;
+    }
     const { data, error } = await build(`${baseCols}, ${SOCIAL_COLS}`);
     if (!error) {
       live.socialColumns = true;

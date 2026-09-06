@@ -1,6 +1,7 @@
 /* regalia: split out of main.js */
 
 import { DEFAULT_FRAME_STYLE, frameSvg, frameTier } from '../frames.js';
+import { noteIn } from '../ledger.js';
 import { seasonUnlocks } from '../season.js';
 import * as store from '../collection.js';
 import * as account from '../account.js';
@@ -12,7 +13,8 @@ import { badgeStates, badgeSvg, romanRank } from '../badges.js';
 import { press, reveal } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
 import { iconSvg } from '../data/icons.js';
-import { albumsDeep, albumsStarted } from '../albums.js';
+import { albumsDeep, albumsHundred, albumsStarted } from '../albums.js';
+import { loadStats as loadWikdleStats } from '../wikdle.js';
 import { formatViews } from '../pricing.js';
 import { specName } from '../booster.js';
 import { el, ink, money, openSheet, refreshWallet, showScreen, state, toast } from './core.js';
@@ -56,6 +58,7 @@ export function paintFrameInto(node, styleId, tier) {
 export function pickFrameStyle(styleId) {
   state.frameStyle = styleId;
   store.saveFrameStyle(styleId);
+  if (noteIn(state.profile, 'framesWorn', styleId, 64)) store.saveProfile(state.profile);
   // The appbar paints the ACCOUNT's copy of the choice when there is one, so
   // adopt it there first; the server write below then just confirms it.
   if (state.account?.profile) {
@@ -136,7 +139,7 @@ export function wornBadges(states) {
     .slice(0, 4);
 }
 
-export function badgeChip(st, { worn = false } = {}) {
+export function badgeChip(st, { worn = false, readOnly = false } = {}) {
   const chip = document.createElement('button');
   chip.type = 'button';
   chip.className = `badge-chip${st.rank > 0 ? '' : ' is-locked'}`;
@@ -150,7 +153,7 @@ export function badgeChip(st, { worn = false } = {}) {
     sub.textContent = st.max > 1 && st.rank > 0 ? romanRank(st.rank) : '';
   }
   press(chip, { sound: null });
-  chip.addEventListener('click', () => { synth.playTap(); openBadgeSheet(st); });
+  chip.addEventListener('click', () => { synth.playTap(); openBadgeSheet(st, { readOnly }); });
   return chip;
 }
 
@@ -214,12 +217,13 @@ export function toggleBadgeEquip(st) {
   return true;
 }
 
-export function openBadgeSheet(st) {
+export function openBadgeSheet(st, { readOnly = false } = {}) {
   openSheet(st.name, (body) => {
     const wrap = document.createElement('div');
     wrap.className = 'badge-sheet';
     wrap.innerHTML = `<div class="badge-sheet-chip"></div><p class="badge-sheet-line"></p><div class="badge-rungs"></div>`;
-    if (st.rank > 0) {
+    // Somebody else's badge is looked at, never put on.
+    if (st.rank > 0 && !readOnly) {
       const wornNow = wornBadges(allBadgeStates()).some((w) => w.badge.id === st.badge.id);
       const equip = document.createElement('button');
       equip.type = 'button';
@@ -261,9 +265,15 @@ export function achFacts() {
     entries,
     albumsDeep: albumsDeep(entries, state.customPacks),
     albumsStarted: albumsStarted(entries, state.customPacks),
+    albumsHundred: albumsHundred(entries, state.customPacks),
     customPacks: state.customPacks ?? [],
     friends: state.social.friends.length,
-    wallet: state.wallet
+    wallet: state.wallet,
+    wikdle: loadWikdleStats(),
+    wishlist: store.loadWishlist().length,
+    badgesWorn: Array.isArray(state.badgeLoadout) ? state.badgeLoadout.length : 0,
+    signedIn: signedIn(),
+    specials: store.allEntries(state.collection).filter((e) => e.special).length
   });
 }
 

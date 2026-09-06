@@ -739,7 +739,7 @@ export function purchase(spec, price, button, count = 1, item = null) {
   gainBooster(spec, count);
   if (item) store.markShopBought(state.profile, item.id, 1);
   refreshWallet();
-  for (let i = 0; i < count; i++) reportQuest('buy', { price: price / count, kind: spec.kind });
+  for (let i = 0; i < count; i++) reportQuest('buy', { price: price / count, kind: spec.kind, rarityId: spec.rarityId ?? null });
   synth.playPurchase();
   button.classList.add('is-bought');
   setTimeout(() => button.classList.remove('is-bought'), 700);
@@ -757,7 +757,7 @@ export function purchaseBundle(item, button) {
   for (const spec of item.specs) gainBooster({ ...spec }, 1);
   store.markShopBought(state.profile, item.id, 1);
   refreshWallet();
-  for (const spec of item.specs) reportQuest('buy', { price: item.price / item.specs.length, kind: spec.kind });
+  for (const spec of item.specs) reportQuest('buy', { price: item.price / item.specs.length, kind: spec.kind, rarityId: spec.rarityId ?? null, bundle: true });
   synth.playPurchase();
   button.classList.add('is-bought');
   setTimeout(() => button.classList.remove('is-bought'), 700);

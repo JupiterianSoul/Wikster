@@ -32,7 +32,8 @@ import { openDaily, openOdds, openWallet } from './daily.js';
 import * as leaderboard from '../leaderboard.js';
 import { flushGuildGoal, reportGuildGoal } from '../guildgoal.js';
 import { pointsForReport, seasonAt } from '../season.js';
-import { addInk, grant } from '../ink.js';
+import { addInk, grant, onInk } from '../ink.js';
+import { bump, ledger } from '../ledger.js';
 import { tilt } from './detail.js';
 import { buildDrawer, closeDrawer, openDrawer, openHelp, openNotifications, paintDrawerLinks } from './drawer.js';
 import { flushSync, gateAltAction, leaveAccount, onSession, purgeRetiredCodes, purgeRetiredThemes, resumeAccount, showGate, stopSocialPoll, submitGate, syncSoon } from './gate.js';
@@ -126,6 +127,7 @@ bind({
   panel: $('#panel'), panelBody: $('#panel-body'), panelToggle: $('#panel-toggle'),
   showcaseLabel: $('#showcase-label'), showcaseNote: $('#showcase-note'), showcaseGrid: $('#showcase-grid'),
   friendShowcaseHead: $('#friend-showcase-head'), friendShowcaseLabel: $('#friend-showcase-label'), friendShowcase: $('#friend-showcase'),
+  friendBadgesLabel: $('#friend-badges-label'), friendBadgesEmpty: $('#friend-badges-empty'), friendBadges: $('#friend-badges'),
   guildsTitle: $('#guilds-title'), guildsIntro: $('#guilds-intro'), guildHome: $('#guild-home'), guildJoin: $('#guild-join'),
   guildTag: $('#guild-tag'), guildName: $('#guild-name'), guildAbout: $('#guild-about'), guildMeta: $('#guild-meta'),
   guildScores: $('#guild-scores'), guildLeave: $('#guild-leave'), guildDelete: $('#guild-delete'), guildInvite: $('#guild-invite'),
@@ -722,6 +724,12 @@ export let packsRail;
 
 live.binderSeg = undefined;
 
+// The ledger hears Ink move, and counts the day as played once.
+onInk((kind, n) => { bump(state.profile, kind === 'earn' ? 'inkEarned' : 'inkSpent', n); store.saveProfile(state.profile); });
+{
+  const day = Math.floor(Date.now() / 86400000);
+  if (ledger(state.profile).lastPlayDay !== day) { ledger(state.profile).lastPlayDay = day; bump(state.profile, 'playDays'); store.saveProfile(state.profile); }
+}
 init();
 
 window.__wikster = {

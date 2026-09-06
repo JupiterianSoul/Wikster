@@ -1,6 +1,7 @@
 /* core: split out of main.js */
 
 import * as store from '../collection.js';
+import { noteIn } from '../ledger.js';
 import { touch } from '../save.js';
 import { DEFAULT_FRAME_STYLE } from '../frames.js';
 import { buckSvg, iconSvg, inkSvg } from '../data/icons.js';
@@ -273,6 +274,7 @@ export function useTheme(id, { announce = false } = {}) {
   document.querySelector('meta[name="theme-color"]')
     ?.setAttribute('content', theme.swatch[0]);
   if (announce) { synth.resume(); synth.playTheme(); }
+  if (state.profile && noteIn(state.profile, 'themesWorn', theme.id, 64)) store.saveProfile(state.profile);
   return theme;
 }
 /* --- app chrome ------------------------------------------------------------------ */

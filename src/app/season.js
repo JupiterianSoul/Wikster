@@ -8,6 +8,7 @@
  * is kept by src/season.js; this paints it and pays what is claimed.
  */
 import { getLanguage, t, tx } from '../i18n.js';
+import { bump, bumpMax, bumpMin, noteIn } from '../ledger.js';
 import { iconSvg } from '../data/icons.js';
 import { Bar, press } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
@@ -161,6 +162,7 @@ function claimRung(current, index, btn) {
   const { reward, season } = claimed;
   if (reward.money) store.saveWallet(store.loadWallet() + reward.money);
   if (reward.ink) addInk(reward.ink);
+  bump(state.profile, 'seasonRungs');
   refreshWallet();
   if (reward.booster) gainBooster(seasonSpec(season, reward.booster), 1);
   if (reward.badge) {
@@ -219,6 +221,7 @@ function paintQuest() {
       }
       store.saveWallet(store.loadWallet() + quest.reward.money);
       addInk(INK_SEASON_QUEST);
+      bump(state.profile, 'seasonQuests');
       refreshWallet();
       store.saveProfile(state.profile);
       earnSeasonPoints(pointsForQuest());

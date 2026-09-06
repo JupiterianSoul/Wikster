@@ -100,6 +100,8 @@ check('B\'s save carries the cards', Boolean(shared.saves.get(idB)?.data?.data?.
 
 /* --- a friend's profile ------------------------------------------------------ */
 section('a friend\'s profile');
+// B's row carries the shelf a sync would publish: two badges, one at rank two.
+shared.profiles.get(idB).badges = [{ id: 'ripper', rank: 2 }, { id: 'climber', rank: 1 }];
 await viaDrawer(a, 'friends');
 await a.waitForTimeout(1200);
 await a.locator('#friends-list .person').first().click();
@@ -110,6 +112,13 @@ check('seven stat cells', (await a.locator('#friend-stats .stat-cell').count()) 
 check('albums are counted off their cards', /^[0-9]+$/.test((await a.locator('#friend-stats .stat-cell b').nth(5).textContent()).trim()));
 check('the tier breakdown is painted', (await a.locator('#friend-rarity-bars .rarity-row').count()) === 8);
 check('legendary counts their three copies', /3/.test(await a.locator('#friend-rarity-bars .rarity-row', { hasText: 'Legendary' }).locator('.rarity-count').textContent()));
+check('the friend\'s badge shelf shows what their row says', (await a.locator('#friend-badges .badge-chip').count()) === 2 && /Badges · 2/.test(await a.locator('#friend-badges-label').textContent()), await a.locator('#friend-badges-label').textContent());
+check('at the rank they hold it', /II/.test(await a.locator('#friend-badges .badge-chip').first().textContent()));
+await a.locator('#friend-badges .badge-chip').nth(1).click();
+await a.waitForTimeout(600);
+check('a tap opens the sheet, with no button to wear it', /Climber/.test(await a.locator('#sheet-title').textContent()) && (await a.locator('#sheet .badge-rung').count()) === 2 && (await a.locator('#sheet .badge-sheet .btn').count()) === 0);
+await a.locator('#sheet-close').click();
+await a.waitForTimeout(400);
 check('the view switch is offered', await a.locator('#friend-seg .seg-option').count() === 2);
 check('albums show first', (await a.locator('#friend-albums .album-cover, #friend-albums > *').count()) >= 1 && await a.locator('#friend-classic').isHidden());
 await a.locator('#friend-seg .seg-option[data-value="classic"]').click();

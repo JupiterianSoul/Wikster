@@ -233,6 +233,26 @@ floor can both see.
   collection milestones.
 - **Badges** in 10 styles, worn four at a time on your profile.
 
+### Achievements, badges and the ledger
+
+There are over three hundred and fifty achievements in some hundred
+families, and every one is computed from the save rather than awarded at a
+moment that could be missed. The first hundred read the collection and the
+profile; the rest read a ledger of things done (`src/ledger.js`, kept on the
+profile under `ledger`): every quest report the app makes is counted there
+(boosters by kind, subjects, new and famous pulls, Wikdle plays and wins,
+spins, shop purchases, sales, cards read), and the places a report does not
+reach bump their own count (guild goals and matches, the table and the hall,
+messages, hearts, bids, lots, Ink earned and spent, themes and frames and
+effects worn, days played). Achievements pay coins or a booster, and Ink.
+
+Badges hang off the hard end of a family and rise in rank as the family is
+climbed: ninety-four of them, and no two alike. Each has its own line art,
+its own foil (the chain badges take theirs from a golden-angle walk round the
+hue wheel, in three foil families) and one of six shapes. The badges a player
+has earned are published with their public stats (`badges` on `profiles`,
+V12) so a friend's page shows their whole shelf without reading their save.
+
 ### Dressing the collection
 
 Customization holds two pickers beyond the theme, and shows only what is

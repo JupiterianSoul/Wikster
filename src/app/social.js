@@ -1,6 +1,7 @@
 /* social: split out of main.js */
 
 import * as account from '../account.js';
+import { bump, bumpMax, bumpMin, noteIn } from '../ledger.js';
 import { getLanguage, t, tx } from '../i18n.js';
 import { rankFor } from '../progression.js';
 import { Bar, Segmented, press, reveal } from '../ui/components.js';
@@ -25,7 +26,8 @@ import { clearNotify, shouldNotify, systemNotify } from './notify.js';
 import { gainBooster } from './open.js';
 import { buildBooster, renderPacks } from './packs.js';
 import { formatDuration, renderProfile } from './profile.js';
-import { paintFrameInto, updateBadges } from './regalia.js';
+import { badgeChip, paintFrameInto, updateBadges } from './regalia.js';
+import { badgeStateFromRank } from '../badges.js';
 import { renderCustomize } from './settings.js';
 
 /* --- friends -------------------------------------------------------------------------------------------------- */
@@ -333,9 +335,11 @@ export async function collectDeliveries() {
       ?? t('friendSomeone');
     if (item.kind === 'booster' && item.payload?.spec) {
       gainBooster(item.payload.spec, item.payload.count ?? 1);
+      bump(state.profile, 'giftsReceived');
       pushNote('gift', t('notifGiftBooster', { name: from }), 'packs');
     } else if (item.kind === 'card' && item.payload?.key) {
       store.receiveCardEntry(state.collection, item.payload);
+      bump(state.profile, 'giftsReceived');
       pushNote('gift', t('notifGiftCard', { name: from, card: item.payload.title }), 'binder');
     } else if (item.kind === 'trade-return' && Array.isArray(item.payload?.cards)) {
       for (const card of item.payload.cards) store.receiveCardEntry(state.collection, card);
@@ -355,6 +359,7 @@ export async function collectDeliveries() {
       refreshWallet();
       if (item.payload.reason === 'sale') {
         state.profile.auctionsSold = (state.profile.auctionsSold ?? 0) + 1;
+        bumpMax(state.profile, 'auctionBest', item.payload.amount);
         store.saveProfile(state.profile);
       }
       pushNote('trade', t(item.payload.reason === 'sale' ? 'notifAuctionSold' : 'notifAuctionRefund',
@@ -876,6 +881,9 @@ export async function sendChat(event) {
   typedAt = 0;
   try {
     await account.sendChatMessage(userId(), entry.otherId, text);
+    bump(state.profile, 'messagesSent');
+    noteIn(state.profile, 'conversations', entry.otherId, 500);
+    store.saveProfile(state.profile);
     synth.playMessage();
     chatWire?.send('sent');
     refreshChat();
@@ -1115,6 +1123,8 @@ export function openAvatarCrop(card) {
       try {
         await account.updateProfileFields(userId(), { avatar });
         state.account.profile.avatar = avatar;
+        bump(state.profile, 'avatarSet');
+        store.saveProfile(state.profile);
         toast(t('avatarSaved'));
         synth.playResolved();
         live.sheet.hide();
@@ -1363,6 +1373,21 @@ export function renderFriend() {
 
   paintFriendStats(entry);
   paintFriendShowcase(entry);
+  paintFriendBadges(entry);
+}
+
+/**
+ * A friend's badge shelf: every chip they have earned, at the rank they
+ * hold it, from the list their profile row carries. A tap opens the same
+ * sheet as on your own shelf, minus the button to wear it.
+ */
+export function paintFriendBadges(entry) {
+  const rows = Array.isArray(entry.profile?.badges) ? entry.profile.badges : [];
+  const states = rows.map((r) => badgeStateFromRank(r?.id, r?.rank)).filter((st) => st && st.rank > 0);
+  el.friendBadgesLabel.textContent = `${t('friendBadgesLabel')} · ${states.length}`;
+  el.friendBadgesEmpty.hidden = states.length > 0;
+  el.friendBadgesEmpty.textContent = t('friendBadgesEmpty', { name: entry.profile?.username ?? '' });
+  el.friendBadges.replaceChildren(...states.map((st) => badgeChip(st, { readOnly: true })));
 }
 
 /**
@@ -1404,6 +1429,7 @@ export async function paintFriendShowcase(entry) {
       const on = !mine(card.key);
       try {
         await account.setKudos(entry.otherId, card.key, me, on);
+        if (on) { bump(state.profile, 'kudosGiven'); store.saveProfile(state.profile); }
         hearts = on ? [...hearts, { key: card.key, sender: me }] : hearts.filter((k) => !(k.key === card.key && k.sender === me));
         synth.playTap();
         paint();

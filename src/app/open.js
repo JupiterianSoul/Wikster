@@ -716,10 +716,12 @@ export async function runOpen(booster) {
   store.clearOpenInFlight();
   // The day's quests hear about it: the booster, then every card.
   reportQuest('open', { kind: state.spec.kind, themeId: state.spec.themeId ?? null, rarityId: state.spec.rarityId ?? null });
+  const wished = new Set(store.loadWishlist().map((c) => c.key));
   for (const pull of pulls) {
     reportQuest('pull', {
       rarityId: pull.rarity.id, themeId: state.spec.themeId ?? null,
       isNew: Boolean(recorded.find((r) => r.entry === pull.entry)?.isNew),
+      wished: wished.has(pull.entry),
       popularity: pull.article.popularity ?? 0
     });
   }

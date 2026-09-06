@@ -11,6 +11,7 @@
  * "wear it" shortcuts on an owned tile do the same thing the picker would.
  */
 import { t, tx } from '../i18n.js';
+import { bump } from '../ledger.js';
 import * as store from '../collection.js';
 import { synth } from '../ui/sound.js';
 import { iconSvg } from '../data/icons.js';
@@ -170,6 +171,7 @@ function buy(kind, id, price, name) {
     return;
   }
   grant(state.profile, kind, id);
+  bump(state.profile, 'atelierBuys');
   store.saveProfile(state.profile);
   refreshWallet();
   synth.playPurchase();

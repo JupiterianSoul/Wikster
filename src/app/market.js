@@ -1,6 +1,7 @@
 /* market: split out of main.js */
 
 import { getLanguage, t, tx } from '../i18n.js';
+import { bump, bumpMax, bumpMin, noteIn } from '../ledger.js';
 import * as store from '../collection.js';
 import * as account from '../account.js';
 import { press } from '../ui/components.js';
@@ -447,6 +448,8 @@ export async function placeBidFlow(a, amount, btn) {
   syncSoon();
   try {
     const updated = await account.placeBid(a.id, amount);
+    bump(state.profile, 'bidsPlaced');
+    store.saveProfile(state.profile);
     rememberBid(a.id);
     const i = m.auctions.findIndex((x) => x.id === a.id);
     if (i >= 0 && updated?.id) m.auctions[i] = updated;
@@ -548,6 +551,8 @@ export function openListSheet(entry) {
       syncSoon();
       try {
         await account.createAuction(snapshot, price, minutes);
+        bump(state.profile, 'auctionsListed');
+        store.saveProfile(state.profile);
         toast(t('marketListed', { card: esc(entry.title) }), 'ok');
         synth.playResolved();
         live.sheet.hide();

@@ -1,6 +1,7 @@
 /* settings: split out of main.js */
 
 import { LANGUAGES, getLanguage, t, tx } from '../i18n.js';
+import { bump, noteIn } from '../ledger.js';
 import * as store from '../collection.js';
 import { synth } from '../ui/sound.js';
 import { iconSvg } from '../data/icons.js';
@@ -494,6 +495,7 @@ export function wearFx(rarity, style) {
   if (style.id === DEFAULT_FX) delete state.cardFx[rarity.id];
   else state.cardFx[rarity.id] = style.id;
   store.saveCardFx(state.cardFx);
+  if (noteIn(state.profile, 'fxWorn', `${rarity.id}:${style.id}`, 64)) store.saveProfile(state.profile);
   reportQuest('fx');
   renderBinder();
   import('./cardindex.js').then((m) => m.renderCardIndex());
@@ -758,6 +760,8 @@ export function openTransfer() {
 
     const out = body.querySelector('[data-out]');
     out.value = exportSave();
+    bump(state.profile, 'backups');
+    store.saveProfile(state.profile);
     out.addEventListener('focus', () => out.select());
 
     const copy = body.querySelector('[data-copy]');

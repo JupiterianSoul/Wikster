@@ -2073,3 +2073,12 @@ exception when others then null; end $$;
 do $$ begin
   alter publication supabase_realtime add table public.guild_season;
 exception when others then null; end $$;
+
+-- ============================================================================
+-- V12 - THE BADGE SHELF
+-- ----------------------------------------------------------------------------
+-- The badges a player has earned, with the rank each is held at, published
+-- with the rest of the public stats so a friend's page can show the shelf
+-- without reading their save: [{ "id": "ripper", "rank": 2 }, ...].
+-- ============================================================================
+alter table public.profiles add column if not exists badges jsonb not null default '[]'::jsonb;

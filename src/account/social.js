@@ -18,6 +18,15 @@ export async function searchPlayers(term, selfId) {
     .neq('id', selfId)
     .limit(20));
 }
+/** The rows for a handful of ids at once: names, levels and faces for a roster or a board. */
+export async function profilesById(ids) {
+  const wanted = [...new Set((ids ?? []).filter(Boolean))].slice(0, 100);
+  if (!wanted.length) return [];
+  return readProfiles('id, username, level', (cols) => supabase
+    .from('profiles')
+    .select(cols)
+    .in('id', wanted));
+}
 /**
  * Everyone you are connected to, in one read, split by what the connection is:
  * an accepted friend, a request you sent, or a request waiting on you.

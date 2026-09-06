@@ -39,6 +39,10 @@ const write = (n) => {
   try { localStorage.setItem(INK_KEY, JSON.stringify(Math.max(0, Math.floor(n)))); } catch { /* session only */ }
 };
 
+/** Whoever wants to hear Ink move: ('earn' | 'spend', amount). */
+let listener = null;
+export const onInk = (fn) => { listener = fn; };
+
 export const loadInk = () => read();
 export const saveInk = (n) => write(n);
 
@@ -47,6 +51,7 @@ export function addInk(amount) {
   const n = Math.max(0, Math.floor(Number(amount) || 0));
   const after = read() + n;
   write(after);
+  if (n > 0) try { listener?.('earn', n); } catch { /* the ledger is not the purse */ }
   return after;
 }
 
@@ -56,6 +61,7 @@ export function spendInk(amount) {
   const have = read();
   if (have < n) return false;
   write(have - n);
+  if (n > 0) try { listener?.('spend', n); } catch { /* the ledger is not the purse */ }
   return true;
 }
 

@@ -19,7 +19,7 @@ import { openDaily } from './daily.js';
 import { live } from './live.js';
 import { dropReady, warmDrawer } from './open.js';
 import { renderPacks } from './packs.js';
-import { refreshLevelBadge, updateBadges } from './regalia.js';
+import { allBadgeStates, refreshLevelBadge, updateBadges } from './regalia.js';
 import { applySettings, renderAccountRow } from './settings.js';
 import { payStipend, renderShop } from './shop.js';
 import { startLiveSocial, stopLiveSocial, syncSocial } from './social.js';
@@ -255,7 +255,9 @@ export function currentStats() {
     boostersOpened: state.profile.boostersOpened ?? 0,
     value: entries.reduce((sum, e) => sum + e.price * e.count, 0),
     bestRarity: best?.id ?? null,
-    playMs: state.profile.playMs ?? 0
+    playMs: state.profile.playMs ?? 0,
+    // Every badge earned, with its rank: what a friend's page shows.
+    badges: allBadgeStates().filter((st) => st.rank > 0).map((st) => ({ id: st.badge.id, rank: st.rank }))
   };
 }
 /**

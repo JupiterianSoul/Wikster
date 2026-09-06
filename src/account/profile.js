@@ -1,6 +1,8 @@
 /* profile: split out of account.js */
 
 import { USERNAME_RE, supabase } from './client.js';
+import { isSchemaGap } from './schema.js';
+import { live } from './live.js';
 
 /* --- profile -------------------------------------------------------------------- */
 
@@ -49,7 +51,7 @@ export function profileForSession(session) {
  */
 
 export async function publishStats(userId, stats) {
-  const { error } = await supabase.from('profiles').update({
+  const row = {
     level: stats.level,
     rank: stats.rank,
     cards: stats.cards,
@@ -58,6 +60,15 @@ export async function publishStats(userId, stats) {
     collection_value: stats.value,
     best_rarity: stats.bestRarity,
     play_ms: stats.playMs
-  }).eq('id', userId);
+  };
+  // The badge shelf rides along where the project has the column (V12);
+  // an older project takes the rest of the stats without it.
+  if (Array.isArray(stats.badges) && live.badgeColumn !== false) {
+    const { error } = await supabase.from('profiles').update({ ...row, badges: stats.badges }).eq('id', userId);
+    if (!error) { live.badgeColumn = true; return; }
+    if (!isSchemaGap(error)) throw error;
+    live.badgeColumn = false;
+  }
+  const { error } = await supabase.from('profiles').update(row).eq('id', userId);
   if (error) throw error;
 }

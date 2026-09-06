@@ -13,6 +13,7 @@
  */
 
 import { t, tx } from '../i18n.js';
+import { bump, bumpMax, bumpMin, noteIn } from '../ledger.js';
 import { iconSvg } from '../data/icons.js';
 import { Bar, Segmented, press } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
@@ -239,6 +240,8 @@ function resultRow(g) {
     try {
       const joined = await account.joinGuild(g.id);
       state.guild = joined;
+      bump(state.profile, 'guildsJoined');
+      store.saveProfile(state.profile);
       synth.playResolved();
       toast(esc(t('guildJoined', { name: joined.name })), 'ok');
       guildView.results = [];
@@ -388,6 +391,8 @@ async function openInviteSheet() {
         ask.disabled = true;
         try {
           await account.inviteToGuild(entry.otherId);
+          bump(state.profile, 'guildInvites');
+          store.saveProfile(state.profile);
           ask.textContent = t('guildInvited');
           ask.classList.remove('btn-primary');
           ask.classList.add('btn-ghost');
@@ -491,6 +496,8 @@ async function claimGoal() {
   try {
     const paid = await account.guildGoalClaim();
     store.saveWallet(store.loadWallet() + paid);
+    bump(state.profile, 'guildGoals');
+    store.saveProfile(state.profile);
     addInk(INK_GUILD_GOAL);
     refreshWallet();
     gainBooster(GOAL_BOOSTER, 1);
@@ -567,6 +574,8 @@ function paintMatch() {
         try {
           const paid = await account.guildMatchClaim();
           store.saveWallet(store.loadWallet() + paid);
+          bump(state.profile, 'guildMatches');
+          store.saveProfile(state.profile);
           addInk(INK_GUILD_MATCH);
           refreshWallet();
           last.claimed = true;
@@ -639,6 +648,8 @@ async function sayInRoom(event) {
   el.guildChatInput.value = '';
   try {
     const line = await account.guildSay(text);
+    bump(state.profile, 'guildChats');
+    store.saveProfile(state.profile);
     if (!guildView.chat.some((m) => m.id === line.id)) { guildView.chat.push(line); paintChat(); }
     synth.playMessage();
   } catch (error) {
@@ -695,6 +706,8 @@ function paintBank() {
       try {
         const taken = await account.guildBankTake(d.id);
         store.receiveCardEntry(state.collection, { ...taken, count: 1 });
+        bump(state.profile, 'guildTaken');
+        store.saveProfile(state.profile);
         guildView.bank = guildView.bank.filter((x) => x.id !== d.id);
         guildView.takesLeft = Math.max(0, guildView.takesLeft - 1);
         synth.playResolved();
@@ -746,6 +759,8 @@ function openDonateSheet() {
         try {
           const deposit = await account.guildBankDonate(snapshot);
           guildView.bank.unshift(deposit);
+          bump(state.profile, 'guildDonated');
+          store.saveProfile(state.profile);
           synth.playResolved();
           toast(esc(t('guildBankDonated', { card: card.title })), 'ok');
           live.sheet.hide();
@@ -795,6 +810,9 @@ function wire() {
     try {
       const made = await account.createGuild(name, tag, about);
       state.guild = made;
+      bump(state.profile, 'guildsFounded');
+      bump(state.profile, 'guildsJoined');
+      store.saveProfile(state.profile);
       el.guildCreate.reset();
       synth.playFanfare();
       toast(esc(t('guildCreated', { name: made.name })), 'ok');

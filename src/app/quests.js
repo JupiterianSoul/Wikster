@@ -1,6 +1,7 @@
 /* quests: split out of main.js */
 
 import { t, tx } from '../i18n.js';
+import { bump, bumpMax, bumpMin, noteIn } from '../ledger.js';
 import * as quests from '../quests.js';
 import { Ring, Segmented, press, reveal } from '../ui/components.js';
 import { QUEST_TIERS } from '../data/quests.js';
@@ -119,6 +120,11 @@ export function paintQuests(board) {
           if (reward.money) { store.saveWallet(store.loadWallet() + reward.money); refreshWallet(); }
           if (reward.booster) gainBooster({ ...reward.booster }, 1);
           addInk(inkForQuestTier(row.quest.tier));
+          bump(state.profile, 'questsClaimed');
+          if (row.quest.tier === 'hard') bump(state.profile, 'questsHard');
+          // Every quest of the day claimed: a full day.
+          if (quests.describe(quests.loadBoard(questUserKey())).every((r) => r.claimed)) bump(state.profile, 'questDays');
+          store.saveProfile(state.profile);
           refreshWallet();
           earnSeasonPoints(pointsForQuest());
           synth.playPurchase();
@@ -276,6 +282,7 @@ export async function loadLeaderboard({ quiet = false } = {}) {
   let page, mine = null;
   try {
     [page, mine] = await Promise.all([leaderboard.fetchPage(view.window, view.page), leaderboard.fetchMyRank(view.window).catch(() => null)]);
+    if (mine?.rank) { bumpMin(state.profile, 'bestRank', mine.rank); store.saveProfile(state.profile); }
   } catch (error) {
     body.replaceChildren(gameStage('podium', houseError(error), { label: t('retry'), run: () => loadLeaderboard() }));
     return;

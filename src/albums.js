@@ -358,6 +358,11 @@ export function albumsDeep(entries, customPacks = []) {
   return buildAlbums(entries, customPacks).filter((a) => a.deep).length;
 }
 
+/** How many albums hold a hundred cards or more: the second depth. */
+export function albumsHundred(entries, customPacks = []) {
+  return buildAlbums(entries, customPacks).filter((a) => (a.owned ?? a.count ?? 0) >= 100).length;
+}
+
 /** How many albums have been opened at all. */
 export function albumsStarted(entries, customPacks = []) {
   return buildAlbums(entries, customPacks).filter((a) => a.unlocked).length;

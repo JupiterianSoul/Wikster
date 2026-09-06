@@ -85,6 +85,7 @@ export {
   setTradeStatus
 } from './account/social.js';
 export { setShowcase, showcaseKudos, setKudos } from './account/social.js';
+export { profilesById } from './account/social.js';
 export {
   myGuild,
   createGuild,

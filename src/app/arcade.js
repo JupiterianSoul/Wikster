@@ -1,6 +1,7 @@
 /* arcade: split out of main.js */
 
 import * as quests from '../quests.js';
+import { record } from '../ledger.js';
 import { t, tx } from '../i18n.js';
 import { ALBUM_TIERS, albumHasTiers, albumTierBooster, albumTiersReached, buildAlbums } from '../albums.js';
 import * as store from '../collection.js';
@@ -35,6 +36,7 @@ export function questUserKey() {
  */
 
 export function reportQuest(metric, detail = {}) {
+  try { if (record(state.profile, metric, detail)) store.saveProfile(state.profile); } catch { /* the ledger is not the game */ }
   try { reportGuildGoal(metric, detail); } catch { /* the goal is not the game */ }
   try { earnSeasonPoints(pointsForReport(metric, detail)); } catch { /* the season is not the game */ }
   try {
