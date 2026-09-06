@@ -45,8 +45,9 @@ console.log('   before:', JSON.stringify(before));
 check('the gold theme is hidden before the code', !before.themes.includes('apotheosis'));
 check('the gold frame is hidden before the code', !before.frames.includes('god'));
 check('a card-effect row per rarity', before.fxRows === 8, String(before.fxRows));
-check('five styles offered per rarity', before.fxChips === 40, String(before.fxChips));
-check('locked styles are marked', await p.locator('.fx-chip.is-locked').count() > 0);
+check('only classic is offered before anything is bought', await p.locator('.fx-chip.is-on').count() === 8 && before.fxChips === 16, String(before.fxChips));
+check('each tier points to the Atelier', await p.locator('.fx-chip.is-hint').count() === 8);
+check('the Atelier frames are not in the picker until bought', !before.frames.some((f) => ['ivy', 'comet', 'inkwell'].includes(f)));
 check('high frames are locked at level 30', await p.locator('.frame-card.is-locked').count() >= 4);
 
 // --- redeem ----------------------------------------------------------------

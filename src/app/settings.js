@@ -10,8 +10,9 @@ import { DEFAULT_THEME, THEMES } from '../ui/themes.js';
 import { themeUnlocked } from '../season.js';
 import { BADGES, badgeSvg } from '../badges.js';
 import { FRAME_STYLES, frameSvg, frameTier, frameUnlocked } from '../frames.js';
-import { RARITIES, rarityFromPopularity } from '../data/rarities.js';
-import { DEFAULT_FX, FX_STYLES, fxCost, fxUnlocked } from '../data/fx.js';
+import { RARITIES } from '../data/rarities.js';
+import { DEFAULT_FX, fxForRarity } from '../data/fx.js';
+import { ownsFrame, ownsFx, ownsTheme } from '../ink.js';
 import * as account from '../account.js';
 import { copyText, describeSave, exportSave, importSave, parseSave, readText, touch } from '../save.js';
 import { STARTER_COINS } from '../economy.js';
@@ -333,10 +334,20 @@ export function renderCustomize() {
   el.themeLabel.textContent = t('themeTitle');
   el.identityLabel.textContent = t('identityTitle');
 
-  // The theme picker previews each theme rather than naming it.
+  // The way to the Atelier, where the rest of this screen is bought.
+  const doorway = document.createElement('div');
+  doorway.className = 'row atelier-door';
+  doorway.innerHTML = `<div class="row-copy"><h4></h4><p></p></div>`;
+  doorway.querySelector('h4').textContent = t('customizeAtelier');
+  doorway.querySelector('p').textContent = t('customizeAtelierNote');
+  settingsRowButton(doorway, t('tabAtelier'), () => import('./atelier.js').then((m) => { showScreen('atelier'); m.renderAtelier(); }));
+  el.customizeDoor.replaceChildren(doorway);
+
+  // The theme picker previews each theme rather than naming it. Only what is
+  // owned is offered: the default, the code and season ones once unlocked,
+  // the rest once bought in the Atelier. The theme being worn always shows.
   const current = storedTheme();
-  el.themeGrid.replaceChildren(...THEMES.filter((theme) => (!theme.code || hasRedeemed(state.profile, theme.code))
-    && (!theme.season || themeUnlocked(state.profile, theme.season))).map((theme) => {
+  el.themeGrid.replaceChildren(...THEMES.filter((theme) => themeOwned(theme, current)).map((theme) => {
     const card = document.createElement('button');
     card.type = 'button';
     card.className = `theme-card${theme.id === current ? ' is-on' : ''}`;
@@ -376,10 +387,13 @@ export function renderCustomize() {
   const wearing = frameStyle();
   // A frame behind a secret code is not shown at all until that code is
   // redeemed: the same rule the special themes and badges follow, so nothing
-  // in the picker hints at a code the player has not been given.
-  const offered = FRAME_STYLES.filter((style) => !style.code || hasRedeemed(state.profile, style.code));
+  // in the picker hints at a code the player has not been given. An Atelier
+  // frame is not shown until bought, for the same reason in the other
+  // direction: the shop is where it is sold, not here.
+  const offered = FRAME_STYLES.filter((style) => style.code ? hasRedeemed(state.profile, style.code)
+    : style.ink ? ownsFrame(state.profile, style.id) : true);
   el.frameStyles.replaceChildren(...offered.map((style) => {
-    const open = style.code ? true : frameUnlocked(style, level);
+    const open = style.code || style.ink ? true : frameUnlocked(style, level);
     const card = document.createElement('button');
     card.type = 'button';
     card.className = `frame-card${style.id === wearing ? ' is-on' : ''}${tier < 1 ? ' is-dim' : ''}${open ? '' : ' is-locked'}`;
@@ -392,7 +406,7 @@ export function renderCustomize() {
       <span class="frame-copy"><h4></h4><small></small></span>
       <span class="theme-check">${iconSvg('check', { size: 14 })}</span>`;
     card.querySelector('h4').textContent = tx(style.name);
-    card.querySelector('small').textContent = open ? '' : t('frameLocked', { level: style.minLevel });
+    card.querySelector('small').textContent = open ? (style.ink ? t('frameFromAtelier') : '') : t('frameLocked', { level: style.minLevel });
     press(card, { sound: null });
     card.addEventListener('click', () => {
       if (!open) {
@@ -411,29 +425,30 @@ export function renderCustomize() {
 
   renderCardFx();
 }
+
+/** Whether a theme belongs in the picker: the default, the one worn, or one unlocked. */
+export function themeOwned(theme, current = storedTheme()) {
+  if (theme.id === DEFAULT_THEME || theme.id === current) return true;
+  if (theme.code) return hasRedeemed(state.profile, theme.code);
+  if (theme.season) return themeUnlocked(state.profile, theme.season);
+  return ownsTheme(state.profile, theme.id);
+}
 /**
- * CARD EFFECTS: one row per rarity, one chip per style.
+ * CARD EFFECTS: one row per rarity, one chip per style owned.
  *
  * The choice is per rarity on purpose. A single setting for the whole
  * collection would make every card look the same and take the ladder's
  * legibility with it; this way a player dresses the tiers they actually
- * collect, and a locked chip says exactly how many cards of that tier open it.
+ * collect. Classic is always here; the rest arrive from the Atelier, and a
+ * tier with nothing bought yet says where to go.
  */
 
 export function renderCardFx() {
   el.fxLabel.textContent = t('fxTitle');
   el.fxNote.textContent = t('fxNote');
 
-  // How many of each tier are in the collection: what unlocks a style.
-  const held = {};
-  for (const entry of Object.values(state.collection.entries ?? {})) {
-    if (entry?.special) continue;
-    const id = entry.rarityId ?? rarityFromPopularity(entry.popularity ?? 0).id;
-    held[id] = (held[id] ?? 0) + (entry.count ?? 1);
-  }
-
   el.fxTiers.replaceChildren(...RARITIES.map((rarity) => {
-    const owned = held[rarity.id] ?? 0;
+    const styles = fxForRarity(rarity.id).filter((style) => style.id === DEFAULT_FX || ownsFx(state.profile, rarity.id, style.id));
     const row = document.createElement('div');
     row.className = 'fx-tier';
     row.innerHTML = `<div class="fx-tier-head"><span class="fx-tier-name"></span>
@@ -441,39 +456,47 @@ export function renderCardFx() {
     const name = row.querySelector('.fx-tier-name');
     name.textContent = tx(rarity.name);
     name.style.color = rarity.color;
-    row.querySelector('.fx-tier-count').textContent = t('fxOwned', { n: owned.toLocaleString() });
+    row.querySelector('.fx-tier-count').textContent = t('fxOwnedStyles', { n: styles.length - 1, total: fxForRarity(rarity.id).length - 1 });
 
-    row.querySelector('.fx-chips').replaceChildren(...FX_STYLES.map((style) => {
-      const cost = fxCost(style.id, rarity.id);
-      const open = fxUnlocked(style.id, rarity.id, owned);
+    row.querySelector('.fx-chips').replaceChildren(...styles.map((style) => {
       const worn = (state.cardFx[rarity.id] ?? DEFAULT_FX) === style.id;
       const chip = document.createElement('button');
       chip.type = 'button';
-      chip.className = `fx-chip${worn ? ' is-on' : ''}${open ? '' : ' is-locked'}`;
+      chip.className = `fx-chip${worn ? ' is-on' : ''}`;
       chip.style.setProperty('--rarity', rarity.color);
       chip.innerHTML = `<span class="fx-chip-name"></span><span class="fx-chip-sub"></span>`;
       chip.querySelector('.fx-chip-name').textContent = tx(style.name);
-      chip.querySelector('.fx-chip-sub').textContent = open
-        ? tx(style.note)
-        : t('fxLocked', { n: cost, rarity: tx(rarity.name) });
+      chip.querySelector('.fx-chip-sub').textContent = tx(style.note);
       press(chip, { sound: null });
       chip.addEventListener('click', () => {
-        if (!open) { synth.playDenied(); toast(esc(t('fxLocked', { n: cost, rarity: tx(rarity.name) })), 'error'); return; }
+        if (worn) return;
         synth.playTap();
-        if (style.id === DEFAULT_FX) delete state.cardFx[rarity.id];
-        else state.cardFx[rarity.id] = style.id;
-        store.saveCardFx(state.cardFx);
-        reportQuest('fx');
+        wearFx(rarity, style);
         toast(esc(t('fxEquipped', { name: tx(style.name), rarity: tx(rarity.name) })));
         renderCardFx();
-        // Anything already drawn is wearing the old look.
-        renderBinder();
-        import('./cardindex.js').then((m) => m.renderCardIndex());
       });
       return chip;
     }));
+    if (styles.length === 1) {
+      const more = document.createElement('span');
+      more.className = 'fx-chip is-hint';
+      more.innerHTML = `<span class="fx-chip-name"></span><span class="fx-chip-sub"></span>`;
+      more.querySelector('.fx-chip-name').textContent = t('fxMoreTitle');
+      more.querySelector('.fx-chip-sub').textContent = t('fxMore');
+      row.querySelector('.fx-chips').appendChild(more);
+    }
     return row;
   }));
+}
+
+/** Puts a style on a rarity and repaints what is already drawn in the old look. */
+export function wearFx(rarity, style) {
+  if (style.id === DEFAULT_FX) delete state.cardFx[rarity.id];
+  else state.cardFx[rarity.id] = style.id;
+  store.saveCardFx(state.cardFx);
+  reportQuest('fx');
+  renderBinder();
+  import('./cardindex.js').then((m) => m.renderCardIndex());
 }
 /* --- settings & customization rows ---------------------------------------- */
 

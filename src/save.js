@@ -19,6 +19,7 @@
 export const SAVE_KEYS = [
   'wikster.collection.v3',
   'wikster.wallet.v1',
+  'wikster.ink.v1',
   'wikster.inventory.v1',
   'wikster.profile.v1',
   'wikster.customPacks.v2',

@@ -27,6 +27,7 @@ import { on } from '../ui/bus.js';
 import { earnSeasonPoints, gameStage, houseError } from './arcade.js';
 import { pointsForGuildGoal } from '../season.js';
 import { el, esc, money, openSheet, refreshWallet, state, toast } from './core.js';
+import { INK_GUILD_GOAL, INK_GUILD_MATCH, addInk } from '../ink.js';
 import { pushNote, whenText } from './drawer.js';
 import { gainBooster } from './open.js';
 import { live } from './live.js';
@@ -490,6 +491,7 @@ async function claimGoal() {
   try {
     const paid = await account.guildGoalClaim();
     store.saveWallet(store.loadWallet() + paid);
+    addInk(INK_GUILD_GOAL);
     refreshWallet();
     gainBooster(GOAL_BOOSTER, 1);
     earnSeasonPoints(pointsForGuildGoal());
@@ -565,6 +567,7 @@ function paintMatch() {
         try {
           const paid = await account.guildMatchClaim();
           store.saveWallet(store.loadWallet() + paid);
+          addInk(INK_GUILD_MATCH);
           refreshWallet();
           last.claimed = true;
           synth.playFanfare();

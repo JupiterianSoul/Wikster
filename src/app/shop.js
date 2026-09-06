@@ -12,7 +12,8 @@ import { specColours, specId, specName } from '../booster.js';
 import { iconSvg } from '../data/icons.js';
 import { synth } from '../ui/sound.js';
 import { reportQuest } from './arcade.js';
-import { el, esc, money, openSheet, refreshWallet, settings, state, toast } from './core.js';
+import { el, esc, ink, money, openSheet, refreshWallet, settings, showScreen, state, toast } from './core.js';
+import { h } from '../ui/dom.js';
 import { live } from './live.js';
 import { gainBooster } from './open.js';
 import { buildBooster, renderPacks } from './packs.js';
@@ -58,6 +59,7 @@ export function renderShop() {
       body: shopGrid(market.bundles.map((item) => bundleTile(item)))
     }),
     buildShopSection({ title: t('shopCrate'), note: t('shopCrateNote'), body: buildCrateStall() }),
+    buildAtelierDoor(),
     market.customs.length
       ? buildShopSection({
           title: t('shopCustomRow'), note: t('shopSizeNote'),
@@ -148,6 +150,23 @@ export function buildSeasonStall({ inSeasonScreen = false } = {}) {
   });
   sec.classList.add('shop-season');
   sec.style.setProperty('--season-accent', season.accent);
+  return sec;
+}
+
+/** The way to the Atelier from the shop floor: what Ink you hold, and the door. */
+function buildAtelierDoor() {
+  const sec = buildShopSection({ title: t('tabAtelier'), note: t('shopAtelierNote'), body: h('div.atelier-door-row') });
+  sec.classList.add('shop-atelier');
+  const row = sec.querySelector('.atelier-door-row');
+  row.innerHTML = `<span class="atelier-door-ink"></span>`;
+  row.querySelector('.atelier-door-ink').innerHTML = ink(state.ink);
+  const go = document.createElement('button');
+  go.type = 'button';
+  go.className = 'btn btn-sm btn-primary';
+  go.textContent = t('shopAtelierGo');
+  press(go, { sound: null });
+  go.addEventListener('click', () => { synth.playTap(); import('./atelier.js').then((m) => { showScreen('atelier'); m.renderAtelier(); }); });
+  row.appendChild(go);
   return sec;
 }
 

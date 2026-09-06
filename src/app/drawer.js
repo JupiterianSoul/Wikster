@@ -78,6 +78,7 @@ export function drawerItems() {
     { id: 'profile',  icon: 'profile',  key: 'tabProfile',  run: go('profile', renderProfile) },
     { id: 'updates',   icon: 'spark',    key: 'tabUpdates',   run: go('updates', lazy(() => import('./updates.js'), 'renderUpdates')) },
     { id: 'customize', icon: 'wand',     key: 'tabCustomize', run: go('customize', renderCustomize) },
+    { id: 'atelier', icon: 'ink',        key: 'tabAtelier',   run: go('atelier', lazy(() => import('./atelier.js'), 'renderAtelier')) },
     { id: 'settings',  icon: 'settings', key: 'tabSettings',  run: go('settings', renderSettings) }
   ];
 }
@@ -369,7 +370,8 @@ export const HELP = {
   quests:  { steps: 3, tip: true },
   leaderboard: { steps: 3, tip: true },
   guilds:  { steps: 5, tip: true },
-  season:  { steps: 4, tip: true }
+  season:  { steps: 4, tip: true },
+  atelier: { steps: 4, tip: true }
 };
 
 export function openHelp(topic) {

@@ -147,6 +147,9 @@ const ICONS = {
   gem: `
     <path d="M7.4 4.4h9.2L21 9.5 12 20.1 3 9.5z"/>
     <path d="M3 9.5h18M9.2 9.5 12 20.1l2.8-10.6M7.4 4.4l1.8 5.1M16.6 4.4l-1.8 5.1"/>`,
+  ink: `
+    <path d="M12 3c3 4.2 6 7.6 6 11.2A6 6 0 0 1 6 14.2C6 10.6 9 7.2 12 3z"/>
+    <path d="M9.2 14.6a2.9 2.9 0 0 0 2 2.7"/>`,
   wand: `
     <path d="M4 20 15.2 8.8"/>
     <path d="M16.8 3.4 17.7 6l2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/>
@@ -332,6 +335,15 @@ export function buckSvg({ size = 13, className = '' } = {}) {
     width="${(size * 16) / 19}" aria-hidden="true" focusable="false">
     <path fill="currentColor" fill-rule="evenodd" d="M3.6 3.2H9c2 0 3.3 1.2 3.3 3 0 1.2-.6 2.1-1.6 2.6 1.3.4 2.2 1.5 2.2 3.1 0 2.1-1.5 3.4-3.9 3.4H3.6zM6.2 5.4V8h2.4c.9 0 1.4-.5 1.4-1.3s-.5-1.3-1.4-1.3zm0 4.8v2.9h2.7c1 0 1.6-.6 1.6-1.5s-.6-1.4-1.6-1.4z"/>
     <path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M7 1v16.6M10.1 1v16.6"/>
+  </svg>`;
+}
+
+/** The Ink drop: the Atelier's currency, drawn once here the way the coin is. */
+export function inkSvg({ size = 13, className = '' } = {}) {
+  return `<svg class="ink-drop ${className}" viewBox="0 0 16 19" height="${size}"
+    width="${(size * 16) / 19}" aria-hidden="true" focusable="false">
+    <path fill="currentColor" d="M8 1.2c2.6 3.6 5.4 7 5.4 10.4A5.4 5.4 0 0 1 8 17a5.4 5.4 0 0 1-5.4-5.4C2.6 8.2 5.4 4.8 8 1.2z"/>
+    <path fill="#fff" fill-opacity=".55" d="M5.6 11.6a2.5 2.5 0 0 0 1.7 2.4c.3.1.6-.2.5-.5a3.6 3.6 0 0 1-1.3-2c-.1-.3-.5-.4-.7-.2a.7.7 0 0 0-.2.3z"/>
   </svg>`;
 }
 

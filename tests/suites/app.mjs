@@ -520,7 +520,10 @@ await page.screenshot({ path: `${SHOT}/a10-settings.png` });
 // The looks moved out to their own screen: themes, picture, name.
 await viaMenu(/customization|personnalisation/i);
 check('customization reachable from the menu', await page.locator('#screen-customize').isVisible());
-check('ten themes offered', (await page.locator('.theme-card').count()) === 10);
+check('only the default theme is offered before the Atelier', (await page.locator('.theme-card').count()) === 1);
+await page.evaluate(() => window.__wikster.own('themes', ['paper', 'arcade', 'noir', 'sunset', 'cartoon', 'matrix', 'casino', 'horror', 'meadow']));
+await page.waitForTimeout(300);
+check('ten themes offered once owned', (await page.locator('.theme-card').count()) === 10);
 check('one is marked current', (await page.locator('.theme-card.is-on').count()) === 1);
 check('identity rows live here', await page.locator('#identity-list').isVisible());
 await page.screenshot({ path: `${SHOT}/a10b-customize.png` });

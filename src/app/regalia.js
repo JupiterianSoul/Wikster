@@ -15,7 +15,8 @@ import { iconSvg } from '../data/icons.js';
 import { albumsDeep, albumsStarted } from '../albums.js';
 import { formatViews } from '../pricing.js';
 import { specName } from '../booster.js';
-import { el, money, openSheet, refreshWallet, showScreen, state, toast } from './core.js';
+import { el, ink, money, openSheet, refreshWallet, showScreen, state, toast } from './core.js';
+import { addInk, inkForAchievement } from '../ink.js';
 import { paintBell, paintDrawerLinks, pushNote } from './drawer.js';
 import { signedIn, userId } from './gate.js';
 import { live } from './live.js';
@@ -316,9 +317,9 @@ export function renderAchievements() {
 
     const label = document.createElement('span');
     label.className = 'ach-reward';
-    label.innerHTML = a.reward.kind === 'coins'
+    label.innerHTML = (a.reward.kind === 'coins'
       ? t('achRewardCoins', { amount: money(a.reward.coins) })
-      : t('achRewardPack', { name: specName(a.reward.spec) });
+      : t('achRewardPack', { name: specName(a.reward.spec) })) + ` + ${ink(inkForAchievement(a.reward))}`;
     row.querySelector('.ach-copy').appendChild(label);
     return row;
   }));
@@ -337,6 +338,8 @@ export function redeemAchievement(a, btn) {
     gainBooster(a.reward.spec, 1);
     renderPacks();
   }
+  addInk(inkForAchievement(a.reward));
+  refreshWallet();
   store.saveProfile(state.profile);
   synth.playAchievement();
   const rect = btn.getBoundingClientRect();

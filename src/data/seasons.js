@@ -208,16 +208,16 @@ export const TRACK = [100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200, 4000];
  * `theme` are the season's and cannot be had any other way.
  */
 export const TRACK_REWARDS = [
-  { money: 300 },
-  { booster: { cards: 5 } },
-  { money: 600 },
-  { badge: true },
-  { money: 500, booster: { cards: 5 } },
-  { money: 1000 },
-  { theme: true },
-  { booster: { cards: 5, rarityId: 'epic' } },
-  { money: 2000 },
-  { booster: { cards: 5, rarityId: 'legendary' }, money: 1500 }
+  { money: 300, ink: 5 },
+  { booster: { cards: 5 }, ink: 5 },
+  { money: 600, ink: 10 },
+  { badge: true, ink: 15 },
+  { money: 500, booster: { cards: 5 }, ink: 10 },
+  { money: 1000, ink: 20 },
+  { theme: true, ink: 25 },
+  { booster: { cards: 5, rarityId: 'epic' }, ink: 25 },
+  { money: 2000, ink: 40 },
+  { booster: { cards: 5, rarityId: 'legendary' }, money: 1500, ink: 60 }
 ];
 
 /**

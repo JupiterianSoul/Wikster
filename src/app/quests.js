@@ -14,6 +14,7 @@ import { formatAmount } from '../pricing.js';
 import { earnSeasonPoints, gameStage, houseError, questUserKey } from './arcade.js';
 import { pointsForQuest } from '../season.js';
 import { el, esc, money, refreshWallet, state, toast } from './core.js';
+import { addInk, inkForQuestTier } from '../ink.js';
 import { paintDrawerLinks } from './drawer.js';
 import { showGate, signedIn, userId } from './gate.js';
 import * as account from '../account.js';
@@ -117,6 +118,8 @@ export function paintQuests(board) {
           const reward = await quests.claim(row.id, questUserKey());
           if (reward.money) { store.saveWallet(store.loadWallet() + reward.money); refreshWallet(); }
           if (reward.booster) gainBooster({ ...reward.booster }, 1);
+          addInk(inkForQuestTier(row.quest.tier));
+          refreshWallet();
           earnSeasonPoints(pointsForQuest());
           synth.playPurchase();
           const rect = btn.getBoundingClientRect();

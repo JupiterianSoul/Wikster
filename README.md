@@ -171,6 +171,17 @@ Income comes from a stipend paid on every shop restock (two hours), a daily
 gift, timed boosters that build up whether the app is open or not, levelling
 up, and a five-a-day quiz.
 
+There is a second currency, Ink, and it buys only looks: the Atelier takes it
+for themes, level frames and card effects, and nothing else does. Ink is paid
+in small steady amounts from many places, so that it is earned rather than
+farmed: every level (more at the round ones), every achievement, every daily
+quest by its tier, every rung of the season track and the day's season quest,
+the seventh gift of a week, a guild goal met and a guild match won. Buckarooz
+can be pressed into Ink at the Atelier's counter at a fixed rate, dear enough
+that a theme stays a real purchase. The balance lives under its own key and
+travels with the save; what has been bought lives on the profile, so a
+purchase follows the player between devices. The module is `src/ink.js`.
+
 The shop restocks every two hours with a spotlight discount, a free shelf that
 is always stocked so an empty wallet is never a dead end, six subjects, a
 vault of tier boosters, and everything you have built yourself.
@@ -224,19 +235,31 @@ floor can both see.
 
 ### Dressing the collection
 
-Customization holds two pickers beyond the theme.
+Customization holds two pickers beyond the theme, and shows only what is
+owned: the door to the rest is the Atelier.
 
-**Card effects** choose the look each rarity wears, one row per tier and five
-styles each: the treatment drawn for that tier, plus Foil Sheen, Prism Split,
-Halo and Archive. They are earned by holding cards of that tier, so the cost
-falls as the tier rises and still bites harder in practice. Every alternate is
-painted in the rarity's own colour, so a choice never costs the ladder its
-legibility. The table is `src/data/fx.js`; the CSS lives under `[data-fx]`.
+**Card effects** choose the look each rarity wears, one row per tier. Classic,
+the treatment drawn for that tier, is always there; the Atelier sells five
+alternates for each rarity, forty in all and no two built the same way. A
+Common can wear pencil hatching, a crease, a postmark, dust in a shaft of
+light or a halftone screen; a Prismatic a turning spectrum, shattered glass, an
+aurora curtain, a starfield or a crown. Each is bought for one rarity and
+dresses every card of that tier; the alternates that paint a colour paint in
+the rarity's own, so a choice never costs the ladder its legibility. A chosen
+effect takes the tier's own dressing off and paints its own on the plate over
+the art and under the text. The table is `src/data/fx.js`; the CSS lives under
+`[data-fx]` in `src/styles/cards.css`.
 
 **Level frames** open at a level of their own, from 15 to 200 across eight
 styles, and a ninth, the Singularity, waits at the level cap of 500. A locked
 frame still shows its drawing, since the point is to see what you are climbing
-towards.
+towards. Ten more are sold in the Atelier and worn from level 1 once bought:
+ivy, clockwork, a tide, a storm, a honeycomb, an inkwell, folded paper, paper
+lanterns, stained glass and a comet; they climb the same fifty tiers as the
+rest.
+
+**Themes** other than the seasons' and the codes' are sold in the Atelier too;
+the default is free, and the one being worn always stays in the picker.
 
 ## Accounts and the social side
 

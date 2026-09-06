@@ -32,6 +32,7 @@ import { openDaily, openOdds, openWallet } from './daily.js';
 import * as leaderboard from '../leaderboard.js';
 import { flushGuildGoal, reportGuildGoal } from '../guildgoal.js';
 import { pointsForReport, seasonAt } from '../season.js';
+import { addInk, grant } from '../ink.js';
 import { tilt } from './detail.js';
 import { buildDrawer, closeDrawer, openDrawer, openHelp, openNotifications, paintDrawerLinks } from './drawer.js';
 import { flushSync, gateAltAction, leaveAccount, onSession, purgeRetiredCodes, purgeRetiredThemes, resumeAccount, showGate, stopSocialPoll, submitGate, syncSoon } from './gate.js';
@@ -57,7 +58,7 @@ bind({
     games: $('#screen-games'), wikdle: $('#screen-wikdle'), slots: $('#screen-slots'),
     duel: $('#screen-duel'), reveal: $('#screen-reveal'),
     quests: $('#screen-quests'), leaderboard: $('#screen-leaderboard'), guilds: $('#screen-guilds'),
-    season: $('#screen-season')
+    season: $('#screen-season'), atelier: $('#screen-atelier')
   },
   seasonTitle: $('#season-title'), seasonBanner: $('#season-banner'), seasonMark: $('#season-mark'), seasonKicker: $('#season-kicker'),
   seasonName: $('#season-name'), seasonTagline: $('#season-tagline'), seasonDates: $('#season-dates'),
@@ -161,7 +162,12 @@ bind({
   settingsTitle: $('#settings-title'), themeLabel: $('#theme-label'), themeGrid: $('#theme-grid'),
   customizeTitle: $('#customize-title'), identityLabel: $('#identity-label'), identityList: $('#identity-list'),
   framesLabel: $('#frames-label'), framesNote: $('#frames-note'), frameStyles: $('#frame-styles'),
-  fxLabel: $('#fx-label'), fxNote: $('#fx-note'), fxTiers: $('#fx-tiers'),
+  fxLabel: $('#fx-label'), fxNote: $('#fx-note'), fxTiers: $('#fx-tiers'), customizeDoor: $('#customize-door'),
+  walletInk: $('#wallet-ink'),
+  atelierTitle: $('#atelier-title'), atelierLead: $('#atelier-lead'), atelierPurseLabel: $('#atelier-purse-label'), atelierPurse: $('#atelier-purse'),
+  atelierCoinsLabel: $('#atelier-coins-label'), atelierCoins: $('#atelier-coins'), atelierExchange: $('#atelier-exchange'),
+  atelierThemesLabel: $('#atelier-themes-label'), atelierThemes: $('#atelier-themes'), atelierFramesLabel: $('#atelier-frames-label'), atelierFrames: $('#atelier-frames'),
+  atelierFxLabel: $('#atelier-fx-label'), atelierFxNote: $('#atelier-fx-note'), atelierFx: $('#atelier-fx'),
   badgesLabel: $('#badges-label'), badgeGrid: $('#badge-grid'),
   badgesTitle: $('#badges-title'), badgesIntro: $('#badges-intro'), badgesAll: $('#badges-all'),
   indexTitle: $('#index-title'), indexIntro: $('#index-intro'), indexCounts: $('#index-counts'),
@@ -744,6 +750,10 @@ window.__wikster = {
     return forced;
   },
   grant(amount = 10000) { store.saveWallet(store.loadWallet() + amount); refreshWallet(); },
+  // Ink the same way, and an Atelier purchase without the counter, so a suite
+  // can put a theme in the picker without earning it first.
+  grantInk(amount = 500) { addInk(amount); refreshWallet(); },
+  own(kind, ids) { for (const id of ids) grant(state.profile, kind, id); store.saveProfile(state.profile); if (state.tab === 'customize') renderCustomize(); },
   giveBooster(spec) { gainBooster(spec, 1); renderPacks(); },
   giveTimed(n = 5) { state.profile.timed.count += n; store.saveProfile(state.profile); renderTimed(); updateBadges(); },
   addXp(amount = 5000) {

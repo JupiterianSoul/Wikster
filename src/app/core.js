@@ -3,7 +3,8 @@
 import * as store from '../collection.js';
 import { touch } from '../save.js';
 import { DEFAULT_FRAME_STYLE } from '../frames.js';
-import { buckSvg, iconSvg } from '../data/icons.js';
+import { buckSvg, iconSvg, inkSvg } from '../data/icons.js';
+import { loadInk } from '../ink.js';
 import { formatAmount, popularityFromViews } from '../pricing.js';
 import { DEFAULT_THEME, applyTheme } from '../ui/themes.js';
 import { backdrop } from '../ui/backdrop.js';
@@ -89,6 +90,7 @@ export const state = {
   inventory: store.loadInventory(),
   profile: store.loadProfile(),
   wallet: store.loadWallet(),
+  ink: loadInk(),
   frameStyle: store.loadFrameStyle() ?? DEFAULT_FRAME_STYLE,
   badgeLoadout: store.loadBadgeLoadout(),
   cardFx: store.loadCardFx(),
@@ -135,6 +137,10 @@ export function settings() {
 
 export function money(amount) {
   return (`${buckSvg({ size: 12 })}${formatAmount(amount)}`);
+}
+/** Ink, in the same shape as money(): the drop, then the number. */
+export function ink(amount) {
+  return (`${inkSvg({ size: 12 })}${formatAmount(amount)}`);
 }
 /** For the few places that put a value into markup rather than textContent. */
 
@@ -341,7 +347,7 @@ export function showScreen(name) {
  */
 
 export function navTabFor(screen) {
-  return (screen === 'market' ? 'shop'
+  return (screen === 'market' || screen === 'atelier' ? 'shop'
     : screen === 'cardindex' ? 'binder'
       : screen === 'glossary' ? 'packs'
         : ['wikdle', 'slots', 'duel', 'reveal'].includes(screen) ? 'games'
@@ -350,8 +356,12 @@ export function navTabFor(screen) {
 
 export function refreshWallet() {
   state.wallet = store.loadWallet();
+  state.ink = loadInk();
   live.walletOdo.set(state.wallet);
   if (el.shopPurse) el.shopPurse.innerHTML = money(state.wallet);
+  if (el.walletInk) el.walletInk.innerHTML = ink(state.ink);
+  if (el.atelierPurse) el.atelierPurse.innerHTML = ink(state.ink);
+  if (el.atelierCoins) el.atelierCoins.innerHTML = money(state.wallet);
   el.wallet.setAttribute('aria-label', `${t('walletTitle')}: ${formatAmount(state.wallet)}`);
 }
 /* --- the sheet ------------------------------------------------------------------------------------ */

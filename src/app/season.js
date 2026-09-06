@@ -23,7 +23,8 @@ import {
 } from '../season.js';
 import { on } from '../ui/bus.js';
 import { earnSeasonPoints, questUserKey } from './arcade.js';
-import { el, esc, money, refreshWallet, showScreen, state, toast } from './core.js';
+import { el, esc, ink, money, refreshWallet, showScreen, state, toast } from './core.js';
+import { INK_SEASON_QUEST, addInk } from '../ink.js';
 import { paintDrawerLinks, pushNote } from './drawer.js';
 import { signedIn } from './gate.js';
 import { gainBooster, spawnBurst } from './open.js';
@@ -98,6 +99,7 @@ function paintPoints() {
 function rewardText(reward, season) {
   const bits = [];
   if (reward.money) bits.push(money(reward.money));
+  if (reward.ink) bits.push(ink(reward.ink));
   if (reward.booster) bits.push(esc(specName(seasonSpec(season, reward.booster))));
   if (reward.badge) bits.push(esc(t('seasonRewardBadge', { name: tx(season.name) })));
   if (reward.theme) bits.push(esc(t('seasonRewardTheme', { name: tx(season.name) })));
@@ -157,7 +159,9 @@ function claimRung(current, index, btn) {
     return;
   }
   const { reward, season } = claimed;
-  if (reward.money) { store.saveWallet(store.loadWallet() + reward.money); refreshWallet(); }
+  if (reward.money) store.saveWallet(store.loadWallet() + reward.money);
+  if (reward.ink) addInk(reward.ink);
+  refreshWallet();
   if (reward.booster) gainBooster(seasonSpec(season, reward.booster), 1);
   if (reward.badge) {
     updateBadges();
@@ -214,6 +218,7 @@ function paintQuest() {
         btn.disabled = false; toast(esc(t('questClaimed')), 'error'); synth.playDenied(); return;
       }
       store.saveWallet(store.loadWallet() + quest.reward.money);
+      addInk(INK_SEASON_QUEST);
       refreshWallet();
       store.saveProfile(state.profile);
       earnSeasonPoints(pointsForQuest());

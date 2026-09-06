@@ -123,6 +123,14 @@
   backdrop-filter: var(--blur);
 }
 [data-theme='arcade'] .wallet-chip { border-radius: var(--radius); }
+/* Ink sits in the same chip, past a thin rule, in its own colour. */
+.wallet-ink {
+  display: inline-flex; align-items: center; gap: 3px;
+  margin-left: 4px; padding-left: 9px;
+  border-left: 1px solid var(--line);
+  font-size: 0.82rem;
+}
+.wallet-ink:empty { display: none; }
 
 /* --- odometer --------------------------------------------------------------- */
 

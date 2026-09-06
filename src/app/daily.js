@@ -11,7 +11,8 @@ import { formatCountdown } from '../shop.js';
 import { oddsRows } from '../data/odds.js';
 import { TODAY_POOL, todayBands } from '../economy.js';
 import { reportQuest } from './arcade.js';
-import { esc, money, openSheet, refreshWallet, state, toast } from './core.js';
+import { esc, ink, money, openSheet, refreshWallet, state, toast } from './core.js';
+import { INK_DAILY_WEEK, addInk } from '../ink.js';
 import { pushNote } from './drawer.js';
 import { live } from './live.js';
 import { fireFlash, gainBooster, spawnBurst } from './open.js';
@@ -171,7 +172,11 @@ export function claimGift(body) {
   grantGift(got.gift);
   reportQuest('daily');
   toast(t('dailyGot', { reward: giftLabel(got.gift) }), 'ok');
-  if (got.weekDone) pushNote('gift', t('dailyWeekDoneNote'), 'packs');
+  if (got.weekDone) {
+    addInk(INK_DAILY_WEEK);
+    refreshWallet();
+    pushNote('gift', t('dailyWeekDoneNote'), 'packs');
+  }
   buildDailyBody(body);
   updateBadges();
 }
@@ -184,6 +189,7 @@ export function openWallet() {
       <p style="margin-bottom:16px" data-what></p>
       <div class="row"><div class="row-copy"><h4 data-earn-t></h4><p data-earn></p></div></div>
       <div class="row"><div class="row-copy"><h4 data-spend-t></h4><p data-spend></p></div></div>
+      <div class="row"><div class="row-copy"><h4 data-ink-t></h4><p data-ink></p></div><button class="btn btn-sm btn-ghost row-action" type="button" data-ink-go></button></div>
       <p class="muted" style="font-size:.78rem;line-height:1.55;margin-top:16px" data-note></p>`;
     body.querySelector('[data-balance]').innerHTML = money(state.wallet);
     body.querySelector('[data-what]').textContent = t('walletWhat');
@@ -192,6 +198,12 @@ export function openWallet() {
     body.querySelector('[data-spend-t]').textContent = t('walletSpendTitle');
     body.querySelector('[data-spend]').textContent = t('walletSpend');
     body.querySelector('[data-note]').textContent = t('walletNote');
+    body.querySelector('[data-ink-t]').innerHTML = `${t('inkTitle')} · ${ink(state.ink)}`;
+    body.querySelector('[data-ink]').textContent = t('walletInkLine');
+    const go = body.querySelector('[data-ink-go]');
+    go.textContent = t('walletInkMore');
+    press(go, { sound: null });
+    go.addEventListener('click', () => { synth.playTap(); import('./atelier.js').then((m) => m.openInkSheet()); });
   });
 }
 /**

@@ -19,10 +19,11 @@ import { iconSvg } from '../data/icons.js';
 import { addXp, rankFor, rewardForLevel, xpForCard } from '../progression.js';
 import { reportAlbums, reportQuest } from './arcade.js';
 import { renderBinder } from './binder.js';
-import { DRAW_HARD_LIMIT, EMERGE_DURATION, EMERGE_STAGGER, LAST_CARD_HOLD, PREFETCH_DELAY, RIP_COMMIT, RIP_DIR_KEY, RIP_LOCK_SLOP, RIP_TICK_STEP, SWIPE_COMMIT, TILT_REACH, clamp, clamp01, debug, el, money, openSheet, refreshWallet, settings, showScreen, shuffle, state, wait } from './core.js';
+import { DRAW_HARD_LIMIT, EMERGE_DURATION, EMERGE_STAGGER, LAST_CARD_HOLD, PREFETCH_DELAY, RIP_COMMIT, RIP_DIR_KEY, RIP_LOCK_SLOP, RIP_TICK_STEP, SWIPE_COMMIT, TILT_REACH, clamp, clamp01, debug, el, ink, money, openSheet, refreshWallet, settings, showScreen, shuffle, state, wait } from './core.js';
 import { buildStaticCard, openCardDetail, tilt } from './detail.js';
 import { signedIn, userId } from './gate.js';
 import { live } from './live.js';
+import { addInk, inkForLevel } from '../ink.js';
 import { buildBooster, renderPacks } from './packs.js';
 import { renderProfile } from './profile.js';
 import { refreshLevelBadge, updateBadges } from './regalia.js';
@@ -1140,7 +1141,7 @@ export function drainLevelUps() {
   return true;
 }
 
-export function rewardCard(reward, { art = true } = {}) {
+export function rewardCard(reward, { art = true, inkAmount = 0 } = {}) {
   const wrap = document.createElement('div');
   wrap.className = 'reward-card';
   // The profile's "next reward" line shows the name alone: a thumbnail-sized
@@ -1156,6 +1157,13 @@ export function rewardCard(reward, { art = true } = {}) {
   else if (reward.coins) label.innerHTML = t('rewardCoins', { amount: money(reward.coins) });
   else label.textContent = specName(reward.spec);
   wrap.appendChild(label);
+  // The Ink a level pays rides under the main reward, never instead of it.
+  if (inkAmount > 0) {
+    const drop = document.createElement('p');
+    drop.className = 'reward-ink';
+    drop.innerHTML = t('rewardInk', { amount: ink(inkAmount) });
+    wrap.appendChild(drop);
+  }
   return wrap;
 }
 
@@ -1177,7 +1185,7 @@ export function showLevelUp(level) {
     body.querySelector('.level-node').textContent = String(level - 1);
     body.querySelector('.level-node.is-new').textContent = String(level);
     body.querySelector('p').textContent = t('levelUpBody', { level, rank: tx(rank.name) });
-    body.querySelector('.level-reward').appendChild(rewardCard(reward));
+    body.querySelector('.level-reward').appendChild(rewardCard(reward, { inkAmount: inkForLevel(level) }));
 
     const bar = new Bar(body.querySelector('.level-bar'));
     bar.set(0, { animate: false });
@@ -1195,6 +1203,7 @@ export function showLevelUp(level) {
 export function claimLevel(level, reward) {
   if (reward.coins) store.saveWallet(store.loadWallet() + reward.coins);
   if (reward.spec) gainBooster(reward.spec, 1);
+  addInk(inkForLevel(level));
 
   state.profile.pendingLevels = state.profile.pendingLevels.filter((l) => l !== level);
   store.saveProfile(state.profile);

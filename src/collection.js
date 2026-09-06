@@ -11,6 +11,7 @@
  * again as a Legendary upgrades the entry.
  */
 import { rarityRank, normalizeRarityId, rarityById } from './data/rarities.js';
+import { DEFAULT_FX, fxExists } from './data/fx.js';
 import { albumKeyOf, customSlug } from './albums.js';
 import { bandFor, priceFor } from './pricing.js';
 import { specId } from './booster.js';
@@ -814,7 +815,9 @@ const FX_KEY = 'wikster.cardFx.v1';
 
 export function loadCardFx() {
   const data = readJson(FX_KEY, null);
-  return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return {};
+  // A style that no longer exists (the table was redrawn) means classic.
+  return Object.fromEntries(Object.entries(data).filter(([rarityId, id]) => fxExists(rarityId, id) && id !== DEFAULT_FX));
 }
 
 export const saveCardFx = (choices) => writeJson(FX_KEY, choices ?? {});

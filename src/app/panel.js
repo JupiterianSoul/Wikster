@@ -28,6 +28,7 @@ import * as reveal from '../reveal.js';
 import * as wikdle from '../wikdle.js';
 import { canClaim, msUntilNextUtcDay } from '../daily.js';
 import { formatCountdown } from '../shop.js';
+import { formatAmount } from '../pricing.js';
 import { nextFreeAt, nextRefreshAt } from '../economy.js';
 import { levelFraction, rankFor, xpForLevel } from '../progression.js';
 import { fill, h } from '../ui/dom.js';
@@ -173,6 +174,13 @@ function screenBlock(tab) {
       line('calendar', t('panelSeason', { name: tx(current.season.name), n: daysLeft() })),
       line('star', t('panelSeasonPoints', { n: entry.points })),
       ready ? action(t('panelClaim', { n: ready }), () => showScreen('season')) : action(t('tabLeaderboard'), () => showScreen('leaderboard'))
+    ]);
+  }
+  if (tab === 'atelier') {
+    return block(t('tabAtelier'), [
+      line('ink', t('panelInk', { n: formatAmount(state.ink) })),
+      line('gem', t('panelCoins', { n: formatAmount(state.wallet) })),
+      action(t('atelierExchange'), () => import('./atelier.js').then((mod) => mod.openExchange()))
     ]);
   }
   if (tab === 'guilds' || tab === 'leaderboard') {

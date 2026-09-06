@@ -1483,6 +1483,37 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 /* A theme that a code unlocked wears a small note in the picker. */
 .theme-card .theme-note { font-size: 0.7rem; color: var(--ink-faint); letter-spacing: 0.06em; text-transform: uppercase; }
 
+/* --- the Atelier ------------------------------------------------------------
+   The same tiles as Customization, each with one button: the price, then
+   "wear it" once owned. Ink is indigo wherever it is shown, so a price in
+   Ink never reads as a price in Buckarooz. */
+.is-ink, .wallet-ink, .atelier-door-ink, .reward-ink, .atelier-balances [data-ink] { color: var(--ink-accent, #818cf8); }
+.atelier-banner { flex-wrap: wrap; row-gap: 10px; }
+.atelier-banner #atelier-exchange { flex-basis: 100%; }
+.atelier-banner .shop-banner-cell:first-child b { color: var(--ink-accent, #818cf8); }
+.atelier-tile { cursor: default; }
+.atelier-buy {
+  justify-self: start;
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 4px;
+}
+.frame-card .atelier-buy { margin: 0 0 0 auto; flex: none; }
+.frame-card .frame-copy { flex: 1; min-width: 0; }
+.fx-chip .atelier-buy { margin-top: 6px; }
+.atelier-buy .buy-price { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; }
+.atelier-buy.is-short { opacity: 0.6; }
+.atelier-tile.is-owned .theme-check { opacity: 1; transform: none; background: var(--surface-2); color: var(--ink-dim); }
+.atelier-tile.is-on .theme-check { background: var(--accent); color: var(--accent-ink); }
+.fx-chip.is-hint { border-style: dashed; cursor: default; opacity: 0.8; }
+.atelier-door-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px;
+  border-radius: var(--radius-lg); border: var(--border) var(--border-style) var(--line); background: var(--surface); }
+.atelier-door-ink { display: inline-flex; align-items: center; gap: 4px; font-weight: 800; font-size: 1.05rem; }
+.atelier-balances { display: flex; gap: 16px; font-size: 1.6rem; font-weight: 800; align-items: baseline; }
+.atelier-balances span { display: inline-flex; align-items: center; gap: 4px; }
+.atelier-balances [data-coins] { color: var(--positive); }
+.reward-ink { display: inline-flex; align-items: center; gap: 3px; font-size: 0.82rem; font-weight: 700; margin-top: 4px; }
+.atelier-door .row-action { white-space: nowrap; }
+
 /* --- redeeming a secret code ---------------------------------------------- */
 /* A row that stacks instead of putting its control on the right: the field
    needs the whole width, and the answer belongs under it. */
@@ -2467,6 +2498,32 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .hell-heat { transform-origin: 0 0; animation: god-breathe 3.2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .hell-flame, .hell-embers, .hell-cracks, .hell-heat { animation: none; }
+}
+
+/* --- the Atelier frames, each with the one movement that is its own ------- */
+.gear-turn { transform-box: fill-box; transform-origin: 50% 50%; animation: god-turn 12s linear infinite; }
+.gear-turn.is-back { animation-direction: reverse; animation-duration: 9s; }
+.tide-roll { transform-origin: 0 0; animation: god-turn 30s linear infinite; }
+.storm-bolt { animation: storm-flash 3.4s steps(1) infinite; }
+.storm-b1 { animation-delay: -1.1s; }
+.storm-b2 { animation-delay: -2.3s; }
+@keyframes storm-flash { 0%, 7%, 100% { opacity: 0; } 8%, 10% { opacity: 1; } 11% { opacity: 0.2; } 13% { opacity: 1; } 18% { opacity: 0; } }
+.bee-hover { animation: bee-bob 1.6s ease-in-out infinite alternate; }
+@keyframes bee-bob { from { transform: translate(0, 0); } to { transform: translate(1.5px, -2px); } }
+.ink-drip { transform-box: fill-box; transform-origin: 50% 0; animation: ink-fall 3s ease-in infinite; }
+.ink-d1 { animation-delay: -1s; }
+.ink-d2 { animation-delay: -2s; }
+@keyframes ink-fall { 0% { transform: scaleY(0.3); opacity: 1; } 70% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1.15); opacity: 0; } }
+.lamp-sway { transform-box: fill-box; transform-origin: 50% 0; animation: lamp-swing 2.8s ease-in-out infinite alternate; }
+.lamp-s1 { animation-delay: -0.9s; }
+.lamp-s2 { animation-delay: -1.8s; }
+@keyframes lamp-swing { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+.glass-light { animation: hell-glow 3.6s ease-in-out infinite alternate; }
+.comet-orbit { transform-origin: 0 0; animation: god-turn 8s linear infinite; }
+.comet-o1 { animation-duration: 13s; animation-direction: reverse; }
+.comet-o2 { animation-duration: 19s; }
+@media (prefers-reduced-motion: reduce) {
+  .gear-turn, .tide-roll, .storm-bolt, .bee-hover, .ink-drip, .lamp-sway, .glass-light, .comet-orbit { animation: none; }
 }
 
 /* --- the badge that burns: three flames behind the skull, each on its own beat --- */

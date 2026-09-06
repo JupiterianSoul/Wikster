@@ -25,7 +25,8 @@
  *
  * `code` marks a style no level can reach: it arrives with a secret code and
  * is hidden from the picker entirely until that code is redeemed, the same way
- * the special themes and badges are.
+ * the special themes and badges are. `ink` marks one the Atelier sells: it
+ * is not in the picker until bought, and worn from level 1 once it is.
  */
 export const FRAME_STYLES = [
   { id: 'metal',   minLevel: 1,   name: { en: 'Metal Ages',    fr: 'Âges du métal' } },
@@ -40,8 +41,22 @@ export const FRAME_STYLES = [
   { id: 'god',     minLevel: Infinity, code: 'creator',
     name: { en: 'Apotheosis', fr: 'Apothéose' } },
   { id: 'hellfire', minLevel: Infinity, code: 'hellfire',
-    name: { en: 'Hellfire', fr: 'Feu de l’enfer' } }
+    name: { en: 'Hellfire', fr: 'Feu de l’enfer' } },
+  // The Atelier's ten: bought with Ink, worn from level 1 once bought.
+  { id: 'ivy',      minLevel: 1, ink: true, name: { en: 'Living Ivy',     fr: 'Lierre vivant' } },
+  { id: 'gears',    minLevel: 1, ink: true, name: { en: 'Clockwork',      fr: 'Horlogerie' } },
+  { id: 'tide',     minLevel: 1, ink: true, name: { en: 'Tidewater',      fr: 'Marée' } },
+  { id: 'storm',    minLevel: 1, ink: true, name: { en: 'Stormcell',      fr: 'Cellule orageuse' } },
+  { id: 'honey',    minLevel: 1, ink: true, name: { en: 'Honeycomb',      fr: 'Rayon de miel' } },
+  { id: 'inkwell',  minLevel: 1, ink: true, name: { en: 'Inkwell',        fr: 'Encrier' } },
+  { id: 'origami',  minLevel: 1, ink: true, name: { en: 'Paper Fold',     fr: 'Pli de papier' } },
+  { id: 'lanterns', minLevel: 1, ink: true, name: { en: 'Paper Lanterns', fr: 'Lanternes de papier' } },
+  { id: 'stained',  minLevel: 1, ink: true, name: { en: 'Stained Glass',  fr: 'Vitrail' } },
+  { id: 'comet',    minLevel: 1, ink: true, name: { en: 'Comet Trail',    fr: 'Traînée de comète' } }
 ];
+
+/** The styles the Atelier sells, in the order it shelves them. */
+export const INK_FRAMES = FRAME_STYLES.filter((s) => s.ink);
 
 /** Has this player reached the level a style asks for? */
 export const frameUnlocked = (style, level) => (Number(level) || 1) >= (style?.minLevel ?? 1);
@@ -547,10 +562,238 @@ function drawSingularity(t, uid) {
     </g>`;
 }
 
+/* ===========================================================================
+   THE ATELIER FRAMES
+   ---------------------------------------------------------------------------
+   Ten styles no level hands out: they are bought with Ink, and once bought
+   they climb the same fifty tiers as the rest. Each one keeps to its own
+   vocabulary so none reads as another recoloured: a hedge of ivy, a train
+   of gears, a tide, a storm, a honeycomb, an inkwell, folded paper, paper
+   lanterns, stained glass, and a comet on its orbit.
+   =========================================================================== */
+
+/* --- ivy: leaves around a vine, then berries, then blossom ------------------ */
+function drawIvy(t, uid) {
+  const g = `${uid}v`;
+  const defs = grad(g, [[0, '#86efac'], [0.5, '#22c55e'], [1, '#14532d']]);
+  const n = 8 + Math.min(16, Math.floor(t / 3));
+  const leaves = Array.from({ length: n }, (_, i) => {
+    const a = (360 / n) * i + jit(i, 1) * 10;
+    const [x, y] = P(33.5, a).split(',');
+    const s = (2.6 + jit(i, 2) * 1.2).toFixed(2);
+    return `<path d="M 0 0 C ${s} ${-s} ${s * 2} 0 0 ${s * 1.6} C ${-s * 2} 0 ${-s} ${-s} 0 0 Z" transform="translate(${x} ${y}) rotate(${a + 90})" fill="url(#${g})" stroke="#14532d" stroke-width=".5"/>`;
+  }).join('');
+  const berries = t >= 10 ? Array.from({ length: Math.min(10, 3 + Math.floor((t - 10) / 4)) }, (_, i) => {
+    const a = -70 + i * 37;
+    const [x, y] = P(37.5, a).split(',');
+    return `<circle cx="${x}" cy="${y}" r="1.5" fill="#dc2626" stroke="#7f1d1d" stroke-width=".4"/>`;
+  }).join('') : '';
+  const blossom = t >= 25 ? [-90, 30, 150].map((a) => {
+    const [x, y] = P(38, a).split(',');
+    return `<g transform="translate(${x} ${y})">${[0, 72, 144, 216, 288].map((r) => `<ellipse rx="1.4" ry="2.6" cy="-2" fill="#fbcfe8" transform="rotate(${r})"/>`).join('')}<circle r="1" fill="#fde047"/></g>`;
+  }).join('') : '';
+  const gold = t >= 40 ? arc(41.5, 0, 359.9, `stroke="#facc15" stroke-width=".9" stroke-opacity=".7" stroke-dasharray="3 5"`) : '';
+  return `<defs>${defs}</defs>${gold}
+    <circle r="33.5" fill="none" stroke="#166534" stroke-width="${3.6 + Math.min(t, 12) * 0.2}"/>
+    <circle r="33.5" fill="none" stroke="#4ade80" stroke-width=".8" stroke-dasharray="2 6" stroke-opacity=".8"/>
+    ${leaves}${berries}${blossom}`;
+}
+
+/* --- gears: a toothed ring and the small wheels that drive it ------------- */
+function drawGears(t, uid) {
+  const g = `${uid}b`;
+  const defs = grad(g, [[0, '#fde68a'], [0.5, '#b45309'], [1, '#78350f']]);
+  const teeth = 18 + Math.min(18, Math.floor(t / 3));
+  const ring = Array.from({ length: teeth * 2 }, (_, i) => P(i % 2 ? 36.5 : 33, (360 / (teeth * 2)) * i)).join(' ');
+  const wheels = Math.min(6, 1 + Math.floor(t / 8));
+  const small = Array.from({ length: wheels }, (_, i) => {
+    const a = -90 + i * (360 / wheels) + 20;
+    const [x, y] = P(43, a).split(',');
+    const r = 4 + jit(i, 3) * 2;
+    const pts = Array.from({ length: 16 }, (_, k) => P(k % 2 ? r + 1.4 : r, k * 22.5)).join(' ');
+    return `<g transform="translate(${x} ${y})" class="gear-turn${i % 2 ? ' is-back' : ''}"><polygon points="${pts}" fill="#d97706" stroke="#78350f" stroke-width=".6"/><circle r="${(r * 0.35).toFixed(1)}" fill="#fef3c7"/></g>`;
+  }).join('');
+  const hand = t >= 20 ? `<line x1="0" y1="-26" x2="0" y2="-31" stroke="#fef3c7" stroke-width="1.4" stroke-linecap="round" transform="rotate(${(t * 23) % 360})"/>` : '';
+  const rivets = t >= 30 ? Array.from({ length: 8 }, (_, i) => { const [x, y] = P(30, i * 45).split(','); return `<circle cx="${x}" cy="${y}" r="1.1" fill="#fde68a" stroke="#78350f" stroke-width=".4"/>`; }).join('') : '';
+  return `<defs>${defs}</defs>
+    <polygon points="${ring}" fill="none" stroke="url(#${g})" stroke-width="3.2" stroke-linejoin="round"/>
+    <circle r="30.5" fill="none" stroke="#78350f" stroke-width="1"/>
+    ${rivets}${hand}${small}`;
+}
+
+/* --- tide: a wave running round the ring, foam on its crest --------------- */
+function drawTide(t, uid) {
+  const g = `${uid}w`;
+  const defs = grad(g, [[0, '#bae6fd'], [0.5, '#0ea5e9'], [1, '#0c4a6e']]);
+  const crests = 6 + Math.min(10, Math.floor(t / 5));
+  const wave = (r, amp, phase) => 'M ' + Array.from({ length: 73 }, (_, i) => {
+    const a = i * 5 + phase;
+    return P(r + amp * Math.sin((a * crests) * TAU), a);
+  }).join(' L ') + ' Z';
+  const foam = Array.from({ length: crests }, (_, i) => {
+    const a = (360 / crests) * i + 90 / crests;
+    const [x, y] = P(37.5, a).split(',');
+    return `<circle cx="${x}" cy="${y}" r="${(0.9 + jit(i, 4) * 0.6).toFixed(2)}" fill="#f0f9ff"/>`;
+  }).join('');
+  const second = t >= 15 ? `<path d="${wave(30, 1.4, 12)}" fill="none" stroke="#7dd3fc" stroke-width="1" stroke-opacity=".8" class="tide-roll"/>` : '';
+  const moon = t >= 30 ? `<circle cx="0" cy="-44" r="3.6" fill="#fef9c3"/><circle cx="1.6" cy="-45" r="3" fill="#0c4a6e" fill-opacity=".0"/>` : '';
+  const fish = t >= 40 ? [40, 200].map((a) => { const [x, y] = P(44, a).split(','); return `<path d="M -3 0 L 1 -2 L 1 2 Z M 1 0 L 3 -1.5 L 3 1.5 Z" transform="translate(${x} ${y}) rotate(${a + 90})" fill="#7dd3fc"/>`; }).join('') : '';
+  return `<defs>${defs}</defs>${moon}
+    <path d="${wave(34, 2.2, 0)}" fill="none" stroke="url(#${g})" stroke-width="${3.4 + Math.min(t, 10) * 0.2}" stroke-linejoin="round" class="tide-roll"/>
+    ${second}${foam}${fish}`;
+}
+
+/* --- storm: a cloud bank, and the bolts that come out of it --------------- */
+function drawStorm(t, uid) {
+  const g = `${uid}s`;
+  const defs = glowFilter(g, 1.8) + grad(`${uid}c`, [[0, '#94a3b8'], [1, '#1e293b']]);
+  const puffs = Array.from({ length: 14 }, (_, i) => {
+    const a = i * (360 / 14);
+    const [x, y] = P(33.5, a).split(',');
+    return `<circle cx="${x}" cy="${y}" r="${(3.6 + jit(i, 5) * 1.6).toFixed(2)}" fill="url(#${uid}c)" stroke="#0f172a" stroke-width=".5"/>`;
+  }).join('');
+  const bolts = Math.min(8, 1 + Math.floor(t / 6));
+  const lightning = Array.from({ length: bolts }, (_, i) => {
+    const a = -90 + i * (360 / bolts) + jit(i, 6) * 20;
+    const [x, y] = P(38, a).split(',');
+    return `<polyline points="0,-6 -2.4,-1 0.8,-0.6 -1.6,6" transform="translate(${x} ${y}) rotate(${a + 90})" fill="none" stroke="#fef08a" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round" filter="url(#${g})" class="storm-bolt storm-b${i % 3}"/>`;
+  }).join('');
+  const rain = t >= 20 ? Array.from({ length: 12 + Math.min(12, t - 20) }, (_, i) => {
+    const a = i * (360 / (12 + Math.min(12, t - 20)));
+    const [x1, y1] = P(41, a).split(',');
+    const [x2, y2] = P(44, a + 3).split(',');
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#bae6fd" stroke-width=".7" stroke-opacity=".7"/>`;
+  }).join('') : '';
+  const eye = t >= 40 ? `<circle r="29" fill="none" stroke="#fef08a" stroke-width=".8" stroke-opacity=".6" stroke-dasharray="1 4"/>` : '';
+  return `<defs>${defs}</defs>${eye}${puffs}${rain}${lightning}`;
+}
+
+/* --- honeycomb: cells around the ring, bees once it fills ----------------- */
+function drawHoney(t, uid) {
+  const g = `${uid}h`;
+  const defs = grad(g, [[0, '#fde68a'], [0.6, '#f59e0b'], [1, '#92400e']]);
+  const cells = 14 + Math.min(10, Math.floor(t / 5));
+  const hex = (x, y, r, rot) => `<polygon points="${Array.from({ length: 6 }, (_, k) => P(r, rot + k * 60)).join(' ')}" transform="translate(${x} ${y})"/>`;
+  const comb = Array.from({ length: cells }, (_, i) => {
+    const a = (360 / cells) * i;
+    const [x, y] = P(33.5, a).split(',');
+    const full = i % 3 !== 2 || t >= 12;
+    return `<g fill="${full ? `url(#${g})` : 'none'}" stroke="#78350f" stroke-width=".8">${hex(x, y, 4.2, a)}</g>`;
+  }).join('');
+  const bees = t >= 20 ? Array.from({ length: Math.min(5, 1 + Math.floor((t - 20) / 7)) }, (_, i) => {
+    const a = -60 + i * 75;
+    const [x, y] = P(42, a).split(',');
+    return `<g transform="translate(${x} ${y}) rotate(${a})" class="bee-hover"><ellipse rx="2.4" ry="1.5" fill="#fbbf24"/><path d="M -1 -1.5 v3 M 0.4 -1.5 v3" stroke="#1c1917" stroke-width=".7"/><ellipse cx="-0.4" cy="-1.8" rx="1.4" ry=".8" fill="#e0f2fe" fill-opacity=".8"/></g>`;
+  }).join('') : '';
+  const drips = t >= 35 ? [70, 110].map((a, i) => { const [x, y] = P(36, a).split(','); return `<path d="M -1.4 0 q 1.4 ${5 + i * 2} 2.8 0 z" transform="translate(${x} ${y})" fill="#f59e0b"/>`; }).join('') : '';
+  return `<defs>${defs}</defs>
+    <circle r="33.5" fill="none" stroke="#78350f" stroke-width="1.2" stroke-opacity=".6"/>
+    ${comb}${drips}${bees}`;
+}
+
+/* --- inkwell: a black ring, splashes and drips, the currency's own frame -- */
+function drawInkwell(t, uid) {
+  const g = `${uid}i`;
+  const defs = grad(g, [[0, '#818cf8'], [0.5, '#312e81'], [1, '#0f0a2e']]);
+  const splashes = 6 + Math.min(14, Math.floor(t / 3));
+  const blobs = Array.from({ length: splashes }, (_, i) => {
+    const a = (360 / splashes) * i + jit(i, 7) * 18;
+    const [x, y] = P(38 + jit(i, 8) * 4, a).split(',');
+    return `<circle cx="${x}" cy="${y}" r="${(1 + jit(i, 9) * 1.8).toFixed(2)}" fill="#1e1b4b"/>`;
+  }).join('');
+  const drips = Array.from({ length: Math.min(5, 1 + Math.floor(t / 10)) }, (_, i) => {
+    const x = -16 + i * 8 + jit(i, 10) * 4;
+    return `<rect x="${x.toFixed(1)}" y="30" width="2.2" height="${(6 + jit(i, 11) * 6).toFixed(1)}" rx="1.1" fill="#1e1b4b" class="ink-drip ink-d${i % 3}"/>`;
+  }).join('');
+  const quill = t >= 30 ? `<path d="M 30 -38 q 12 -10 16 -2 q -8 2 -14 12 z" fill="#c7d2fe" stroke="#312e81" stroke-width=".6"/><path d="M 32 -28 l 6 -8" stroke="#312e81" stroke-width=".8"/>` : '';
+  const sheen = t >= 45 ? arc(33.5, 200, 340, `stroke="#a5b4fc" stroke-width="1" stroke-opacity=".7" stroke-linecap="round"`) : '';
+  return `<defs>${defs}</defs>${blobs}
+    <circle r="33.5" fill="none" stroke="url(#${g})" stroke-width="${5 + Math.min(t, 10) * 0.25}"/>
+    ${drips}${sheen}${quill}`;
+}
+
+/* --- origami: a ring folded from paper, facets light and dark ------------- */
+function drawOrigami(t, uid) {
+  const facets = 12 + Math.min(12, Math.floor(t / 4) * 2);
+  const tones = ['#fda4af', '#fecdd3', '#fb7185', '#ffe4e6'];
+  const ring = Array.from({ length: facets }, (_, i) => {
+    const a0 = (360 / facets) * i;
+    const a1 = a0 + 360 / facets;
+    const inner = i % 2 ? 30 : 31.5;
+    const outer = i % 2 ? 36.5 : 38;
+    return `<polygon points="${P(inner, a0)} ${P(outer, a0 + (a1 - a0) / 2)} ${P(inner, a1)}" fill="${tones[i % 4]}" stroke="#9f1239" stroke-width=".4"/>`;
+  }).join('');
+  const cranes = t >= 20 ? Array.from({ length: Math.min(4, 1 + Math.floor((t - 20) / 8)) }, (_, i) => {
+    const a = -120 + i * 90;
+    const [x, y] = P(44, a).split(',');
+    return `<path d="M -4 1 L 0 -4 L 4 1 L 0 3 Z M 0 -4 L 1 -7 M -4 1 L -7 3" transform="translate(${x} ${y}) rotate(${a + 90})" fill="#fff1f2" stroke="#9f1239" stroke-width=".5" stroke-linejoin="round"/>`;
+  }).join('') : '';
+  const creases = t >= 35 ? arc(28.5, 0, 359.9, `stroke="#9f1239" stroke-width=".5" stroke-dasharray="4 3" stroke-opacity=".6"`) : '';
+  return `${creases}${ring}${cranes}`;
+}
+
+/* --- lanterns: paper lamps hung on a cord around the ring ----------------- */
+function drawLanterns(t, uid) {
+  const g = `${uid}l`;
+  const defs = glowFilter(g, 1.6);
+  const n = 6 + Math.min(10, Math.floor(t / 4));
+  const lamps = Array.from({ length: n }, (_, i) => {
+    const a = -90 + (360 / n) * i;
+    const [x, y] = P(36, a).split(',');
+    const warm = ['#ef4444', '#f97316', '#fbbf24'][i % 3];
+    return `<g transform="translate(${x} ${y})" class="lamp-sway lamp-s${i % 3}">
+      <line x1="0" y1="-4.5" x2="0" y2="-3" stroke="#fde68a" stroke-width=".6"/>
+      <rect x="-2.6" y="-3" width="5.2" height="6" rx="2" fill="${warm}" stroke="#7c2d12" stroke-width=".5" filter="url(#${g})"/>
+      <line x1="0" y1="3" x2="0" y2="5" stroke="#fde68a" stroke-width=".6"/></g>`;
+  }).join('');
+  const cord = `<circle r="33.5" fill="none" stroke="#7c2d12" stroke-width="1" stroke-dasharray="1.5 2.5"/>`;
+  const glow = t >= 15 ? `<circle r="41" fill="none" stroke="#fbbf24" stroke-width="6" stroke-opacity=".08"/>` : '';
+  const sparks = t >= 30 ? Array.from({ length: 8 + Math.min(8, t - 30) }, (_, i) => { const [x, y] = P(44 + jit(i, 12) * 6, i * 27).split(','); return `<circle cx="${x}" cy="${y}" r=".8" fill="#fde68a"/>`; }).join('') : '';
+  return `<defs>${defs}</defs>${glow}${cord}${sparks}${lamps}`;
+}
+
+/* --- stained glass: panes leaded together, a rose at the top later -------- */
+function drawStained(t, uid) {
+  const panes = 8 + Math.min(16, Math.floor(t / 3));
+  const glass = ['#f87171', '#60a5fa', '#facc15', '#4ade80', '#c084fc', '#fb923c'];
+  const ring = Array.from({ length: panes }, (_, i) => {
+    const a0 = (360 / panes) * i;
+    const a1 = a0 + 360 / panes;
+    return `<path d="M ${P(30, a0)} A 30 30 0 0 1 ${P(30, a1)} L ${P(38, a1)} A 38 38 0 0 0 ${P(38, a0)} Z" fill="${glass[i % 6]}" fill-opacity=".75" stroke="#1c1917" stroke-width="1.2"/>`;
+  }).join('');
+  const rose = t >= 25 ? `<g transform="translate(0 -44)">${Array.from({ length: 8 }, (_, k) => `<path d="M 0 0 L ${P(5.5, k * 45 - 22.5)} A 5.5 5.5 0 0 1 ${P(5.5, k * 45 + 22.5)} Z" fill="${glass[k % 6]}" fill-opacity=".8" stroke="#1c1917" stroke-width=".7"/>`).join('')}<circle r="1.6" fill="#fef3c7" stroke="#1c1917" stroke-width=".5"/></g>` : '';
+  const light = t >= 40 ? `<circle r="34" fill="none" stroke="#fef3c7" stroke-width="8" stroke-opacity=".12" class="glass-light"/>` : '';
+  return `${light}${ring}${rose}`;
+}
+
+/* --- comet: a head on its orbit, and the tail it leaves behind ------------ */
+function drawComet(t, uid) {
+  const g = `${uid}k`;
+  const defs = glowFilter(g, 2) + `<linearGradient id="${uid}t" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#67e8f9" stop-opacity="0"/><stop offset="1" stop-color="#ecfeff"/></linearGradient>`;
+  const tails = Math.min(3, 1 + Math.floor(t / 17));
+  const trail = Array.from({ length: tails }, (_, i) => {
+    const start = i * 120;
+    const sweep = 80 + Math.min(120, t * 3);
+    return `<g class="comet-orbit comet-o${i}">${arc(34, start, start + sweep, `stroke="url(#${uid}t)" stroke-width="${3.2 - i * 0.6}" stroke-linecap="round"`)}
+      <circle cx="${P(34, start + sweep).split(',')[0]}" cy="${P(34, start + sweep).split(',')[1]}" r="${2.6 - i * 0.4}" fill="#ecfeff" filter="url(#${g})"/></g>`;
+  }).join('');
+  const stars = Array.from({ length: 8 + Math.min(16, Math.floor(t / 2)) }, (_, i) => {
+    const n = 8 + Math.min(16, Math.floor(t / 2));
+    const [x, y] = P(42 + jit(i, 13) * 10, (360 / n) * i).split(',');
+    return `<circle cx="${x}" cy="${y}" r="${(0.5 + jit(i, 14) * 0.8).toFixed(2)}" fill="#a5f3fc"/>`;
+  }).join('');
+  const orbit = `<circle r="34" fill="none" stroke="#155e75" stroke-width="1" stroke-dasharray="2 3"/>`;
+  const planet = t >= 30 ? `<circle cx="0" cy="-45" r="3" fill="#fbbf24"/><ellipse cx="0" cy="-45" rx="5.5" ry="1.4" fill="none" stroke="#fde68a" stroke-width=".7" transform="rotate(-20 0 -45)"/>` : '';
+  return `<defs>${defs}</defs>${stars}${orbit}${planet}${trail}`;
+}
+
 const DRAWERS = {
   metal: drawMetal, circuit: drawCircuit, orbit: drawOrbit, crest: drawCrest, crystal: drawCrystal,
   aurora: drawAurora, runic: drawRunic, solar: drawSolar, singularity: drawSingularity,
-  god: drawGod, hellfire: drawHellfire
+  god: drawGod, hellfire: drawHellfire,
+  ivy: drawIvy, gears: drawGears, tide: drawTide, storm: drawStorm, honey: drawHoney,
+  inkwell: drawInkwell, origami: drawOrigami, lanterns: drawLanterns, stained: drawStained, comet: drawComet
 };
 
 /**
