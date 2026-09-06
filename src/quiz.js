@@ -137,6 +137,9 @@ export function recordQuizPlay(userKey = 'local') {
  *   4  the card, plus a solid pile of money
  *   5  the card, big money, and a 5-card Rare booster of the subject
  */
+/** What a right answer is worth on the leaderboard: five right is a thousand. */
+export const QUIZ_POINTS_PER_ANSWER = 200;
+
 export function quizRewards(correct, themeId) {
   const rewards = { money: 0, card: false, booster: null };
   if (correct === 1) rewards.money = QUIZ_MONEY.small;

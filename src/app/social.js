@@ -41,7 +41,7 @@ export function personRow(profile, actions, { onOpen = null, note = null } = {})
 
   const mark = row.querySelector('.person-mark');
   paintAvatarInto(mark, profile);
-  const live = account.isOnline(profile);
+  const live = onlineNow(profile);
   if (live !== null) {
     const dot = document.createElement('span');
     dot.className = `presence-dot${live ? ' is-online' : ''}`;
@@ -136,6 +136,106 @@ export async function syncSocial() {
   if (state.tab === 'friends') renderFriends();
   if (state.tab === 'chat' && state.chat) refreshChat();
 }
+/* --- the live wires ----------------------------------------------------------
+ *
+ * The heartbeat above finds out once a minute. These find out the moment it
+ * happens: a Realtime feed of the rows written for me (messages, receipts,
+ * parcels, requests, trades) and a presence channel that says who is here.
+ * Both fall back to the heartbeat when the socket is not there.
+ */
+
+export const liveSocial = { feed: null, presence: null, online: null, timer: null };
+
+/** Whether this player asked to appear offline. */
+export const presenceHidden = () => state.account.profile?.presence === 'hidden';
+
+/**
+ * Whether a friend is online right now: on the presence channel, or, for an
+ * app that does not track presence, seen within the last two minutes. Null
+ * when the database cannot say either way.
+ */
+export function onlineNow(profile) {
+  if (!profile) return null;
+  if (liveSocial.online && account.hasPresence(profile)) {
+    // The lobby is the word: a friend whose socket closed a second ago is
+    // gone now, not in two minutes when their last heartbeat ages out.
+    if (profile.presence !== 'online') return false;
+    return liveSocial.online.has(profile.id);
+  }
+  return account.isOnline(profile);
+}
+
+/**
+ * When a friend was last here, in the words a person uses: to the minute
+ * within the hour, to the hour within the day, then yesterday and days.
+ * Nothing for a friend who appears offline on purpose, and nothing for one
+ * who is online now.
+ */
+export function lastSeenText(profile) {
+  if (!account.hasPresence(profile) || profile.presence !== 'online') return '';
+  if (onlineNow(profile)) return '';
+  const at = Date.parse(profile.last_seen_at ?? '');
+  if (!Number.isFinite(at)) return '';
+  const mins = Math.floor(Math.max(0, Date.now() - at) / 60000);
+  if (mins < 60) return t('lastSeenMins', { n: Math.max(1, mins) });
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return t('lastSeenHours', { n: hours });
+  const days = Math.floor(hours / 24);
+  if (days <= 1) return t('lastSeenYesterday');
+  return t('lastSeenDays', { n: days });
+}
+
+export function startLiveSocial() {
+  stopLiveSocial();
+  if (!signedIn() || !account.configured) return;
+  liveSocial.feed = account.openSocialFeed(userId(), onSocialEvent);
+  liveSocial.presence = account.openPresence(userId(), { hidden: presenceHidden() || document.visibilityState !== 'visible' }, onPresenceSync);
+}
+
+export function stopLiveSocial() {
+  liveSocial.feed?.close();
+  liveSocial.presence?.close();
+  liveSocial.feed = null;
+  liveSocial.presence = null;
+  liveSocial.online = null;
+  clearTimeout(liveSocial.timer);
+}
+
+/** Tell the presence channel whether to show me: hidden by choice, or away. */
+export function settlePresence() {
+  liveSocial.presence?.setHidden(presenceHidden() || document.visibilityState !== 'visible');
+}
+
+/** A row just arrived for me. The open conversation is repainted on the
+ *  spot; everything else goes through the heartbeat, one beat, now. */
+function onSocialEvent(event) {
+  if (event.kind === 'status') return;
+  const row = event.row ?? {};
+  if (event.kind === 'message' && state.tab === 'chat' && state.chat?.otherId === row.sender) {
+    showTyping(false);
+    refreshChat({ markRead: true });
+  }
+  if (event.kind === 'read' && row.read_at && state.tab === 'chat' && state.chat?.otherId === row.recipient) {
+    for (const m of state.chatRows) if (m.id === row.id || (m.sender === userId() && !m.read_at && m.created_at <= row.created_at)) m.read_at = m.read_at ?? row.read_at;
+    paintChat(state.chatRows);
+    return;
+  }
+  clearTimeout(liveSocial.timer);
+  liveSocial.timer = setTimeout(() => { syncSocial().catch(() => {}); }, 250);
+}
+
+function onPresenceSync(ids) {
+  liveSocial.online = ids;
+  repaintPresence();
+}
+
+/** The presence dots and lines, wherever they are on screen right now. */
+export function repaintPresence() {
+  if (state.tab === 'friends') renderFriends();
+  if (state.tab === 'friend') paintFriendPresence();
+  if (state.tab === 'chat') paintChatPresence();
+}
+
 /**
  * Claim everything in my postbox: gifted cards, gifted boosters, and the
  * goods side of accepted trades. Each item lands in the local save first and
@@ -580,6 +680,17 @@ export function keepChatBottom() {
   requestAnimationFrame(() => { el.chatLog.scrollTop = el.chatLog.scrollHeight; });
 }
 
+/** Online, or offline and since when, under the name in the chat's head. */
+export function paintChatPresence() {
+  const person = state.chat?.profile;
+  if (!person) return;
+  const online = onlineNow(person);
+  const since = online ? '' : lastSeenText(person);
+  el.chatPresence.textContent = online === null ? ''
+    : (online ? t('friendOnline') : `${t('friendOffline')}${since ? ` · ${since}` : ''}`);
+  el.chatPresence.className = `chat-presence${online ? ' is-online' : ''}`;
+}
+
 export function renderChatFrame() {
   const entry = state.chat;
   const person = entry?.profile;
@@ -587,10 +698,7 @@ export function renderChatFrame() {
   el.chatBack.innerHTML = iconSvg('chevronLeft', { size: 18 });
   el.chatName.textContent = person.username ?? '';
   paintAvatarInto(el.chatAvatar, person);
-  const online = account.isOnline(person);
-  el.chatPresence.textContent = online === null ? ''
-    : (online ? t('friendOnline') : t('friendOffline'));
-  el.chatPresence.className = `chat-presence${online ? ' is-online' : ''}`;
+  paintChatPresence();
   el.chatWho.setAttribute('aria-label', t('chatSeeProfile', { name: person.username ?? '' }));
   el.chatInput.placeholder = t('chatPlaceholder');
   el.chatSend.textContent = t('chatSend');
@@ -1012,7 +1120,7 @@ export function renderFriends() {
   // Favourites first, then whoever is online now, then the alphabet.
   const orderedFriends = [...friends].sort((a, b) =>
     (isFavFriend(b.otherId) - isFavFriend(a.otherId))
-    || ((account.isOnline(b.profile) === true) - (account.isOnline(a.profile) === true))
+    || ((onlineNow(b.profile) === true) - (onlineNow(a.profile) === true))
     || a.profile.username.localeCompare(b.profile.username));
 
   el.friendsList.replaceChildren(...orderedFriends.map((entry) => {
@@ -1108,22 +1216,33 @@ export function openFriend(entry) {
 
 export let friendSeg;
 
+/** The line under a friend's name: online or not, their rank, and when they
+ *  were last here when they are not. */
+export function paintFriendPresence() {
+  const person = state.viewing?.profile;
+  if (!person) return;
+  const level = person.level ?? 1;
+  const online = onlineNow(person);
+  const since = online ? '' : lastSeenText(person);
+  el.friendRank.innerHTML = (online === null ? ''
+    : `<span class="presence-dot is-inline${online ? ' is-online' : ''}"></span> `
+      + esc(online ? t('friendOnline') : t('friendOffline')) + ' · ')
+    + esc(tx(rankFor(level).name))
+    + (since ? `<small class="friend-seen">${esc(since)}</small>` : '');
+}
+
 export function renderFriend() {
   const entry = state.viewing;
   if (!entry) return;
   const person = entry.profile;
   const level = person.level ?? 1;
-  const online = account.isOnline(person);
 
   el.friendBack.innerHTML = iconSvg('chevronLeft', { size: 18 });
   el.friendName.textContent = person.username ?? '';
   live.friendRing.set(0, String(level));
   paintFrameInto(el.friendRing, person.avatar?.frame?.style ?? null, person.avatar?.frame?.style ? frameTier(level) : 0);
   el.friendLevel.textContent = t('profileLevel', { n: level });
-  el.friendRank.innerHTML = (online === null ? ''
-    : `<span class="presence-dot is-inline${online ? ' is-online' : ''}"></span> `
-      + esc(online ? t('friendOnline') : t('friendOffline')) + ' · ')
-    + esc(tx(rankFor(level).name));
+  paintFriendPresence();
   el.friendStatsLabel.textContent = t('profileStats');
   el.friendRarityLabel.textContent = t('statRarity');
   el.friendCardsLabel.textContent = t('friendCollection');

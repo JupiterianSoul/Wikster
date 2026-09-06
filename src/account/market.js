@@ -107,22 +107,39 @@ export function openChatChannel(selfId, otherId, onEvent) {
   const name = `chat:${[selfId, otherId].sort().join(':')}`;
   let channel = null;
   let ready = false;
+  // What was said before the wire was up: "I have read yours" is sent the
+  // moment a conversation opens, which is before the channel has joined, and
+  // a receipt dropped there is a receipt the other side only sees on the
+  // next poll. Held here and sent on join instead.
+  const waiting = [];
+  const put = (payload) => {
+    try { channel.send({ type: 'broadcast', event: 'chat', payload }); } catch { /* the poll carries it */ }
+  };
   try {
     channel = supabase.channel(name, { config: { broadcast: { self: false } } });
     channel
       .on('broadcast', { event: 'chat' }, ({ payload }) => {
         if (payload?.from && payload.from !== selfId) onEvent?.(payload);
       })
-      .subscribe((status) => { ready = status === 'SUBSCRIBED'; });
+      .subscribe((status) => {
+        ready = status === 'SUBSCRIBED';
+        if (ready) while (waiting.length) put(waiting.shift());
+      });
   } catch {
     channel = null;
   }
   return {
     send(kind, extra = {}) {
-      if (!channel || !ready) return;
-      try {
-        channel.send({ type: 'broadcast', event: 'chat', payload: { kind, from: selfId, at: Date.now(), ...extra } });
-      } catch { /* the poll carries it */ }
+      if (!channel) return;
+      const payload = { kind, from: selfId, at: Date.now(), ...extra };
+      if (!ready) {
+        // Only the last of each kind is worth keeping: three "typing" is one.
+        const at = waiting.findIndex((w) => w.kind === kind);
+        if (at >= 0) waiting.splice(at, 1);
+        if (waiting.length < 8) waiting.push(payload);
+        return;
+      }
+      put(payload);
     },
     close() {
       if (!channel) return;

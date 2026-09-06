@@ -38,7 +38,7 @@ async function newPlayer(label, { cards = {} } = {}) {
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errors.push(`${label} PAGE: ${e.message}`));
   installStubs(page);
-  installSupabase(page, { db: shared });
+  await installSupabase(page, { db: shared });
   await page.addInitScript(({ cards }) => {
     localStorage.setItem('wikster.language', 'en');
     localStorage.setItem('wikster.profile.v1', JSON.stringify({

@@ -29,17 +29,18 @@ import { applyPanelState, paintPanel, togglePanel } from './panel.js';
 import { openFilters, renderBinder, turnAlbumPage } from './binder.js';
 import { $, THEME_KEY, WIDE, applyStrings, bind, debug, el, flushPlaytime, lookForUpdate, migrateLanguages, migrateSpecialCards, migrateViews, money, placeDrawerLinks, refreshWallet, setTickerJob, showScreen, shuffle, state, storedTheme, syncTicker, toast, useTheme } from './core.js';
 import { openDaily, openOdds, openWallet } from './daily.js';
+import * as leaderboard from '../leaderboard.js';
 import { tilt } from './detail.js';
 import { buildDrawer, closeDrawer, openDrawer, openHelp, openNotifications, paintDrawerLinks } from './drawer.js';
 import { flushSync, gateAltAction, onSession, purgeRetiredCodes, purgeRetiredThemes, resumeAccount, showGate, stopSocialPoll, submitGate, syncSoon } from './gate.js';
 import { live } from './live.js';
 import { applyRarityVars, drainLevelUps, gainBooster, homeTabFor, initSwipe, paintOpenHint, showLevelUp, warmDrawer } from './open.js';
 import { buildBooster, createCustomPack, paintForgeSeal, paintPackCaption, renderPacks, renderTimed, syncTimed } from './packs.js';
-import { renderProfile } from './profile.js';
+import { paintPlaytime, renderProfile } from './profile.js';
 import { refreshLevelBadge, updateBadges } from './regalia.js';
 import { applySettings, renderCustomize, sayWipeNote, wipeEverything } from './settings.js';
 import { payStipend, renderShop } from './shop.js';
-import { chatTyped, keepChatBottom, loadFriends, openFriend, renderFriends, runSearch, sendChat, socialAction, syncSocial } from './social.js';
+import { chatTyped, keepChatBottom, loadFriends, openFriend, renderFriends, runSearch, sendChat, settlePresence, socialAction, syncSocial } from './social.js';
 
 bind({
   screens: {
@@ -580,12 +581,15 @@ export function init() {
       // Coming back is the natural moment to retry anything that did not land,
       // and to pick up what happened while the app was away.
       resumeAccount();
+      settlePresence();
     } else {
       stopSocialPoll();
       flushPlaytime();
       live.visibleSince = null;
       synth.suspend();
       music.park();
+      // Away is offline to friends, the moment the app leaves the screen.
+      settlePresence();
       // Leaving is the last chance to get the save up before the WebView is
       // frozen, so this one does not wait out the debounce.
       flushSync();
@@ -594,6 +598,16 @@ export function init() {
     syncTicker();
   });
   window.addEventListener('pagehide', () => { flushPlaytime(); flushSync(); });
+  // Time played is written every minute while the app is on screen, so the
+  // profile, the friends' view of it and the achievements are never a session
+  // behind. The profile screen repaints its own counter.
+  setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    flushPlaytime();
+    if (state.tab === 'profile') paintPlaytime();
+  }, 60000);
+  // A score that could not be sent is sent when the network comes back.
+  window.addEventListener('online', () => { leaderboard.flushScores().catch(() => {}); });
 
   backdrop.start();
   startSession();

@@ -26,6 +26,12 @@ export function formatDuration(ms) {
   return `${minutes}m`;
 }
 
+/** The time-played cell alone, for the minute tick while the profile is open. */
+export function paintPlaytime() {
+  const cell = el.statGrid?.querySelector('[data-stat="playtime"] b');
+  if (cell) cell.textContent = formatDuration(state.profile.playMs ?? 0);
+}
+
 export function renderProfile() {
   const { progress, rarityCounts } = state.profile;
   const level = progress.level ?? 1;
@@ -65,9 +71,10 @@ export function renderProfile() {
       state.profile.achievements?.redeemed ?? []).filter((a) => a.unlocked).length)],
     ...(account.configured ? [[t('statFriends'), String(state.social.friends.length)]] : [])
   ];
-  el.statGrid.replaceChildren(...stats.map(([label, value]) => {
+  el.statGrid.replaceChildren(...stats.map(([label, value], i) => {
     const cell = document.createElement('div');
     cell.className = 'stat-cell';
+    if (i === 0) cell.dataset.stat = 'playtime';
     cell.innerHTML = '<b></b><span></span>';
     cell.querySelector('b').textContent = value;
     cell.querySelector('span').textContent = label;

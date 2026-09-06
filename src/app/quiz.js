@@ -1,6 +1,6 @@
 /* quiz: split out of main.js */
 
-import { QUIZ_PER_DAY, buildQuiz, questionCountFor, quizAvailable, quizPlaysLeft, quizRewards, recordQuizPlay } from '../quiz.js';
+import { QUIZ_PER_DAY, QUIZ_POINTS_PER_ANSWER, buildQuiz, questionCountFor, quizAvailable, quizPlaysLeft, quizRewards, recordQuizPlay } from '../quiz.js';
 import { priceFor } from '../pricing.js';
 import { specColours, specIcon, specId, specName, toDrawPack } from '../booster.js';
 import { t, tx } from '../i18n.js';
@@ -15,7 +15,8 @@ import { press, reveal } from '../ui/components.js';
 import { reportQuest } from './arcade.js';
 import { el, esc, money, refreshWallet, showScreen, state, toast } from './core.js';
 import { buildStaticCard } from './detail.js';
-import { userId } from './gate.js';
+import { signedIn, userId } from './gate.js';
+import * as leaderboard from '../leaderboard.js';
 import { gainBooster } from './open.js';
 import { renderPacks } from './packs.js';
 import { updateBadges } from './regalia.js';
@@ -145,6 +146,7 @@ export function finishQuiz() {
   if (q.correct === q.questions.length) state.profile.quizPerfect = (state.profile.quizPerfect ?? 0) + 1;
   q.rewards = quizRewards(q.correct, q.themeId);
   reportQuest('quiz', { correct: q.correct });
+  if (signedIn() && q.correct > 0) leaderboard.submitScore('quiz', q.correct * QUIZ_POINTS_PER_ANSWER).catch(() => { /* queued for later */ });
   if (q.rewards.money > 0) {
     store.saveWallet(store.loadWallet() + q.rewards.money);
     refreshWallet();

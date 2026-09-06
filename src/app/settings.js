@@ -26,7 +26,7 @@ import { gainBooster } from './open.js';
 import { buildBooster, renderPacks } from './packs.js';
 import { frameStyle, pickFrameStyle, updateBadges, wearBadge } from './regalia.js';
 import { renderShop } from './shop.js';
-import { openAvatarPicker, paintAvatarInto } from './social.js';
+import { openAvatarPicker, paintAvatarInto, settlePresence } from './social.js';
 
 /* --- settings ------------------------------------------------------------------------------------------- */
 
@@ -610,6 +610,7 @@ export function accountRows() {
     try {
       await account.updateProfileFields(userId(), { presence: next });
       state.account.profile.presence = next;
+      settlePresence();
       btn.textContent = presLabel(next);
     } catch (error) { toast(esc(describeError(error)), 'error'); }
     btn.disabled = false;

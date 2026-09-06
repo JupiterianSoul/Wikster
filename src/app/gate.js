@@ -14,7 +14,7 @@ import { DEFAULT_THEME, THEMES } from '../ui/themes.js';
 import { DEFAULT_FRAME_STYLE, FRAME_STYLES } from '../frames.js';
 import { renderBinder } from './binder.js';
 import { endSplash, showWelcome } from './boot.js';
-import { SPECIAL_FIX_KEY, VIEWS_FIX_KEY, applyStrings, el, refreshWallet, showScreen, showUpdateBar, state, storedTheme, toast, useTheme } from './core.js';
+import { SPECIAL_FIX_KEY, VIEWS_FIX_KEY, applyStrings, el, flushPlaytime, refreshWallet, showScreen, showUpdateBar, state, storedTheme, toast, useTheme } from './core.js';
 import { openDaily } from './daily.js';
 import { live } from './live.js';
 import { dropReady, warmDrawer } from './open.js';
@@ -22,7 +22,8 @@ import { renderPacks } from './packs.js';
 import { refreshLevelBadge, updateBadges } from './regalia.js';
 import { applySettings, renderAccountRow } from './settings.js';
 import { payStipend, renderShop } from './shop.js';
-import { syncSocial } from './social.js';
+import { startLiveSocial, stopLiveSocial, syncSocial } from './social.js';
+import * as leaderboard from '../leaderboard.js';
 
 /* --- the account gate -------------------------------------------------------------------------------------- */
 
@@ -270,6 +271,9 @@ export async function flushSync() {
   if (!signedIn() || !state.account.profile) return;
   clearTimeout(syncTimer);
   syncTimer = null;
+  // The minutes since the last flush belong to the stats that are about to
+  // be published, not to the next push.
+  flushPlaytime();
   // Not while a booster is being opened: a push can merge another device's
   // keys into storage, and the reveal is writing the collection there card
   // by card from the copy it holds in memory. Written on top of the merge,
@@ -360,6 +364,8 @@ export async function resumeAccount() {
   if (state.account.failed || !had) syncSoon();
   syncSocial();
   startSocialPoll();
+  startLiveSocial();
+  leaderboard.flushScores().catch(() => {});
 }
 /**
  * Sign in has happened. Pull the account's save over the local one, then start
@@ -389,6 +395,8 @@ export async function enterApp() {
   if (!state.account.failed && account.saveFromNewerBuild()) { state.account.outdated = true; showUpdateBar('outdated'); }
   syncSocial();
   startSocialPoll();
+  startLiveSocial();
+  leaderboard.flushScores().catch(() => {});
 
   if (!languageChosen() || !state.profile.started) showWelcome();
   else {
@@ -511,6 +519,7 @@ export async function leaveAccount() {
   handledUser = null;
   state.social = { friends: [], incoming: [], outgoing: [], results: [], loaded: false, unread: new Map(), trades: [] };
   stopSocialPoll();
+  stopLiveSocial();
   el.welcome.hidden = true;
   showScreen('packs');
   showGate();

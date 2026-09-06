@@ -500,5 +500,25 @@ export const RELEASES = [
       { en: 'A window dragged across the desk’s edge repaints the book, the shelf’s hint and the panel, not only the drawer', fr: 'Une fenêtre déplacée au-delà du seuil du bureau repeint l’album, l’indice de l’étagère et le panneau, pas seulement le tiroir' },
       { en: 'Sync waits until a booster is opened before pushing: a merge landing mid-reveal could hand another device’s cards back to it undone', fr: 'La synchronisation attend la fin de l’ouverture d’un booster avant d’envoyer : une fusion tombée en pleine révélation pouvait rendre à un autre appareil ses cartes défaites' }
     ]
+  },
+  {
+    id: 'livewire', icon: 'bell', accent: '#34d399',
+    title: { en: 'The live wire', fr: 'Le fil direct' },
+    points: [
+      { en: 'Messages, requests, gifts and trades arrive the moment they are sent', fr: 'Messages, demandes, cadeaux et échanges arrivent à l’instant où ils partent' },
+      { en: 'Friends show online and offline as it happens, with when they were last here', fr: 'Les amis passent en ligne et hors ligne en direct, avec leur dernière venue' },
+      { en: 'Wikdle in French, with hints from the encyclopaedia', fr: 'Wikdle en français, avec des indices tirés de l’encyclopédie' },
+      { en: 'Every minigame counts on the leaderboard, and a score is never lost', fr: 'Chaque mini-jeu compte au classement, et un score n’est jamais perdu' }
+    ],
+    changelog: [
+      { en: 'The app listens to the server instead of asking it once a minute: a message, a read receipt, a friend request, a parcel or a trade reaches you as it is written', fr: 'L’application écoute le serveur au lieu de l’interroger chaque minute : un message, un accusé de lecture, une demande d’ami, un colis ou un échange vous parvient dès qu’il est écrit' },
+      { en: 'Who is online comes from a presence channel everyone joins on sign-in: a friend closing the app goes offline at once, and Appear offline keeps you off it', fr: 'Qui est en ligne vient d’un canal de présence que chacun rejoint à la connexion : un ami qui ferme l’application passe hors ligne aussitôt, et Apparaître hors ligne vous en garde à l’écart' },
+      { en: 'The read mark in a chat appears when the other person opens the conversation, not when they start typing: the receipt was being sent before the wire had joined', fr: 'La marque de lecture d’une discussion apparaît quand l’autre ouvre la conversation, pas quand il se met à écrire : l’accusé partait avant que le fil n’ait rejoint' },
+      { en: 'A friend who is offline says when they were last online: to the minute within the hour, to the hour within the day, then yesterday and days; under their name on their profile and beside Offline in the chat', fr: 'Un ami hors ligne indique sa dernière venue : à la minute dans l’heure, à l’heure dans la journée, puis hier et en jours ; sous son nom sur son profil et à côté de Hors ligne dans la discussion' },
+      { en: 'Wikdle has a French board: French words, checked against a French dictionary, on an AZERTY keyboard, with the day’s article on the French Wikipedia', fr: 'Wikdle a un plateau français : des mots français, vérifiés dans un dictionnaire français, sur un clavier AZERTY, avec l’article du jour sur la Wikipédia francophone' },
+      { en: 'Wikdle’s hints come from the word’s own article, what Wikipedia calls it and then how its article begins with the word blanked out; a letter in its place is the third, or the fallback', fr: 'Les indices de Wikdle viennent de l’article du mot, comment Wikipédia l’appelle puis le début de son article avec le mot masqué ; une lettre à sa place est le troisième, ou le recours' },
+      { en: 'The slot machine and the quiz score on the leaderboard too; a score that could not be sent waits on the device and goes up on the next connection; the board repaints as scores land, yours or anyone’s', fr: 'La machine à sous et le quiz comptent aussi au classement ; un score qui n’a pu partir attend sur l’appareil et monte à la prochaine connexion ; le classement se repeint quand les scores tombent, les vôtres ou ceux des autres' },
+      { en: 'Time played is written every minute while the app is open, so the profile, the friends’ view of it and the achievements never lag a session behind', fr: 'Le temps de jeu s’écrit chaque minute tant que l’application est ouverte : le profil, ce qu’en voient les amis et les succès n’ont plus une session de retard' }
+    ]
   }
 ];

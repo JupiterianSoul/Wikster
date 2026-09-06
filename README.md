@@ -485,6 +485,34 @@ integration or through `.github/workflows/cloudflare.yml`, which deploys
 `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` exist as repository
 secrets, and does nothing at all until then.
 
+### The live wire
+
+Everything that happens to a player because of someone else used to be
+found by asking the server once a minute. `src/account/realtime.js` holds
+three Realtime subscriptions instead: a feed of the social rows written for
+me (messages, receipts, parcels, requests, trades, filtered on the server by
+the same row-level rules a query obeys), a presence channel every signed-in
+player joins so "online" is who is on it right now, and the board's three
+windows so a leaderboard on screen moves as scores land. `src/app/social.js`
+turns each event into the same repaint the heartbeat does, one beat, now;
+the heartbeat still runs a minute apart as the net. The chat's broadcast
+wire holds what was said before it joined, which is what puts the read mark
+up when the other person opens the conversation rather than when they type.
+A friend who is offline says when they were last here, from their last
+heartbeat. `supabase/schema.sql` V7 publishes the tables and gives the
+friendships their whole row on delete.
+
+Scores go through a queue in `src/leaderboard.js`: written to the device
+first, sent, and kept until the server has them; every game sends, the slot
+machine and the quiz included, and the server takes the difference when a
+day's best is beaten instead of adding it twice. `tests/suites/live.mjs`
+runs all of it against the stub's own Phoenix socket (in
+`tests/lib/supastub.mjs`, over Playwright's mocked WebSocket).
+
+Wikdle plays in the app's language: `src/data/wikdle-words-fr.js` carries
+the French answers and dictionary, accents dropped, and the hints come from
+the word's article on that language's Wikipedia.
+
 ### On a desk
 
 `src/styles/desktop.css` has two widths in it, and they are different rooms.

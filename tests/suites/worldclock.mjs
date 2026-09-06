@@ -12,7 +12,7 @@ const errors = [];
 const ctx = await browser.newContext({ serviceWorkers: 'block', ...devices['Pixel 7'] });
 const p = await ctx.newPage();
 p.on('pageerror', (e) => errors.push(e.message));
-installStubs(p); installSupabase(p, { db: shared });
+installStubs(p); await installSupabase(p, { db: shared });
 const PX = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
 await p.addInitScript(({ PX }) => {
   localStorage.setItem('wikster.language', 'en');

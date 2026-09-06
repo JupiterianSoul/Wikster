@@ -30,6 +30,7 @@ export {
   subscribeAuctions,
   openChatChannel
 } from './account/market.js';
+export { openSocialFeed, openPresence, openBoardFeed } from './account/realtime.js';
 export { getProfile, ensureProfile, profileForSession, publishStats } from './account/profile.js';
 export {
   remoteBuildStamp,

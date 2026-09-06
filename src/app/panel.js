@@ -165,7 +165,7 @@ function screenBlock(tab) {
     ]);
   }
   if (['games', 'wikdle', 'slots', 'duel', 'reveal'].includes(tab)) {
-    const game = wikdle.loadGame();
+    const game = wikdle.loadGame(wikdle.utcDay(), wikdle.langFor(getLanguage()));
     return block(t('tabGames'), [
       line('grid', game.status === 'playing' ? t('panelWikdleOpen') : t('panelWikdleDone')),
       line('podium', t('panelRounds', { game: t('duelTitle'), n: duel.roundsLeft() })),

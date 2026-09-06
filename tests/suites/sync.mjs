@@ -36,7 +36,7 @@ async function device(label, { cards = {}, wallet = '50000', owner = null, extra
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errors.push(`${label} PAGE: ${e.message}`));
   installStubs(page);
-  installSupabase(page, { db: shared });
+  await installSupabase(page, { db: shared });
   await page.addInitScript(({ cards, wallet, owner, extra }) => {
     // Once per device: a reload (a restore ends in one) must find the
     // storage the app left, not this script's starting point again.

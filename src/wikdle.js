@@ -19,17 +19,23 @@
  * with the first screen. Everything that needs a word awaits loadWords()
  * once; the board does it before it paints.
  */
-let words = null;
+const words = {};
 
-/** Fetches the answer and dictionary lists, once. */
-export async function loadWords() {
-  words ??= await import('./data/wikdle-words.js');
-  return words;
+/** The languages a board exists in; anything else plays in English. */
+export const LANGS = ['en', 'fr'];
+export const langFor = (language) => (LANGS.includes(language) ? language : 'en');
+
+/** Fetches a language's answer and dictionary lists, once. */
+export async function loadWords(lang = 'en') {
+  const id = langFor(lang);
+  words[id] ??= await (id === 'fr' ? import('./data/wikdle-words-fr.js') : import('./data/wikdle-words.js'));
+  return words[id];
 }
 
-const lists = () => {
-  if (!words) throw new Error('WIKDLE_WORDS_NOT_LOADED');
-  return words;
+const lists = (lang = 'en') => {
+  const found = words[langFor(lang)];
+  if (!found) throw new Error('WIKDLE_WORDS_NOT_LOADED');
+  return found;
 };
 import { t } from './i18n.js';
 
@@ -52,10 +58,13 @@ export const msToNextDay = (now = Date.now()) => {
  * days are not consecutive words, and the walk is a permutation, so a word
  * does not come back until every other has been used.
  */
-export function wordForDay(day = utcDay()) {
+export function wordForDay(day = utcDay(), lang = 'en') {
+  const id = langFor(lang);
   let h = 2166136261;
-  for (const ch of `wikdle:${day}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
-  const { ANSWERS } = lists();
+  // The English seed is the one the board has always used, so a day's word
+  // did not change under everyone when a second language arrived.
+  for (const ch of id === 'en' ? `wikdle:${day}` : `wikdle:${id}:${day}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  const { ANSWERS } = lists(id);
   const n = ANSWERS.length;
   // A stride coprime with the list length visits every word once.
   const stride = 7919 % n || 1;
@@ -64,7 +73,7 @@ export function wordForDay(day = utcDay()) {
 }
 
 /** Whether a guess is a word the dictionary knows. */
-export const isWord = (guess) => lists().DICTIONARY.has(String(guess ?? '').toLowerCase());
+export const isWord = (guess, lang = 'en') => lists(lang).DICTIONARY.has(String(guess ?? '').toLowerCase());
 
 /**
  * One row scored against the answer: an array of 'hit' | 'near' | 'miss'.
@@ -103,7 +112,7 @@ export function keyMarks(rows) {
 
 /* --- persistence ---------------------------------------------------------- */
 
-const blank = (day) => ({ day, rows: [], status: 'playing', startedAt: Date.now(), finishedAt: null });
+const blank = (day, lang = 'en') => ({ day, lang: langFor(lang), rows: [], status: 'playing', startedAt: Date.now(), finishedAt: null });
 
 function readAll() {
   try {
@@ -119,20 +128,24 @@ function writeAll(all) {
 }
 
 /** Today's board, started if there is none. A board from another day is not today's. */
-export function loadGame(day = utcDay()) {
+/** Where a day's board is kept: the English one under its day, as it always
+ *  was; another language's under the language and the day. */
+const gameKey = (day, lang = 'en') => (langFor(lang) === 'en' ? day : `${langFor(lang)}:${day}`);
+
+export function loadGame(day = utcDay(), lang = 'en') {
   const all = readAll();
-  const game = all.games?.[day];
-  if (game && Array.isArray(game.rows)) return game;
-  return blank(day);
+  const game = all.games?.[gameKey(day, lang)];
+  if (game && Array.isArray(game.rows)) return { lang: langFor(lang), ...game };
+  return blank(day, lang);
 }
 
 function saveGame(game) {
   const all = readAll();
   all.games = all.games ?? {};
-  all.games[game.day] = game;
+  all.games[gameKey(game.day, game.lang)] = game;
   // Only the last few days are kept; the streak and the stats carry the rest.
-  const days = Object.keys(all.games).sort();
-  while (days.length > 7) delete all.games[days.shift()];
+  const days = Object.keys(all.games).sort((a, b) => a.slice(-10).localeCompare(b.slice(-10)));
+  while (days.length > 14) delete all.games[days.shift()];
   writeAll(all);
 }
 
@@ -166,8 +179,8 @@ export function playGuess(game, guess) {
   if (game.status !== 'playing') return { error: 'over' };
   const word = String(guess ?? '').toLowerCase().replace(/[^a-z]/g, '');
   if (word.length !== COLUMNS) return { error: 'short' };
-  if (!isWord(word)) return { error: 'unknown' };
-  const answer = wordForDay(game.day);
+  if (!isWord(word, game.lang)) return { error: 'unknown' };
+  const answer = wordForDay(game.day, game.lang);
   const marks = scoreGuess(word, answer);
   const rows = [...game.rows, { guess: word, marks }];
   const won = marks.every((m) => m === 'hit');
@@ -192,55 +205,112 @@ export function playGuess(game, guess) {
 }
 
 /* --- hints ------------------------------------------------------------------
- * Two hints, and both have to be worth what they cost.
+ * Three hints, and each has to be worth what it costs.
  *
- * The first is always a letter in its place: it is drawn from the answer
- * itself, so it cannot be wrong, cannot be vague, and works with no
- * connection at all. The second is what the word MEANS, taken from
- * Wikipedia - but only when the page is a real article. A five-letter word
- * usually has a page listing its meanings instead, and "Topics referred to
- * by the same term" is not a hint; when that is what comes back, or nothing
- * does, the second hint is another letter rather than a wasted hundred
- * points.
+ * The first two come from the encyclopaedia: what the word's own article
+ * says it is, in a few words, and then the sentence the article opens with,
+ * the word itself blanked out wherever it appears. That is a real clue to
+ * think with rather than a letter to fill in. The third is a letter in its
+ * place, drawn from the answer itself, which cannot be wrong and works with
+ * no connection at all; it is also what the first two fall back to when the
+ * encyclopaedia has nothing worth reading about the word.
+ *
+ * A five-letter word usually has a page listing its meanings rather than an
+ * article, so the search looks past that page for the article the word
+ * most plainly names: "Tiger" over "Tiger (disambiguation)", the city over
+ * the football club.
  */
 
 /** What a hint costs, in the day's points, and how many a board may take. */
 export const HINT_COST = 120;
-export const HINTS_MAX = 2;
+export const HINTS_MAX = 3;
 
-/** The word with its letters hidden, in a sentence about it. */
-const mask = (text, word) => String(text ?? '').replace(new RegExp(`\\b${word}(s|es|ed|ing)?\\b`, 'gi'), (m) => '▮'.repeat(word.length) + (m.length > word.length ? m.slice(word.length) : ''));
+const fold = (text) => String(text ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-const firstSentence = (text) => {
-  const clean = String(text ?? '').replace(/\s+/g, ' ').trim();
-  if (!clean) return '';
-  const cut = clean.match(/^.*?[.!?](\s|$)/);
-  return (cut ? cut[0] : clean).trim().slice(0, 220);
-};
+/** The word with its letters hidden wherever it appears, accents or not,
+ *  plural or not: "▮▮▮▮▮ is the capital of France." */
+const mask = (text, word) => String(text ?? '').replace(/\p{L}+/gu, (token) => {
+  const flat = fold(token);
+  if (!flat.startsWith(word) || flat.length > word.length + 3) return token;
+  return '▮'.repeat(word.length) + token.slice(word.length);
+});
+
+/** The sentences of a paragraph, whole, short enough to read as a clue. */
+const sentences = (text) => String(text ?? '').replace(/\s+/g, ' ').trim()
+  .split(/(?<=[.!?])\s+(?=[A-ZÀ-Ý«"(])/)
+  .map((line) => line.trim())
+  .filter((line) => line.length >= 12 && line.length <= 240);
 
 /**
- * Whether a summary is about the word or about the many things the word can
+ * Whether a line is about the word or about the many things the word can
  * name. A page of meanings, a list, a name page: none of them say anything
- * about the answer, and all of them used to be handed over as the hint.
+ * about the answer.
  */
-const EMPTY_MEANING = /(may|can) (also )?refer to|refers? to:|same term|disambiguat|Wikimedia|list of |^(surname|given name|family name)/i;
-function usefulMeaning(data, word) {
-  if (!data || (data.type && data.type !== 'standard')) return null;
-  for (const candidate of [String(data.description ?? '').trim(), firstSentence(data.extract)]) {
-    if (!candidate || candidate.length < 8) continue;
-    if (EMPTY_MEANING.test(candidate)) continue;
-    const hidden = mask(candidate, word);
-    // A sentence that is nothing but the blanked-out word says nothing.
-    if (hidden.replace(/▮/g, '').replace(/[^a-zA-Z]/g, '').length < 6) continue;
-    return hidden.charAt(0).toUpperCase() + hidden.slice(1);
+const EMPTY_MEANING = /(may|can) (also )?refer to|refers? to:|same term|disambiguat|homonym|Wikimedia|list of |liste de |^(surname|given name|family name|nom de famille|prénom)/i;
+const useful = (line, word) => {
+  if (!line || EMPTY_MEANING.test(line)) return null;
+  const hidden = mask(line, word);
+  // A line that is nothing but the blanked-out word says nothing.
+  if (hidden.replace(/▮/g, '').replace(/[^\p{L}]/gu, '').length < 6) return null;
+  return hidden.charAt(0).toUpperCase() + hidden.slice(1);
+};
+
+const wikiHost = (lang) => `https://${langFor(lang)}.wikipedia.org`;
+
+async function getJson(url) {
+  const res = await fetch(url, { headers: { accept: 'application/json' } });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+/** The article the word most plainly names: its own page when that is an
+ *  article, otherwise the first search hit whose title is the word. */
+async function findArticle(word, lang) {
+  const summary = await getJson(`${wikiHost(lang)}/api/rest_v1/page/summary/${encodeURIComponent(word)}`).catch(() => null);
+  if (summary && (!summary.type || summary.type === 'standard') && !EMPTY_MEANING.test(String(summary.description ?? '')) && !EMPTY_MEANING.test(sentences(summary.extract)[0] ?? '')) return summary;
+  const search = await getJson(`${wikiHost(lang)}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(`intitle:${word}`)}&srlimit=10&format=json&origin=*`).catch(() => null);
+  for (const hit of search?.query?.search ?? []) {
+    const title = String(hit.title ?? '');
+    const flat = fold(title);
+    if (!(flat === word || flat.startsWith(`${word} (`) || flat.startsWith(`${word} `))) continue;
+    if (/disambig|homonym/i.test(title)) continue;
+    const page = await getJson(`${wikiHost(lang)}/api/rest_v1/page/summary/${encodeURIComponent(title)}`).catch(() => null);
+    if (page && (!page.type || page.type === 'standard')) return page;
   }
   return null;
 }
 
+const facts = new Map();
+
+/** What the encyclopaedia can say about the word without saying it: the
+ *  short description, then the article's opening sentences. Cached. */
+async function articleFacts(word, lang) {
+  const key = `${langFor(lang)}:${word}`;
+  if (facts.has(key)) return facts.get(key);
+  let lines = [];
+  try {
+    const page = await findArticle(word, lang);
+    if (page) {
+      const about = useful(String(page.description ?? '').trim(), word);
+      if (about) lines.push({ kind: 'about', text: about });
+      for (const line of sentences(page.extract).slice(0, 4)) {
+        const clue = useful(line, word);
+        if (clue) lines.push({ kind: 'sentence', text: clue });
+        if (lines.length >= 3) break;
+      }
+    }
+  } catch {
+    lines = [];
+  }
+  // Nothing found is not remembered: the next tap may have a connection.
+  if (lines.length) facts.set(key, lines);
+  return lines;
+}
+
 /**
  * Which letter a letter-hint gives away: the same order every time for a
- * given word, so taking the second hint never repeats the first, and
- * positions the board has already turned green are skipped as worthless.
+ * given word, so taking the second never repeats the first, and positions
+ * the board has already turned green are skipped as worthless.
  */
 function letterHint(word, taken, greens = []) {
   const order = [2, 4, 0, 3, 1];   // middle first: the least guessable places
@@ -249,7 +319,7 @@ function letterHint(word, taken, greens = []) {
   const at = (free.length ? free : order.filter((i) => !taken.has(i)))[0];
   if (at == null) return null;
   taken.add(at);
-  return { at, text: t('wikdleHintLetter', { n: at + 1, of: COLUMNS, letter: String(word[at]).toUpperCase() }) };
+  return { at, kind: 'letter', text: t('wikdleHintLetter', { n: at + 1, of: COLUMNS, letter: String(word[at]).toUpperCase() }) };
 }
 
 /** The positions a board's letter hints have already given away. */
@@ -258,27 +328,16 @@ const hintedPositions = (hints) => new Set((hints ?? [])
   .filter((at) => Number.isInteger(at)));
 
 /**
- * A hint for the day's word. The first is a letter; the second is the
- * meaning when Wikipedia has one worth reading, and another letter when it
- * does not. Never resolves to nothing: a hint always tells you something.
+ * A hint for the day's word: the encyclopaedia's, while it has something
+ * unsaid and the board has not taken its two; then a letter. Never resolves
+ * to nothing while a letter is left: a hint always tells you something.
  */
-export async function fetchHint(word, n, { greens = [], hints = [] } = {}) {
+export async function fetchHint(word, n, { greens = [], hints = [], lang = 'en' } = {}) {
   const taken = hintedPositions(hints);
-  if (n === 0) return letterHint(word, taken, greens);
-  const meaning = await wikipediaMeaning(word);
-  if (meaning) return { text: meaning };
-  return letterHint(word, taken, greens);
-}
-
-/** The word's own article, when it has one worth quoting. */
-async function wikipediaMeaning(word) {
-  try {
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(word)}`, { headers: { accept: 'application/json' } });
-    if (!res.ok) return null;
-    return usefulMeaning(await res.json(), word);
-  } catch {
-    return null;
-  }
+  const said = new Set((hints ?? []).map(hintText));
+  const fromArticle = n < 2 ? (await articleFacts(word, lang)).find((line) => !said.has(line.text)) : null;
+  if (fromArticle) return fromArticle;
+  return letterHint(word, taken, greens) ?? (await articleFacts(word, lang)).find((line) => !said.has(line.text)) ?? null;
 }
 
 /** Record a hint taken on today's board, so it is charged once and shown again after a relaunch. */
@@ -293,7 +352,7 @@ export function takeHint(game, hint) {
 export const hintText = (hint) => (typeof hint === 'string' ? hint : String(hint?.text ?? ''));
 
 /** The Wikipedia article of the day's word, to read once the board is done. */
-export const articleUrl = (word) => `https://en.wikipedia.org/wiki/${encodeURIComponent(word)}`;
+export const articleUrl = (word, lang = 'en') => `https://${langFor(lang)}.wikipedia.org/wiki/${encodeURIComponent(word)}`;
 
 /**
  * What a finished board is worth: more for fewer rows, less for each hint,

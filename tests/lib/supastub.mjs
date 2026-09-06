@@ -39,7 +39,12 @@ export const newDatabase = () => ({
  *                  social columns on profiles, and no messages/deliveries/
  *                  trades tables at all. The app must stay usable on this.
  */
-export function installSupabase(page, { log = null, db = newDatabase(), schema = 'v2' } = {}) {
+/*
+ * Async on purpose: the WebSocket route below is an init script, and an init
+ * script added after the page has navigated is one the page never ran, so a
+ * suite awaits this before its first goto.
+ */
+export async function installSupabase(page, { log = null, db = newDatabase(), schema = 'v2' } = {}) {
   const uuid = () => `00000000-0000-4000-8000-${String(++db.seq).padStart(12, '0')}`;
 
   const note = (method, url) => { if (log) log.push(`${method} ${url.replace(SUPA_URL, '')}`); };
@@ -123,6 +128,135 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
     f.status === 'accepted' &&
     ((f.requester === a && f.addressee === b) || (f.requester === b && f.addressee === a)));
 
+  // --- Realtime -------------------------------------------------------------
+  //
+  // A Phoenix socket the way Supabase Realtime answers one, over Playwright's
+  // mocked WebSocket: joins with their postgres_changes bindings, presence
+  // tracked per topic, user broadcasts relayed to the rest of the topic, and
+  // the heartbeat answered so the client never gives up on it. Every REST
+  // write above that a player may hear about calls db.emitChange(), which is
+  // what stands in for the publication: a row reaches a socket only when its
+  // binding matches and its user could have read the row.
+  db.realtime ??= { sockets: new Set(), refs: 0 };
+  const rt = db.realtime;
+  const canSee = (user, table, row) => {
+    if (!user || !row) return false;
+    if (table === 'messages' || table === 'deliveries') return row.sender === user || row.recipient === user;
+    if (table === 'friendships') return row.requester === user || row.addressee === user;
+    if (table === 'trades') return row.proposer === user || row.recipient === user;
+    return true;   // the board is public
+  };
+  const bindingMatches = (binding, table, type, row) => {
+    if (binding.table !== table) return false;
+    if (binding.event !== '*' && binding.event !== type) return false;
+    const m = /^(\w+)=eq\.(.+)$/.exec(binding.filter ?? '');
+    return !m || String(row?.[m[1]]) === m[2];
+  };
+  const push = (sock, msg) => { try { sock.ws.send(JSON.stringify(msg)); } catch { /* closed */ } };
+  db.emitChange = (table, type, record, old = null) => {
+    const row = type === 'DELETE' ? old : record;
+    for (const sock of rt.sockets) {
+      for (const [topic, join] of sock.joins) {
+        const ids = join.bindings.filter((b) => bindingMatches(b, table, type, row) && canSee(sock.user, table, row)).map((b) => b.id);
+        if (!ids.length) continue;
+        push(sock, [null, null, topic, 'postgres_changes', { ids, data: {
+          type, schema: 'public', table, commit_timestamp: new Date().toISOString(), columns: [],
+          record: type === 'DELETE' ? {} : record, old_record: old ?? {}, errors: null
+        } }]);
+      }
+    }
+  };
+  const presenceState = (topic) => {
+    const state = {};
+    for (const sock of rt.sockets) {
+      const join = sock.joins.get(topic);
+      if (join?.tracked) (state[join.presenceKey] ??= { metas: [] }).metas.push({ phx_ref: join.tracked.ref, ...join.tracked.meta });
+    }
+    return state;
+  };
+  const presenceDiff = (topic, joins, leaves) => {
+    for (const sock of rt.sockets) if (sock.joins.has(topic)) push(sock, [null, null, topic, 'presence_diff', { joins, leaves }]);
+  };
+  const untrack = (sock, topic) => {
+    const join = sock.joins.get(topic);
+    if (!join?.tracked) return;
+    const was = join.tracked;
+    join.tracked = null;
+    presenceDiff(topic, {}, { [join.presenceKey]: { metas: [{ phx_ref: was.ref, ...was.meta }] } });
+  };
+  const leaveTopic = (sock, topic) => { untrack(sock, topic); sock.joins.delete(topic); };
+  const decodeBinaryPush = (buf) => {
+    // kind 3: [3, joinRefLen, refLen, topicLen, eventLen, metaLen, encoding] + fields + payload
+    if (buf[0] !== 3) return null;
+    const lens = [buf[1], buf[2], buf[3], buf[4], buf[5]];
+    const encoding = buf[6];
+    let at = 7;
+    const take = (n) => { const out = buf.subarray(at, at + n).toString('utf8'); at += n; return out; };
+    const [joinRef, ref, topic, event, meta] = lens.map(take);
+    const rest = buf.subarray(at);
+    const payload = encoding === 1 ? JSON.parse(rest.toString('utf8') || 'null') : rest;
+    return { joinRef, ref, topic, event, meta: meta ? JSON.parse(meta) : null, payload };
+  };
+  const onSocketMessage = (sock, raw) => {
+    if (typeof raw !== 'string') {
+      const msg = decodeBinaryPush(Buffer.from(raw));
+      if (!msg) return;
+      for (const other of rt.sockets) {
+        if (other === sock || !other.joins.has(msg.topic)) continue;
+        push(other, [null, null, msg.topic, 'broadcast', { type: 'broadcast', event: msg.event, payload: msg.payload }]);
+      }
+      push(sock, [msg.joinRef || null, msg.ref || null, msg.topic, 'phx_reply', { status: 'ok', response: {} }]);
+      return;
+    }
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch { return; }
+    const [joinRef, ref, topic, event, payload] = parsed;
+    const reply = (response = {}) => push(sock, [joinRef ?? null, ref ?? null, topic, 'phx_reply', { status: 'ok', response }]);
+    if (topic === 'phoenix' && event === 'heartbeat') return reply();
+    if (event === 'phx_join') {
+      const token = payload?.access_token;
+      if (token) sock.user = db.tokens.get(token) ?? sock.user;
+      const bindings = (payload?.config?.postgres_changes ?? []).map((b) => ({ ...b, id: ++rt.refs }));
+      sock.joins.set(topic, { joinRef, bindings, presenceKey: payload?.config?.presence?.key ?? String(++rt.refs), tracked: null });
+      reply({ postgres_changes: bindings.map((b) => ({ id: b.id, event: b.event, schema: b.schema, table: b.table, filter: b.filter })) });
+      if (payload?.config?.presence?.enabled) push(sock, [null, null, topic, 'presence_state', presenceState(topic)]);
+      return;
+    }
+    if (event === 'phx_leave') { leaveTopic(sock, topic); return reply(); }
+    if (event === 'access_token') { if (payload?.access_token) sock.user = db.tokens.get(payload.access_token) ?? sock.user; return reply(); }
+    if (event === 'presence') {
+      const join = sock.joins.get(topic);
+      if (!join) return reply();
+      if (payload?.event === 'track') {
+        untrack(sock, topic);
+        join.tracked = { ref: String(++rt.refs), meta: payload.payload ?? {} };
+        reply();
+        presenceDiff(topic, { [join.presenceKey]: { metas: [{ phx_ref: join.tracked.ref, ...join.tracked.meta }] } }, {});
+      } else {
+        untrack(sock, topic);
+        reply();
+      }
+      return;
+    }
+    if (event === 'broadcast') {
+      for (const other of rt.sockets) {
+        if (other === sock || !other.joins.has(topic)) continue;
+        push(other, [null, null, topic, 'broadcast', payload]);
+      }
+      return reply();
+    }
+    reply();
+  };
+  await page.routeWebSocket(/stub\.supabase\.co\/realtime\/v1\/websocket/, (ws) => {
+    const sock = { ws, user: null, joins: new Map() };
+    rt.sockets.add(sock);
+    ws.onMessage((raw) => onSocketMessage(sock, raw));
+    ws.onClose(() => {
+      for (const topic of [...sock.joins.keys()]) leaveTopic(sock, topic);
+      rt.sockets.delete(sock);
+    });
+  });
+
   // --- GoTrue ---------------------------------------------------------------
   page.route(`${SUPA_URL}/auth/v1/**`, async (route) => {
     const request = route.request();
@@ -181,29 +315,46 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
       return json(route, !taken);
     }
     /* -- the leaderboard: scores seeded by the test as db.scores = [{ user_id, username, score }] -- */
+    // The windows as the trigger keeps them: one total per player over every
+    // score row, ranked. A test may seed db.scores = [{ user_id, username, score }].
+    const board = () => {
+      const totals = new Map();
+      for (const r of db.scores ?? []) {
+        const row = totals.get(r.user_id) ?? { user_id: r.user_id, username: r.username, score: 0 };
+        row.score += r.score;
+        totals.set(r.user_id, row);
+      }
+      return [...totals.values()].sort((a, b) => b.score - a.score);
+    };
     if (path === 'rpc/leaderboard_page') {
-      const all = [...(db.scores ?? [])].sort((a, b) => b.score - a.score);
+      const all = board();
       const page = Number(body.p_page) || 0;
       return json(route, all.slice(page * 20, page * 20 + 20).map((r, i) => ({ rank: page * 20 + i + 1, user_id: r.user_id, username: r.username, score: r.score })));
     }
     if (path === 'rpc/submit_score') {
-      // The server's rule: one row per game and day, a duel or reveal round
-      // replacing the day's when it beats it, never above the game's maximum.
-      const max = { wikdle: 1400, duel: 3100, reveal: 1600 }[body.p_game];
+      // The server's rule: one row per game and day; a round replaces the
+      // day's when it beats it (Wikdle counts once), never above the game's
+      // maximum; the windows move by the difference.
+      const max = { wikdle: 1400, duel: 3100, reveal: 1600, slots: 20000, quiz: 1000 }[body.p_game];
       if (!max) return fail(route, 'this game is not scored by the client', 400);
       if (body.p_points < 0 || body.p_points > max) return fail(route, 'points out of range', 400);
       db.scores ??= [];
-      const at = db.scores.findIndex((r) => r.user_id === me && r.game === body.p_game && r.day === body.p_day);
-      if (at >= 0) {
-        if (body.p_game === 'wikdle' || body.p_points <= db.scores[at].score) return json(route, null, 204);
-        db.scores.splice(at, 1);
-      }
       const username = db.profiles.get(me)?.username ?? 'someone';
-      db.scores.push({ user_id: me, username, game: body.p_game, day: body.p_day, score: body.p_points });
+      const found = db.scores.find((r) => r.user_id === me && r.game === body.p_game && r.day === body.p_day);
+      if (found) {
+        if (body.p_game === 'wikdle' || body.p_points <= found.score) return json(route, null, 204);
+        found.score = body.p_points;
+      } else {
+        db.scores.push({ user_id: me, username, game: body.p_game, day: body.p_day, score: body.p_points });
+      }
+      const mine = board().find((r) => r.user_id === me);
+      for (const table of ['leaderboard_daily', 'leaderboard_weekly', 'leaderboard_alltime']) {
+        db.emitChange?.(table, 'UPDATE', { user_id: me, score: mine?.score ?? 0, updated_at: new Date().toISOString() });
+      }
       return json(route, null, 204);
     }
     if (path === 'rpc/my_rank') {
-      const all = [...(db.scores ?? [])].sort((a, b) => b.score - a.score);
+      const all = board();
       const at = all.findIndex((r) => r.user_id === me);
       return json(route, at < 0 ? [] : [{ rank: at + 1, score: all[at].score, total: all.length }]);
     }
@@ -221,10 +372,12 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
 
     /* -- the market: same rules as the definer functions in schema.sql -- */
     const auctionFloor = (a) => (a.current_bid == null ? a.start_price : Math.ceil(a.current_bid * 1.15));
-    const postParcel = (sender, recipient, kind, payload) => db.deliveries.push({
-      id: uuid(), sender, recipient, kind, payload,
-      created_at: new Date().toISOString(), claimed_at: null
-    });
+    const postParcel = (sender, recipient, kind, payload) => {
+      const row = { id: uuid(), sender, recipient, kind, payload, created_at: new Date().toISOString(), claimed_at: null };
+      db.deliveries.push(row);
+      db.emitChange('deliveries', 'INSERT', row);
+      return row;
+    };
     if (path === 'rpc/create_auction') {
       if (schema === 'v1') return fail(route, 'function public.create_auction does not exist', 404);
       const minutes = Number(body.minutes);
@@ -491,6 +644,7 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
         }
         const row = { id: uuid(), status: 'pending', created_at: new Date().toISOString(), ...body };
         db.friendships.push(row);
+        db.emitChange('friendships', 'INSERT', row);
         return rows(route, [row], 201);
       }
       if (method === 'PATCH') {
@@ -498,7 +652,9 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
         const row = db.friendships.find((f) => f.id === id);
         // Only the addressee may accept.
         if (!row || row.addressee !== me) return fail(route, 'row-level security policy', 403);
+        const before = { ...row };
         Object.assign(row, body);
+        db.emitChange('friendships', 'UPDATE', row, before);
         return rows(route, [row]);
       }
       if (method === 'DELETE') {
@@ -509,6 +665,7 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
           return fail(route, 'row-level security policy', 403);
         }
         const [gone] = db.friendships.splice(at, 1);
+        db.emitChange('friendships', 'DELETE', null, gone);
         return rows(route, [gone]);
       }
     }
@@ -541,6 +698,7 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
         if (!areFriends(body.sender, body.recipient)) return fail(route, 'row-level security policy', 403);
         const row = { id: uuid(), read_at: null, created_at: new Date().toISOString(), ...body };
         db.messages.push(row);
+        db.emitChange('messages', 'INSERT', row);
         return rows(route, [row], 201);
       }
       if (method === 'PATCH') {
@@ -552,8 +710,10 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
           if (m.recipient !== me) continue;
           if (sender && m.sender !== sender) continue;
           if (params.get('read_at') === 'is.null' && m.read_at) continue;
+          const before = { ...m };
           Object.assign(m, body);
           changed.push(m);
+          db.emitChange('messages', 'UPDATE', m, before);
         }
         return rows(route, changed);
       }
@@ -576,6 +736,7 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
         }
         const row = { id: uuid(), claimed_at: null, created_at: new Date().toISOString(), ...body };
         db.deliveries.push(row);
+        db.emitChange('deliveries', 'INSERT', row);
         return rows(route, [row], 201);
       }
       if (method === 'PATCH') {
@@ -604,6 +765,7 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
         const row = { id: uuid(), status: 'pending', resolved_at: null,
           created_at: new Date().toISOString(), ...body };
         db.trades.push(row);
+        db.emitChange('trades', 'INSERT', row);
         return rows(route, [row], 201);
       }
       if (method === 'PATCH') {
@@ -612,7 +774,9 @@ export function installSupabase(page, { log = null, db = newDatabase(), schema =
         if (!row || (row.proposer !== me && row.recipient !== me)) {
           return fail(route, 'row-level security policy', 403);
         }
+        const before = { ...row };
         Object.assign(row, body);
+        db.emitChange('trades', 'UPDATE', row, before);
         return rows(route, [row]);
       }
     }

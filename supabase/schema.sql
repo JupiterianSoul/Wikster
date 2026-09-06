@@ -990,3 +990,87 @@ alter table public.quests enable row level security;
 drop policy if exists "your quests are yours to read" on public.quests;
 create policy "your quests are yours to read"
   on public.quests for select to authenticated using (auth.uid() = user_id);
+
+-- ============================================================================
+-- V7 - THE LIVE WIRES, AND A BOARD THAT COUNTS EVERY GAME
+-- ----------------------------------------------------------------------------
+-- The app used to find out about a message, a request, a gift or a trade by
+-- asking once a minute. It now listens: the social tables join the Realtime
+-- publication, and the rows a player may read (their row-level rules apply
+-- to the stream as they do to a query) reach them the moment they are
+-- written. Friendships keep their whole row on delete so a removal still
+-- names who it was about. The board's three windows are published too, so a
+-- leaderboard on screen moves as scores land.
+--
+-- submit_score gains the quiz and the slot machine, and no longer inflates a
+-- window when a day's best is beaten: the row is updated in place and the
+-- windows take the difference, instead of a delete that subtracted nothing
+-- followed by an insert that added everything again.
+-- ============================================================================
+
+do $$ begin
+  alter publication supabase_realtime add table public.messages;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.deliveries;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.friendships;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.trades;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.leaderboard_daily;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.leaderboard_weekly;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.leaderboard_alltime;
+exception when others then null; end $$;
+alter table public.friendships replica identity full;
+
+alter table public.scores drop constraint if exists scores_game_check;
+alter table public.scores add constraint scores_game_check
+  check (game in ('slots', 'roulette', 'wikdle', 'quest', 'duel', 'reveal', 'quiz'));
+
+-- A beaten best moves the windows by the difference.
+create or replace function public.scores_windows_delta()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare d integer := new.points - old.points;
+begin
+  if d = 0 then return new; end if;
+  update leaderboard_daily   set score = greatest(0, score + d), updated_at = now() where user_id = new.user_id;
+  update leaderboard_weekly  set score = greatest(0, score + d), updated_at = now() where user_id = new.user_id;
+  update leaderboard_alltime set score = greatest(0, score + d), updated_at = now() where user_id = new.user_id;
+  return new;
+end $$;
+drop trigger if exists scores_windows_delta on public.scores;
+create trigger scores_windows_delta after update of points on public.scores
+  for each row execute function public.scores_windows_delta();
+
+create or replace function public.submit_score(p_game text, p_points integer, p_day text)
+returns void language plpgsql security definer set search_path = public as $$
+declare
+  v_max integer;
+  v_existing integer;
+begin
+  if auth.uid() is null then raise exception 'sign in'; end if;
+  v_max := case p_game
+    when 'wikdle' then 1400 when 'duel' then 3100 when 'reveal' then 1600
+    when 'slots' then 20000 when 'quiz' then 1000 else null end;
+  if v_max is null then raise exception 'this game is not scored by the client'; end if;
+  if p_points < 0 or p_points > v_max then raise exception 'points out of range'; end if;
+  select points into v_existing from scores
+    where user_id = auth.uid() and game = p_game and detail->>'day' = p_day
+    limit 1;
+  if v_existing is not null then
+    if p_game = 'wikdle' or p_points <= v_existing then return; end if;
+    update scores set points = p_points, at = now()
+      where user_id = auth.uid() and game = p_game and detail->>'day' = p_day;
+    return;
+  end if;
+  insert into scores (user_id, game, points, detail) values (auth.uid(), p_game, p_points, jsonb_build_object('day', p_day));
+end $$;
+grant execute on function public.submit_score(text, integer, text) to authenticated;

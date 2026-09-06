@@ -15,6 +15,8 @@ import { gameStage, houseError, questUserKey } from './arcade.js';
 import { el, esc, money, refreshWallet, state, toast } from './core.js';
 import { paintDrawerLinks } from './drawer.js';
 import { showGate, signedIn, userId } from './gate.js';
+import * as account from '../account.js';
+import { on } from '../ui/bus.js';
 import { gainBooster, spawnBurst } from './open.js';
 
 /* --- quests --------------------------------------------------------------------------------- */
@@ -160,19 +162,59 @@ export function renderLeaderboard() {
     });
   }
   leaderboardSeg.select?.(view.window, { silent: true });
+  // Always from the top: a board left on its third page would otherwise come
+  // back with that page stacked under stale rows.
+  view.page = 0;
+  view.rows = [];
+  watchBoard();
   loadLeaderboard();
 }
 
-export async function loadLeaderboard() {
+/*
+ * The board moves while it is being looked at: a score of mine that just
+ * landed, or anyone else's, repaints it. The feed is opened with the screen
+ * and closed when the screen is left (the clock below notices), and a
+ * repaint never comes more than once a second.
+ */
+let boardFeed = null;
+let boardRepaint = null;
+const boardMoved = () => {
+  if (state.tab !== 'leaderboard') return;
+  clearTimeout(boardRepaint);
+  boardRepaint = setTimeout(() => {
+    if (state.tab !== 'leaderboard') return;
+    state.leaderboardView.page = 0;
+    loadLeaderboard({ quiet: true });
+  }, 400);
+};
+function watchBoard() {
+  if (boardFeed || !signedIn()) return;
+  boardFeed = account.openBoardFeed(boardMoved);
+}
+function unwatchBoard() {
+  boardFeed?.close();
+  boardFeed = null;
+  clearTimeout(boardRepaint);
+}
+on('score', boardMoved);
+
+export async function loadLeaderboard({ quiet = false } = {}) {
   const view = state.leaderboardView;
   const body = el.leaderboardBody;
-  el.leaderboardMe.hidden = true;
-  el.screens.leaderboard?.classList.remove('has-pin');
   if (!signedIn()) {
+    el.leaderboardMe.hidden = true;
+    el.screens.leaderboard?.classList.remove('has-pin');
     body.replaceChildren(gameStage('podium', t('lbSignIn'), { label: t('gateSignIn'), run: () => showGate() }));
     return;
   }
-  if (view.page === 0) body.replaceChildren(gameStage('podium', t('lbLoading')));
+  // A score of mine still in the queue goes up before the board is read, so
+  // what comes back is never a board without me on it.
+  await leaderboard.flushScores().catch(() => {});
+  if (view.page === 0 && !quiet) {
+    el.leaderboardMe.hidden = true;
+    el.screens.leaderboard?.classList.remove('has-pin');
+    body.replaceChildren(gameStage('podium', t('lbLoading')));
+  }
   let page, mine = null;
   try {
     [page, mine] = await Promise.all([leaderboard.fetchPage(view.window, view.page), leaderboard.fetchMyRank(view.window).catch(() => null)]);
@@ -236,7 +278,7 @@ export async function loadLeaderboard() {
   paintReset();
   clearInterval(state.lbTimer);
   state.lbTimer = setInterval(() => {
-    if (state.tab !== 'leaderboard') { clearInterval(state.lbTimer); return; }
+    if (state.tab !== 'leaderboard') { clearInterval(state.lbTimer); unwatchBoard(); return; }
     paintReset();
   }, 1000);
   list.appendChild(reset);

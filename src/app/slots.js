@@ -11,6 +11,7 @@ import { formatAmount } from '../pricing.js';
 import { gameStage, houseError, reportQuest } from './arcade.js';
 import { el, esc, money, refreshWallet, state, toast, wait } from './core.js';
 import { showGate, signedIn } from './gate.js';
+import * as leaderboard from '../leaderboard.js';
 
 /* --- the slot machine ----------------------------------------------------------------------- */
 
@@ -402,7 +403,10 @@ export function renderSlots() {
       say(t('slotsWon', { amount: formatAmount(spun.grand) }), bonusTier ?? tier);
       if (paid > 0) await showBanner(bonusTier === 'jackpot' || bonusTier === 'mega' ? 'mega' : 'big', { title: t('slotsBonusDone'), sub: formatAmount(paid) }, 1500);
     }
-    if (spun.grand > 0) reportQuest('points', { amount: Math.round(spun.grand), game: 'slots' });
+    if (spun.grand > 0) {
+      reportQuest('points', { amount: Math.round(spun.grand), game: 'slots' });
+      if (signedIn()) leaderboard.submitScore('slots', Math.round(spun.grand)).catch(() => { /* queued for later */ });
+    }
     await wait(300);
     machine.phase = 'idle';
     paintBets();

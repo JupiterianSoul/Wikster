@@ -7,6 +7,7 @@
  * the bottom of the screen when it is not on the page being looked at.
  */
 import { supabase } from './account.js';
+import { emit } from './ui/bus.js';
 
 export const WINDOWS = ['daily', 'weekly', 'alltime'];
 export const PAGE_SIZE = 20;
@@ -39,16 +40,75 @@ export async function fetchMyRank(window = 'daily') {
   return { rank: Number(row.rank), score: Number(row.score) || 0, total: Number(row.total) || 0 };
 }
 
-/**
- * A game scored on the device sends its points for the day: Wikdle once, a
- * duel or a reveal round whenever it beats the day's best. The server keeps
- * one row per game and day and refuses points above the game's maximum.
+/** The most a game can send for one day; the server holds the same table. */
+export const GAME_MAX = { wikdle: 1400, duel: 3100, reveal: 1600, slots: 20000, quiz: 1000 };
+
+/** The day a score belongs to, in the server's clock. */
+export const utcDay = (now = Date.now()) => new Date(now).toISOString().slice(0, 10);
+
+/*
+ * A score that could not be sent is not a score that was lost. Every
+ * submission is written to a queue first and removed when the server has
+ * it; a refusal the server means (out of range, an unknown game) drops it,
+ * anything else - no network, a timeout, a tunnel that closed - keeps it for
+ * the next flush, which happens on resume, on reconnect and before the board
+ * is read.
  */
-export async function submitScore(game, points, day) {
-  if (!supabase) throw new Error('CLOSED');
-  const { error } = await withTimeout(supabase.rpc('submit_score', { p_game: game, p_points: points, p_day: day }));
+const QUEUE_KEY = 'wikster.scores.queue.v1';
+const readQueue = () => { try { const q = JSON.parse(localStorage.getItem(QUEUE_KEY) ?? '[]'); return Array.isArray(q) ? q : []; } catch { return []; } };
+const writeQueue = (q) => { try { if (q.length) localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); else localStorage.removeItem(QUEUE_KEY); } catch { /* storage unavailable */ } };
+const REFUSED = /out of range|not scored|sign in/i;
+let flushing = null;
+
+async function send(entry) {
+  const { error } = await withTimeout(supabase.rpc('submit_score', { p_game: entry.game, p_points: entry.points, p_day: entry.day }));
   if (error) throw new Error(error.message);
 }
+
+/** Sends whatever is waiting, oldest first, and stops at the first failure
+ *  that is not a refusal. Resolves to how many landed. */
+export async function flushScores() {
+  if (!supabase) return 0;
+  if (flushing) return flushing;
+  flushing = (async () => {
+    let landed = 0;
+    let queue = readQueue();
+    while (queue.length) {
+      const entry = queue[0];
+      try {
+        await send(entry);
+        landed += 1;
+      } catch (error) {
+        if (!REFUSED.test(String(error?.message ?? ''))) break;
+      }
+      queue = queue.slice(1);
+      writeQueue(queue);
+    }
+    if (landed) emit('score', { landed });
+    return landed;
+  })();
+  try { return await flushing; } finally { flushing = null; }
+}
+
+/**
+ * A game scored on the device sends its points for the day: Wikdle once, a
+ * duel, a reveal, a quiz or a spin whenever it beats the day's best. The
+ * server keeps one row per game and day and refuses points above the game's
+ * maximum. Queued first, so a score survives a dead network.
+ */
+export async function submitScore(game, points, day = utcDay()) {
+  const max = GAME_MAX[game];
+  if (!max) throw new Error('this game is not scored by the client');
+  const clean = Math.max(0, Math.min(max, Math.round(Number(points) || 0)));
+  if (clean <= 0) return;
+  writeQueue([...readQueue(), { game, points: clean, day, at: Date.now() }]);
+  if (!supabase) throw new Error('CLOSED');
+  await flushScores();
+  if (readQueue().some((e) => e.game === game && e.day === day && e.points === clean)) throw new Error('QUEUED');
+}
+
+/** How many scores are still waiting to be sent. */
+export const pendingScores = () => readQueue().length;
 
 export const submitWikdle = (points, day) => submitScore('wikdle', points, day);
 

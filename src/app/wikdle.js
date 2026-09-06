@@ -1,6 +1,6 @@
 /* wikdle: split out of main.js */
 
-import { t } from '../i18n.js';
+import { getLanguage, t } from '../i18n.js';
 import { iconSvg } from '../data/icons.js';
 import * as wikdle from '../wikdle.js';
 import { press } from '../ui/components.js';
@@ -16,7 +16,11 @@ import { gainBooster } from './open.js';
 
 /* --- Wikdle ------------------------------------------------------------------------------ */
 
-export const KEYBOARD_ROWS = ['qwertyuiop', 'asdfghjkl', '⏎zxcvbnm⌫'];
+/** The keys, laid out the way the language's keyboards are. */
+export const KEYBOARD_ROWS = {
+  en: ['qwertyuiop', 'asdfghjkl', '⏎zxcvbnm⌫'],
+  fr: ['azertyuiop', 'qsdfghjklm', '⏎wxcvbn⌫']
+};
 /** Paper confetti over a node: a short burst from its middle, falling and tumbling. */
 
 export function confettiOver(node, count = 90) {
@@ -58,10 +62,13 @@ export function confettiOver(node, count = 90) {
 }
 
 export async function renderWikdle() {
-  await wikdle.loadWords();
+  // The board is in the app's language: a French app plays French words,
+  // checked against a French dictionary, and reads a French article after.
+  const lang = wikdle.langFor(getLanguage());
+  await wikdle.loadWords(lang);
   el.wikdleTitle.textContent = t('wikdleTitle');
   el.wikdleBack.innerHTML = iconSvg('chevronLeft', { size: 18 });
-  let game = wikdle.loadGame();
+  let game = wikdle.loadGame(wikdle.utcDay(), lang);
   let typed = '';
   const body = el.wikdleBody;
   const wrap = document.createElement('div');
@@ -127,7 +134,7 @@ export async function renderWikdle() {
 
   const paintKeys = () => {
     const marks = wikdle.keyMarks(game.rows);
-    keys.replaceChildren(...KEYBOARD_ROWS.map((letters) => {
+    keys.replaceChildren(...(KEYBOARD_ROWS[game.lang] ?? KEYBOARD_ROWS.en).map((letters) => {
       const row = document.createElement('div');
       row.className = 'wikdle-keyrow';
       for (const ch of letters) {
@@ -152,11 +159,11 @@ export async function renderWikdle() {
     const used = game.hints ?? [];
     hintsPill.textContent = t('wikdleHintsLeft', { n: Math.max(0, wikdle.HINTS_MAX - used.length) });
     hints.replaceChildren(...used.map((hint) => {
-      const letter = Number.isInteger(hint?.at);
+      const kind = Number.isInteger(hint?.at) ? 'letter' : (hint?.kind === 'sentence' ? 'sentence' : 'about');
       const line = document.createElement('p');
       line.className = 'wikdle-hint';
-      line.innerHTML = `<span class="wikdle-hint-icon">${iconSvg('bulb', { size: 15 })}</span><b></b><span></span>`;
-      line.querySelector('b').textContent = letter ? t('wikdleHintLetterLabel') : t('wikdleHintMeaning');
+      line.innerHTML = `<span class="wikdle-hint-icon">${iconSvg(kind === 'letter' ? 'bulb' : 'book', { size: 15 })}</span><b></b><span></span>`;
+      line.querySelector('b').textContent = t(kind === 'letter' ? 'wikdleHintLetterLabel' : kind === 'sentence' ? 'wikdleHintSentence' : 'wikdleHintMeaning');
       line.querySelector('span:last-child').textContent = wikdle.hintText(hint);
       return line;
     }));
@@ -176,8 +183,8 @@ export async function renderWikdle() {
         // hint, so the hint skips them.
         const greens = new Set();
         for (const row of game.rows ?? []) row.marks?.forEach((m, i) => { if (m === 'hit') greens.add(i); });
-        const hint = await wikdle.fetchHint(wikdle.wordForDay(game.day), used.length,
-          { greens: [...greens], hints: used });
+        const hint = await wikdle.fetchHint(wikdle.wordForDay(game.day, game.lang), used.length,
+          { greens: [...greens], hints: used, lang: game.lang });
         if (game.status !== 'playing') return;
         if (!hint) { btn.disabled = false; btn.classList.remove('is-busy'); toast(esc(t('wikdleHintNone')), 'error'); synth.playDenied(); return; }
         game = wikdle.takeHint(game, hint);
@@ -197,7 +204,7 @@ export async function renderWikdle() {
     if (game.status === 'playing') { done.hidden = true; return; }
     const stats = wikdle.loadStats();
     const won = game.status === 'won';
-    const word = wikdle.wordForDay(game.day);
+    const word = wikdle.wordForDay(game.day, game.lang);
     const points = wikdle.wikdlePoints(game);
     const base = wikdle.basePoints(game);
     const hintsUsed = game.hints?.length ?? 0;
@@ -224,7 +231,7 @@ export async function renderWikdle() {
     done.querySelector('.wikdle-verdict b').textContent = won ? t('wikdleWon', { n: game.rows.length, points }) : t('wikdleLost');
     done.querySelector('.wikdle-answer span').textContent = t('wikdleAnswer', { word: word.toUpperCase() });
     const read = done.querySelector('.wikdle-read');
-    read.href = wikdle.articleUrl(word);
+    read.href = wikdle.articleUrl(word, game.lang);
     read.textContent = t('wikdleRead');
     const rows = done.querySelectorAll('.wikdle-breakdown > div');
     rows[0].querySelector('span').textContent = t('wikdlePointsBase', { n: game.rows.length });

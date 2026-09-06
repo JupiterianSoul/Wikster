@@ -32,7 +32,7 @@ async function open({ mobile = true } = {}) {
   const p = await ctx.newPage();
   p.on('pageerror', (e) => errs.push(String(e)));
   installStubs(p);
-  installSupabase(p, { db: shared });
+  await installSupabase(p, { db: shared });
   await p.addInitScript(({ entries }) => {
     localStorage.setItem('wikster.language', 'en');
     const now = Date.now();
