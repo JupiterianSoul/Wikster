@@ -13,6 +13,7 @@ import { frameTier } from '../frames.js';
 import { isSensitive } from '../sensitive.js';
 import { CURRENCY_NAME, formatAmount } from '../pricing.js';
 import { albumsDeep, buildAlbums } from '../albums.js';
+import { emit } from '../ui/bus.js';
 import { reportQuest } from './arcade.js';
 import { buildAlbumCover, classicSections, renderBinder } from './binder.js';
 import { el, esc, openSheet, refreshWallet, showScreen, state, toast } from './core.js';
@@ -128,6 +129,7 @@ export async function syncSocial() {
   await loadFriends();
   account.heartbeat(userId()).catch(() => {});
   try { await collectDeliveries(); } catch { /* next pass */ }
+  try { await syncGuildInvites(); } catch { /* next pass */ }
   try { state.social.unread = await account.unreadBySender(userId()); } catch { /* keep old */ }
   try {
     state.social.trades = await account.openTrades(userId());
@@ -137,6 +139,40 @@ export async function syncSocial() {
   if (state.tab === 'friends') renderFriends();
   if (state.tab === 'chat' && state.chat) refreshChat();
 }
+let invitesUnavailable = false;
+
+/**
+ * Guild invitations. They are not deliveries: an invitation is an offer, and
+ * the answer is the player's, so nothing is claimed here. All this does is
+ * carry the list to whoever is showing it, and tell the player once about
+ * each one it has never seen. The ids it has told them about are kept in the
+ * save, so a restart does not announce the same invitation twice.
+ */
+export async function syncGuildInvites() {
+  if (invitesUnavailable || state.guild) { state.social.guildInvites = []; return; }
+  let invites = [];
+  try { invites = await account.myGuildInvites(); } catch (error) {
+    // A project that has not run schema V9 has no invitations table. Ask
+    // once, then leave it alone until the app is started again.
+    if (String(error?.message) === 'SCHEMA') invitesUnavailable = true;
+    throw error;
+  }
+  state.social.guildInvites = invites;
+  const seen = state.profile.guildInviteSeen ?? [];
+  const fresh = invites.filter((invite) => !seen.includes(invite.id));
+  for (const invite of fresh) {
+    const line = t('notifGuildInvite', { name: invite.inviterName, guild: invite.name });
+    pushNote('shield', line, 'guilds');
+    if (shouldNotify()) systemNotify(t('notifTitle'), line, 'guilds');
+  }
+  const ids = invites.map((invite) => invite.id);
+  if (fresh.length || seen.length !== ids.length) {
+    state.profile.guildInviteSeen = ids;
+    store.saveProfile(state.profile);
+  }
+  emit('guild-invite', { invites });
+}
+
 /* --- the live wires ----------------------------------------------------------
  *
  * The heartbeat above finds out once a minute. These find out the moment it
@@ -145,7 +181,7 @@ export async function syncSocial() {
  * Both fall back to the heartbeat when the socket is not there.
  */
 
-export const liveSocial = { feed: null, presence: null, online: null, timer: null };
+export const liveSocial = { feed: null, presence: null, invites: null, online: null, timer: null };
 
 /** Whether this player asked to appear offline. */
 export const presenceHidden = () => state.account.profile?.presence === 'hidden';
@@ -191,13 +227,19 @@ export function startLiveSocial() {
   if (!signedIn() || !account.configured) return;
   liveSocial.feed = account.openSocialFeed(userId(), onSocialEvent);
   liveSocial.presence = account.openPresence(userId(), { hidden: presenceHidden() || document.visibilityState !== 'visible' }, onPresenceSync);
+  liveSocial.invites = account.openGuildInviteFeed(userId(), () => {
+    clearTimeout(liveSocial.timer);
+    liveSocial.timer = setTimeout(() => { syncSocial().catch(() => {}); }, 250);
+  });
 }
 
 export function stopLiveSocial() {
   liveSocial.feed?.close();
   liveSocial.presence?.close();
+  liveSocial.invites?.close();
   liveSocial.feed = null;
   liveSocial.presence = null;
+  liveSocial.invites = null;
   liveSocial.online = null;
   clearTimeout(liveSocial.timer);
 }

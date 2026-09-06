@@ -19,7 +19,7 @@ const withTimeout = (promise) => Promise.race([
 function named(error) {
   const text = String(error?.message ?? '');
   if (/does not exist|schema cache/i.test(text)) return new Error('SCHEMA');
-  const code = /ALREADY_IN_GUILD|NAME_TAKEN|TAG_TAKEN|GUILD_FULL|NOT_FOUND|sign in/.exec(text)?.[0];
+  const code = /ALREADY_IN_GUILD|NAME_TAKEN|TAG_TAKEN|GUILD_FULL|NOT_IN_GUILD|NOT_FRIEND|ALREADY_MEMBER|INVITE_GONE|NOT_OWNER|NOT_FOUND|sign in/.exec(text)?.[0];
   return new Error(code === 'sign in' ? 'CLOSED' : (code ?? text));
 }
 
@@ -54,6 +54,34 @@ export async function joinGuild(id) {
 
 export async function leaveGuild() {
   await call('leave_guild');
+}
+
+/** The founder closes the guild: roster, windows and invitations with it. */
+export async function deleteGuild() {
+  await call('delete_guild');
+}
+
+/** Ask a friend into my guild. Asking twice keeps the standing invitation. */
+export async function inviteToGuild(userId) {
+  await call('invite_to_guild', { p_user: userId });
+}
+
+/** Invitations waiting for me, newest first. */
+export async function myGuildInvites() {
+  const data = await call('my_guild_invites');
+  return (data ?? []).map((r) => ({
+    id: r.id, guildId: r.guild_id, name: r.name ?? '?', tag: r.tag ?? '', about: r.about ?? '',
+    members: Number(r.members) || 0, inviter: r.inviter, inviterName: r.inviter_name ?? '?', createdAt: r.created_at
+  }));
+}
+
+export async function acceptGuildInvite(id) {
+  const data = await call('accept_guild_invite', { p_invite: id });
+  return shape(Array.isArray(data) ? data[0] : data);
+}
+
+export async function declineGuildInvite(id) {
+  await call('decline_guild_invite', { p_invite: id });
 }
 
 export async function searchGuilds(term) {

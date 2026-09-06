@@ -363,7 +363,7 @@ export const HELP = {
   reveal:  { steps: 3, tip: true },
   quests:  { steps: 3, tip: true },
   leaderboard: { steps: 3, tip: true },
-  guilds:  { steps: 3, tip: true }
+  guilds:  { steps: 4, tip: true }
 };
 
 export function openHelp(topic) {

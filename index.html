@@ -450,13 +450,19 @@
               </div>
               <div class="guild-scores" id="guild-scores"></div>
               <div class="guild-actions">
+                <button id="guild-invite" class="btn btn-primary btn-sm" type="button"></button>
                 <button id="guild-leave" class="btn btn-ghost btn-sm" type="button"></button>
+                <button id="guild-delete" class="btn btn-ghost btn-sm" type="button" hidden></button>
               </div>
             </div>
             <div class="section-head"><h3 class="label" id="guild-roster-label"></h3></div>
             <div class="people" id="guild-roster"></div>
           </div>
           <div id="guild-join" class="guild-join" hidden>
+            <div id="guild-invites-room" hidden>
+              <div class="section-head"><h3 class="label" id="guild-invites-label"></h3></div>
+              <div class="people" id="guild-invites"></div>
+            </div>
             <form id="guild-find" class="find panel" autocomplete="off">
               <span class="find-mark" id="guild-find-mark" aria-hidden="true"></span>
               <input id="guild-find-input" class="find-input" type="search" spellcheck="false" enterkeyhint="search">

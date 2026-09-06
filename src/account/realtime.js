@@ -90,6 +90,27 @@ export function openPresence(selfId, { hidden = false } = {}, onSync) {
   };
 }
 
+/**
+ * Invitations posted to me. Its own channel on purpose: a project that has
+ * not run schema V9 has no guild_invites table, and a binding on a table
+ * that is not there fails the whole channel it sits in. Alone, it costs
+ * nothing but itself.
+ */
+export function openGuildInviteFeed(selfId, onInvite) {
+  if (!configured || !selfId) return { close() {} };
+  let channel = null;
+  try {
+    channel = supabase.channel(`guild-invites:${selfId}`);
+    channel.on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'guild_invites', filter: `invitee=eq.${selfId}` },
+      (payload) => { try { onInvite?.(payload.new ?? null); } catch { /* a listener's problem */ } });
+    channel.subscribe();
+  } catch {
+    channel = null;
+  }
+  return { close() { drop(channel); channel = null; } };
+}
+
 /** The three windows of the board moving under someone's score. */
 export function openBoardFeed(onChange) {
   if (!configured) return { close() {} };

@@ -516,12 +516,24 @@ the word's article on that language's Wikipedia.
 ### The clubhouse
 
 Guilds are a name, a tag and up to fifty players (`supabase/schema.sql`
-V8, `src/account/guilds.js`, `src/app/guilds.js`). A guild has three
+V8 and V9, `src/account/guilds.js`, `src/app/guilds.js`). A guild has three
 windows of its own, filled by the same trigger that fills a player's: every
 point scored lands on both at once, so there is nothing to sum and nothing
 to sync. Founding, joining and leaving are functions on the server; the
-last one out closes the guild. The guild leaderboard is painted by the same
-code as the players' (`boardNode` in `src/app/quests.js`) and moves live.
+last one out closes the guild, and the founder can close it outright with
+`delete_guild()`, which the roster, the windows and any standing invitation
+cascade from. The guild leaderboard is painted by the same code as the
+players' (`boardNode` in `src/app/quests.js`) and moves live.
+
+An invitation is an offer, not a membership: `invite_to_guild()` writes a
+row in `guild_invites` and `accept_guild_invite()` is where the room is
+checked for space and the guest for a guild of their own, so nothing that
+changed in between can be missed. It reaches the guest through its own
+Realtime channel (`openGuildInviteFeed` in `src/account/realtime.js`, alone
+so a project without V9 loses nothing else), and the minute heartbeat finds
+it when there is no socket. The screen and the bell read the same list, and
+the ids already announced are kept in the save so a restart does not ring
+twice for the same invitation.
 
 The showcase is up to three cards pinned on the profile: a copy of each,
 kept in the profile so it syncs, and published on the profile row so a

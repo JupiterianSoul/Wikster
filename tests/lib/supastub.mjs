@@ -31,6 +31,7 @@ export const newDatabase = () => ({
   kudos: [],                // { owner, key, sender, created_at }: hearts on a showcase
   guilds: [],               // { id, name, tag, about, owner, members, created_at }
   guildMembers: [],         // { user_id, guild_id, joined_at }
+  guildInvites: [],         // { id, guild_id, inviter, invitee, created_at }
   tokens: new Map(),        // access_token -> user id
   seq: 0
 });
@@ -147,6 +148,7 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
     if (table === 'messages' || table === 'deliveries') return row.sender === user || row.recipient === user;
     if (table === 'friendships') return row.requester === user || row.addressee === user;
     if (table === 'trades') return row.proposer === user || row.recipient === user;
+    if (table === 'guild_invites') return row.inviter === user || row.invitee === user;
     return true;   // the board is public
   };
   const bindingMatches = (binding, table, type, row) => {
@@ -409,12 +411,68 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
       db.guildMembers = db.guildMembers.filter((m) => m.user_id !== me);
       const left = db.guildMembers.filter((m) => m.guild_id === id);
       const row = db.guilds.find((g) => g.id === id);
-      if (!left.length) db.guilds = db.guilds.filter((g) => g.id !== id);
-      else {
+      if (!left.length) {
+        db.guilds = db.guilds.filter((g) => g.id !== id);
+        db.guildInvites = db.guildInvites.filter((i) => i.guild_id !== id);
+      } else {
         row.members = left.length;
         if (row.owner === me) row.owner = [...left].sort((a, b) => a.joined_at.localeCompare(b.joined_at))[0].user_id;
       }
       emitGuild(id);
+      return json(route, null, 204);
+    }
+    if (path === 'rpc/delete_guild') {
+      const id = guildOf(me);
+      if (!id) return fail(route, 'NOT_FOUND', 400);
+      const row = db.guilds.find((g) => g.id === id);
+      if (row?.owner !== me) return fail(route, 'NOT_OWNER', 400);
+      db.guilds = db.guilds.filter((g) => g.id !== id);
+      db.guildMembers = db.guildMembers.filter((m) => m.guild_id !== id);
+      db.guildInvites = db.guildInvites.filter((i) => i.guild_id !== id);
+      emitGuild(id);
+      return json(route, null, 204);
+    }
+    if (path === 'rpc/invite_to_guild') {
+      const id = guildOf(me);
+      const guest = body.p_user;
+      if (!guest || guest === me) return fail(route, 'NOT_FOUND', 400);
+      if (!id) return fail(route, 'NOT_IN_GUILD', 400);
+      const row = db.guilds.find((g) => g.id === id);
+      if (row.members >= 50) return fail(route, 'GUILD_FULL', 400);
+      if (!areFriends(me, guest)) return fail(route, 'NOT_FRIEND', 400);
+      if (guildOf(guest)) return fail(route, 'ALREADY_MEMBER', 400);
+      if (!db.guildInvites.some((i) => i.guild_id === id && i.invitee === guest)) {
+        const invite = { id: uuid(), guild_id: id, inviter: me, invitee: guest, created_at: new Date().toISOString() };
+        db.guildInvites.push(invite);
+        db.emitChange?.('guild_invites', 'INSERT', invite);
+      }
+      return json(route, null, 204);
+    }
+    if (path === 'rpc/my_guild_invites') {
+      return json(route, db.guildInvites.filter((i) => i.invitee === me).map((i) => {
+        const g = db.guilds.find((row) => row.id === i.guild_id);
+        return {
+          id: i.id, guild_id: i.guild_id, name: g?.name ?? '?', tag: g?.tag ?? '', about: g?.about ?? '',
+          members: g?.members ?? 0, inviter: i.inviter, inviter_name: db.profiles.get(i.inviter)?.username ?? '?',
+          created_at: i.created_at
+        };
+      }).sort((a, b) => b.created_at.localeCompare(a.created_at)));
+    }
+    if (path === 'rpc/accept_guild_invite') {
+      if (guildOf(me)) return fail(route, 'ALREADY_IN_GUILD', 400);
+      const invite = db.guildInvites.find((i) => i.id === body.p_invite && i.invitee === me);
+      if (!invite) return fail(route, 'INVITE_GONE', 400);
+      const row = db.guilds.find((g) => g.id === invite.guild_id);
+      if (!row) return fail(route, 'NOT_FOUND', 400);
+      if (row.members >= 50) return fail(route, 'GUILD_FULL', 400);
+      db.guildMembers.push({ user_id: me, guild_id: row.id, joined_at: new Date().toISOString() });
+      row.members += 1;
+      db.guildInvites = db.guildInvites.filter((i) => i.invitee !== me);
+      emitGuild(row.id);
+      return json(route, row);
+    }
+    if (path === 'rpc/decline_guild_invite') {
+      db.guildInvites = db.guildInvites.filter((i) => !(i.id === body.p_invite && i.invitee === me));
       return json(route, null, 204);
     }
     if (path === 'rpc/search_guilds') {

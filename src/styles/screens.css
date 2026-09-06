@@ -1742,6 +1742,8 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .pick-copy b { font-size: 0.86rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pick-copy span { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
 .pick-tick { flex: none; color: var(--accent); opacity: 0; }
+.pick-row.is-static { cursor: default; }
+.pick-end { flex: none; display: flex; align-items: center; gap: 6px; }
 .pick-row.is-on .pick-tick { opacity: 1; }
 
 .trade-line {
@@ -2557,7 +2559,8 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .guild-score b { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
 .guild-score span { font-size: 0.66rem; letter-spacing: var(--label-tracking); text-transform: uppercase; color: var(--ink-faint); }
 .guild-score small { font-size: 0.72rem; color: var(--ink-dim); }
-.guild-actions { display: flex; justify-content: flex-end; }
+.guild-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.guild-actions .btn { flex: none; }
 .guild-form { margin: 0 var(--gutter); padding: 16px; display: grid; gap: 12px; }
 .guild-row-tag { flex: none; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.08em; color: var(--accent); }
 .person-copy .guild-line { font-variant-numeric: tabular-nums; }

@@ -1334,3 +1334,116 @@ exception when others then null; end $$;
 do $$ begin
   alter publication supabase_realtime add table public.showcase_kudos;
 exception when others then null; end $$;
+
+-- ============================================================================
+-- V9 - CLOSING A GUILD, AND ASKING A FRIEND IN
+-- ----------------------------------------------------------------------------
+-- Two things a guild had no way to do. Closing: the founder takes the guild
+-- down, members, windows and pending invitations with it, instead of the
+-- roundabout of leaving until it empties. Inviting: any member asks a friend
+-- in, and the friend answers on their own screen. An invitation is an offer,
+-- never a membership: it is the accept that checks the room is still there,
+-- still has space, and that the guest is not already in one.
+-- ============================================================================
+
+create table if not exists public.guild_invites (
+  id         uuid primary key default gen_random_uuid(),
+  guild_id   uuid not null references public.guilds on delete cascade,
+  inviter    uuid not null references auth.users on delete cascade,
+  invitee    uuid not null references auth.users on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (guild_id, invitee),
+  check (inviter <> invitee)
+);
+create index if not exists guild_invites_invitee_idx on public.guild_invites (invitee, created_at desc);
+
+alter table public.guild_invites enable row level security;
+drop policy if exists "you see invitations to you or from your guild" on public.guild_invites;
+create policy "you see invitations to you or from your guild"
+  on public.guild_invites for select to authenticated
+  using (auth.uid() = invitee or auth.uid() = inviter
+    or exists (select 1 from guild_members m where m.user_id = auth.uid() and m.guild_id = guild_invites.guild_id));
+-- No write policies on purpose: invitations are posted, accepted and turned
+-- down through the functions below.
+
+-- A member asks a friend in. The guild must have room, the guest must be a
+-- friend and must not already be in a guild. Asking twice is not an error:
+-- the standing invitation simply keeps its place.
+create or replace function public.invite_to_guild(p_user uuid)
+returns void language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); g guilds;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  if p_user is null or p_user = me then raise exception 'NOT_FOUND'; end if;
+  select gu.* into g from guilds gu join guild_members m on m.guild_id = gu.id where m.user_id = me;
+  if g.id is null then raise exception 'NOT_IN_GUILD'; end if;
+  if g.members >= 50 then raise exception 'GUILD_FULL'; end if;
+  if not public.are_friends(me, p_user) then raise exception 'NOT_FRIEND'; end if;
+  if exists (select 1 from guild_members where user_id = p_user) then raise exception 'ALREADY_MEMBER'; end if;
+  insert into guild_invites (guild_id, inviter, invitee) values (g.id, me, p_user)
+    on conflict (guild_id, invitee) do nothing;
+end $$;
+
+-- What is waiting for me, newest first, with the guild and who asked.
+create or replace function public.my_guild_invites()
+returns table (id uuid, guild_id uuid, name text, tag text, about text, members integer, inviter uuid, inviter_name text, created_at timestamptz)
+language sql stable security definer set search_path = public as $$
+  select i.id, g.id, g.name, g.tag, g.about, g.members, i.inviter, coalesce(p.username, '?'), i.created_at
+    from guild_invites i
+    join guilds g on g.id = i.guild_id
+    left join profiles p on p.id = i.inviter
+    where i.invitee = auth.uid()
+    order by i.created_at desc
+    limit 20;
+$$;
+
+-- Saying yes. Everything is checked here, at the moment it matters, and all
+-- of my other invitations go with it: I can only be in one guild.
+create or replace function public.accept_guild_invite(p_invite uuid)
+returns public.guilds language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); g uuid; row_out guilds;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  if exists (select 1 from guild_members where user_id = me) then raise exception 'ALREADY_IN_GUILD'; end if;
+  select guild_id into g from guild_invites where id = p_invite and invitee = me;
+  if g is null then raise exception 'INVITE_GONE'; end if;
+  select * into row_out from guilds where id = g for update;
+  if row_out.id is null then raise exception 'NOT_FOUND'; end if;
+  if row_out.members >= 50 then raise exception 'GUILD_FULL'; end if;
+  insert into guild_members (user_id, guild_id) values (me, g);
+  update guilds set members = members + 1 where id = g returning * into row_out;
+  delete from guild_invites where invitee = me;
+  return row_out;
+end $$;
+
+create or replace function public.decline_guild_invite(p_invite uuid)
+returns void language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid();
+begin
+  if me is null then raise exception 'sign in'; end if;
+  delete from guild_invites where id = p_invite and invitee = me;
+end $$;
+
+-- The founder closes the guild. The rows that hang off it - the roster, the
+-- three windows, the standing invitations - all cascade from this one delete.
+create or replace function public.delete_guild()
+returns void language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); g uuid;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  select guild_id into g from guild_members where user_id = me;
+  if g is null then raise exception 'NOT_FOUND'; end if;
+  if (select owner from guilds where id = g) <> me then raise exception 'NOT_OWNER'; end if;
+  delete from guilds where id = g;
+end $$;
+
+grant execute on function public.invite_to_guild(uuid) to authenticated;
+grant execute on function public.my_guild_invites() to authenticated;
+grant execute on function public.accept_guild_invite(uuid) to authenticated;
+grant execute on function public.decline_guild_invite(uuid) to authenticated;
+grant execute on function public.delete_guild() to authenticated;
+
+-- An invitation should land on the guest's screen the moment it is sent.
+do $$ begin
+  alter publication supabase_realtime add table public.guild_invites;
+exception when others then null; end $$;

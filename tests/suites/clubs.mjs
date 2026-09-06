@@ -212,6 +212,57 @@ check('B is out, back to the search', await b.locator('#guild-join').isVisible()
 check('the guild is still standing with one member', shared.guilds.length === 1 && shared.guilds[0].members === 1);
 check('the panel knows the guild on a desk build', true);
 
+/* --- invitations, and closing the guild --------------------------------------- */
+section('invitations and closing');
+// A asks B in from the guild card. The chooser is the friend list.
+await a.locator('#guild-invite').click();
+await a.waitForTimeout(800);
+check('the chooser lists my friends', /grace_h/.test(await a.locator('#sheet').textContent()), (await a.locator('#sheet').textContent()).slice(0, 120));
+await a.locator('#sheet .pick-row .btn-primary').first().click();
+await a.waitForTimeout(800);
+check('the server holds the invitation', shared.guildInvites.length === 1 && shared.guildInvites[0].invitee === idB);
+check('and the button says it is sent', /invited/i.test(await a.locator('#sheet .pick-row .btn').first().textContent()));
+await closeSheets(a);
+
+// It reaches B where B is standing, with no reload and no second guild.
+check('B sees it arrive', await until(async () => await b.locator('#guild-invites-room').isVisible()
+  && /Night Owls/.test(await b.locator('#guild-invites').textContent())), await b.locator('#guild-invites').textContent());
+check('and who sent it', /ada_lovelace/.test(await b.locator('#guild-invites').textContent()));
+check('the bell was rung', await until(async () => /invited you/i.test(await b.evaluate(() =>
+  JSON.stringify(JSON.parse(localStorage.getItem('wikster.profile.v1') ?? '{}').notifFeed ?? [])))));
+
+// Turning it down takes it off both sides.
+await b.locator('#guild-invites .btn-ghost').first().click();
+await b.waitForTimeout(900);
+check('declining clears it', shared.guildInvites.length === 0 && await b.locator('#guild-invites-room').isHidden());
+check('and B is still without a guild', await b.locator('#guild-join').isVisible());
+
+// Asked a second time, B accepts.
+await a.locator('#guild-invite').click();
+await a.waitForTimeout(800);
+await a.locator('#sheet .pick-row .btn-primary').first().click();
+await a.waitForTimeout(800);
+await closeSheets(a);
+check('B is asked again', await until(async () => /Night Owls/.test(await b.locator('#guild-invites').textContent())));
+await b.locator('#guild-invites .btn-primary').first().click();
+await b.waitForTimeout(1400);
+check('accepting puts B in', await b.locator('#guild-home').isVisible() && shared.guildMembers.length === 2);
+check('and spends the invitation', shared.guildInvites.length === 0);
+check('a member cannot close the guild', await b.locator('#guild-delete').isHidden());
+check('the founder can', await a.locator('#guild-delete').isVisible());
+check('A\'s roster caught up on its own', await until(async () => /grace_h/.test(await a.locator('#guild-roster').textContent())),
+  (await a.locator('#guild-roster').textContent()).slice(0, 120));
+
+// The founder closes it. Two taps, as with leaving, because it is final.
+await a.locator('#guild-delete').click();
+await a.waitForTimeout(400);
+check('closing asks twice', /sure/i.test(await a.locator('#guild-delete').textContent()), await a.locator('#guild-delete').textContent());
+await a.locator('#guild-delete').click();
+await a.waitForTimeout(1400);
+check('the guild is gone from the server', shared.guilds.length === 0 && shared.guildMembers.length === 0);
+check('A is back at the search', await a.locator('#guild-join').isVisible() && await a.locator('#guild-home').isHidden());
+check('and B finds out without asking', await until(async () => await b.locator('#guild-join').isVisible()));
+
 console.log(errors.length ? `\nERRORS:\n${errors.join('\n')}` : '\nno page errors');
 console.log(fails ? `\n${fails} FAILURES` : '\nALL PASS');
 await browser.close();

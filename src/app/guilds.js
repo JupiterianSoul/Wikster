@@ -12,17 +12,18 @@
  * both: the guild leaderboard, in the same shape as the players'.
  */
 
-import { t } from '../i18n.js';
+import { t, tx } from '../i18n.js';
 import { iconSvg } from '../data/icons.js';
 import { Segmented, press } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
 import { formatAmount } from '../pricing.js';
+import { rankFor } from '../progression.js';
 import { formatCountdown } from '../shop.js';
 import * as leaderboard from '../leaderboard.js';
 import * as account from '../account.js';
 import { on } from '../ui/bus.js';
 import { gameStage, houseError } from './arcade.js';
-import { el, esc, state, toast } from './core.js';
+import { el, esc, openSheet, state, toast } from './core.js';
 import { describeError, showGate, signedIn, userId } from './gate.js';
 import { boardNode, boardRow } from './quests.js';
 import { paintPanel } from './panel.js';
@@ -30,17 +31,21 @@ import { paintPanel } from './panel.js';
 const WINDOWS = ['daily', 'weekly', 'alltime'];
 
 /** What the screen holds between paints. */
-export const guildView = { window: 'daily', page: 0, rows: [], roster: [], results: [], ranks: {} };
+export const guildView = { window: 'daily', page: 0, rows: [], roster: [], results: [], ranks: {}, invites: [] };
+
+const CAP = 50;
 
 let seg = null;
 let feed = null;
 let repaint = null;
 let leaveArmed = null;
+let deleteArmed = null;
 let wired = false;
 
 const guildError = (error) => {
   const code = String(error?.message ?? '');
-  return /^(ALREADY_IN_GUILD|NAME_TAKEN|TAG_TAKEN|GUILD_FULL|NOT_FOUND|SCHEMA)$/.test(code) ? t(`guildErr_${code}`) : describeError(error);
+  return /^(ALREADY_IN_GUILD|NAME_TAKEN|TAG_TAKEN|GUILD_FULL|NOT_IN_GUILD|NOT_FRIEND|ALREADY_MEMBER|INVITE_GONE|NOT_OWNER|NOT_FOUND|SCHEMA)$/.test(code)
+    ? t(`guildErr_${code}`) : describeError(error);
 };
 
 /** Asks the server which guild is mine, once per session and after a change. */
@@ -58,6 +63,7 @@ export async function renderGuilds() {
   el.guildsTitle.textContent = t('tabGuilds');
   el.guildsIntro.textContent = t('guildsIntro');
   el.guildRosterLabel.textContent = t('guildRoster');
+  el.guildInvitesLabel.textContent = t('guildInvitesLabel');
   el.guildCreateLabel.textContent = t('guildCreateLabel');
   el.guildBoardLabel.textContent = t('guildBoard');
   el.guildFindMark.innerHTML = iconSvg('search', { size: 18 });
@@ -107,20 +113,33 @@ function paintRooms() {
     el.guildResults.replaceChildren(...guildView.results.map(resultRow));
     el.guildFindStatus.textContent = '';
     el.guildCreateStatus.textContent = '';
+    paintInvites();
+    loadInvites();
   }
   paintPanel({ force: true });
 }
 
 function paintHome(g) {
+  const owner = g.owner === userId();
   el.guildTag.textContent = g.tag;
   el.guildName.textContent = g.name;
   el.guildAbout.textContent = g.about || '';
   el.guildAbout.hidden = !g.about;
-  const role = g.owner === userId() ? t('guildOwner') : t('guildMember');
-  el.guildMeta.textContent = `${t('guildMembers', { n: g.members })} · ${role}`;
-  el.guildLeave.textContent = t('guildLeave');
-  el.guildLeave.classList.remove('btn-danger');
+  el.guildMeta.textContent = `${t('guildMembers', { n: g.members })} · ${t(owner ? 'guildOwner' : 'guildMember')}`;
+  clearTimeout(leaveArmed);
   leaveArmed = null;
+  el.guildLeave.textContent = t('guildLeave');
+  el.guildLeave.classList.remove('btn-danger', 'is-armed');
+  // Asking a friend in is any member's right; closing the guild is the
+  // founder's alone, so the button is not there for anyone else.
+  const full = g.members >= CAP;
+  el.guildInvite.textContent = full ? t('guildFull') : t('guildInviteGo');
+  el.guildInvite.disabled = full;
+  clearTimeout(deleteArmed);
+  deleteArmed = null;
+  el.guildDelete.hidden = !owner;
+  el.guildDelete.textContent = t('guildDelete');
+  el.guildDelete.classList.remove('btn-danger', 'is-armed');
   paintScores();
   loadRoster(g);
 }
@@ -187,8 +206,8 @@ function resultRow(g) {
   const join = document.createElement('button');
   join.type = 'button';
   join.className = 'btn btn-sm btn-primary';
-  join.textContent = g.members >= 50 ? t('guildFull') : t('guildJoin');
-  join.disabled = g.members >= 50;
+  join.textContent = g.members >= CAP ? t('guildFull') : t('guildJoin');
+  join.disabled = g.members >= CAP;
   press(join, { sound: null });
   join.addEventListener('click', async () => {
     join.disabled = true;
@@ -208,6 +227,158 @@ function resultRow(g) {
   });
   row.querySelector('.person-actions').appendChild(join);
   return row;
+}
+
+/* --- invitations ---------------------------------------------------------- */
+
+/**
+ * What is waiting for me. Only ever asked for while I have no guild: an
+ * invitation to a second one is nothing I can act on, and the server would
+ * turn it down anyway.
+ */
+export async function loadInvites() {
+  if (!signedIn() || state.guild) return;
+  let invites = [];
+  try { invites = await account.myGuildInvites(); } catch { return; }
+  guildView.invites = invites;
+  state.social.guildInvites = invites;
+  if (state.tab === 'guilds' && !state.guild) paintInvites();
+}
+
+function paintInvites() {
+  const invites = state.guild ? [] : guildView.invites;
+  el.guildInvitesRoom.hidden = !invites.length;
+  el.guildInvites.replaceChildren(...invites.map(inviteRow));
+}
+
+/** One invitation: who asked, into what, and the two answers. */
+function inviteRow(invite) {
+  const row = document.createElement('div');
+  row.className = 'person';
+  row.innerHTML = `
+    <span class="person-mark guild-row-tag" aria-hidden="true"></span>
+    <span class="person-copy"><b></b><span></span></span>
+    <span class="person-actions"></span>`;
+  row.querySelector('.person-mark').textContent = invite.tag;
+  row.querySelector('b').textContent = invite.name;
+  row.querySelector('.person-copy span').textContent =
+    `${t('guildInvitedBy', { name: invite.inviterName })} · ${t('guildMembers', { n: invite.members })}`;
+
+  const drop = (id) => {
+    guildView.invites = guildView.invites.filter((i) => i.id !== id);
+    state.social.guildInvites = guildView.invites;
+    paintInvites();
+  };
+  const answer = (label, cls, run) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `btn btn-sm ${cls}`;
+    btn.textContent = label;
+    press(btn, { sound: null });
+    btn.addEventListener('click', async () => {
+      for (const other of row.querySelectorAll('button')) other.disabled = true;
+      try { await run(); } catch (error) {
+        toast(esc(guildError(error)), 'error');
+        synth.playDenied();
+        // A stale invitation is gone from the server; drop it here too.
+        if (String(error?.message) === 'INVITE_GONE') drop(invite.id);
+        else for (const other of row.querySelectorAll('button')) other.disabled = false;
+      }
+    });
+    return btn;
+  };
+  row.querySelector('.person-actions').append(
+    answer(t('guildInviteAccept'), 'btn-primary', async () => {
+      const joined = await account.acceptGuildInvite(invite.id);
+      state.guild = joined;
+      guildView.invites = [];
+      state.social.guildInvites = [];
+      guildView.results = [];
+      synth.playResolved();
+      toast(esc(t('guildJoined', { name: joined.name })), 'ok');
+      paintRooms();
+      loadGuildBoard();
+    }),
+    answer(t('guildInviteDecline'), 'btn-ghost', async () => {
+      await account.declineGuildInvite(invite.id);
+      synth.playTap();
+      drop(invite.id);
+    })
+  );
+  return row;
+}
+
+/**
+ * Asking friends in. The list is my friends: the ones already on the roster
+ * are named as members and cannot be asked twice, and everyone else gets a
+ * button that reports what the server said, whatever it said.
+ */
+async function openInviteSheet() {
+  const g = state.guild;
+  if (!g) return;
+  let friends = state.social.friends ?? [];
+  if (!friends.length) {
+    try {
+      const lists = await account.listFriendships(userId());
+      Object.assign(state.social, lists, { loaded: true });
+      friends = state.social.friends ?? [];
+    } catch { /* whatever is loaded is what we show */ }
+  }
+  const inside = new Set(guildView.roster.map((m) => m.userId));
+  openSheet(t('guildInviteTitle', { name: g.name }), (body) => {
+    const note = document.createElement('p');
+    note.className = 'muted';
+    note.textContent = friends.length
+      ? t('guildInviteNote', { n: Math.max(0, CAP - g.members) })
+      : t('guildInviteNoFriends');
+    body.appendChild(note);
+    if (!friends.length) return;
+
+    const list = document.createElement('div');
+    list.className = 'pick-list';
+    list.replaceChildren(...friends.map((entry) => {
+      const row = document.createElement('div');
+      row.className = 'pick-row is-static';
+      row.innerHTML = `
+        <span class="pick-copy"><b></b><span></span></span>
+        <span class="pick-end"></span>`;
+      const name = entry.profile?.username ?? '?';
+      row.querySelector('b').textContent = name;
+      const level = entry.profile?.level ?? 1;
+      row.querySelector('.pick-copy span').textContent = t('friendsLevelLine', { n: level, rank: tx(rankFor(level).name) });
+      const end = row.querySelector('.pick-end');
+      if (inside.has(entry.otherId)) {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = t('guildMember');
+        end.appendChild(chip);
+        return row;
+      }
+      const ask = document.createElement('button');
+      ask.type = 'button';
+      ask.className = 'btn btn-sm btn-primary';
+      ask.textContent = t('guildInviteSend');
+      press(ask, { sound: null });
+      ask.addEventListener('click', async () => {
+        ask.disabled = true;
+        try {
+          await account.inviteToGuild(entry.otherId);
+          ask.textContent = t('guildInvited');
+          ask.classList.remove('btn-primary');
+          ask.classList.add('btn-ghost');
+          synth.playResolved();
+          toast(esc(t('guildInviteSent', { name })), 'ok');
+        } catch (error) {
+          toast(esc(guildError(error)), 'error');
+          synth.playDenied();
+          ask.disabled = false;
+        }
+      });
+      end.appendChild(ask);
+      return row;
+    }));
+    body.appendChild(list);
+  });
 }
 
 /** The forms and the buttons, bound once. */
@@ -256,9 +427,9 @@ function wire() {
   el.guildLeave.addEventListener('click', async () => {
     // Two taps: the first arms it and says so, the second leaves.
     if (leaveArmed == null) {
-      leaveArmed = setTimeout(() => { leaveArmed = null; el.guildLeave.textContent = t('guildLeave'); el.guildLeave.classList.remove('btn-danger'); }, 4000);
+      leaveArmed = setTimeout(() => { leaveArmed = null; el.guildLeave.textContent = t('guildLeave'); el.guildLeave.classList.remove('btn-danger', 'is-armed'); }, 4000);
       el.guildLeave.textContent = t('guildLeaveSure');
-      el.guildLeave.classList.add('btn-danger');
+      el.guildLeave.classList.add('btn-danger', 'is-armed');
       synth.playTap();
       return;
     }
@@ -277,7 +448,43 @@ function wire() {
     }
     el.guildLeave.disabled = false;
   });
+  press(el.guildInvite, { sound: null });
+  el.guildInvite.addEventListener('click', () => { synth.playTap(); openInviteSheet(); });
+  press(el.guildDelete, { sound: null });
+  el.guildDelete.addEventListener('click', async () => {
+    // The same two taps as leaving, because this one cannot be undone.
+    if (deleteArmed == null) {
+      deleteArmed = setTimeout(() => { deleteArmed = null; el.guildDelete.textContent = t('guildDelete'); el.guildDelete.classList.remove('btn-danger', 'is-armed'); }, 4000);
+      el.guildDelete.textContent = t('guildDeleteSure');
+      el.guildDelete.classList.add('btn-danger', 'is-armed');
+      synth.playTap();
+      return;
+    }
+    clearTimeout(deleteArmed);
+    deleteArmed = null;
+    el.guildDelete.disabled = true;
+    try {
+      const name = state.guild?.name ?? '';
+      await account.deleteGuild();
+      state.guild = null;
+      guildView.results = [];
+      toast(esc(t('guildDeleted', { name })), 'ok');
+      synth.playResolved();
+      paintRooms();
+      loadGuildBoard();
+    } catch (error) {
+      toast(esc(guildError(error)), 'error');
+      synth.playDenied();
+    }
+    el.guildDelete.disabled = false;
+  });
   on('score', boardMoved);
+  // The heartbeat and the live wire both end at the same list; the screen
+  // takes what they found rather than asking the server a second time.
+  on('guild-invite', () => {
+    guildView.invites = state.social.guildInvites ?? guildView.invites;
+    if (state.tab === 'guilds' && !state.guild) paintInvites();
+  });
 }
 
 /* --- the guild board ----------------------------------------------------- */
@@ -329,15 +536,33 @@ export async function loadGuildBoard({ quiet = false } = {}) {
   el.guildBoard.replaceChildren(list);
 }
 
-/** The board, and the guild's own numbers, move as scores land. */
+/**
+ * The board, and the guild's own numbers, move as scores land. The guild
+ * itself is checked at the same moment: a member joining or leaving moves
+ * the windows too, and so does the founder closing the whole thing, so this
+ * is where a roster and a member count stop being stale. The card is only
+ * repainted when something about the guild actually changed, so a score
+ * landing never disarms a button somebody is halfway through pressing.
+ */
 function boardMoved() {
   if (state.tab !== 'guilds') return;
   clearTimeout(repaint);
-  repaint = setTimeout(() => {
+  repaint = setTimeout(async () => {
     if (state.tab !== 'guilds') return;
     guildView.page = 0;
     loadGuildBoard({ quiet: true });
-    if (state.guild) paintScores();
+    if (!state.guild) return;
+    paintScores();
+    const was = state.guild;
+    let fresh = was;
+    try { fresh = await account.myGuild(); } catch { return; }
+    if (state.tab !== 'guilds' || state.guild !== was) return;
+    if (!fresh) { state.guild = null; paintRooms(); return; }
+    state.guild = fresh;
+    if (fresh.members !== was.members || fresh.owner !== was.owner || fresh.name !== was.name) {
+      paintHome(fresh);
+      paintPanel({ force: true });
+    }
   }, 400);
 }
 
