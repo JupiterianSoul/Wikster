@@ -18,6 +18,7 @@
  * art, a diagonal sheen, and one pip per rank along the bottom edge.
  */
 import { tx } from './i18n.js';
+import { SEASONS } from './data/seasons.js';
 
 /* --- the set ---------------------------------------------------------------
  * `chain` + `from`: upgradeable, one rank per unlocked rung from `from` up.
@@ -78,7 +79,14 @@ export const BADGES = [
     name: { en: 'To the Hellfire', fr: 'Vers le Feu de l’enfer' } },
   // The only badge in gold, and the only one that is not somebody else's.
   { id: 'special-creator', code: 'creator', motif: 'seal',   foil: ['#fff7d6', '#fbbf24', '#7c2d12'],
-    name: { en: 'The Creator', fr: 'Le Créateur' } }
+    name: { en: 'The Creator', fr: 'Le Créateur' } },
+  // The season badges (src/data/seasons.js): one per season, earned on its
+  // track and kept for good. Like the code badges, a season badge that has
+  // not been earned is not shown at all.
+  ...SEASONS.map((season) => ({
+    id: `season-${season.id}`, season: season.id, motif: season.badge.motif, foil: season.badge.foil,
+    name: { en: `${season.name.en} ${season.from[0] === 1 && season.id === 'frost' ? 'Season' : 'Season'}`, fr: `Saison ${season.name.fr}` }
+  }))
 ];
 
 /**
@@ -88,7 +96,7 @@ export const BADGES = [
  * rank 0 = locked; rungs = the achievements the chip counts, in order;
  * next = the first rung not yet unlocked, if any.
  */
-export function badgeStates(evaluated, redeemed = {}) {
+export function badgeStates(evaluated, redeemed = {}, seasonBadges = []) {
   const byChain = new Map();
   for (const a of evaluated) {
     if (!a.chain) continue;
@@ -99,7 +107,12 @@ export function badgeStates(evaluated, redeemed = {}) {
 
   // A special badge that has not been earned is not a locked chip: it is
   // not there at all. Nobody is shown a thing they can never have.
-  return BADGES.filter((badge) => !badge.code || Number(redeemed?.[badge.code] ?? 0) > 0).map((badge) => {
+  return BADGES.filter((badge) => (!badge.code || Number(redeemed?.[badge.code] ?? 0) > 0)
+    && (!badge.season || seasonBadges.includes(badge.season))).map((badge) => {
+    if (badge.season) {
+      const rung = { id: `season:${badge.season}`, unlocked: true, tier: 1, name: tx(badge.name), desc: tx(SEASON_RUNG) };
+      return { badge, rank: 1, max: 1, rungs: [rung], next: null, name: tx(badge.name) };
+    }
     if (badge.code) {
       // One rung: the code itself. Unlocked by redeeming it, nothing else.
       const on = Number(redeemed?.[badge.code] ?? 0) > 0;
@@ -120,8 +133,13 @@ export function badgeStates(evaluated, redeemed = {}) {
   });
 }
 
-export const badgesEarned = (evaluated, redeemed = {}) =>
-  badgeStates(evaluated, redeemed).filter((s) => s.rank > 0).length;
+export const badgesEarned = (evaluated, redeemed = {}, seasonBadges = []) =>
+  badgeStates(evaluated, redeemed, seasonBadges).filter((s) => s.rank > 0).length;
+
+const SEASON_RUNG = {
+  en: 'Reach the fourth rung of the season’s track while the season is on.',
+  fr: 'Atteignez le quatrième palier de la piste de la saison pendant la saison.'
+};
 
 const CODE_RUNG = {
   en: 'Redeem the secret code made for you in Settings.',
@@ -210,6 +228,34 @@ const MOTIFS = {
   heart: (s) => `<g fill="none" stroke="${s}" stroke-width="2.4" stroke-linejoin="round">
     <path d="M 0 13 Q -14 3 -14 -5 Q -14 -13 -7 -13 Q -2 -13 0 -8 Q 2 -13 7 -13 Q 14 -13 14 -5 Q 14 3 0 13 Z"/>
     <path d="M -5 -4 L -1 -4 L 1 -8 L 3 0 L 5 -4" stroke-width="1.8"/></g>`,
+  /* --- the season motifs (src/data/seasons.js) --- */
+  flake: (s) => `<g fill="none" stroke="${s}" stroke-width="2.2" stroke-linecap="round">
+    <path d="M0 -16 V16 M-14 -8 L14 8 M-14 8 L14 -8"/>
+    <path d="M0 -16 l-4 4 M0 -16 l4 4 M0 16 l-4 -4 M0 16 l4 -4 M-14 -8 l0 5.5 M-14 -8 l5 -1.5 M14 8 l0 -5.5 M14 8 l-5 1.5 M-14 8 l5 1.5 M-14 8 l0 -5.5 M14 -8 l-5 -1.5 M14 -8 l0 5.5"/></g>`,
+  sprout: (s) => `<g fill="none" stroke="${s}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0 16 V-2"/><path d="M0 4 Q-12 6 -13 -6 Q-2 -6 0 4 Z"/><path d="M0 -2 Q12 0 13 -12 Q2 -12 0 -2 Z"/></g>`,
+  egg: (s) => `<g fill="none" stroke="${s}" stroke-width="2.4" stroke-linejoin="round">
+    <path d="M0 -16 Q13 -6 13 5 Q13 16 0 16 Q-13 16 -13 5 Q-13 -6 0 -16 Z"/>
+    <path d="M-11 2 l4 -3 4 3 4 -3 4 3 4 -3" stroke-width="2"/><path d="M-9 8 l3 -2 3 2 3 -2 3 2 3 -2 3 2" stroke-width="2"/></g>`,
+  flower: (s) => `<g fill="none" stroke="${s}" stroke-width="2.2" stroke-linejoin="round">
+    <circle cx="0" cy="0" r="4"/>
+    <path d="M0 -4 Q-5 -14 0 -16 Q5 -14 0 -4 Z M4 0 Q14 -5 16 0 Q14 5 4 0 Z M0 4 Q5 14 0 16 Q-5 14 0 4 Z M-4 0 Q-14 5 -16 0 Q-14 -5 -4 0 Z"/></g>`,
+  sun: (s) => `<g fill="none" stroke="${s}" stroke-width="2.4" stroke-linecap="round">
+    <circle cx="0" cy="0" r="7"/>
+    <path d="M0 -16 v4 M0 12 v4 M-16 0 h4 M12 0 h4 M-11.3 -11.3 l2.8 2.8 M8.5 8.5 l2.8 2.8 M-11.3 11.3 l2.8 -2.8 M8.5 -8.5 l2.8 -2.8"/></g>`,
+  compass: (s) => `<g fill="none" stroke="${s}" stroke-width="2.2" stroke-linejoin="round">
+    <circle cx="0" cy="0" r="15"/>
+    <path d="M0 -11 L4 0 L0 11 L-4 0 Z"/><path d="M-4 0 L0 -11 L4 0 Z" fill="${s}" stroke="none"/></g>`,
+  leaf: (s) => `<g fill="none" stroke="${s}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M-13 13 Q-13 -13 15 -15 Q17 13 -13 13 Z"/><path d="M-13 13 Q-2 2 11 -11"/><path d="M-4 4 l6 1 M1 -1 l6 1 M-8 8 l5 1"/></g>`,
+  ghost: (s) => `<g fill="none" stroke="${s}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M-12 14 V-2 A12 12 0 0 1 12 -2 V14 L8 10 L4 14 L0 10 L-4 14 L-8 10 Z"/>
+    <path d="M-5 -1 a1.6 1.6 0 1 0 .1 0 M5 -1 a1.6 1.6 0 1 0 .1 0"/></g>`,
+  candle: (s) => `<g fill="none" stroke="${s}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="-6" y="-2" width="12" height="18" rx="2"/><path d="M0 -2 V-6"/>
+    <path d="M0 -16 Q-4 -11 0 -7 Q4 -11 0 -16 Z"/></g>`,
+  tree: (s) => `<g fill="none" stroke="${s}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M0 -16 L8 -6 H4 L11 4 H6 L14 14 H-14 L-6 4 H-11 L-4 -6 H-8 Z"/><path d="M-2 14 v3 h4 v-3"/><path d="M-3 2 h.1 M4 -3 h.1 M2 8 h.1"/></g>`,
   /* A speech bubble laughing: shut eyes, wide mouth. */
   laugh: (s) => `<g fill="none" stroke="${s}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
     <path d="M -16 -14 Q -16 -17 -13 -17 L 13 -17 Q 16 -17 16 -14 L 16 5 Q 16 8 13 8 L -2 8 L -10 16 L -8 8 L -13 8 Q -16 8 -16 5 Z"/>

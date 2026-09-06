@@ -1,6 +1,7 @@
 /* regalia: split out of main.js */
 
 import { DEFAULT_FRAME_STYLE, frameSvg, frameTier } from '../frames.js';
+import { seasonUnlocks } from '../season.js';
 import * as store from '../collection.js';
 import * as account from '../account.js';
 import { levelFraction } from '../progression.js';
@@ -100,7 +101,7 @@ export function updateBadges() {
 
 export function allBadgeStates() {
   const evaluated = evaluateAchievements(achFacts(), state.profile.achievements?.redeemed ?? []);
-  return badgeStates(evaluated, state.profile.codesRedeemed ?? {});
+  return badgeStates(evaluated, state.profile.codesRedeemed ?? {}, seasonUnlocks(state.profile).badges);
 }
 /** Put a badge on the profile without asking: the code's own, the moment it is redeemed. */
 

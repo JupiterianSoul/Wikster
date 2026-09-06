@@ -1,6 +1,7 @@
 /* shop: split out of main.js */
 
 import { getLanguage, t, tx } from '../i18n.js';
+import { seasonAt, seasonSpec } from '../season.js';
 import { crateReel, formatCountdown, generateShop, rollCrate } from '../shop.js';
 import { CUSTOM_CARD_RANGE, TODAY_CARDS, TODAY_PRICE, boosterPrice, cratePriceAt, freeWindowAt, nextFreeAt, nextRefreshAt, windowIndexAt } from '../economy.js';
 import { readDayBefore } from '../wiki/fetch.js';
@@ -42,6 +43,7 @@ export function renderShop() {
   const sections = [
     buildFeatured(market.featured),
     buildTodayStall(),
+    buildSeasonStall(),
     buildShopSection({
       title: t('shopFreeRow'), note: freeNoteText(), noteAttr: 'data-free-note',
       body: shopGrid(market.free.map((item) => shopTile(item, { free: true })))
@@ -124,6 +126,28 @@ export function buildTodayStall() {
   tile.appendChild(buy);
   sec.appendChild(shopGrid([tile]));
   if (bought) tile.classList.add('is-bought-today');
+  return sec;
+}
+
+/**
+ * The season's stall: the season's own booster, in two sizes of luck, here
+ * until the season turns. The same stall sits on the Season screen.
+ */
+export function buildSeasonStall({ inSeasonScreen = false } = {}) {
+  const current = seasonAt();
+  const { season } = current;
+  const items = [
+    { id: specId(seasonSpec(season)), spec: seasonSpec(season), price: boosterPrice(seasonSpec(season)) },
+    { id: specId(seasonSpec(season, { rarityId: 'rare' })), spec: seasonSpec(season, { rarityId: 'rare' }), price: boosterPrice(seasonSpec(season, { rarityId: 'rare' })) }
+  ];
+  const until = new Date(current.endsAt - 1).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'long' });
+  const sec = buildShopSection({
+    title: inSeasonScreen ? tx(season.name) : t('shopSeasonRow', { name: tx(season.name) }),
+    note: t('seasonShopNote', { date: until }),
+    body: shopGrid(items.map((item) => shopTile(item)))
+  });
+  sec.classList.add('shop-season');
+  sec.style.setProperty('--season-accent', season.accent);
   return sec;
 }
 

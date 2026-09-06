@@ -24,13 +24,14 @@ import { generateShop } from '../shop.js';
 import * as odds from '../data/odds.js';
 import { addXp } from '../progression.js';
 import { timedTopTier } from '../timed.js';
-import { reportAlbums } from './arcade.js';
+import { reportAlbums, earnSeasonPoints } from './arcade.js';
 import { applyPanelState, paintPanel, togglePanel } from './panel.js';
 import { openFilters, renderBinder, turnAlbumPage } from './binder.js';
 import { $, THEME_KEY, WIDE, applyStrings, bind, debug, el, flushPlaytime, lookForUpdate, migrateLanguages, migrateSpecialCards, migrateViews, money, placeDrawerLinks, refreshWallet, setTickerJob, showScreen, shuffle, state, storedTheme, syncTicker, toast, useTheme } from './core.js';
 import { openDaily, openOdds, openWallet } from './daily.js';
 import * as leaderboard from '../leaderboard.js';
 import { flushGuildGoal, reportGuildGoal } from '../guildgoal.js';
+import { pointsForReport, seasonAt } from '../season.js';
 import { tilt } from './detail.js';
 import { buildDrawer, closeDrawer, openDrawer, openHelp, openNotifications, paintDrawerLinks } from './drawer.js';
 import { flushSync, gateAltAction, leaveAccount, onSession, purgeRetiredCodes, purgeRetiredThemes, resumeAccount, showGate, stopSocialPoll, submitGate, syncSoon } from './gate.js';
@@ -55,8 +56,15 @@ bind({
     glossary: $('#screen-glossary'), open: $('#screen-open'),
     games: $('#screen-games'), wikdle: $('#screen-wikdle'), slots: $('#screen-slots'),
     duel: $('#screen-duel'), reveal: $('#screen-reveal'),
-    quests: $('#screen-quests'), leaderboard: $('#screen-leaderboard'), guilds: $('#screen-guilds')
+    quests: $('#screen-quests'), leaderboard: $('#screen-leaderboard'), guilds: $('#screen-guilds'),
+    season: $('#screen-season')
   },
+  seasonTitle: $('#season-title'), seasonBanner: $('#season-banner'), seasonMark: $('#season-mark'), seasonKicker: $('#season-kicker'),
+  seasonName: $('#season-name'), seasonTagline: $('#season-tagline'), seasonDates: $('#season-dates'),
+  seasonPoints: $('#season-points'), seasonPointsLabel: $('#season-points-label'), seasonNext: $('#season-next'), seasonBar: $('#season-bar'),
+  seasonTrackLabel: $('#season-track-label'), seasonTrack: $('#season-track'), seasonQuestLabel: $('#season-quest-label'), seasonQuest: $('#season-quest'),
+  seasonShopLabel: $('#season-shop-label'), seasonShop: $('#season-shop'), seasonBoardLabel: $('#season-board-label'), seasonBoard: $('#season-board'),
+  seasonCalendarLabel: $('#season-calendar-label'), seasonCalendar: $('#season-calendar'),
   gamesTitle: $('#games-title'), gamesSub: $('#games-sub'), gamesList: $('#games-list'),
   wikdleTitle: $('#wikdle-title'), wikdleBody: $('#wikdle-body'), wikdleBack: $('#wikdle-back'),
   slotsTitle: $('#slots-title'), slotsBody: $('#slots-body'), slotsBack: $('#slots-back'),
@@ -722,6 +730,9 @@ window.__wikster = {
   signOut: () => leaveAccount(),
   // A suite moves the guild's weekly goal the way a booster or a Wikdle would.
   guildGoal: (metric, detail) => { reportGuildGoal(metric, detail); return flushGuildGoal(); },
+  // And the season's track the same way; seasonAt says which season it is.
+  season: (metric, detail) => earnSeasonPoints(pointsForReport(metric, detail)),
+  seasonAt,
   setTheme: (id) => { useTheme(id); renderPacks(); renderShop(); renderBinder(); renderCustomize(); },
   debugRarity(id) {
     const forced = rarityById(id);

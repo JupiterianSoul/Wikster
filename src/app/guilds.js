@@ -24,7 +24,8 @@ import { formatCountdown } from '../shop.js';
 import * as leaderboard from '../leaderboard.js';
 import * as account from '../account.js';
 import { on } from '../ui/bus.js';
-import { gameStage, houseError } from './arcade.js';
+import { earnSeasonPoints, gameStage, houseError } from './arcade.js';
+import { pointsForGuildGoal } from '../season.js';
 import { el, esc, money, openSheet, refreshWallet, state, toast } from './core.js';
 import { pushNote, whenText } from './drawer.js';
 import { gainBooster } from './open.js';
@@ -33,7 +34,7 @@ import { describeError, showGate, signedIn, userId } from './gate.js';
 import { boardNode, boardRow } from './quests.js';
 import { paintPanel } from './panel.js';
 
-const WINDOWS = ['daily', 'weekly', 'alltime'];
+const WINDOWS = ['daily', 'weekly', 'season', 'alltime'];
 
 /** What the screen holds between paints. */
 export const guildView = {
@@ -167,8 +168,8 @@ function paintHome(g) {
 
 /** The three windows, with the guild's standing in each. */
 async function paintScores() {
-  const labels = { daily: 'guildScoreToday', weekly: 'guildScoreWeek', alltime: 'guildScoreAll' };
-  el.guildScores.replaceChildren(...WINDOWS.map((w) => {
+  const labels = { daily: 'guildScoreToday', weekly: 'guildScoreWeek', season: 'guildScoreSeason', alltime: 'guildScoreAll' };
+  el.guildScores.replaceChildren(...WINDOWS.filter((w) => w !== 'season').map((w) => {
     const cell = document.createElement('div');
     cell.className = 'guild-score';
     cell.dataset.window = w;
@@ -181,6 +182,8 @@ async function paintScores() {
   WINDOWS.forEach((w, i) => {
     const r = ranks[i];
     guildView.ranks[w] = r;
+    // The card keeps its three cells; the season's standing lives on the Season screen.
+    if (w === 'season') return;
     const cell = el.guildScores.querySelector(`[data-window="${w}"]`);
     if (!cell) return;
     cell.querySelector('b').textContent = formatAmount(r?.score ?? 0);
@@ -489,6 +492,7 @@ async function claimGoal() {
     store.saveWallet(store.loadWallet() + paid);
     refreshWallet();
     gainBooster(GOAL_BOOSTER, 1);
+    earnSeasonPoints(pointsForGuildGoal());
     if (guildView.goal) guildView.goal.claimed = true;
     synth.playFanfare();
     toast(esc(t('guildGoalPaid', { amount: `${formatAmount(paid)} ${CURRENCY_NAME}` })), 'ok');
@@ -904,7 +908,7 @@ export async function loadGuildBoard({ quiet = false } = {}) {
   const ms = leaderboard.msToReset(view.window);
   reset.innerHTML = `${iconSvg('clock', { size: 14 })}<span></span>`;
   reset.querySelector('span').textContent = ms == null ? t('lbForever')
-    : t(view.window === 'weekly' ? 'lbResetWeekly' : 'lbResetDaily', { time: formatCountdown(ms) });
+    : t(view.window === 'weekly' ? 'lbResetWeekly' : view.window === 'season' ? 'lbResetSeason' : 'lbResetDaily', { time: formatCountdown(ms) });
   list.appendChild(reset);
   if (view.more) {
     const more = document.createElement('button');

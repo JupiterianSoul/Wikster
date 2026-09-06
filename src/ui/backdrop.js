@@ -148,6 +148,7 @@ class Backdrop {
       case 'hellfire': this.#hellfire(ctx, w, h, t); break;
       case 'lecture': this.#lecture(ctx, w, h, t); break;
       case 'yaourt': this.#yaourt(ctx, w, h, t); break;
+      case 'season': this.#season(ctx, w, h, t); break;
       default: this.#aurora(ctx, w, h, t);
     }
   }
@@ -1260,5 +1261,120 @@ class Backdrop {
     }
     ctx.globalAlpha = 1;
   }
+
+  /**
+   * SEASON - the one renderer behind all eleven season themes. A sky in the
+   * season's three colours, a soft glow low on one side, and a field of
+   * things in the air: snow that falls and wanders, hearts and bubbles that
+   * rise, petals and leaves that tumble across, embers that climb and fade,
+   * sparks that flash off the water. Seeded once per theme, so nothing
+   * shimmers on a repaint; the seed field is dropped when the theme changes.
+   */
+  #season(ctx, w, h, now) {
+    const { sky, particle, count = 50, speed = 1, glow } = this.theme.backdrop;
+    const sec = (now / 1000) * speed;
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, sky[0]);
+    grad.addColorStop(0.55, sky[1]);
+    grad.addColorStop(1, sky[2]);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    if (glow) {
+      const g = ctx.createRadialGradient(w * 0.3, h * 0.85, 0, w * 0.3, h * 0.85, Math.max(w, h) * 0.7);
+      g.addColorStop(0, glow);
+      g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+    if (!this.seedField || this.seedField.kind !== particle) {
+      this.seedField = { kind: particle, items: Array.from({ length: count }, (_, i) => ({
+        x: Math.random(), y: Math.random(), r: 0.6 + Math.random() * 1.6, p: Math.random() * TAU,
+        s: 0.5 + Math.random() * 0.9, hue: Math.random()
+      })) };
+    }
+    const light = this.theme.swatch[1];
+    const light2 = this.theme.swatch[2];
+    ctx.globalCompositeOperation = 'lighter';
+    for (const it of this.seedField.items) {
+      let x, y, a, size = it.r;
+      switch (particle) {
+        case 'snow': {
+          const fall = (it.y + sec * 0.018 * it.s) % 1;
+          x = (it.x + Math.sin(sec * 0.4 + it.p) * 0.02) * w;
+          y = fall * h;
+          a = 0.35 + 0.35 * Math.sin(sec + it.p);
+          ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
+          ctx.beginPath(); ctx.arc(x, y, size * 1.3, 0, TAU); ctx.fill();
+          break;
+        }
+        case 'heart':
+        case 'bubble': {
+          const rise = (it.y - sec * 0.012 * it.s + 10) % 1;
+          x = (it.x + Math.sin(sec * 0.3 + it.p) * 0.015) * w;
+          y = rise * h;
+          a = 0.12 + 0.18 * Math.sin(rise * Math.PI);
+          size = it.r * (particle === 'heart' ? 4 : 5);
+          ctx.strokeStyle = particle === 'bubble' ? `rgba(255, 255, 255, ${a})` : 'transparent';
+          ctx.fillStyle = particle === 'heart' ? this.#tint(it.hue > 0.5 ? light : light2, a) : 'rgba(255,255,255,0.02)';
+          ctx.lineWidth = 1;
+          if (particle === 'bubble') { ctx.beginPath(); ctx.arc(x, y, size, 0, TAU); ctx.stroke(); }
+          else this.#heart(ctx, x, y, size);
+          break;
+        }
+        case 'petal':
+        case 'leaf': {
+          const drift = (it.y + sec * 0.014 * it.s) % 1;
+          x = ((it.x + sec * 0.01 * it.s + Math.sin(sec * 0.5 + it.p) * 0.03) % 1) * w;
+          y = drift * h;
+          a = 0.25 + 0.25 * Math.sin(sec * 0.8 + it.p);
+          size = it.r * 3.2;
+          ctx.fillStyle = this.#tint(it.hue > 0.6 ? light2 : light, a);
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(sec * 0.6 * it.s + it.p);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, size, size * (particle === 'leaf' ? 0.45 : 0.6), 0, 0, TAU);
+          ctx.fill();
+          ctx.restore();
+          break;
+        }
+        case 'ember': {
+          const rise = (it.y - sec * 0.02 * it.s + 10) % 1;
+          x = (it.x + Math.sin(sec * 0.9 + it.p) * 0.01) * w;
+          y = (1 - rise * 0.9) * h;
+          a = Math.max(0, 0.5 - rise * 0.5) * (0.6 + 0.4 * Math.sin(sec * 3 + it.p));
+          ctx.fillStyle = this.#tint(it.hue > 0.5 ? light : light2, a);
+          ctx.beginPath(); ctx.arc(x, y, size, 0, TAU); ctx.fill();
+          break;
+        }
+        default: {
+          // Sparks: fixed in place, flashing.
+          x = it.x * w; y = it.y * h;
+          const flash = Math.max(0, Math.sin(sec * 1.4 * it.s + it.p));
+          a = flash * flash * 0.6;
+          ctx.fillStyle = this.#tint(it.hue > 0.5 ? light : '#ffffff', a);
+          ctx.beginPath(); ctx.arc(x, y, size * (0.6 + flash), 0, TAU); ctx.fill();
+        }
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /** A hex colour with an alpha, for the field above. */
+  #tint(hex, a) {
+    const n = parseInt(String(hex).replace('#', ''), 16);
+    if (!Number.isFinite(n)) return `rgba(255, 255, 255, ${a})`;
+    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${Math.max(0, Math.min(1, a)).toFixed(3)})`;
+  }
+
+  #heart(ctx, x, y, s) {
+    ctx.beginPath();
+    ctx.moveTo(x, y + s * 0.9);
+    ctx.bezierCurveTo(x - s * 1.4, y - s * 0.1, x - s * 0.6, y - s * 1.1, x, y - s * 0.4);
+    ctx.bezierCurveTo(x + s * 0.6, y - s * 1.1, x + s * 1.4, y - s * 0.1, x, y + s * 0.9);
+    ctx.closePath();
+    ctx.fill();
+  }
+
 }
 export const backdrop = new Backdrop();

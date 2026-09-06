@@ -17,6 +17,7 @@
  */
 
 import { getLanguage, t, tx } from '../i18n.js';
+import { claimableTiers, daysLeft, seasonAt, seasonEntry } from '../season.js';
 import { iconSvg } from '../data/icons.js';
 import { press } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
@@ -164,6 +165,16 @@ function screenBlock(tab) {
       action(t('marketSell'), () => import('./market.js').then((mod) => mod.openSellSheet()))
     ]);
   }
+  if (tab === 'season') {
+    const current = seasonAt();
+    const entry = seasonEntry(state.profile, current.key);
+    const ready = claimableTiers(state.profile, current.key);
+    return block(t('tabSeason'), [
+      line('calendar', t('panelSeason', { name: tx(current.season.name), n: daysLeft() })),
+      line('star', t('panelSeasonPoints', { n: entry.points })),
+      ready ? action(t('panelClaim', { n: ready }), () => showScreen('season')) : action(t('tabLeaderboard'), () => showScreen('leaderboard'))
+    ]);
+  }
   if (tab === 'guilds' || tab === 'leaderboard') {
     const g = state.guild;
     return block(t('tabGuilds'), [
@@ -196,7 +207,7 @@ function currentSignature() {
     state.tab, document.documentElement.dataset.panel, getLanguage(),
     progress.level, progress.xp, state.wallet, unreadCount(),
     canClaim(state.profile.daily), board.quests.filter((q) => q.progress >= q.target).length,
-    quests.claimableCount(questUserKey()),
+    quests.claimableCount(questUserKey()), claimableTiers(state.profile), seasonEntry(state.profile, seasonAt().key).points,
     duel.roundsLeft(), reveal.roundsLeft(), activeFilterCount(), state.guild?.id, state.guild?.members,
     Object.keys(state.collection?.entries ?? {}).length,
     Object.values(state.inventory ?? {}).reduce((s, r) => s + (r.count ?? 0), 0)

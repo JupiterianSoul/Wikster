@@ -7,6 +7,7 @@ import { iconSvg } from '../data/icons.js';
 import { press } from '../ui/components.js';
 import { canRedeem, codeByInput, codeLook, codeSpec, hasRedeemed, timesRedeemed } from '../codes.js';
 import { DEFAULT_THEME, THEMES } from '../ui/themes.js';
+import { themeUnlocked } from '../season.js';
 import { BADGES, badgeSvg } from '../badges.js';
 import { FRAME_STYLES, frameSvg, frameTier, frameUnlocked } from '../frames.js';
 import { RARITIES, rarityFromPopularity } from '../data/rarities.js';
@@ -334,7 +335,8 @@ export function renderCustomize() {
 
   // The theme picker previews each theme rather than naming it.
   const current = storedTheme();
-  el.themeGrid.replaceChildren(...THEMES.filter((theme) => !theme.code || hasRedeemed(state.profile, theme.code)).map((theme) => {
+  el.themeGrid.replaceChildren(...THEMES.filter((theme) => (!theme.code || hasRedeemed(state.profile, theme.code))
+    && (!theme.season || themeUnlocked(state.profile, theme.season))).map((theme) => {
     const card = document.createElement('button');
     card.type = 'button';
     card.className = `theme-card${theme.id === current ? ' is-on' : ''}`;
@@ -345,10 +347,10 @@ export function renderCustomize() {
       <span class="theme-check">${iconSvg('check', { size: 14 })}</span>`;
     card.querySelector('h4').textContent = tx(theme.name);
     card.querySelector('p').textContent = tx(theme.blurb);
-    if (theme.code) {
+    if (theme.code || theme.season) {
       const note = document.createElement('span');
       note.className = 'theme-note';
-      note.textContent = t('themeLockedNote');
+      note.textContent = t(theme.season ? 'themeSeasonNote' : 'themeLockedNote');
       card.querySelector('p').after(note);
     }
     press(card, { sound: null });

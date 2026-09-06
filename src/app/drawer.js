@@ -1,6 +1,7 @@
 /* drawer: split out of main.js */
 
 import { canClaim } from '../daily.js';
+import { claimableTiers } from '../season.js';
 import * as quests from '../quests.js';
 import * as account from '../account.js';
 import { iconSvg, logoSvg } from '../data/icons.js';
@@ -58,6 +59,9 @@ export function drawerItems() {
     { id: 'quests', icon: 'scroll',     key: 'tabQuests',
       badge: () => quests.claimableCount(questUserKey()),
       run: go('quests', renderQuests) },
+    { id: 'season', icon: 'calendar', key: 'tabSeason',
+      dot: () => claimableTiers(state.profile) > 0,
+      run: go('season', lazy(() => import('./season.js'), 'renderSeason')) },
     { id: 'leaderboard', icon: 'podium', key: 'tabLeaderboard', run: go('leaderboard', renderLeaderboard) },
     ...(account.configured
       ? [{ id: 'guilds', icon: 'shield', key: 'tabGuilds', run: go('guilds', lazy(() => import('./guilds.js'), 'renderGuilds')) }]
@@ -181,6 +185,7 @@ export function noteKind(icon, screen) {
   if (icon === 'chat') return 'message';
   if (icon === 'gift') return 'gift';
   if (screen === 'quests') return 'quest';
+  if (screen === 'season') return 'quest';
   if (screen === 'ach') return 'achievement';
   if (screen === 'market' || icon === 'bell') return 'auction';
   if (screen === 'packs' || icon === 'packs') return 'booster';
@@ -363,7 +368,8 @@ export const HELP = {
   reveal:  { steps: 3, tip: true },
   quests:  { steps: 3, tip: true },
   leaderboard: { steps: 3, tip: true },
-  guilds:  { steps: 5, tip: true }
+  guilds:  { steps: 5, tip: true },
+  season:  { steps: 4, tip: true }
 };
 
 export function openHelp(topic) {

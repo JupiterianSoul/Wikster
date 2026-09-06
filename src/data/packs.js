@@ -28,6 +28,8 @@
  * keep them in the language of the wiki they filter.
  */
 
+import { seasonPackById } from './seasons.js';
+
 export const THEME_PACKS = [
   {
     id: 'cars', icon: 'cars',
@@ -554,7 +556,7 @@ export const THEME_PACKS = [
   }
 ];
 
-export const themeById = (id) => THEME_PACKS.find((p) => p.id === id) ?? null;
+export const themeById = (id) => THEME_PACKS.find((p) => p.id === id) ?? seasonPackById(id);
 
 /** Hero article titles for the batched pack-art lookup, in one language. */
 export const heroTitles = (lang) => THEME_PACKS.map((p) => p.hero[lang] ?? p.hero.en);

@@ -427,6 +427,111 @@ export const THEMES = [
       drive: 0.04,
       transient: 'chime'
     }
+  },
+
+  /* --- the season themes -------------------------------------------------
+   * One per season in src/data/seasons.js, unlocked on the season's track.
+   * `season` names it; the picker hides a season theme the save has not
+   * earned, the way it hides a theme behind a code. All eleven share the
+   * season renderer in ui/backdrop.js, coloured and peopled per season. */
+  {
+    id: 'frost', season: 'frost',
+    name: { en: 'Frost', fr: 'Givre' },
+    blurb: { en: 'Ice blue on a polar night, snow that never quite lands, glass bells.', fr: 'Bleu glace sur une nuit polaire, une neige qui ne se pose jamais tout à fait, cloches de verre.' },
+    swatch: ['#071426', '#bfe9ff', '#7dd3fc'],
+    backdrop: { renderer: 'season', sky: ['#04101f', '#0a1a2e', '#071426'], particle: 'snow', count: 90, speed: 1, glow: 'rgba(191, 233, 255, 0.12)' },
+    motion: { scale: 1.1, ease: 'cubic-bezier(0.22, 1, 0.36, 1)', pop: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+    sound: { voice: 'fm', gain: 0.6, root: 329.63, scale: [0, 2, 4, 7, 9], reverb: { seconds: 3.6, decay: 2.8, mix: 0.36 }, filter: 5600, drive: 0.1, transient: 'air' }
+  },
+  {
+    id: 'hearts', season: 'hearts',
+    name: { en: 'Hearts', fr: 'Cœurs' },
+    blurb: { en: 'Rose on wine, hearts drifting up like confetti, a warm piano.', fr: 'Rose sur lie-de-vin, des cœurs qui montent comme des confettis, un piano chaud.' },
+    swatch: ['#2a0a16', '#fb7185', '#fda4af'],
+    backdrop: { renderer: 'season', sky: ['#1a0610', '#2a0a16', '#180810'], particle: 'heart', count: 40, speed: 0.8, glow: 'rgba(251, 113, 133, 0.14)' },
+    motion: { scale: 1.05, ease: 'cubic-bezier(0.25, 1, 0.5, 1)', pop: 'cubic-bezier(0.3, 1.4, 0.6, 1)' },
+    sound: { voice: 'keys', gain: 0.7, root: 293.66, scale: [0, 2, 4, 7, 9], reverb: { seconds: 2.4, decay: 2.6, mix: 0.28 }, filter: 3600, drive: 0, transient: 'brush' }
+  },
+  {
+    id: 'thaw', season: 'thaw',
+    name: { en: 'Thaw', fr: 'Dégel' },
+    blurb: { en: 'Spring green on deep water, petals on the wind, wooden notes.', fr: 'Vert printemps sur eau profonde, des pétales au vent, notes de bois.' },
+    swatch: ['#07211a', '#86efac', '#5eead4'],
+    backdrop: { renderer: 'season', sky: ['#04150f', '#07211a', '#061a14'], particle: 'petal', count: 50, speed: 0.9, glow: 'rgba(134, 239, 172, 0.12)' },
+    motion: { scale: 1.1, ease: 'cubic-bezier(0.25, 1, 0.5, 1)', pop: 'cubic-bezier(0.3, 1.4, 0.6, 1)' },
+    sound: { voice: 'marimba', gain: 0.66, root: 349.23, scale: [0, 2, 4, 7, 9], reverb: { seconds: 1.4, decay: 3, mix: 0.16 }, filter: 3400, drive: 0, transient: 'knock' }
+  },
+  {
+    id: 'fools', season: 'fools',
+    name: { en: 'Fools and Eggs', fr: 'Poissons et œufs' },
+    blurb: { en: 'Yellow on purple, bubbles everywhere, a chip tune that cannot keep a straight face.', fr: 'Jaune sur violet, des bulles partout, un son de puce qui ne garde pas son sérieux.' },
+    swatch: ['#1d1040', '#fde047', '#c4b5fd'],
+    backdrop: { renderer: 'season', sky: ['#130a2c', '#1d1040', '#150c30'], particle: 'bubble', count: 36, speed: 1.1, glow: 'rgba(253, 224, 71, 0.1)' },
+    motion: { scale: 1.3, ease: 'cubic-bezier(0.3, 1.6, 0.5, 1)', pop: 'cubic-bezier(0.3, 1.8, 0.5, 1)' },
+    sound: { voice: 'chip', gain: 0.5, root: 392, scale: [0, 2, 4, 5, 7, 9, 11], reverb: { seconds: 0.6, decay: 2, mix: 0.06 }, filter: 6000, drive: 0.1, transient: 'air' }
+  },
+  {
+    id: 'bloom', season: 'bloom',
+    name: { en: 'Bloom', fr: 'Floraison' },
+    blurb: { en: 'Pink and leaf green, a garden at dusk, petals falling, felt keys.', fr: 'Rose et vert feuille, un jardin au crépuscule, des pétales qui tombent, touches feutrées.' },
+    swatch: ['#132412', '#f9a8d4', '#a3e635'],
+    backdrop: { renderer: 'season', sky: ['#0d1a0c', '#152012', '#0f1a0e'], particle: 'petal', count: 60, speed: 0.7, glow: 'rgba(249, 168, 212, 0.13)' },
+    motion: { scale: 1.1, ease: 'cubic-bezier(0.25, 1, 0.5, 1)', pop: 'cubic-bezier(0.3, 1.4, 0.6, 1)' },
+    sound: { voice: 'keys', gain: 0.7, root: 329.63, scale: [0, 2, 4, 7, 9], reverb: { seconds: 2, decay: 2.8, mix: 0.24 }, filter: 3800, drive: 0, transient: 'brush' }
+  },
+  {
+    id: 'solstice', season: 'solstice',
+    name: { en: 'Solstice', fr: 'Solstice' },
+    blurb: { en: 'Gold on deep sea, sparks off the water, bright bells.', fr: 'Or sur mer profonde, des étincelles sur l’eau, cloches claires.' },
+    swatch: ['#06232e', '#fbbf24', '#22d3ee'],
+    backdrop: { renderer: 'season', sky: ['#031820', '#06232e', '#041b25'], particle: 'spark', count: 70, speed: 1.2, glow: 'rgba(251, 191, 36, 0.16)' },
+    motion: { scale: 1, ease: 'cubic-bezier(0.22, 1, 0.36, 1)', pop: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+    sound: { voice: 'fm', gain: 0.6, root: 392, scale: [0, 2, 4, 7, 9], reverb: { seconds: 2.6, decay: 2.4, mix: 0.3 }, filter: 6200, drive: 0.1, transient: 'air' }
+  },
+  {
+    id: 'voyage', season: 'voyage',
+    name: { en: 'Voyage', fr: 'Grand voyage' },
+    blurb: { en: 'Orange on navy, carved capitals, bubbles rising through deep water.', fr: 'Orange sur marine, capitales gravées, des bulles qui montent en eau profonde.' },
+    swatch: ['#0c1a3f', '#fb923c', '#93c5fd'],
+    backdrop: { renderer: 'season', sky: ['#07112b', '#0c1a3f', '#091530'], particle: 'bubble', count: 44, speed: 1, glow: 'rgba(251, 146, 60, 0.12)' },
+    motion: { scale: 1, ease: 'cubic-bezier(0.22, 1, 0.36, 1)', pop: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+    sound: { voice: 'synthwave', gain: 0.6, root: 261.63, scale: [0, 3, 5, 7, 10], reverb: { seconds: 2.4, decay: 2.2, mix: 0.3 }, filter: 4600, drive: 0.12, transient: 'air' }
+  },
+  {
+    id: 'harvest', season: 'harvest',
+    name: { en: 'Harvest', fr: 'Moisson' },
+    blurb: { en: 'Amber on oak, leaves turning in the air, a serif, wooden notes.', fr: 'Ambre sur chêne, des feuilles qui tournent dans l’air, un empattement, notes de bois.' },
+    swatch: ['#1f1108', '#f59e0b', '#fde68a'],
+    backdrop: { renderer: 'season', sky: ['#160c05', '#1f1108', '#180d06'], particle: 'leaf', count: 46, speed: 0.9, glow: 'rgba(245, 158, 11, 0.14)' },
+    motion: { scale: 0.9, ease: 'cubic-bezier(0.2, 0.9, 0.3, 1)', pop: 'cubic-bezier(0.3, 1.5, 0.5, 1)' },
+    sound: { voice: 'marimba', gain: 0.66, root: 261.63, scale: [0, 2, 4, 7, 9], reverb: { seconds: 1.2, decay: 3.4, mix: 0.12 }, filter: 3000, drive: 0, transient: 'knock' }
+  },
+  {
+    id: 'hallows', season: 'hallows',
+    name: { en: 'Hallows', fr: 'Sabbat' },
+    blurb: { en: 'Pumpkin on midnight purple, embers in the dark, bells from the wrong end of the corridor.', fr: 'Citrouille sur violet de minuit, des braises dans le noir, des cloches venues du mauvais bout du couloir.' },
+    swatch: ['#160a2a', '#fb923c', '#c084fc'],
+    backdrop: { renderer: 'season', sky: ['#0b0518', '#160a2a', '#0e061c'], particle: 'ember', count: 50, speed: 0.8, glow: 'rgba(251, 146, 60, 0.12)' },
+    motion: { scale: 1.2, ease: 'cubic-bezier(0.3, 0, 0.2, 1)', pop: 'cubic-bezier(0.25, 1.1, 0.4, 1)' },
+    sound: { voice: 'fm', gain: 0.6, root: 174.61, scale: [0, 1, 3, 6, 8], reverb: { seconds: 4, decay: 3.4, mix: 0.4 }, filter: 3000, drive: 0.2, transient: 'air' }
+  },
+  {
+    id: 'ember', season: 'ember',
+    name: { en: 'Ember', fr: 'Braise' },
+    blurb: { en: 'Copper on charcoal, sparks rising from a fire you cannot see, a low piano.', fr: 'Cuivre sur charbon, des étincelles qui montent d’un feu qu’on ne voit pas, un piano grave.' },
+    swatch: ['#120e0c', '#f97316', '#fdba74'],
+    backdrop: { renderer: 'season', sky: ['#0b0807', '#120e0c', '#0d0908'], particle: 'ember', count: 60, speed: 1, glow: 'rgba(249, 115, 22, 0.16)' },
+    motion: { scale: 1, ease: 'cubic-bezier(0.22, 1, 0.36, 1)', pop: 'cubic-bezier(0.34, 1.56, 0.64, 1)' },
+    sound: { voice: 'keys', gain: 0.7, root: 196, scale: [0, 2, 3, 5, 7, 8, 10], reverb: { seconds: 3, decay: 3, mix: 0.3 }, filter: 2800, drive: 0.1, transient: 'knock' }
+  },
+  {
+    id: 'yule', season: 'yule',
+    name: { en: 'Yule', fr: 'Noël' },
+    blurb: { en: 'Red and pine, snow in the lamplight, bells that sound like December.', fr: 'Rouge et sapin, de la neige dans la lumière des lampes, des cloches qui sonnent comme décembre.' },
+    swatch: ['#08231a', '#f87171', '#86efac'],
+    backdrop: { renderer: 'season', sky: ['#04170f', '#08231a', '#061c14'], particle: 'snow', count: 100, speed: 0.8, glow: 'rgba(248, 113, 113, 0.14)' },
+    motion: { scale: 1.1, ease: 'cubic-bezier(0.25, 1, 0.5, 1)', pop: 'cubic-bezier(0.3, 1.4, 0.6, 1)' },
+    sound: { voice: 'fm', gain: 0.6, root: 349.23, scale: [0, 2, 4, 7, 9], reverb: { seconds: 3.4, decay: 2.8, mix: 0.36 }, filter: 6000, drive: 0.1, transient: 'air' }
   }
 ];
 

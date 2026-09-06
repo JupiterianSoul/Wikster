@@ -345,7 +345,7 @@ export function navTabFor(screen) {
     : screen === 'cardindex' ? 'binder'
       : screen === 'glossary' ? 'packs'
         : ['wikdle', 'slots', 'duel', 'reveal'].includes(screen) ? 'games'
-          : (['settings', 'customize', 'badges', 'friends', 'friend', 'chat', 'ach', 'updates', 'quiz', 'games', 'quests', 'leaderboard', 'guilds'].includes(screen) ? 'profile' : screen));
+          : (['settings', 'customize', 'badges', 'friends', 'friend', 'chat', 'ach', 'updates', 'quiz', 'games', 'quests', 'leaderboard', 'guilds', 'season'].includes(screen) ? 'profile' : screen));
 }
 
 export function refreshWallet() {

@@ -358,10 +358,15 @@ export function styleForSpec(spec) {
 
   const theme = themeById(spec.themeId);
   if (theme) {
-    const s = THEME_STYLES[theme.id] ?? OPEN_STYLE;
+    // A season's booster carries its own look on the row (src/data/seasons.js)
+    // and borrows a drawn emblem, since it has no album of its own.
+    const s = theme.style
+      ? { family: theme.style.family, foil: (P[theme.style.foil] ?? P.facets)(1, 0.14), holoAngle: theme.style.holoAngle,
+          particles: burst(theme.style.shapes, theme.style.colors, { count: 30, spread: 1.2, gravity: 0.3 }) }
+      : (THEME_STYLES[theme.id] ?? OPEN_STYLE);
     return { accent: theme.accent, accent2: theme.accent2, foil: s.foil,
       holo: holo(s.holoAngle ?? 115), particles: s.particles,
-      family: s.family ?? 'roundel', emblem: { kind: 'drawn', id: theme.id } };
+      family: s.family ?? 'roundel', emblem: { kind: 'drawn', id: theme.emblem ?? theme.id } };
   }
 
   // A pure rarity booster is a cut gem in the tier's colour.

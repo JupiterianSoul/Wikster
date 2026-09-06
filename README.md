@@ -513,6 +513,27 @@ Wikdle plays in the app's language: `src/data/wikdle-words-fr.js` carries
 the French answers and dictionary, accents dropped, and the hints come from
 the word's article on that language's Wikipedia.
 
+### The seasons
+
+The year is eleven seasons (`src/data/seasons.js`), each dated by month
+and day so the calendar repeats on its own. `src/season.js` says which one
+is on, keeps season points in the profile under the season's key (the year
+it began and its id, so a season played twice is two entries), reads the
+track of ten rungs off them, and deals a season quest a day off the same
+ledger the daily quests use. A rung's theme and badge go into
+`profile.seasonUnlocks`, which outlives the season. Season boosters are
+subject packs in all but name: `themeById` in `src/data/packs.js` knows
+`SEASON_PACKS`, so naming, colours, art and the draw are the same code as
+any subject, and each carries its own foil and particles on its row. The
+eleven season themes share one backdrop renderer (`season` in
+`src/ui/backdrop.js`), coloured and peopled per season; their CSS blocks
+sit at the end of `src/styles/themes.css`, and the picker hides a season
+theme the save has not earned. On the server (schema V11) a `seasons` table
+holds the same calendar and `current_season_key()` reads it, so every score
+also lands on `leaderboard_season` and `guild_season` under the season it
+was made in; those windows are never emptied, and the four board functions
+take `season` as a window.
+
 ### The clubhouse
 
 Guilds are a name, a tag and up to fifty players (`supabase/schema.sql`

@@ -7,9 +7,10 @@
  * the bottom of the screen when it is not on the page being looked at.
  */
 import { supabase } from './account.js';
+import { msToSeasonEnd } from './season.js';
 import { emit } from './ui/bus.js';
 
-export const WINDOWS = ['daily', 'weekly', 'alltime'];
+export const WINDOWS = ['daily', 'weekly', 'season', 'alltime'];
 export const PAGE_SIZE = 20;
 const TIMEOUT_MS = 10000;
 
@@ -115,6 +116,7 @@ export const submitWikdle = (points, day) => submitScore('wikdle', points, day);
 /** Milliseconds until a window resets: midnight UTC, or Sunday midnight UTC; never for all-time. */
 export function msToReset(window, now = Date.now()) {
   if (window === 'alltime') return null;
+  if (window === 'season') return msToSeasonEnd(now);
   const next = new Date(now);
   next.setUTCHours(24, 0, 0, 0);
   if (window === 'weekly') {

@@ -522,6 +522,24 @@ export const RELEASES = [
     ]
   },
   {
+    id: 'seasons', icon: 'calendar', accent: '#fb923c',
+    title: { en: 'The seasons', fr: 'Les saisons' },
+    points: [
+      { en: 'The year is eleven seasons, each with its own booster, board and track', fr: 'L’année compte onze saisons, chacune avec son booster, son classement et sa piste' },
+      { en: 'A theme and a badge per season, nowhere else to be had', fr: 'Un thème et un badge par saison, introuvables ailleurs' },
+      { en: 'A season quest a day, and a fourth window on every board', fr: 'Une quête de saison par jour, et une quatrième fenêtre sur chaque classement' }
+    ],
+    changelog: [
+      { en: 'Eleven seasons on the calendar, every day of the year in one of them: Frost, Hearts, Thaw, Fools and Eggs, Bloom, Solstice, Voyage, Harvest, Hallows, Ember, Yule. Each comes round every year with the same name and the same look', fr: 'Onze saisons au calendrier, chaque jour de l’année dans l’une d’elles : Givre, Cœurs, Dégel, Poissons et œufs, Floraison, Solstice, Grand voyage, Moisson, Sabbat, Braise, Noël. Chacune revient chaque année, même nom, même allure' },
+      { en: 'Season points from everything you do, on a track of ten rungs: coins, the season’s boosters, and at the fourth and seventh rung the season’s badge and the season’s theme, kept for good and never offered again once the season has passed. A rung reached can be claimed after the season; a rung not reached cannot', fr: 'Des points de saison pour tout ce que vous faites, sur une piste de dix paliers : des pièces, les boosters de la saison, et aux quatrième et septième paliers le badge et le thème de la saison, gardés pour toujours et jamais réoffèrts une fois la saison passée. Un palier atteint se réclame après la saison ; un palier non atteint, jamais' },
+      { en: 'Each season has a booster of its own, drawn from its corner of the encyclopaedia (Christmas markets and reindeer in Yule, haunted houses and witches in Hallows, hoaxes and painted eggs in April), on the shop floor and on the Season screen until the season turns, in a plain and a Rare size, priced by the same rule as every other booster', fr: 'Chaque saison a son booster, tiré de son coin de l’encyclopédie (marchés de Noël et rennes à Noël, maisons hantées et sorcières au Sabbat, canulars et œufs peints en avril), dans la boutique et sur l’écran Saison jusqu’au changement de saison, en taille simple et Rare, au prix de la règle de tous les autres boosters' },
+      { en: 'Eleven themes, one per season, each with its own palette, shape and type and its own weather behind the app: snow in Frost and Yule, hearts rising in Hearts, petals in Thaw and Bloom, bubbles in April and on the Voyage, sparks off the water at the Solstice, leaves in Harvest, embers in Hallows and Ember', fr: 'Onze thèmes, un par saison, chacun avec sa palette, ses formes, sa typographie et sa propre météo derrière l’application : de la neige à Givre et Noël, des cœurs qui montent à Cœurs, des pétales à Dégel et Floraison, des bulles en avril et en Grand voyage, des étincelles sur l’eau au Solstice, des feuilles à Moisson, des braises au Sabbat et à Braise' },
+      { en: 'A season quest a day, dealt from the season, read off the same ledger as the daily quests, paying coins and season points', fr: 'Une quête de saison par jour, tirée de la saison, lue sur le même registre que les quêtes du jour, payée en pièces et en points de saison' },
+      { en: 'The leaderboard and the guild board have a fourth window, the season, filed under the season a score was made in and kept forever; the Season screen says where you and your guild stand in it', fr: 'Le classement et celui des guildes ont une quatrième fenêtre, la saison, classée sous la saison où le score a été fait et gardée pour toujours ; l’écran Saison dit où vous et votre guilde en êtes' },
+      { en: 'The Season screen lays the year out: what is on, how long it has left, what came before with what you reached in it, and what comes next', fr: 'L’écran Saison étale l’année : ce qui est en cours, ce qui lui reste, ce qui est passé avec ce que vous y avez atteint, et ce qui vient' }
+    ]
+  },
+  {
     id: 'clubs', icon: 'shield', accent: '#c4b5fd',
     title: { en: 'The clubhouse', fr: 'Le club' },
     points: [

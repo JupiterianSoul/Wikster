@@ -864,3 +864,474 @@
   --press-shift: 1px;
   --texture: grain;
 }
+
+/* ==========================================================================
+   THE SEASON THEMES
+   --------------------------------------------------------------------------
+   One block per season (src/data/seasons.js), unlocked on the season's
+   track and kept for good. Colours, shape and type; the backdrop behind them
+   is the shared season renderer in ui/backdrop.js, coloured per season.
+   ========================================================================== */
+
+/* --- FROST: the year under ice --- */
+[data-theme='frost'] {
+  --ink: #eef7ff;
+  --ink-dim: #9dbbd6;
+  --ink-faint: #5f7a94;
+
+  --surface: rgba(191, 233, 255, 0.07);
+  --surface-2: rgba(191, 233, 255, 0.13);
+  --surface-solid: #0a1a2e;
+  --line: rgba(191, 233, 255, 0.22);
+  --line-strong: rgba(191, 233, 255, 0.42);
+
+  --accent: #bfe9ff;
+  --accent-2: #7dd3fc;
+  --accent-ink: #04121f;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: var(--font);
+  --display-weight: 800;
+  --display-tracking: -0.02em;
+  --display-transform: none;
+  --label-tracking: 0.12em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: none;
+}
+/* --- HEARTS: rose on wine --- */
+[data-theme='hearts'] {
+  --ink: #fff1f3;
+  --ink-dim: #d6a2ad;
+  --ink-faint: #8c6570;
+
+  --surface: rgba(251, 113, 133, 0.07);
+  --surface-2: rgba(251, 113, 133, 0.13);
+  --surface-solid: #2a0a16;
+  --line: rgba(251, 113, 133, 0.22);
+  --line-strong: rgba(251, 113, 133, 0.42);
+
+  --accent: #fb7185;
+  --accent-2: #fda4af;
+  --accent-ink: #2a0810;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 16px;
+  --radius: 24px;
+  --radius-lg: 34px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: ui-rounded, 'SF Pro Rounded', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Georgia', ui-serif, serif;
+  --display-weight: 700;
+  --display-tracking: -0.01em;
+  --display-transform: none;
+  --label-tracking: 0.09em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: none;
+}
+/* --- THAW: spring green on deep teal --- */
+[data-theme='thaw'] {
+  --ink: #ecfdf5;
+  --ink-dim: #9ccab3;
+  --ink-faint: #5d8a72;
+
+  --surface: rgba(134, 239, 172, 0.07);
+  --surface-2: rgba(134, 239, 172, 0.13);
+  --surface-solid: #07211a;
+  --line: rgba(134, 239, 172, 0.22);
+  --line-strong: rgba(134, 239, 172, 0.42);
+
+  --accent: #86efac;
+  --accent-2: #5eead4;
+  --accent-ink: #052016;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 14px;
+  --radius: 20px;
+  --radius-lg: 30px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: ui-rounded, 'SF Pro Rounded', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font);
+  --display-weight: 800;
+  --display-tracking: -0.015em;
+  --display-transform: none;
+  --label-tracking: 0.09em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: none;
+}
+/* --- FOOLS AND EGGS: yellow on purple, a comic hand --- */
+[data-theme='fools'] {
+  --ink: #fefce8;
+  --ink-dim: #c9c19a;
+  --ink-faint: #7f7a5c;
+
+  --surface: rgba(253, 224, 71, 0.07);
+  --surface-2: rgba(253, 224, 71, 0.13);
+  --surface-solid: #1d1040;
+  --line: rgba(253, 224, 71, 0.22);
+  --line-strong: rgba(253, 224, 71, 0.42);
+
+  --accent: #fde047;
+  --accent-2: #c4b5fd;
+  --accent-ink: #1c1400;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: 'Comic Neue', ui-rounded, ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font);
+  --display-weight: 700;
+  --display-tracking: 0;
+  --display-transform: none;
+  --label-tracking: 0.1em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: none;
+}
+/* --- BLOOM: pink and leaf green --- */
+[data-theme='bloom'] {
+  --ink: #fff5fb;
+  --ink-dim: #c9a2b9;
+  --ink-faint: #7e6474;
+
+  --surface: rgba(249, 168, 212, 0.07);
+  --surface-2: rgba(249, 168, 212, 0.13);
+  --surface-solid: #152012;
+  --line: rgba(249, 168, 212, 0.22);
+  --line-strong: rgba(249, 168, 212, 0.42);
+
+  --accent: #f9a8d4;
+  --accent-2: #a3e635;
+  --accent-ink: #2b0a1d;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 18px;
+  --radius: 26px;
+  --radius-lg: 36px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: ui-rounded, 'SF Pro Rounded', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Georgia', ui-serif, serif;
+  --display-weight: 700;
+  --display-tracking: -0.01em;
+  --display-transform: none;
+  --label-tracking: 0.08em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: none;
+}
+/* --- SOLSTICE: gold on deep sea --- */
+[data-theme='solstice'] {
+  --ink: #fffbeb;
+  --ink-dim: #cdbb8a;
+  --ink-faint: #8a7c55;
+
+  --surface: rgba(251, 191, 36, 0.07);
+  --surface-2: rgba(251, 191, 36, 0.13);
+  --surface-solid: #06232e;
+  --line: rgba(251, 191, 36, 0.22);
+  --line-strong: rgba(251, 191, 36, 0.42);
+
+  --accent: #fbbf24;
+  --accent-2: #22d3ee;
+  --accent-ink: #231600;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 12px;
+  --radius: 18px;
+  --radius-lg: 26px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: var(--font);
+  --display-weight: 900;
+  --display-tracking: -0.03em;
+  --display-transform: uppercase;
+  --label-tracking: 0.14em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: none;
+}
+/* --- VOYAGE: orange on navy, carved capitals --- */
+[data-theme='voyage'] {
+  --ink: #fff7ed;
+  --ink-dim: #c8b09a;
+  --ink-faint: #85705d;
+
+  --surface: rgba(251, 146, 60, 0.07);
+  --surface-2: rgba(251, 146, 60, 0.13);
+  --surface-solid: #0c1a3f;
+  --line: rgba(251, 146, 60, 0.22);
+  --line-strong: rgba(251, 146, 60, 0.42);
+
+  --accent: #fb923c;
+  --accent-2: #93c5fd;
+  --accent-ink: #1f1004;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: 'Avenir Next', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Cinzel', 'Trajan Pro', 'Georgia', ui-serif, serif;
+  --display-weight: 700;
+  --display-tracking: 0.06em;
+  --display-transform: uppercase;
+  --label-tracking: 0.16em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: grain;
+}
+/* --- HARVEST: amber on oak, a serif --- */
+[data-theme='harvest'] {
+  --ink: #fef3c7;
+  --ink-dim: #c9ad78;
+  --ink-faint: #85704a;
+
+  --surface: rgba(245, 158, 11, 0.07);
+  --surface-2: rgba(245, 158, 11, 0.13);
+  --surface-solid: #1f1108;
+  --line: rgba(245, 158, 11, 0.22);
+  --line-strong: rgba(245, 158, 11, 0.42);
+
+  --accent: #f59e0b;
+  --accent-2: #fde68a;
+  --accent-ink: #1f1300;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: 'Georgia', 'Iowan Old Style', ui-serif, serif;
+  --font-display: var(--font);
+  --display-weight: 700;
+  --display-tracking: -0.01em;
+  --display-transform: none;
+  --label-tracking: 0.1em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: grain;
+}
+/* --- HALLOWS: pumpkin on midnight purple --- */
+[data-theme='hallows'] {
+  --ink: #fff4e6;
+  --ink-dim: #c7a58a;
+  --ink-faint: #7d6656;
+
+  --surface: rgba(251, 146, 60, 0.07);
+  --surface-2: rgba(251, 146, 60, 0.13);
+  --surface-solid: #160a2a;
+  --line: rgba(251, 146, 60, 0.22);
+  --line-strong: rgba(251, 146, 60, 0.42);
+
+  --accent: #fb923c;
+  --accent-2: #c084fc;
+  --accent-ink: #1b0a00;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: 'Avenir Next', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Cinzel', 'Trajan Pro', 'Georgia', ui-serif, serif;
+  --display-weight: 800;
+  --display-tracking: 0.08em;
+  --display-transform: uppercase;
+  --label-tracking: 0.2em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: grain;
+}
+/* --- EMBER: copper on charcoal --- */
+[data-theme='ember'] {
+  --ink: #fff1e6;
+  --ink-dim: #c9a087;
+  --ink-faint: #806354;
+
+  --surface: rgba(249, 115, 22, 0.07);
+  --surface-2: rgba(249, 115, 22, 0.13);
+  --surface-solid: #120e0c;
+  --line: rgba(249, 115, 22, 0.22);
+  --line-strong: rgba(249, 115, 22, 0.42);
+
+  --accent: #f97316;
+  --accent-2: #fdba74;
+  --accent-ink: #1a0b02;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Georgia', ui-serif, serif;
+  --display-weight: 700;
+  --display-tracking: 0.02em;
+  --display-transform: none;
+  --label-tracking: 0.14em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: grain;
+}
+/* --- YULE: red and pine --- */
+[data-theme='yule'] {
+  --ink: #fff5f5;
+  --ink-dim: #c9a3a3;
+  --ink-faint: #7f6666;
+
+  --surface: rgba(248, 113, 113, 0.07);
+  --surface-2: rgba(248, 113, 113, 0.13);
+  --surface-solid: #08231a;
+  --line: rgba(248, 113, 113, 0.22);
+  --line-strong: rgba(248, 113, 113, 0.42);
+
+  --accent: #f87171;
+  --accent-2: #86efac;
+  --accent-ink: #2a0606;
+  --positive: #86efac;
+  --negative: #fda4af;
+  --warning: #fcd34d;
+
+  --radius-sm: 14px;
+  --radius: 20px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+  --border: 1px;
+  --border-style: solid;
+
+  --surface-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --raise-shadow: 0 26px 60px -28px rgba(0, 0, 0, 0.95);
+  --glow: 0 0 30px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+  --blur: blur(14px) saturate(1.2);
+
+  --font: ui-rounded, 'SF Pro Rounded', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Georgia', ui-serif, serif;
+  --display-weight: 800;
+  --display-tracking: -0.01em;
+  --display-transform: none;
+  --label-tracking: 0.1em;
+
+  --press-scale: 0.965;
+  --press-shift: 0px;
+  --texture: none;
+}

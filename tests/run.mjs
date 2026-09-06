@@ -16,7 +16,7 @@ import { createConnection } from 'node:net';
 
 const MODES = {
   app: 'offline', hellfire: 'offline', games: 'offline', regalia: 'offline', offline: 'offline', product: 'offline', arcade2: 'offline', desk: 'offline',
-  fixes6: 'stub', worldclock: 'stub', facetoface: 'stub', g4: 'stub', sync: 'stub', live: 'stub', clubs: 'stub'
+  fixes6: 'stub', worldclock: 'stub', facetoface: 'stub', g4: 'stub', sync: 'stub', live: 'stub', clubs: 'stub', seasons: 'stub'
 };
 const PORT = Number(process.env.PORT) || 4173;
 const OUT = 'tests/out';

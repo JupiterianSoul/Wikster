@@ -141,7 +141,7 @@ export function openBoardFeed(onChange) {
   let channel = null;
   try {
     channel = supabase.channel('board');
-    for (const table of ['leaderboard_daily', 'leaderboard_weekly', 'leaderboard_alltime', 'guild_daily', 'guild_weekly', 'guild_alltime']) {
+    for (const table of ['leaderboard_daily', 'leaderboard_weekly', 'leaderboard_alltime', 'leaderboard_season', 'guild_daily', 'guild_weekly', 'guild_alltime', 'guild_season']) {
       channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => { try { onChange?.(); } catch { /* ignore */ } });
     }
     channel.subscribe();

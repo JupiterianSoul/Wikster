@@ -11,7 +11,8 @@ import { synth } from '../ui/sound.js';
 import { formatCountdown } from '../shop.js';
 import * as leaderboard from '../leaderboard.js';
 import { formatAmount } from '../pricing.js';
-import { gameStage, houseError, questUserKey } from './arcade.js';
+import { earnSeasonPoints, gameStage, houseError, questUserKey } from './arcade.js';
+import { pointsForQuest } from '../season.js';
 import { el, esc, money, refreshWallet, state, toast } from './core.js';
 import { paintDrawerLinks } from './drawer.js';
 import { showGate, signedIn, userId } from './gate.js';
@@ -116,6 +117,7 @@ export function paintQuests(board) {
           const reward = await quests.claim(row.id, questUserKey());
           if (reward.money) { store.saveWallet(store.loadWallet() + reward.money); refreshWallet(); }
           if (reward.booster) gainBooster({ ...reward.booster }, 1);
+          earnSeasonPoints(pointsForQuest());
           synth.playPurchase();
           const rect = btn.getBoundingClientRect();
           spawnBurst({ shapes: ['star4', 'orb'], colors: [tier.color, '#f8fafc', '#fbbf24'], count: 16, spread: 1, gravity: 0.3 },
@@ -293,7 +295,7 @@ export async function loadLeaderboard({ quiet = false } = {}) {
     const ms = leaderboard.msToReset(view.window);
     reset.innerHTML = `${iconSvg('clock', { size: 14 })}<span></span>`;
     reset.querySelector('span').textContent = ms == null ? t('lbForever')
-      : t(view.window === 'weekly' ? 'lbResetWeekly' : 'lbResetDaily', { time: formatCountdown(ms) });
+      : t(view.window === 'weekly' ? 'lbResetWeekly' : view.window === 'season' ? 'lbResetSeason' : 'lbResetDaily', { time: formatCountdown(ms) });
   };
   paintReset();
   clearInterval(state.lbTimer);

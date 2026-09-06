@@ -1853,3 +1853,223 @@ exception when others then null; end $$;
 do $$ begin
   alter publication supabase_realtime add table public.guild_matches;
 exception when others then null; end $$;
+
+-- ============================================================================
+-- V11 - THE SEASONS
+-- ----------------------------------------------------------------------------
+-- The year in eleven parts (src/data/seasons.js is the calendar the app
+-- reads; this table is the same calendar, so the server can say which
+-- season a score belongs to without trusting the phone's clock). Every
+-- score lands on a fourth window filed under the season it was scored in,
+-- for players and for guilds, and the windows of past seasons stay: a
+-- season is never emptied, the next one simply starts a new key.
+-- ============================================================================
+
+create table if not exists public.seasons (
+  id         text primary key,
+  ord        integer not null,
+  from_month integer not null, from_day integer not null,
+  to_month   integer not null, to_day   integer not null
+);
+insert into public.seasons (id, ord, from_month, from_day, to_month, to_day) values
+  ('frost', 1, 1, 1, 2, 1), ('hearts', 2, 2, 1, 3, 1), ('thaw', 3, 3, 1, 4, 1), ('fools', 4, 4, 1, 5, 1),
+  ('bloom', 5, 5, 1, 6, 1), ('solstice', 6, 6, 1, 7, 14), ('voyage', 7, 7, 14, 9, 1), ('harvest', 8, 9, 1, 10, 1),
+  ('hallows', 9, 10, 1, 11, 3), ('ember', 10, 11, 3, 12, 1), ('yule', 11, 12, 1, 1, 1)
+on conflict (id) do update set ord = excluded.ord, from_month = excluded.from_month, from_day = excluded.from_day,
+  to_month = excluded.to_month, to_day = excluded.to_day;
+alter table public.seasons enable row level security;
+drop policy if exists "the calendar is public" on public.seasons;
+create policy "the calendar is public" on public.seasons for select to authenticated using (true);
+
+-- The key a score is filed under today: the year the season began, and its id.
+create or replace function public.current_season_key()
+returns text language plpgsql stable set search_path = public as $$
+declare d date := (now() at time zone 'utc')::date; y integer := extract(year from (now() at time zone 'utc'))::integer; r record;
+begin
+  for r in select * from seasons order by ord loop
+    if r.to_month < r.from_month or (r.to_month = r.from_month and r.to_day <= r.from_day) then
+      -- A season across the year end: it began this year, or last.
+      if d >= make_date(y, r.from_month, r.from_day) then return y || '-' || r.id; end if;
+      if d < make_date(y, r.to_month, r.to_day) then return (y - 1) || '-' || r.id; end if;
+    elsif d >= make_date(y, r.from_month, r.from_day) and d < make_date(y, r.to_month, r.to_day) then
+      return y || '-' || r.id;
+    end if;
+  end loop;
+  return y || '-none';
+end $$;
+
+create table if not exists public.leaderboard_season (
+  season     text not null,
+  user_id    uuid not null references auth.users on delete cascade,
+  score      bigint not null default 0,
+  updated_at timestamptz not null default now(),
+  primary key (season, user_id)
+);
+create index if not exists leaderboard_season_idx on public.leaderboard_season (season, score desc, updated_at asc);
+create table if not exists public.guild_season (
+  season     text not null,
+  guild_id   uuid not null references public.guilds on delete cascade,
+  score      bigint not null default 0,
+  updated_at timestamptz not null default now(),
+  primary key (season, guild_id)
+);
+create index if not exists guild_season_idx on public.guild_season (season, score desc, updated_at asc);
+alter table public.leaderboard_season enable row level security;
+alter table public.guild_season enable row level security;
+drop policy if exists "the season board is public" on public.leaderboard_season;
+create policy "the season board is public" on public.leaderboard_season for select to authenticated using (true);
+drop policy if exists "the guild season board is public" on public.guild_season;
+create policy "the guild season board is public" on public.guild_season for select to authenticated using (true);
+
+-- The same trigger fills the fourth window.
+create or replace function public.scores_into_windows()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  insert into leaderboard_daily (user_id, score) values (new.user_id, new.points)
+    on conflict (user_id) do update set score = leaderboard_daily.score + excluded.score, updated_at = now();
+  insert into leaderboard_weekly (user_id, score) values (new.user_id, new.points)
+    on conflict (user_id) do update set score = leaderboard_weekly.score + excluded.score, updated_at = now();
+  insert into leaderboard_alltime (user_id, score) values (new.user_id, new.points)
+    on conflict (user_id) do update set score = leaderboard_alltime.score + excluded.score, updated_at = now();
+  insert into leaderboard_season (season, user_id, score) values (current_season_key(), new.user_id, new.points)
+    on conflict (season, user_id) do update set score = leaderboard_season.score + excluded.score, updated_at = now();
+  perform guild_windows_add(new.user_id, new.points);
+  return new;
+end $$;
+
+create or replace function public.scores_windows_delta()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare d integer := new.points - old.points;
+begin
+  if d = 0 then return new; end if;
+  update leaderboard_daily   set score = greatest(0, score + d), updated_at = now() where user_id = new.user_id;
+  update leaderboard_weekly  set score = greatest(0, score + d), updated_at = now() where user_id = new.user_id;
+  update leaderboard_alltime set score = greatest(0, score + d), updated_at = now() where user_id = new.user_id;
+  insert into leaderboard_season (season, user_id, score) values (current_season_key(), new.user_id, greatest(0, d))
+    on conflict (season, user_id) do update set score = greatest(0, leaderboard_season.score + d), updated_at = now();
+  perform guild_windows_add(new.user_id, d);
+  return new;
+end $$;
+
+create or replace function public.guild_windows_add(p_user uuid, p_delta integer)
+returns void language plpgsql security definer set search_path = public as $$
+declare g uuid;
+begin
+  if p_delta = 0 then return; end if;
+  select guild_id into g from guild_members where user_id = p_user;
+  if g is null then return; end if;
+  insert into guild_daily (guild_id, score) values (g, greatest(0, p_delta))
+    on conflict (guild_id) do update set score = greatest(0, guild_daily.score + p_delta), updated_at = now();
+  insert into guild_weekly (guild_id, score) values (g, greatest(0, p_delta))
+    on conflict (guild_id) do update set score = greatest(0, guild_weekly.score + p_delta), updated_at = now();
+  insert into guild_alltime (guild_id, score) values (g, greatest(0, p_delta))
+    on conflict (guild_id) do update set score = greatest(0, guild_alltime.score + p_delta), updated_at = now();
+  insert into guild_season (season, guild_id, score) values (current_season_key(), g, greatest(0, p_delta))
+    on conflict (season, guild_id) do update set score = greatest(0, guild_season.score + p_delta), updated_at = now();
+  if p_delta > 0 then perform guild_goal_bump(g, 'points', p_delta); end if;
+end $$;
+
+-- The boards learn the fourth window.
+create or replace function public.leaderboard_page(p_window text, p_page integer default 0)
+returns table (rank bigint, user_id uuid, username text, score bigint)
+language plpgsql stable security definer set search_path = public as $$
+declare sk text := current_season_key();
+begin
+  if p_window = 'daily' then
+    return query select row_number() over (order by d.score desc, d.updated_at asc) as rank, d.user_id, p.username, d.score
+      from leaderboard_daily d join profiles p on p.id = d.user_id
+      order by d.score desc, d.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  elsif p_window = 'weekly' then
+    return query select row_number() over (order by w.score desc, w.updated_at asc), w.user_id, p.username, w.score
+      from leaderboard_weekly w join profiles p on p.id = w.user_id
+      order by w.score desc, w.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  elsif p_window = 'season' then
+    return query select row_number() over (order by s.score desc, s.updated_at asc), s.user_id, p.username, s.score
+      from leaderboard_season s join profiles p on p.id = s.user_id where s.season = sk
+      order by s.score desc, s.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  else
+    return query select row_number() over (order by a.score desc, a.updated_at asc), a.user_id, p.username, a.score
+      from leaderboard_alltime a join profiles p on p.id = a.user_id
+      order by a.score desc, a.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  end if;
+end $$;
+
+create or replace function public.my_rank(p_window text)
+returns table (rank bigint, score bigint, total bigint)
+language plpgsql stable security definer set search_path = public as $$
+declare me uuid := auth.uid(); my_score bigint; my_at timestamptz; sk text := current_season_key();
+begin
+  if me is null then return; end if;
+  if p_window = 'daily' then
+    select d.score, d.updated_at into my_score, my_at from leaderboard_daily d where d.user_id = me;
+    if my_score is null then return; end if;
+    return query select (select count(*) + 1 from leaderboard_daily x where x.score > my_score or (x.score = my_score and x.updated_at < my_at)), my_score, (select count(*) from leaderboard_daily);
+  elsif p_window = 'weekly' then
+    select w.score, w.updated_at into my_score, my_at from leaderboard_weekly w where w.user_id = me;
+    if my_score is null then return; end if;
+    return query select (select count(*) + 1 from leaderboard_weekly x where x.score > my_score or (x.score = my_score and x.updated_at < my_at)), my_score, (select count(*) from leaderboard_weekly);
+  elsif p_window = 'season' then
+    select s.score, s.updated_at into my_score, my_at from leaderboard_season s where s.user_id = me and s.season = sk;
+    if my_score is null then return; end if;
+    return query select (select count(*) + 1 from leaderboard_season x where x.season = sk and (x.score > my_score or (x.score = my_score and x.updated_at < my_at))), my_score, (select count(*) from leaderboard_season x where x.season = sk);
+  else
+    select a.score, a.updated_at into my_score, my_at from leaderboard_alltime a where a.user_id = me;
+    if my_score is null then return; end if;
+    return query select (select count(*) + 1 from leaderboard_alltime x where x.score > my_score or (x.score = my_score and x.updated_at < my_at)), my_score, (select count(*) from leaderboard_alltime);
+  end if;
+end $$;
+
+create or replace function public.guild_board(p_window text, p_page integer default 0)
+returns table (rank bigint, guild_id uuid, name text, tag text, members integer, score bigint)
+language plpgsql stable security definer set search_path = public as $$
+declare sk text := current_season_key();
+begin
+  if p_window = 'daily' then
+    return query select row_number() over (order by d.score desc, d.updated_at asc), g.id, g.name, g.tag, g.members, d.score
+      from guild_daily d join guilds g on g.id = d.guild_id order by d.score desc, d.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  elsif p_window = 'weekly' then
+    return query select row_number() over (order by w.score desc, w.updated_at asc), g.id, g.name, g.tag, g.members, w.score
+      from guild_weekly w join guilds g on g.id = w.guild_id order by w.score desc, w.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  elsif p_window = 'season' then
+    return query select row_number() over (order by s.score desc, s.updated_at asc), g.id, g.name, g.tag, g.members, s.score
+      from guild_season s join guilds g on g.id = s.guild_id where s.season = sk order by s.score desc, s.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  else
+    return query select row_number() over (order by a.score desc, a.updated_at asc), g.id, g.name, g.tag, g.members, a.score
+      from guild_alltime a join guilds g on g.id = a.guild_id order by a.score desc, a.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  end if;
+end $$;
+
+create or replace function public.my_guild_rank(p_window text)
+returns table (rank bigint, score bigint, total bigint)
+language plpgsql stable security definer set search_path = public as $$
+declare g uuid; my_score bigint; my_at timestamptz; sk text := current_season_key();
+begin
+  select guild_id into g from guild_members where user_id = auth.uid();
+  if g is null then return; end if;
+  if p_window = 'daily' then
+    select d.score, d.updated_at into my_score, my_at from guild_daily d where d.guild_id = g;
+    if my_score is null then return query select null::bigint, 0::bigint, (select count(*) from guild_daily); return; end if;
+    return query select (select count(*) + 1 from guild_daily x where x.score > my_score or (x.score = my_score and x.updated_at < my_at)), my_score, (select count(*) from guild_daily);
+  elsif p_window = 'weekly' then
+    select w.score, w.updated_at into my_score, my_at from guild_weekly w where w.guild_id = g;
+    if my_score is null then return query select null::bigint, 0::bigint, (select count(*) from guild_weekly); return; end if;
+    return query select (select count(*) + 1 from guild_weekly x where x.score > my_score or (x.score = my_score and x.updated_at < my_at)), my_score, (select count(*) from guild_weekly);
+  elsif p_window = 'season' then
+    select s.score, s.updated_at into my_score, my_at from guild_season s where s.guild_id = g and s.season = sk;
+    if my_score is null then return query select null::bigint, 0::bigint, (select count(*) from guild_season x where x.season = sk); return; end if;
+    return query select (select count(*) + 1 from guild_season x where x.season = sk and (x.score > my_score or (x.score = my_score and x.updated_at < my_at))), my_score, (select count(*) from guild_season x where x.season = sk);
+  else
+    select a.score, a.updated_at into my_score, my_at from guild_alltime a where a.guild_id = g;
+    if my_score is null then return query select null::bigint, 0::bigint, (select count(*) from guild_alltime); return; end if;
+    return query select (select count(*) + 1 from guild_alltime x where x.score > my_score or (x.score = my_score and x.updated_at < my_at)), my_score, (select count(*) from guild_alltime);
+  end if;
+end $$;
+
+grant execute on function public.current_season_key() to authenticated;
+
+do $$ begin
+  alter publication supabase_realtime add table public.leaderboard_season;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.guild_season;
+exception when others then null; end $$;

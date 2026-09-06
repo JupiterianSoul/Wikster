@@ -343,6 +343,7 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
       return [...totals.values()].sort((a, b) => b.score - a.score);
     };
     if (path === 'rpc/leaderboard_page') {
+      // Every window reads the same totals here; the season window included.
       const all = board();
       const page = Number(body.p_page) || 0;
       return json(route, all.slice(page * 20, page * 20 + 20).map((r, i) => ({ rank: page * 20 + i + 1, user_id: r.user_id, username: r.username, score: r.score })));

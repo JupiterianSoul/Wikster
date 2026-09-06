@@ -16,6 +16,8 @@ import { gainBooster } from './open.js';
 import { updateBadges } from './regalia.js';
 import { signedIn, userId } from './gate.js';
 import { guildGoalSetup, reportGuildGoal } from '../guildgoal.js';
+import { addSeasonPoints, pointsForReport } from '../season.js';
+import { emit } from '../ui/bus.js';
 
 // The guild's weekly goal hears the same reports the quests do.
 guildGoalSetup(() => signedIn() && Boolean(state.guild));
@@ -34,6 +36,7 @@ export function questUserKey() {
 
 export function reportQuest(metric, detail = {}) {
   try { reportGuildGoal(metric, detail); } catch { /* the goal is not the game */ }
+  try { earnSeasonPoints(pointsForReport(metric, detail)); } catch { /* the season is not the game */ }
   try {
     const done = quests.track(metric, detail, questUserKey());
     for (const id of done) {
@@ -45,6 +48,22 @@ export function reportQuest(metric, detail = {}) {
     console.warn('quest report failed', error);
   }
 }
+/**
+ * Season points, from whatever was just done. The profile is saved, a rung
+ * newly reached is announced, and whoever paints the season hears about it.
+ */
+export function earnSeasonPoints(amount) {
+  if (!(amount > 0)) return;
+  const moved = addSeasonPoints(state.profile, amount);
+  store.saveProfile(state.profile);
+  for (const i of moved.reached) {
+    toast(esc(t('seasonRungReached', { n: i + 1 })), 'ok');
+    pushNote('calendar', t('seasonRungReached', { n: i + 1 }), 'season');
+  }
+  paintDrawerLinks();
+  emit('season', moved);
+}
+
 /** Albums completed since the last look: one report each. */
 
 export let albumsDoneBefore = null;
