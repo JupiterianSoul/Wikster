@@ -58,7 +58,7 @@ bind({
     market: $('#screen-market'), cardindex: $('#screen-cardindex'),
     glossary: $('#screen-glossary'), open: $('#screen-open'),
     games: $('#screen-games'), wikdle: $('#screen-wikdle'), slots: $('#screen-slots'),
-    duel: $('#screen-duel'), reveal: $('#screen-reveal'),
+    duel: $('#screen-duel'), reveal: $('#screen-reveal'), versus: $('#screen-versus'),
     quests: $('#screen-quests'), leaderboard: $('#screen-leaderboard'), guilds: $('#screen-guilds'),
     season: $('#screen-season'), atelier: $('#screen-atelier')
   },
@@ -73,6 +73,7 @@ bind({
   slotsTitle: $('#slots-title'), slotsBody: $('#slots-body'), slotsBack: $('#slots-back'),
   duelTitle: $('#duel-title'), duelBody: $('#duel-body'), duelBack: $('#duel-back'),
   revealTitle: $('#reveal-title'), revealBody: $('#reveal-body'), revealBack: $('#reveal-back'),
+  versusTitle: $('#versus-title'), versusBody: $('#versus-body'), versusBack: $('#versus-back'),
   questsTitle: $('#quests-title'), questsSub: $('#quests-sub'), questsBody: $('#quests-body'),
   leaderboardTitle: $('#leaderboard-title'), leaderboardSeg: $('#leaderboard-seg'),
   leaderboardBody: $('#leaderboard-body'), leaderboardMe: $('#leaderboard-me'),
@@ -409,6 +410,7 @@ export function init() {
   press(el.panelToggle, { sound: null });
   el.duelBack.addEventListener('click', () => { synth.playTap(); showScreen('games'); });
   el.revealBack.addEventListener('click', () => { synth.playTap(); import('./reveal.js').then((m) => m.leaveReveal()); showScreen('games'); });
+  el.versusBack.addEventListener('click', () => { synth.playTap(); showScreen('games'); });
   quests.onQuestsChange(() => paintDrawerLinks());
   reportAlbums();
   applyPanelState();

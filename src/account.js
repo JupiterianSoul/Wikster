@@ -30,7 +30,8 @@ export {
   subscribeAuctions,
   openChatChannel
 } from './account/market.js';
-export { openSocialFeed, openPresence, openBoardFeed, openGuildInviteFeed, openGuildRoom } from './account/realtime.js';
+export { openSocialFeed, openPresence, openBoardFeed, openGuildInviteFeed, openGuildRoom, openChallengeFeed } from './account/realtime.js';
+export { sendChallenge, myChallenges, answerChallenge, declineChallenge, claimChallenge } from './account/versus.js';
 export { getProfile, ensureProfile, profileForSession, publishStats } from './account/profile.js';
 export {
   remoteBuildStamp,

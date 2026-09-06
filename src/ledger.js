@@ -109,6 +109,10 @@ export function record(profile, metric, detail = {}) {
     case 'album':
       bump(profile, 'albumsDone');
       return true;
+    case 'versus':
+      bump(profile, 'versusClaimed');
+      if (d.won) bump(profile, 'versusWon');
+      return true;
     default:
       return false;
   }

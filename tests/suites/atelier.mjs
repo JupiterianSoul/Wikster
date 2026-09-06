@@ -7,6 +7,7 @@ import { chromium, devices } from 'playwright';
 import { launchOptions } from '../lib/browser.mjs';
 import { installStubs } from '../lib/stubs.mjs';
 import { EXCHANGE_RATE, FRAME_PRICE, THEME_PRICE, fxPrice, inkForLevel } from '../../src/ink.js';
+import { RELEASES } from '../../src/data/releases.js';
 
 let fails = 0;
 const check = (l, c, e = '') => { if (!c) fails++; console.log(`${c ? 'PASS' : 'FAIL'}  ${l}${e ? '  ' + e : ''}`); };
@@ -30,11 +31,11 @@ await p.waitForTimeout(2400);
 section('what is new');
 const sawNew = await (async () => { for (let i = 0; i < 20; i++) { if (/What.s new/i.test(await p.locator('#sheet-title').textContent().catch(() => ''))) return true; await p.waitForTimeout(400); } return false; })();
 check('the what\'s-new sheet opens for a returning device', sawNew, await p.locator('#sheet-title').textContent().catch(() => ''));
-check('it lists the releases missed, newest first, three at most', (await p.locator('#sheet .whatsnew-item').count()) === 3 && /Faces everywhere/i.test(await p.locator('#sheet .whatsnew-item').first().textContent()), String(await p.locator('#sheet .whatsnew-item').count()));
+check('it lists the releases missed, newest first, three at most', (await p.locator('#sheet .whatsnew-item').count()) === 3 && new RegExp(RELEASES.at(-1).title.en, 'i').test(await p.locator('#sheet .whatsnew-item').first().textContent()), await p.locator('#sheet .whatsnew-item').first().textContent());
 await p.locator('#sheet .whatsnew .btn-primary').click();
 await p.waitForTimeout(900);
 check('the patch-notes button lands on the Updates screen', await p.locator('#screen-updates').isVisible());
-check('and the device is marked up to date', (await p.evaluate(() => localStorage.getItem('wikster.seenRelease.v1'))) === 'faces');
+check('and the device is marked up to date', (await p.evaluate(() => localStorage.getItem('wikster.seenRelease.v1'))) === RELEASES.at(-1).id);
 const closeSheets = async () => { for (let i = 0; i < 8; i++) {
   if (!(await p.locator('#sheet').isVisible().catch(() => false))) return;
   if (await p.locator('#sheet-close').isVisible()) await p.locator('#sheet-close').click();

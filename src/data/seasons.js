@@ -239,7 +239,9 @@ export const POINTS_FOR = {
   duel: () => 8,
   reveal: () => 8,
   slots: () => 1,
-  custom: () => 15
+  custom: () => 15,
+  // A friend game settled and claimed: more for the winner.
+  versus: (detail) => (detail?.won ? 40 : 10)
 };
 
 /** What a claimed daily quest and a guild goal add on top. */

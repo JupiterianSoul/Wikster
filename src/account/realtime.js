@@ -91,6 +91,26 @@ export function openPresence(selfId, { hidden = false } = {}, onSync) {
 }
 
 /**
+ * Challenges set for me, and mine being answered: an insert or an update on
+ * a row I am on. Its own channel, like the invitations, so a project that
+ * has not run V13 loses only this.
+ */
+export function openChallengeFeed(selfId, onChange) {
+  if (!configured || !selfId) return { close() {} };
+  let channel = null;
+  try {
+    channel = supabase.channel(`challenges:${selfId}`);
+    const hear = (payload) => { try { onChange?.(payload.new ?? null, payload.eventType ?? payload.type ?? null); } catch { /* a listener's problem */ } };
+    channel.on('postgres_changes', { event: '*', schema: 'public', table: 'challenges', filter: `opponent=eq.${selfId}` }, hear);
+    channel.on('postgres_changes', { event: '*', schema: 'public', table: 'challenges', filter: `challenger=eq.${selfId}` }, hear);
+    channel.subscribe();
+  } catch {
+    channel = null;
+  }
+  return { close() { drop(channel); channel = null; } };
+}
+
+/**
  * Invitations posted to me. Its own channel on purpose: a project that has
  * not run schema V9 has no guild_invites table, and a binding on a table
  * that is not there fails the whole channel it sits in. Alone, it costs

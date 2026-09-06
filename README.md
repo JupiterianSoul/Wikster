@@ -526,6 +526,21 @@ never disagree about what a line pays. Without the functions the app still
 runs: Wikdle and the quests work on the device, the casino says the house is
 closed, and the leaderboard says what to run.
 
+### Play with friends
+
+Two games that cannot be played alone (`src/versus.js`, `src/app/versus.js`,
+schema V13). A challenge is set for a friend with the challenger's half
+already played; the friend plays theirs when they like, and `challenge_answer`
+settles it on the server the moment the second half lands, so neither side
+sees the other's hand first and neither marks their own. **Card Clash**: five
+cards a side, laid best to worst by monthly readers and compared pair by
+pair. **Speed Sort**: the same eight cards for both, put in order of readers
+against the clock; right positions count first, the faster hand wins a tie.
+Each side claims its pay once (coins, Ink and season points), the bell rings
+when a challenge arrives or is settled, and the table follows the server
+live. The same arithmetic lives in `src/versus.js` so a screen can show the
+reckoning it already knows and a test can check the two agree.
+
 ## The website
 
 The site is the same `dist/`, published to GitHub Pages from the `gh-pages`

@@ -38,6 +38,7 @@ export const newDatabase = () => ({
   guildBank: [],            // { id, guild_id, donor, donor_name, card, created_at }
   guildBankTakes: [],       // { user_id, day, n }
   guildMatches: [],         // { week, guild_a, guild_b, score_a, score_b }
+  challenges: [],           // { id, kind, challenger, opponent, status, payload, reply, result, claimed, created_at, updated_at }
   guildMatchClaims: [],     // { week, user_id }
   goalKind: null,           // a suite may pin the week's goal kind
   tokens: new Map(),        // access_token -> user id
@@ -157,6 +158,7 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
     if (table === 'friendships') return row.requester === user || row.addressee === user;
     if (table === 'trades') return row.proposer === user || row.recipient === user;
     if (table === 'guild_invites') return row.inviter === user || row.invitee === user;
+    if (table === 'challenges') return row.challenger === user || row.opponent === user;
     if (table === 'guild_messages' || table === 'guild_bank' || table === 'guild_goals') {
       return db.guildMembers.some((m) => m.user_id === user && m.guild_id === row.guild_id);
     }
@@ -512,6 +514,76 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
       db.guildInvites = db.guildInvites.filter((i) => i.invitee !== me);
       emitGuild(row.id);
       return json(route, row);
+    }
+    /* -- versus: the friend games (V13) -- */
+    const challengeRow = (c) => ({
+      ...c, challenger_name: db.profiles.get(c.challenger)?.username ?? '?', opponent_name: db.profiles.get(c.opponent)?.username ?? '?'
+    });
+    const hand = (cards) => (Array.isArray(cards) ? cards : []).map((c) => Number(c?.views) || 0).sort((x, y) => y - x);
+    const sortScore = (cards, order) => {
+      const truth = [...(cards ?? [])].sort((x, y) => (Number(y.views) || 0) - (Number(x.views) || 0)).map((c) => c.key);
+      return (Array.isArray(order) ? order : []).reduce((n, k, i) => n + (truth[i] === k ? 1 : 0), 0);
+    };
+    if (path === 'rpc/challenge_send') {
+      const other = body.p_user;
+      if (!other || other === me) return fail(route, 'NOT_FOUND', 400);
+      if (!['clash', 'sort'].includes(body.p_kind)) return fail(route, 'BAD_KIND', 400);
+      if (!areFriends(me, other)) return fail(route, 'NOT_FRIEND', 400);
+      if (db.challenges.filter((c) => c.challenger === me && c.opponent === other && c.status === 'open').length >= 5) return fail(route, 'TOO_MANY', 400);
+      if (!Array.isArray(body.p_payload?.cards)) return fail(route, 'BAD_HAND', 400);
+      const now = new Date().toISOString();
+      const row = { id: uuid(), kind: body.p_kind, challenger: me, opponent: other, status: 'open', payload: body.p_payload, reply: null, result: null, claimed: [], created_at: now, updated_at: now };
+      db.challenges.push(row);
+      db.emitChange?.('challenges', 'INSERT', row);
+      return json(route, challengeRow(row));
+    }
+    if (path === 'rpc/my_challenges') {
+      const cutoff = Date.now() - 14 * 86400000;
+      return json(route, db.challenges
+        .filter((c) => (c.challenger === me || c.opponent === me) && (c.status === 'open' || Date.parse(c.updated_at) > cutoff))
+        .sort((a, b) => b.updated_at.localeCompare(a.updated_at)).slice(0, 40).map(challengeRow));
+    }
+    if (path === 'rpc/challenge_decline') {
+      const row = db.challenges.find((c) => c.id === body.p_id && c.status === 'open' && (c.opponent === me || c.challenger === me));
+      if (!row) return fail(route, 'GONE', 400);
+      row.status = 'declined'; row.updated_at = new Date().toISOString();
+      db.emitChange?.('challenges', 'UPDATE', row);
+      return json(route, null, 204);
+    }
+    if (path === 'rpc/challenge_answer') {
+      const row = db.challenges.find((c) => c.id === body.p_id && c.opponent === me);
+      if (!row) return fail(route, 'GONE', 400);
+      if (row.status !== 'open') return fail(route, 'SETTLED', 400);
+      const reply = body.p_reply ?? {};
+      let result;
+      if (row.kind === 'clash') {
+        if (!Array.isArray(reply.cards) || !reply.cards.length) return fail(route, 'BAD_HAND', 400);
+        const a = hand(row.payload.cards), b = hand(reply.cards);
+        let sc = 0, so = 0;
+        for (let i = 0; i < Math.min(a.length, 5); i++) {
+          if (i >= b.length || a[i] > b[i]) sc++; else if (b[i] > a[i]) so++;
+        }
+        result = { winner: sc > so ? 'challenger' : so > sc ? 'opponent' : 'draw', scores: { challenger: sc, opponent: so } };
+      } else {
+        if (!Array.isArray(reply.order)) return fail(route, 'BAD_HAND', 400);
+        const sc = sortScore(row.payload.cards, row.payload.order), so = sortScore(row.payload.cards, reply.order);
+        const cm = Number(row.payload.ms) || 0, om = Number(reply.ms) || 0;
+        const winner = sc > so ? 'challenger' : so > sc ? 'opponent' : cm < om ? 'challenger' : om < cm ? 'opponent' : 'draw';
+        result = { winner, scores: { challenger: sc, opponent: so }, ms: { challenger: cm, opponent: om } };
+      }
+      row.reply = reply; row.result = result; row.status = 'done'; row.updated_at = new Date().toISOString();
+      db.emitChange?.('challenges', 'UPDATE', row);
+      return json(route, challengeRow(row));
+    }
+    if (path === 'rpc/challenge_claim') {
+      const row = db.challenges.find((c) => c.id === body.p_id && (c.challenger === me || c.opponent === me));
+      if (!row) return fail(route, 'GONE', 400);
+      if (row.status !== 'done') return fail(route, 'NOT_DONE', 400);
+      if (row.claimed.includes(me)) return fail(route, 'CLAIMED', 400);
+      const side = row.challenger === me ? 'challenger' : 'opponent';
+      const w = row.result.winner;
+      row.claimed.push(me); row.updated_at = new Date().toISOString();
+      return json(route, w === 'draw' ? 300 : w === side ? 600 : 150);
     }
     if (path === 'rpc/decline_guild_invite') {
       db.guildInvites = db.guildInvites.filter((i) => !(i.id === body.p_invite && i.invitee === me));

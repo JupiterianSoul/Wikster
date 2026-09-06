@@ -835,7 +835,10 @@ update public.trades
 create table if not exists public.scores (
   id         bigint generated always as identity primary key,
   user_id    uuid not null references auth.users on delete cascade,
-  game       text not null check (game in ('slots', 'roulette', 'wikdle', 'quest', 'duel', 'reveal')),
+  -- Every list of games in this file must be THIS list: the file is meant to
+  -- be re-run whole on a live project, and a narrower list further down is
+  -- rejected outright by rows the app has already written.
+  game       text not null check (game in ('slots', 'roulette', 'wikdle', 'quest', 'duel', 'reveal', 'quiz')),
   points     integer not null check (points >= 0),
   detail     jsonb,
   at         timestamptz not null default now()
@@ -896,7 +899,7 @@ create trigger scores_into_windows after insert on public.scores
 -- the two new games) is brought up by the alter below.
 alter table public.scores drop constraint if exists scores_game_check;
 alter table public.scores add constraint scores_game_check
-  check (game in ('slots', 'roulette', 'wikdle', 'quest', 'duel', 'reveal'));
+  check (game in ('slots', 'roulette', 'wikdle', 'quest', 'duel', 'reveal', 'quiz'));
 
 create or replace function public.submit_score(p_game text, p_points integer, p_day text)
 returns void language plpgsql security definer set search_path = public as $$
@@ -2082,3 +2085,155 @@ exception when others then null; end $$;
 -- without reading their save: [{ "id": "ripper", "rank": 2 }, ...].
 -- ============================================================================
 alter table public.profiles add column if not exists badges jsonb not null default '[]'::jsonb;
+
+-- ============================================================================
+-- V13 - VERSUS: two games that only work with a friend
+-- ----------------------------------------------------------------------------
+-- A challenge is set up by one player from their own cards, with their half
+-- already played, and answered by a friend when they like; the reckoning is
+-- done here the moment the answer lands, so neither side can see the other's
+-- hand first and neither can mark their own. Card Clash: five cards a side,
+-- laid best to worst by readers and compared pair by pair. Speed Sort: the
+-- same eight cards for both, ordered by readers against the clock.
+-- ============================================================================
+create table if not exists public.challenges (
+  id          uuid primary key default gen_random_uuid(),
+  kind        text not null check (kind in ('clash', 'sort')),
+  challenger  uuid not null references auth.users on delete cascade,
+  opponent    uuid not null references auth.users on delete cascade,
+  status      text not null default 'open' check (status in ('open', 'done', 'declined')),
+  payload     jsonb not null default '{}'::jsonb,     -- the cards, and the challenger's play
+  reply       jsonb,                                  -- the opponent's play
+  result      jsonb,                                  -- { winner, scores, ms }
+  claimed     jsonb not null default '[]'::jsonb,     -- who has taken their pay
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  check (challenger <> opponent)
+);
+create index if not exists challenges_opponent_idx on public.challenges (opponent, updated_at desc);
+create index if not exists challenges_challenger_idx on public.challenges (challenger, updated_at desc);
+
+alter table public.challenges enable row level security;
+drop policy if exists "the two players see their challenge" on public.challenges;
+create policy "the two players see their challenge"
+  on public.challenges for select to authenticated
+  using (auth.uid() = challenger or auth.uid() = opponent);
+-- No write policies: everything goes through the functions below.
+
+-- The challenger's half, with a friend named. Five open challenges to the
+-- same friend at once is plenty.
+create or replace function public.challenge_send(p_user uuid, p_kind text, p_payload jsonb)
+returns public.challenges language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); row_out challenges;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  if p_user is null or p_user = me then raise exception 'NOT_FOUND'; end if;
+  if p_kind not in ('clash', 'sort') then raise exception 'BAD_KIND'; end if;
+  if not public.are_friends(me, p_user) then raise exception 'NOT_FRIEND'; end if;
+  if (select count(*) from challenges where challenger = me and opponent = p_user and status = 'open') >= 5 then raise exception 'TOO_MANY'; end if;
+  if jsonb_typeof(p_payload->'cards') <> 'array' then raise exception 'BAD_HAND'; end if;
+  insert into challenges (kind, challenger, opponent, payload) values (p_kind, me, p_user, p_payload) returning * into row_out;
+  return row_out;
+end $$;
+
+-- What is on my table: open ones either way, and the last fortnight of settled ones.
+create or replace function public.my_challenges()
+returns table (id uuid, kind text, challenger uuid, opponent uuid, challenger_name text, opponent_name text,
+  status text, payload jsonb, reply jsonb, result jsonb, claimed jsonb, created_at timestamptz, updated_at timestamptz)
+language sql stable security definer set search_path = public as $$
+  select c.id, c.kind, c.challenger, c.opponent, coalesce(pc.username, '?'), coalesce(po.username, '?'),
+         c.status, c.payload, c.reply, c.result, c.claimed, c.created_at, c.updated_at
+    from challenges c
+    left join profiles pc on pc.id = c.challenger
+    left join profiles po on po.id = c.opponent
+    where (c.challenger = auth.uid() or c.opponent = auth.uid())
+      and (c.status = 'open' or c.updated_at > now() - interval '14 days')
+    order by c.updated_at desc
+    limit 40;
+$$;
+
+create or replace function public.challenge_decline(p_id uuid)
+returns void language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid();
+begin
+  if me is null then raise exception 'sign in'; end if;
+  update challenges set status = 'declined', updated_at = now()
+    where id = p_id and status = 'open' and (opponent = me or challenger = me);
+  if not found then raise exception 'GONE'; end if;
+end $$;
+
+-- A hand laid best to worst by readers, as a sorted array of readerships.
+create or replace function public.challenge_hand(p_cards jsonb)
+returns numeric[] language sql immutable as $$
+  select coalesce(array_agg(v order by v desc), '{}'::numeric[])
+    from (select coalesce((c->>'views')::numeric, 0) as v from jsonb_array_elements(p_cards) c) h;
+$$;
+
+-- How many positions of an order are right for a Speed Sort hand.
+create or replace function public.challenge_sort_score(p_cards jsonb, p_order jsonb)
+returns integer language sql immutable as $$
+  with truth as (
+    select c->>'key' as key, row_number() over (order by coalesce((c->>'views')::numeric, 0) desc) as pos
+      from jsonb_array_elements(p_cards) c),
+  given as (
+    select value #>> '{}' as key, ordinality as pos from jsonb_array_elements(coalesce(p_order, '[]'::jsonb)) with ordinality)
+  select count(*)::integer from truth t join given g on g.key = t.key and g.pos = t.pos;
+$$;
+
+-- The opponent's half, and the reckoning.
+create or replace function public.challenge_answer(p_id uuid, p_reply jsonb)
+returns public.challenges language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); c challenges; a numeric[]; b numeric[]; sc integer := 0; so integer := 0; w text; i integer;
+  cm numeric; om numeric; res jsonb;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  select * into c from challenges where id = p_id and opponent = me for update;
+  if c.id is null then raise exception 'GONE'; end if;
+  if c.status <> 'open' then raise exception 'SETTLED'; end if;
+  if c.kind = 'clash' then
+    if jsonb_typeof(p_reply->'cards') <> 'array' or jsonb_array_length(p_reply->'cards') < 1 then raise exception 'BAD_HAND'; end if;
+    a := public.challenge_hand(c.payload->'cards');
+    b := public.challenge_hand(p_reply->'cards');
+    for i in 1..least(array_length(a, 1), 5) loop
+      if i > coalesce(array_length(b, 1), 0) then sc := sc + 1;
+      elsif a[i] > b[i] then sc := sc + 1;
+      elsif b[i] > a[i] then so := so + 1;
+      end if;
+    end loop;
+    w := case when sc > so then 'challenger' when so > sc then 'opponent' else 'draw' end;
+    res := jsonb_build_object('winner', w, 'scores', jsonb_build_object('challenger', sc, 'opponent', so));
+  else
+    if jsonb_typeof(p_reply->'order') <> 'array' then raise exception 'BAD_HAND'; end if;
+    sc := public.challenge_sort_score(c.payload->'cards', c.payload->'order');
+    so := public.challenge_sort_score(c.payload->'cards', p_reply->'order');
+    cm := coalesce((c.payload->>'ms')::numeric, 0);
+    om := coalesce((p_reply->>'ms')::numeric, 0);
+    w := case when sc > so then 'challenger' when so > sc then 'opponent'
+              when cm < om then 'challenger' when om < cm then 'opponent' else 'draw' end;
+    res := jsonb_build_object('winner', w, 'scores', jsonb_build_object('challenger', sc, 'opponent', so),
+                              'ms', jsonb_build_object('challenger', cm, 'opponent', om));
+  end if;
+  update challenges set reply = p_reply, result = res, status = 'done', updated_at = now() where id = c.id returning * into c;
+  return c;
+end $$;
+
+-- Each side takes its pay once: the winner's, the loser's, or a draw's.
+create or replace function public.challenge_claim(p_id uuid)
+returns integer language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); c challenges; side text; w text; pay integer;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  select * into c from challenges where id = p_id and (challenger = me or opponent = me) for update;
+  if c.id is null then raise exception 'GONE'; end if;
+  if c.status <> 'done' then raise exception 'NOT_DONE'; end if;
+  if c.claimed ? me::text then raise exception 'CLAIMED'; end if;
+  side := case when c.challenger = me then 'challenger' else 'opponent' end;
+  w := c.result->>'winner';
+  pay := case when w = 'draw' then 300 when w = side then 600 else 150 end;
+  update challenges set claimed = c.claimed || to_jsonb(me::text), updated_at = now() where id = c.id;
+  return pay;
+end $$;
+
+do $$ begin
+  alter publication supabase_realtime add table public.challenges;
+exception when others then null; end $$;

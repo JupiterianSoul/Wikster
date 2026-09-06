@@ -154,6 +154,7 @@ export function renderGames() {
     { id: 'slots', icon: 'reel', color: '#fbbf24', title: t('slotsTitle'), note: t('gamesSlotsNote'), run: () => import('./slots.js').then((m) => { m.renderSlots(); showScreen('slots'); }) },
     { id: 'duel', icon: 'podium', color: '#f472b6', title: t('duelTitle'), note: t('gamesDuelNote'), run: () => import('./duel.js').then((m) => { m.renderDuel(); showScreen('duel'); }) },
     { id: 'reveal', icon: 'search', color: '#22d3ee', title: t('revealGameTitle'), note: t('gamesRevealNote'), run: () => import('./reveal.js').then((m) => { m.renderReveal(); showScreen('reveal'); }) },
+    { id: 'versus', icon: 'friends', color: '#a78bfa', title: t('versusTitle'), note: t('gamesVersusNote'), run: () => import('./versus.js').then((m) => { showScreen('versus'); m.renderVersus(); }) },
   ];
   const list = document.createElement('div');
   list.className = 'games-list';

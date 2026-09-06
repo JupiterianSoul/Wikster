@@ -29,7 +29,7 @@ const text = (sel) => p.locator(sel).first().textContent().then((s) => (s ?? '')
 await p.evaluate(() => document.querySelector('.appbar .icon-btn')?.click()); await p.waitForTimeout(400);
 for (const link of ['games', 'quests', 'leaderboard']) check(`drawer has the ${link} tab`, (await p.locator(`.drawer-link[data-link="${link}"]`).count()) === 1);
 await go('games');
-check('the hub shows four games', (await p.locator('#screen-games .game-tile').count()) === 4, String(await p.locator('#screen-games .game-tile').count()));
+check('the hub shows five games', (await p.locator('#screen-games .game-tile').count()) === 5, String(await p.locator('#screen-games .game-tile').count()));
 check('the hub says the house needs an account when there is none', /account/i.test(await text('#screen-games .game-closed')), await text('#screen-games .game-closed'));
 
 /* --- Wikdle -------------------------------------------------------------------- */
@@ -100,7 +100,7 @@ const doneRows = board.quests.filter((q) => q.progress >= q.target).length;
 check('exactly the finished quests offer a claim', (await p.locator('#screen-quests .quest .btn-primary').count()) === doneRows, `${doneRows} done`);
 check('the board is kept on the device for today', board && board.day === new Date().toISOString().slice(0, 10) && board.userKey === 'local' && board.quests.length === 3, JSON.stringify(board)?.slice(0, 120));
 // A Wikdle solve is reported to the quests: a wikdle or points quest, if dealt, moved.
-const wikdleRow = board.quests.find((q) => /wikdle|points/.test(q.id));
+const wikdleRow = board.quests.find((q) => /wikdle|points/.test(q.id) && !/exact/.test(q.id));
 if (wikdleRow && !alreadyWon) check('the Wikdle win was credited to the day\'s quest', wikdleRow.progress > 0, JSON.stringify(wikdleRow));
 // Finish the first quest by hand and claim it.
 await p.evaluate(() => { const b = JSON.parse(localStorage.getItem('wikster.quests.v1')); b.quests[0].progress = b.quests[0].target; localStorage.setItem('wikster.quests.v1', JSON.stringify(b)); });
@@ -121,7 +121,7 @@ check('a relaunch cannot claim it again', (await p.locator('#screen-quests .ques
 /* --- leaderboard, signed out --------------------------------------------------- */
 await go('leaderboard');
 check('the board asks for an account', (await p.locator('#screen-leaderboard .game-stage').count()) === 1 && /sign in/i.test(await text('#screen-leaderboard .game-stage')), await text('#screen-leaderboard .game-stage'));
-check('three windows to pick from', (await p.locator('#leaderboard-seg .seg-option').count()) === 3, String(await p.locator('#leaderboard-seg .seg-option').count()));
+check('four windows to pick from', (await p.locator('#leaderboard-seg .seg-option').count()) === 4, String(await p.locator('#leaderboard-seg .seg-option').count()));
 check('the pinned row stays hidden', await p.locator('#leaderboard-me').isHidden());
 
 /* --- help sheets exist for every new screen ------------------------------------- */

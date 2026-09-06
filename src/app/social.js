@@ -229,6 +229,7 @@ export function startLiveSocial() {
   if (!signedIn() || !account.configured) return;
   liveSocial.feed = account.openSocialFeed(userId(), onSocialEvent);
   liveSocial.presence = account.openPresence(userId(), { hidden: presenceHidden() || document.visibilityState !== 'visible' }, onPresenceSync);
+  liveSocial.challenges = account.openChallengeFeed(userId(), (row, type) => { import('./versus.js').then((m) => m.noteChallenge(row, type)); });
   liveSocial.invites = account.openGuildInviteFeed(userId(), () => {
     clearTimeout(liveSocial.timer);
     liveSocial.timer = setTimeout(() => { syncSocial().catch(() => {}); }, 250);
@@ -239,6 +240,8 @@ export function stopLiveSocial() {
   liveSocial.feed?.close();
   liveSocial.presence?.close();
   liveSocial.invites?.close();
+  liveSocial.challenges?.close();
+  liveSocial.challenges = null;
   liveSocial.feed = null;
   liveSocial.presence = null;
   liveSocial.invites = null;
@@ -1359,7 +1362,8 @@ export function renderFriend() {
     actionBtn('chat', 'chatOpen', () => openChat(entry), 'btn-primary'),
     actionBtn('trade', 'tradeOpen', () => openTradeSheet(entry)),
     actionBtn('gift', 'giftOpen', () => openGiftChooser(entry)),
-    actionBtn('wish', 'wishTitle', () => openFriendWishlist(entry))
+    actionBtn('wish', 'wishTitle', () => openFriendWishlist(entry)),
+    actionBtn('dice', 'friendChallenge', () => import('./versus.js').then((m) => { showScreen('versus'); m.renderVersus({ friendId: entry.otherId }); }))
   );
 
   // Their cards, the two ways yours are shown: albums, or every card at once.

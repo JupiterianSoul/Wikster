@@ -106,7 +106,8 @@ export function measure({ profile, entries, albumsDeep, albumsStarted = 0, album
     boardTop100: n('bestRank') > 0 && n('bestRank') <= 100 ? 1 : 0,
     boardTop10: n('bestRank') > 0 && n('bestRank') <= 10 ? 1 : 0,
     boardFirst: n('bestRank') === 1 ? 1 : 0,
-    backups: n('backups')
+    backups: n('backups'),
+    versusPlayed: n('versusPlayed'), versusWins: n('versusWins')
   };
 }
 
@@ -1071,6 +1072,27 @@ export const ACHIEVEMENTS = [
       [1,  coins(200),  { en: 'Seven for seven', fr: 'Sept sur sept' }],
       [10, coins(900),  { en: 'Ten weeks straight', fr: 'Dix semaines de suite' }],
       [52, pack('mythic', 5), { en: 'Fifty-two', fr: 'Cinquante-deux' }]
+    ]),
+
+  // --- the friend games ------------------------------------------------------
+  ...chain('versus', 'dice', 'versusPlayed',
+    (n) => n === 1
+      ? { en: 'Settle a game against a friend', fr: 'Terminez une partie contre un ami' }
+      : { en: `Settle ${en(n)} games against friends`, fr: `Terminez ${fr(n)} parties contre des amis` },
+    [
+      [1,   coins(200),  { en: 'Game on', fr: 'C’est parti' }],
+      [10,  coins(700),  { en: 'Regular opponent', fr: 'Adversaire habituel' }],
+      [50,  coins(2000), { en: 'Sparring partner', fr: 'Partenaire d’entraînement' }],
+      [200, pack('mythic', 5), { en: 'Two hundred games', fr: 'Deux cents parties' }]
+    ]),
+  ...chain('versuswin', 'trophy', 'versusWins',
+    (n) => n === 1
+      ? { en: 'Beat a friend at a game', fr: 'Battez un ami à un jeu' }
+      : { en: `Beat friends ${en(n)} times`, fr: `Battez des amis ${fr(n)} fois` },
+    [
+      [1,  coins(300),  { en: 'Bragging rights', fr: 'De quoi se vanter' }],
+      [10, coins(1200), { en: 'The one to beat', fr: 'Celui qu’il faut battre' }],
+      [50, pack('exotic', 5), { en: 'Undisputed', fr: 'Incontesté' }]
     ]),
 
   // --- the board -------------------------------------------------------------

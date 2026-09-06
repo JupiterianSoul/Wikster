@@ -50,7 +50,7 @@ const text = async (sel) => (await p.locator(sel).textContent().catch(() => ''))
 /* --- the duel ------------------------------------------------------------------ */
 section('the popularity duel');
 await go('games');
-check('the hub offers four games', (await p.locator('#screen-games .game-tile').count()) === 4);
+check('the hub offers five games', (await p.locator('#screen-games .game-tile').count()) === 5);
 await p.locator('#screen-games .game-tile').nth(2).click();
 await p.waitForTimeout(900);
 check('the duel opens on its lobby', await p.locator('#screen-duel .duel-start').isVisible());

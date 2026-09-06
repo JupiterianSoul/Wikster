@@ -117,6 +117,8 @@ export const BADGES = [
   { id: 'sunrise',     chain: 'days',         from: 3, motif: 'sunrise',      name: { en: 'Around the Sun', fr: 'Le tour du soleil' } },
   { id: 'sevens',      chain: 'weeks',        from: 2, motif: 'seven',        name: { en: 'Seven for Seven', fr: 'Sept sur sept' } },
   { id: 'numberone',   ach: 'board-1',                 motif: 'laurelone',    name: { en: 'Number One', fr: 'Numéro un' } },
+  { id: 'sparring',    chain: 'versus',       from: 3, motif: 'crossedcards', name: { en: 'Sparring Partner', fr: 'Partenaire d’entraînement' } },
+  { id: 'undisputed',  chain: 'versuswin',    from: 2, motif: 'stopwatch',    name: { en: 'Undisputed', fr: 'Incontesté' } },
   // The special badges: one per secret code (src/codes.js), earned the
   // moment the code is redeemed, worn straight away. `code` names the code;
   // the chip's foil is the person's own colour rather than the rank ladder.
@@ -439,6 +441,11 @@ const MOTIFS = {
     <rect x="-16" y="-14" width="32" height="28" rx="3"/><path d="M-16 -7 h32"/><path d="M-6 -1 h12 l-8 12" stroke-width="2.8"/></g>`,
   laurelone: (s) => `<g fill="none" stroke="${s}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
     <path d="M-3 12 V-10 L-8 -6"/><path d="M-3 12 h-4 M-3 12 h4" /><path d="M-16 -4 Q-18 8 -8 14 M-14 -2 q-4 4 -2 8 M-12 4 q-3 4 0 8"/><path d="M16 -4 Q18 8 8 14 M14 -2 q4 4 2 8 M12 4 q3 4 0 8"/></g>`,
+  crossedcards: (s) => `<g fill="none" stroke="${s}" stroke-width="2.2" stroke-linejoin="round">
+    <rect x="-14" y="-12" width="16" height="24" rx="2.5" transform="rotate(-18)"/><rect x="-2" y="-12" width="16" height="24" rx="2.5" transform="rotate(18)"/>
+    <path d="M-8 -4 l3 3 M8 0 l-3 3" stroke-width="1.8"/></g>`,
+  stopwatch: (s) => `<g fill="none" stroke="${s}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="0" cy="2" r="13"/><path d="M0 2 L6 -3"/><path d="M-4 -15 h8 M0 -15 v4 M11 -9 l3 -3"/></g>`,
   /* --- the season motifs (src/data/seasons.js) --- */
   flake: (s) => `<g fill="none" stroke="${s}" stroke-width="2.2" stroke-linecap="round">
     <path d="M0 -16 V16 M-14 -8 L14 8 M-14 8 L14 -8"/>
