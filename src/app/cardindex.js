@@ -119,6 +119,17 @@ export function renderCardIndex() {
         textContent: state.wishlist.size === 1
           ? t('wishCountOne')
           : t('wishCount', { n: state.wishlist.size }) }));
+    // Who among my friends holds one of these: the way to a trade. It sits
+    // by the count rather than in the grid, which is laid out for cards.
+    if (state.wishlist.size) {
+      const match = document.createElement('button');
+      match.type = 'button';
+      match.className = 'btn btn-ghost btn-sm wish-match';
+      match.innerHTML = `${iconSvg('trade', { size: 14 })}<span style="margin-left:6px">${esc(t('wishMatchGo'))}</span>`;
+      press(match, { sound: null });
+      match.addEventListener('click', () => { synth.playTap(); import('./social.js').then((m) => m.openWishMatches()); });
+      el.indexCounts.appendChild(match);
+    }
     const rows = [...state.wishlist.values()].map((card) => ({
       key: card.key, title: card.title, rarity: card.rarityId,
       price: card.price, views: card.views, thumbnail: card.thumbnail, lang: card.lang
@@ -130,7 +141,15 @@ export function renderCardIndex() {
     } else {
       el.indexList.replaceChildren(...rows.map(indexTile));
     }
-    refreshWishes().then(() => { if (state.tab === 'cardindex' && ci.wishMode) renderCardIndex(); });
+    // The server's copy is read once per visit; a repaint only when it
+    // differs, or the view would rebuild itself forever.
+    if (!ci.wishFresh) {
+      ci.wishFresh = true;
+      const before = [...state.wishlist.keys()].join('|');
+      refreshWishes().then(() => {
+        if (state.tab === 'cardindex' && ci.wishMode && [...state.wishlist.keys()].join('|') !== before) renderCardIndex();
+      }).finally(() => { setTimeout(() => { ci.wishFresh = false; }, 5000); });
+    }
     return;
   }
 

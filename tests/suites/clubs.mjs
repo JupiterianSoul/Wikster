@@ -183,6 +183,7 @@ await a.waitForTimeout(1200);
 check('founding puts the guild card up', await a.locator('#guild-home').isVisible() && (await a.locator('#guild-tag').textContent()) === 'OWL' && /Night Owls/.test(await a.locator('#guild-name').textContent()));
 check('one member, the founder', /1 member/i.test(await a.locator('#guild-meta').textContent()) && /founder/i.test(await a.locator('#guild-meta').textContent()), await a.locator('#guild-meta').textContent());
 check('the roster lists me', await until(async () => /ada_lovelace/.test(await a.locator('#guild-roster').textContent())));
+check('with a face on every row', await until(async () => (await a.locator('#guild-roster .person-mark[data-face]').count()) >= 1 && /^a$/i.test((await a.locator('#guild-roster .person-mark[data-face]').first().textContent()).trim())));
 check('the server has it', shared.guilds.length === 1 && shared.guilds[0].tag === 'OWL' && shared.guildMembers.length === 1);
 // B finds it and joins.
 await viaDrawer(b, 'guilds');
@@ -214,6 +215,7 @@ await a.locator('#guild-chat-form button[type="submit"]').click();
 await a.waitForTimeout(600);
 check('A\'s line is in the room', /owls assemble/.test(await a.locator('#guild-chat-log').textContent()));
 check('B hears it live, under A\'s name', await until(async () => /owls assemble/.test(await b.locator('#guild-chat-log').textContent()) && /ada_lovelace/i.test(await b.locator('#guild-chat-log').textContent())), (await b.locator('#guild-chat-log').textContent()).slice(0, 120));
+check('and A\'s face beside it', (await b.locator('#guild-chat-log .bubble-who .person-mark[data-face]').count()) >= 1);
 check('the server keeps the line', shared.guildMessages.length === 1 && shared.guildMessages[0].sender_name === 'ada_lovelace');
 
 // The goal: eighteen boosters between two. A opens ten, B eight, both see it move.

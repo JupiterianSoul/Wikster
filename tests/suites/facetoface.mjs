@@ -49,6 +49,8 @@ async function newPlayer(label, { cards = {} } = {}) {
     }));
     localStorage.setItem('wikster.wallet.v1', '50000');
     localStorage.setItem('wikster.collection.v3', JSON.stringify({ entries: cards }));
+    // A wants Alan Turing, which B holds three of: the wishlist match.
+    localStorage.setItem('wikster.wishlist.v1', JSON.stringify([{ key: 'en:Alan_Turing', title: 'Alan Turing', rarityId: 'legendary', price: 1600, views: 400000, lang: 'en' }]));
   }, { cards });
   await page.goto((process.env.BASE_URL ?? 'http://127.0.0.1:4173/'), { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(2200);
@@ -107,6 +109,7 @@ await a.waitForTimeout(1200);
 await a.locator('#friends-list .person').first().click();
 await a.waitForTimeout(1800);
 check('the friend screen is up', await a.locator('#screen-friend').isVisible());
+check('their face sits beside their ring', (await a.locator('#friend-face').count()) === 1 && /^g$/i.test((await a.locator('#friend-face').textContent()).trim()));
 check('the stats label reads like the profile', /stat/i.test(await a.locator('#friend-stats-label').textContent()));
 check('seven stat cells', (await a.locator('#friend-stats .stat-cell').count()) === 7, String(await a.locator('#friend-stats .stat-cell').count()));
 check('albums are counted off their cards', /^[0-9]+$/.test((await a.locator('#friend-stats .stat-cell b').nth(5).textContent()).trim()));
@@ -119,6 +122,7 @@ await a.waitForTimeout(600);
 check('a tap opens the sheet, with no button to wear it', /Climber/.test(await a.locator('#sheet-title').textContent()) && (await a.locator('#sheet .badge-rung').count()) === 2 && (await a.locator('#sheet .badge-sheet .btn').count()) === 0);
 await a.locator('#sheet-close').click();
 await a.waitForTimeout(400);
+
 check('the view switch is offered', await a.locator('#friend-seg .seg-option').count() === 2);
 check('albums show first', (await a.locator('#friend-albums .album-cover, #friend-albums > *').count()) >= 1 && await a.locator('#friend-classic').isHidden());
 await a.locator('#friend-seg .seg-option[data-value="classic"]').click();
@@ -343,6 +347,23 @@ check('the mark wears the crop, not a cover', await a.evaluate(() => {
   const m = document.querySelector('.person-mark.has-avatar');
   return m && /%/.test(m.style.backgroundSize) && m.style.backgroundSize !== 'cover';
 }));
+
+/* --- the wishlist match ---------------------------------------------------- */
+section('the wishlist match');
+// The server's copy is the truth: A's wish for Alan Turing sits there too.
+shared.wishlists.push({ owner: idA, key: 'en:Alan_Turing', card: { key: 'en:Alan_Turing', title: 'Alan Turing', rarityId: 'legendary', price: 1600, views: 400000, lang: 'en' }, created_at: new Date().toISOString() });
+await viaDrawer(a, 'cardindex');
+await a.locator('#index-rarities .chip').first().click();
+await a.waitForTimeout(900);
+check('the wishlist view offers the match', (await a.locator('.wish-match').count()) === 1, String(await a.locator('#screen-cardindex').isVisible()));
+await a.locator('.wish-match').click();
+await a.waitForTimeout(2500);
+check('B is found holding the wished card', /grace_h/.test(await a.locator('#sheet').textContent()) && /Alan Turing/.test(await a.locator('#sheet').textContent()), (await a.locator('#sheet [data-status]').textContent()));
+check('with the spare copies noted', /spare/i.test(await a.locator('#sheet').textContent()));
+await a.locator('#sheet .person .btn-primary').first().click();
+await a.waitForTimeout(2200);
+check('the trade sheet opens already asking for it', /Trade/i.test(await a.locator('#sheet-title').textContent()) && (await a.locator('#sheet [data-ask] .pick-row.is-on').count()) === 1 && /Alan Turing/.test(await a.locator('#sheet [data-ask] .pick-row.is-on').textContent()));
+await closeSheets(a);
 
 console.log(errors.length ? `page errors: ${errors.join(' | ')}` : 'no page errors');
 console.log(fails ? `${fails} CHECK(S) FAILED` : 'ALL PASS');

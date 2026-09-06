@@ -1,6 +1,7 @@
 /* boot: split out of main.js */
 
 import { iconSvg, logoSvg } from '../data/icons.js';
+import { checkWhatsNew } from './whatsnew.js';
 import { LANGUAGES, getLanguage, languageChosen, setLanguage, t, tx } from '../i18n.js';
 import { Bar, NavBar, Odometer, Rail, Ring, Segmented, Sheet, press, trackDrag } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
@@ -127,6 +128,7 @@ bind({
   panel: $('#panel'), panelBody: $('#panel-body'), panelToggle: $('#panel-toggle'),
   showcaseLabel: $('#showcase-label'), showcaseNote: $('#showcase-note'), showcaseGrid: $('#showcase-grid'),
   friendShowcaseHead: $('#friend-showcase-head'), friendShowcaseLabel: $('#friend-showcase-label'), friendShowcase: $('#friend-showcase'),
+  profileFace: $('#profile-face'), friendFace: $('#friend-face'),
   friendBadgesLabel: $('#friend-badges-label'), friendBadgesEmpty: $('#friend-badges-empty'), friendBadges: $('#friend-badges'),
   guildsTitle: $('#guilds-title'), guildsIntro: $('#guilds-intro'), guildHome: $('#guild-home'), guildJoin: $('#guild-join'),
   guildTag: $('#guild-tag'), guildName: $('#guild-name'), guildAbout: $('#guild-about'), guildMeta: $('#guild-meta'),
@@ -395,6 +397,8 @@ export function init() {
   // Whether a newer build is out: asked once at launch, and again whenever
   // the app comes back to the foreground after a while away.
   setTimeout(lookForUpdate, 4000);
+  // What changed since the last visit, once the launch sheets are done.
+  setTimeout(() => checkWhatsNew({ fresh: !state.profile.started }), 1200);
   setTimeout(registerShell, 3000);
   setTimeout(warmDrawer, 2500);
   sayWipeNote();

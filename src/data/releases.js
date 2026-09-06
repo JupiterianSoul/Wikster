@@ -596,5 +596,19 @@ export const RELEASES = [
       { en: 'Fifty-eight new badges hang off the hard ends of the new families, each with its own line art. Every badge, old and new, now has a foil of its own and one of six shapes (hexagon, shield, circle, diamond, octagon, square), so no two chips on any shelf look alike', fr: 'Cinquante-huit nouveaux badges accrochés au bout des nouvelles familles, chacun avec son propre dessin. Chaque badge, ancien ou nouveau, a désormais sa propre dorure et l’une de six formes (hexagone, écu, cercle, losange, octogone, carré) : deux jetons ne se ressemblent jamais' },
       { en: 'The badges you have earned, with their ranks, are published with your public stats, and a friend’s page shows their whole shelf under their showcase; a tap on a chip says what each rank took', fr: 'Les badges gagnés, avec leur rang, sont publiés avec vos statistiques publiques, et la page d’un ami montre toute son étagère sous sa vitrine ; un appui sur un jeton dit ce que chaque rang a demandé' }
     ]
+  },
+  {
+    id: 'faces', icon: 'friends', accent: '#38bdf8',
+    title: { en: 'Faces everywhere', fr: 'Des visages partout' },
+    points: [
+      { en: 'Pictures and level frames wherever a name is: the guild, the board, the profiles', fr: 'Photos et cadres de niveau partout où il y a un nom : la guilde, le classement, les profils' },
+      { en: 'A what’s-new sheet on launch, with the way to the patch notes', fr: 'Une fiche Quoi de neuf au lancement, avec le chemin des notes de version' },
+      { en: 'Wishlist matching: which friends hold what you want, and a trade already asking for it', fr: 'Liste de souhaits : quels amis possèdent ce que vous voulez, et un échange déjà rédigé' }
+    ],
+    changelog: [
+      { en: 'Every place a player is named now shows their picture inside their level frame: the guild roster, the hall (beside each line), the table (beside each donor), an invitation (the inviter), every row and the podium of the leaderboard, and the hero of your own profile and of a friend’s page. People who are not friends are read from the profiles table in one batch per screen and kept for the session', fr: 'Partout où un joueur est nommé, sa photo apparaît dans son cadre de niveau : la liste de la guilde, la salle (à côté de chaque ligne), la table (à côté de chaque donateur), une invitation (l’invitant), chaque ligne et le podium du classement, et l’en-tête de votre profil et de la page d’un ami. Les joueurs qui ne sont pas des amis sont lus dans la table des profils en une fois par écran et gardés pour la session' },
+      { en: 'On launch, a device last here before the latest release gets a short sheet of what changed since (the last three releases at most, newest first), with a button to the full patch notes on the Updates screen. A brand-new player sees the welcome instead and is marked up to date', fr: 'Au lancement, un appareil venu pour la dernière fois avant la dernière version reçoit une courte fiche de ce qui a changé depuis (les trois dernières versions au plus, la plus récente d’abord), avec un bouton vers les notes de version complètes sur l’écran Mises à jour. Un nouveau joueur voit l’accueil à la place et est marqué à jour' },
+      { en: 'The wishlist view of the Card Index has a button that looks through your friends’ collections for the cards on your list, friends with spare copies first, and opens a trade sheet with those cards already asked for', fr: 'La vue liste de souhaits de l’Index a un bouton qui parcourt les collections de vos amis à la recherche des cartes de votre liste, les amis avec des doubles d’abord, et ouvre une fiche d’échange avec ces cartes déjà demandées' }
+    ]
   }
 ];

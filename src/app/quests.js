@@ -1,6 +1,7 @@
 /* quests: split out of main.js */
 
 import { t, tx } from '../i18n.js';
+import { paintFaces } from './faces.js';
 import { bump, bumpMax, bumpMin, noteIn } from '../ledger.js';
 import * as quests from '../quests.js';
 import { Ring, Segmented, press, reveal } from '../ui/components.js';
@@ -188,8 +189,11 @@ export function renderLeaderboard() {
 export function boardRow(r, { isMe, nameOf, subOf = null, cls = '' }) {
   const row = document.createElement('div');
   row.className = `lb-row${isMe(r) ? ' is-me' : ''}${r.rank <= 3 ? ` is-top${r.rank}` : ''} ${cls}`;
-  row.innerHTML = `<span class="lb-rank tabular"></span><span class="lb-name"></span><span class="lb-score tabular"></span>`;
+  row.innerHTML = `<span class="lb-rank tabular"></span><span class="person-mark lb-row-face" aria-hidden="true"></span><span class="lb-name"></span><span class="lb-score tabular"></span>`;
   row.querySelector('.lb-rank').textContent = `#${r.rank}`;
+  const face = row.querySelector('.lb-row-face');
+  if (r.userId) { face.dataset.face = r.userId; face.textContent = String(nameOf(r)).slice(0, 1).toUpperCase(); }
+  else face.remove();
   const name = row.querySelector('.lb-name');
   name.textContent = nameOf(r);
   if (subOf) { const sub = document.createElement('small'); sub.className = 'lb-sub'; sub.textContent = subOf(r); name.appendChild(sub); }
@@ -213,6 +217,7 @@ export function boardNode(rows, { isMe, nameOf, faceOf, subOf = null, empty, gui
       <span class="lb-step-score tabular"></span>`;
     node.querySelector('.lb-medal').textContent = String(rank);
     node.querySelector('.lb-face').textContent = r ? faceOf(r) : '·';
+    if (r?.userId) node.querySelector('.lb-face').dataset.face = r.userId;
     node.querySelector('.lb-step-name').textContent = r ? nameOf(r) : t('lbOpenStep');
     node.querySelector('.lb-step-score').textContent = r ? formatAmount(r.score) : '';
     return node;
@@ -231,6 +236,7 @@ export function boardNode(rows, { isMe, nameOf, faceOf, subOf = null, empty, gui
     wrap.replaceChildren(...rest.map((r) => boardRow(r, { isMe, nameOf, subOf })));
     list.appendChild(wrap);
   }
+  if (!guild) paintFaces(list, { fallback: (mark) => mark.textContent });
   return list;
 }
 

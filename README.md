@@ -283,6 +283,17 @@ the default is free, and the one being worn always stays in the picker.
 
 ## Accounts and the social side
 
+Wherever a player is named, their picture sits inside their level frame:
+the friends list, a friend's page, the chat, the guild roster, the hall, the
+table, an invitation, and every row of the leaderboard. Friends are known
+with their picture already; anyone else is read from the profiles table in
+one batch per screen (`src/app/faces.js`). The wishlist view of the Card
+Index can look through your friends' collections for the cards you want and
+open a trade already asking for them. On launch, a device that was last
+here before the latest release is shown what changed since, with the way to
+the full patch notes (`src/app/whatsnew.js`).
+
+
 Accounts are optional. Signed in, you get cloud save across devices, plus
 friends, chat, trading, gifting, an auction house where cards go to real
 bidders, and presence.

@@ -1,3 +1,4 @@
+import { RELEASES } from '../../src/data/releases.js';
 // Shared fake wiki backend for the browser tests.
 export const ARTICLES = [
   ['Cygnus X-1', 'A galactic X-ray source in the constellation Cygnus, widely accepted as the first black hole ever identified by astronomers working in the field.', 420000],
@@ -15,6 +16,13 @@ const IMG = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240"><d
 export function installStubs(page, { fandomOk = true, calls = null } = {}) {
   let i = 0;
   const note = (u) => { if (calls) calls.push(u); };
+
+  // Every suite starts as a device that has seen the latest release, so the
+  // what's-new sheet only shows where a suite asks for it by marking an
+  // older one in its own init script (which runs after this one).
+  page.addInitScript((latest) => {
+    try { if (!localStorage.getItem('wikster.seenRelease.v1')) localStorage.setItem('wikster.seenRelease.v1', latest); } catch { /* storage off */ }
+  }, RELEASES.at(-1).id);
 
   // The published site's build stamp: answered as "same build" so no suite
   // sees an update bar it did not ask for.

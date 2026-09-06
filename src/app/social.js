@@ -549,7 +549,7 @@ export function openGiftBooster(entry) {
  * theirs to ask for. My cards go into escrow the moment the trade is posted.
  */
 
-export async function openTradeSheet(entry) {
+export async function openTradeSheet(entry, { ask: wanted = [] } = {}) {
   let theirs = [];
   try { theirs = (await account.friendCollection(entry.otherId)) ?? []; } catch { theirs = []; }
   const mine = store.allEntries(state.collection)
@@ -557,9 +557,12 @@ export async function openTradeSheet(entry) {
     .sort((a, b) => rarityRank(b.rarityId) - rarityRank(a.rarityId));
   theirs = theirs.filter((c) => !store.isLocked(c));
   theirs.sort((a, b) => rarityRank(b.rarityId) - rarityRank(a.rarityId));
+  // Cards asked for up front (a wishlist match) lead the list, already ticked.
+  const lead = new Set(wanted);
+  if (lead.size) theirs.sort((a, b) => Number(lead.has(b.key)) - Number(lead.has(a.key)));
 
   const give = new Set();
-  const ask = new Set();
+  const ask = new Set(theirs.filter((c) => lead.has(c.key)).slice(0, 3).map((c) => c.key));
 
   openSheet(t('tradeTitle', { name: entry.profile.username }), (body) => {
     body.innerHTML = `
@@ -579,7 +582,7 @@ export async function openTradeSheet(entry) {
     const pickRow = (card, bag, cap = 3) => {
       const row = document.createElement('button');
       row.type = 'button';
-      row.className = 'pick-row is-tick';
+      row.className = `pick-row is-tick${bag.has(card.key) ? ' is-on' : ''}`;
       row.innerHTML = `
         <span class="pick-thumb"></span>
         <span class="pick-copy"><b></b><span></span></span>
@@ -1334,6 +1337,7 @@ export function renderFriend() {
   el.friendName.textContent = person.username ?? '';
   live.friendRing.set(0, String(level));
   paintFrameInto(el.friendRing, person.avatar?.frame?.style ?? null, person.avatar?.frame?.style ? frameTier(level) : 0);
+  paintAvatarInto(el.friendFace, person, { frame: { style: null, tier: 0 } });
   el.friendLevel.textContent = t('profileLevel', { n: level });
   paintFriendPresence();
   el.friendStatsLabel.textContent = t('profileStats');
@@ -1489,6 +1493,57 @@ export function paintFriendStats(entry) {
     return row;
   }));
 }
+/**
+ * WISHLIST MATCHING: every friend whose collection holds a card on my
+ * wishlist, with the cards, and a trade sheet already asking for them. The
+ * collections are read one friend at a time, the way the trade sheet reads
+ * one, and a friend whose collection is private simply matches nothing.
+ */
+export async function findWishMatches() {
+  const wanted = new Map([...state.wishlist.values()].map((c) => [c.key, c]));
+  const matches = [];
+  if (!wanted.size) return matches;
+  for (const entry of state.social.friends.slice(0, 30)) {
+    let theirs = [];
+    try { theirs = (await account.friendCollection(entry.otherId)) ?? []; } catch { theirs = []; }
+    const held = theirs.filter((c) => wanted.has(c.key) && !store.isLocked(c));
+    if (held.length) matches.push({ entry, cards: held, spare: held.filter((c) => (c.count ?? 1) > 1).length });
+  }
+  // Friends with spare copies first, then the most matches.
+  return matches.sort((a, b) => b.spare - a.spare || b.cards.length - a.cards.length);
+}
+
+export function openWishMatches() {
+  openSheet(t('wishMatchTitle'), async (body) => {
+    body.innerHTML = `<p class="muted" style="font-size:.84rem" data-status></p><div class="settings-list" style="padding:0;margin-top:10px" data-list></div>`;
+    const status = body.querySelector('[data-status]');
+    const list = body.querySelector('[data-list]');
+    if (!signedIn()) { status.textContent = t('wishMatchSignIn'); return; }
+    if (!state.wishlist.size) { status.textContent = t('wishEmpty'); return; }
+    if (!state.social.friends.length) { status.textContent = t('wishMatchNoFriends'); return; }
+    status.textContent = t('wishMatchLooking', { n: state.social.friends.length });
+    const matches = await findWishMatches();
+    if (!body.isConnected) return;
+    status.textContent = matches.length ? t('wishMatchFound', { n: matches.length }) : t('wishMatchNone');
+    list.replaceChildren(...matches.map(({ entry, cards, spare }) => {
+      const row = personRow(entry.profile, [], { onOpen: null });
+      row.querySelector('.person-copy span').textContent = t(spare ? 'wishMatchLineSpare' : 'wishMatchLine', { n: cards.length, spare, cards: cards.slice(0, 3).map((c) => c.title).join(', ') });
+      const go = document.createElement('button');
+      go.type = 'button';
+      go.className = 'btn btn-sm btn-primary';
+      go.textContent = t('wishMatchTrade');
+      press(go, { sound: null });
+      go.addEventListener('click', () => {
+        synth.playTap();
+        live.sheet.hide();
+        setTimeout(() => openTradeSheet(entry, { ask: cards.map((c) => c.key) }), 260);
+      });
+      row.querySelector('.person-actions').appendChild(go);
+      return row;
+    }));
+  });
+}
+
 /** A friend's wishlist: what they want, whether they already found it, and
  *  whether you happen to be holding it. */
 

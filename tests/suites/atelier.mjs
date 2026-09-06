@@ -22,9 +22,19 @@ await p.addInitScript(() => {
   localStorage.setItem('wikster.wallet.v1', '20000');
   // A stale choice from before the table was redrawn: it must read as classic.
   localStorage.setItem('wikster.cardFx.v1', JSON.stringify({ rare: 'sheen' }));
+  // Last here two releases ago: the what's-new sheet has something to say.
+  localStorage.setItem('wikster.seenRelease.v1', 'seasons');
 });
 await p.goto((process.env.BASE_URL ?? 'http://127.0.0.1:4173/'), { waitUntil: 'domcontentloaded' });
 await p.waitForTimeout(2400);
+section('what is new');
+const sawNew = await (async () => { for (let i = 0; i < 20; i++) { if (/What.s new/i.test(await p.locator('#sheet-title').textContent().catch(() => ''))) return true; await p.waitForTimeout(400); } return false; })();
+check('the what\'s-new sheet opens for a returning device', sawNew, await p.locator('#sheet-title').textContent().catch(() => ''));
+check('it lists the releases missed, newest first, three at most', (await p.locator('#sheet .whatsnew-item').count()) === 3 && /Faces everywhere/i.test(await p.locator('#sheet .whatsnew-item').first().textContent()), String(await p.locator('#sheet .whatsnew-item').count()));
+await p.locator('#sheet .whatsnew .btn-primary').click();
+await p.waitForTimeout(900);
+check('the patch-notes button lands on the Updates screen', await p.locator('#screen-updates').isVisible());
+check('and the device is marked up to date', (await p.evaluate(() => localStorage.getItem('wikster.seenRelease.v1'))) === 'faces');
 const closeSheets = async () => { for (let i = 0; i < 8; i++) {
   if (!(await p.locator('#sheet').isVisible().catch(() => false))) return;
   if (await p.locator('#sheet-close').isVisible()) await p.locator('#sheet-close').click();

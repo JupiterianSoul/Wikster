@@ -1,6 +1,7 @@
 /* profile: split out of main.js */
 
 import { MAX_LEVEL, levelFraction, rankFor, rewardForLevel, xpForLevel } from '../progression.js';
+import { paintAvatarInto } from './social.js';
 import { frameTier } from '../frames.js';
 import { getLanguage, t, tx } from '../i18n.js';
 import * as store from '../collection.js';
@@ -45,6 +46,9 @@ export function renderProfile() {
 
   live.profileRing.set(levelFraction(progress), String(level));
   paintFrameInto(el.profileRing, frameStyle(), frameTier(level));
+  // The picture beside the ring: the account's, or the initial of the name.
+  paintAvatarInto(el.profileFace, state.account?.profile ?? { username: t('lbYou') }, { frame: { style: null, tier: 0 } });
+  el.profileFace.hidden = !state.account?.profile;
   el.profileLevel.textContent = atMax ? t('profileMax') : t('profileLevel', { n: level });
   el.profileRank.textContent = tx(rank.name);
   live.xpBar.set(levelFraction(progress));

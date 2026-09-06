@@ -1982,6 +1982,26 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
   z-index: 3;
 }
 .person-mark, .ring { position: relative; }
+/* Faces where a name used to be alone: a small mark in a chat line or a
+   bank row, a full one on the board and beside the profile ring. */
+.person-mark.is-tiny { width: 22px; height: 22px; font-size: 0.62rem; margin-right: 6px; vertical-align: middle; display: inline-grid; }
+.person-mark.is-tiny .frame-overlay { width: 200%; height: 200%; }
+.bubble-who { display: inline-flex; align-items: center; }
+.guild-deposit .person-copy span { display: inline-flex; align-items: center; }
+.invite-face { margin-bottom: 4px; }
+.lb-row { grid-template-columns: 2.8em auto 1fr auto; }
+.lb-row-face { width: 30px; height: 30px; font-size: 0.72rem; }
+.lb-row-face .frame-overlay { width: 210%; height: 210%; }
+.hero-face { width: 56px; height: 56px; font-size: 1.2rem; }
+.hero-face[hidden] { display: none; }
+.hero-id { gap: 18px; }
+.index-counts .wish-match { flex: none; margin-left: auto; white-space: nowrap; }
+.whatsnew { display: grid; gap: 14px; }
+.whatsnew-lead { font-size: 0.86rem; color: var(--ink-dim); }
+.whatsnew-item { display: grid; gap: 6px; padding: 12px 14px; border-radius: var(--radius); border: var(--border) var(--border-style) var(--line); border-left: 3px solid var(--tl, var(--accent)); background: var(--surface); }
+.whatsnew-item h4 { display: flex; align-items: center; gap: 8px; font-size: 0.92rem; }
+.whatsnew-node { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--tl, var(--accent)) 22%, transparent); color: var(--tl, var(--accent)); }
+.whatsnew-item ul { margin: 0; padding-left: 18px; font-size: 0.82rem; color: var(--ink-dim); display: grid; gap: 3px; }
 
 .badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .badge-chip {

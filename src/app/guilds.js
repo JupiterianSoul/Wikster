@@ -13,6 +13,7 @@
  */
 
 import { t, tx } from '../i18n.js';
+import { paintFaces } from './faces.js';
 import { bump, bumpMax, bumpMin, noteIn } from '../ledger.js';
 import { iconSvg } from '../data/icons.js';
 import { Bar, Segmented, press } from '../ui/components.js';
@@ -205,7 +206,10 @@ async function loadRoster(g) {
       <span class="person-mark" aria-hidden="true"></span>
       <span class="person-copy"><b></b><span class="guild-line"></span></span>
       <span class="person-actions"></span>`;
-    row.querySelector('.person-mark').textContent = String(m.username).slice(0, 1).toUpperCase();
+    const mark = row.querySelector('.person-mark');
+    mark.dataset.face = m.userId;
+    mark.dataset.level = String(m.level ?? 1);
+    mark.textContent = String(m.username).slice(0, 1).toUpperCase();
     row.querySelector('b').textContent = m.userId === userId() ? `${m.username} (${t('guildYou')})` : m.username;
     row.querySelector('.guild-line').textContent = t('guildRosterLine', { n: m.level, points: formatAmount(m.score) });
     if (m.userId === g.owner) {
@@ -216,6 +220,7 @@ async function loadRoster(g) {
     }
     return row;
   }));
+  paintFaces(el.guildRoster, { fallback: (mark) => mark.textContent });
 }
 
 /** A guild found by the search, with the way in. */
@@ -291,6 +296,15 @@ function inviteRow(invite) {
   row.querySelector('b').textContent = invite.name;
   row.querySelector('.person-copy span').textContent =
     `${t('guildInvitedBy', { name: invite.inviterName })} · ${t('guildMembers', { n: invite.members })}`;
+  // The tag on the mark, the inviter's face beside it.
+  if (invite.inviter) {
+    const face = document.createElement('span');
+    face.className = 'person-mark is-tiny invite-face';
+    face.dataset.face = invite.inviter;
+    face.textContent = String(invite.inviterName ?? '?').slice(0, 1).toUpperCase();
+    row.querySelector('.person-copy').prepend(face);
+    paintFaces(row, { fallback: (mark) => mark.textContent });
+  }
 
   const drop = (id) => {
     guildView.invites = guildView.invites.filter((i) => i.id !== id);
@@ -627,7 +641,11 @@ function paintChat() {
     if (!own && m.sender !== lastSender) {
       const who = document.createElement('span');
       who.className = 'bubble-who';
-      who.textContent = m.name;
+      const face = document.createElement('span');
+      face.className = 'person-mark is-tiny';
+      face.dataset.face = m.sender;
+      face.textContent = String(m.name).slice(0, 1).toUpperCase();
+      who.append(face, document.createTextNode(m.name));
       bubble.appendChild(who);
     }
     lastSender = m.sender;
@@ -638,6 +656,7 @@ function paintChat() {
     bubble.appendChild(when);
     return bubble;
   }));
+  paintFaces(el.guildChatLog, { fallback: (mark) => mark.textContent });
   keepChatBottom();
 }
 
@@ -695,6 +714,13 @@ function paintBank() {
     const line = row.querySelector('.person-copy span');
     line.textContent = `${tx(rarity.name)} · ${t('guildBankFrom', { name: d.donorName })}`;
     line.style.color = rarity.color;
+    if (d.donor) {
+      const face = document.createElement('span');
+      face.className = 'person-mark is-tiny';
+      face.dataset.face = d.donor;
+      face.textContent = String(d.donorName ?? '?').slice(0, 1).toUpperCase();
+      line.prepend(face);
+    }
     const take = document.createElement('button');
     take.type = 'button';
     take.className = 'btn btn-sm btn-primary';
@@ -723,6 +749,7 @@ function paintBank() {
     row.querySelector('.person-actions').appendChild(take);
     return row;
   }));
+  paintFaces(el.guildBank, { fallback: (mark) => mark.textContent });
 }
 
 /** Putting a duplicate on the table: only cards with a spare copy are offered. */
