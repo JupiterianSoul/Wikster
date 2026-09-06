@@ -1530,7 +1530,7 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .atelier-buy .buy-label { color: inherit; }
 .frame-card .atelier-buy { margin: 0 0 0 auto; flex: none; }
 .frame-card .frame-copy { flex: 1; min-width: 0; }
-.fx-chip .atelier-buy { margin-top: 6px; }
+.fx-chip .atelier-buy { width: 100%; justify-content: center; }
 .atelier-buy .buy-price { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; }
 .atelier-buy.is-short {
   background: var(--ui-plate);
@@ -2499,12 +2499,29 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .fx-tier-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .fx-tier-name { font-weight: 700; font-size: 0.9rem; letter-spacing: 0.01em; }
 .fx-tier-count { font-size: 0.74rem; color: var(--ink-faint); }
-.fx-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px; }
+.fx-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(152px, 1fr)); gap: 12px; }
 .fx-chip {
-  display: grid; gap: 3px; text-align: left; padding: 10px 12px;
-  border-radius: 12px; border: 1px solid var(--line);
+  /* A column, not a grid: the note takes the slack, which puts every buy
+     button in a row on one line however long the notes above them run. */
+  display: flex; flex-direction: column; gap: 6px; text-align: left; padding: 10px;
+  border-radius: 14px; border: 1px solid var(--line);
   background: var(--surface); color: var(--ink); cursor: pointer;
+  /* A tile is as tall as its card plus its copy; a row of samples off screen
+     costs a box rather than a card. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 340px;
 }
+.fx-chip-sub { flex: 1; }
+/* The sample: a real card, sized to the tile rather than to the reveal. */
+.fx-sample-slot { display: block; width: 100%; }
+.card.fx-sample {
+  --card-w: 100%;
+  width: 100%;
+  /* The tile answers the tap, not the card inside it. */
+  pointer-events: none;
+  perspective: none;
+}
+.card.fx-sample .card-inner { transition: none; }
 .fx-chip-name { font-weight: 650; font-size: 0.82rem; }
 .fx-chip-sub { font-size: 0.7rem; color: var(--ink-dim); line-height: 1.35; }
 .fx-chip.is-on {

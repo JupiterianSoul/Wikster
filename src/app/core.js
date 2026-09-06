@@ -392,6 +392,9 @@ export function applyStrings() {
   el.walletMark.innerHTML = buckSvg({ size: 12 });
   el.sheetClose.innerHTML = iconSvg('close', { size: 17 });
   el.openBack.innerHTML = iconSvg('chevronLeft', { size: 18 });
+  el.openSkip.innerHTML = iconSvg('skipEnd', { size: 17 });
+  el.openSkip.setAttribute('aria-label', t('openSkip'));
+  el.openSkip.title = t('openSkip');
   el.oddsBtn.setAttribute('aria-label', t('pullRates'));
   el.packsEmptyCta.textContent = t('goShop');
   el.menuBtn.setAttribute('aria-label', t('menu'));

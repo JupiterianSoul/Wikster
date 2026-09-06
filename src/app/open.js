@@ -547,6 +547,7 @@ export function openScreenFor(spec) {
   el.openHint.className = 'open-hint';
   el.summary.replaceChildren();
   el.openDone.hidden = true;
+  el.openSkip.hidden = true;
   el.cardStack.replaceChildren();
   state.pulls = []; state.cards = []; state.index = 0; state.seen = new Set();
 
@@ -732,7 +733,9 @@ export async function runOpen(booster) {
   if (state.spec.kind !== 'code') {
     store.recordOpening(state.profile, pulls);
     if (state.spec.kind === 'timed') {
-      state.profile.timed.opened = (state.profile.timed.opened ?? 0) + 1;
+      // A bundle carries the slots it was made of: seven packs torn as one
+      // still walk the track seven steps.
+      state.profile.timed.opened = (state.profile.timed.opened ?? 0) + (state.spec.timedSlots ?? 1);
       store.saveProfile(state.profile);
     }
     awardXp(pulls);
@@ -745,6 +748,7 @@ export async function runOpen(booster) {
   // being read: the next tear is then instant.
   if ((state.inventory[specId(state.spec)]?.count ?? 0) > 0) ensureReady(state.spec);
   el.openScreen.classList.replace('phase-opening', 'phase-reveal');
+  el.openSkip.hidden = false;
   state.index = 0;
   layoutDeck();
   revealCurrent();
@@ -946,6 +950,14 @@ export function wireFavButton(button, entryKey, { size = 16 } = {}) {
 /** Attach the drawn data. Rarity is only set here, on the hidden front face. */
 
 export function bindCards(pulls) {
+  // The stack was built to the pack's promise, before the draw came back. A
+  // draw can come back short (a thin subject, a slow network, a big pack), so
+  // the cards nothing was drawn for are taken out here rather than left in the
+  // deck face down forever, waiting on a card that does not exist.
+  if (state.cards.length > pulls.length) {
+    for (const spare of state.cards.slice(pulls.length)) spare.remove();
+    state.cards = state.cards.slice(0, pulls.length);
+  }
   state.cards.forEach((card, i) => {
     const pull = pulls[i];
     if (!pull) return;
@@ -1047,9 +1059,25 @@ export function goTo(index) {
   revealCurrent();
 }
 
+/**
+ * Straight to the results. The pack's cards were written to the collection
+ * before the first one turned, so this skips the ceremony and nothing else:
+ * the same summary, the same level-ups, the same everything the last swipe
+ * would have reached. Only available while there are cards to skip past.
+ */
+
+export function skipToSummary() {
+  if (!el.openScreen.classList.contains('phase-reveal') || !state.pulls.length) return;
+  synth.playTap();
+  // The summary opens once every card has been turned; a skip says they have.
+  for (let i = 0; i < state.pulls.length; i++) state.seen.add(i);
+  showSummary();
+}
+
 export function showSummary() {
   if (el.openScreen.classList.contains('phase-summary')) return;
   clearTimeout(state.summaryTimer);
+  el.openSkip.hidden = true;
   el.summary.replaceChildren(...state.pulls.map((pull) => {
     const data = { ...pull.article, price: pull.price, packIcon: pull.packIcon };
     const card = buildStaticCard(data, pull.rarity, pull.article.key);

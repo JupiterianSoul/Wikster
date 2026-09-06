@@ -39,7 +39,7 @@ import { tilt } from './detail.js';
 import { buildDrawer, closeDrawer, openDrawer, openHelp, openNotifications, paintDrawerLinks } from './drawer.js';
 import { flushSync, gateAltAction, leaveAccount, onSession, purgeRetiredCodes, purgeRetiredThemes, resumeAccount, showGate, stopSocialPoll, submitGate, syncSoon } from './gate.js';
 import { live } from './live.js';
-import { applyRarityVars, drainLevelUps, gainBooster, homeTabFor, initSwipe, paintOpenHint, showLevelUp, warmDrawer } from './open.js';
+import { applyRarityVars, drainLevelUps, gainBooster, homeTabFor, initSwipe, paintOpenHint, showLevelUp, skipToSummary, warmDrawer } from './open.js';
 import { buildBooster, createCustomPack, paintForgeSeal, paintPackCaption, renderPacks, renderTimed, syncTimed } from './packs.js';
 import { paintPlaytime, renderProfile } from './profile.js';
 import { refreshLevelBadge, updateBadges } from './regalia.js';
@@ -102,7 +102,7 @@ bind({
   creatorMine: $('#creator-mine'), creatorEmpty: $('#creator-empty'),
   creatorEmptyMark: $('#creator-empty-mark'), creatorEmptyText: $('#creator-empty-text'),
 
-  timedTitle: $('#timed-title'), timedOpen: $('#timed-open'),
+  timedTitle: $('#timed-title'), timedOpen: $('#timed-open'), timedOpenAll: $('#timed-open-all'),
   freeRing: $('#free-ring'), freeCount: $('#free-count'), freeCap: $('#free-cap'),
   freeState: $('#free-state'), freePips: $('#free-pips'), freeFoot: $('#free-foot'),
   freeTrackLabel: $('#free-track-label'), freePerks: $('#free-perks'),
@@ -187,6 +187,7 @@ bind({
   redeemLabel: $('#redeem-label'), redeemList: $('#redeem-list'),
 
   openScreen: $('#screen-open'), openBack: $('#open-back'), openTitle: $('#open-title'),
+  openSkip: $('#open-skip'),
   burstLayer: $('#burst-layer'),
   openProgress: $('#open-progress'), openStage: $('#open-stage'), boosterSlot: $('#booster-slot'),
   cardStack: $('#card-stack'), summary: $('#summary'), openHint: $('#open-hint'), openDone: $('#open-done'),
@@ -474,7 +475,8 @@ export function init() {
   // Pack art is language-specific, so it waits until a language exists.
 
   [el.wallet, el.menuBtn, el.bell, el.levelBadge, el.packsOpen, el.timedOpen,
-   el.filterOpen, el.openBack, el.openDone, el.sheetClose, el.starterGo,
+   el.filterOpen, el.openBack, el.openSkip, el.openDone, el.sheetClose, el.starterGo,
+   el.timedOpenAll,
    el.packsEmptyCta, el.creatorGo, el.findGo, el.friendBack,
    el.friendRemove, el.gateAlt, el.oddsBtn, el.albumBack, el.chatBack, el.quizBack].forEach((node) => press(node));
 
@@ -555,6 +557,9 @@ export function init() {
   };
   el.openBack.addEventListener('click', leaveOpen);
   el.openDone.addEventListener('click', leaveOpen);
+  // Past the cards, straight to what the pack held. The cards are already in
+  // the collection by this point, so nothing is lost by not turning them.
+  el.openSkip.addEventListener('click', skipToSummary);
 
   el.sheetClose.addEventListener('click', () => live.sheet.hide());
   document.addEventListener('keydown', (e) => {

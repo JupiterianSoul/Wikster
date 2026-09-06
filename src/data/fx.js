@@ -54,10 +54,10 @@ export const FX_BY_RARITY = {
     s('molten', 'Molten', 'En fusion', 'Seams of molten gold flowing across the art.', 'Des veines d’or en fusion qui coulent sur l’image.')
   ],
   mythic: [
-    s('bloodmoon', 'Blood Moon', 'Lune de sang', 'A crimson moon rising behind the art, eclipsed at its edge.', 'Une lune pourpre qui se lève derrière l’image, éclipsée sur son bord.'),
+    s('bloodmoon', 'Blood Moon', 'Lune de sang', 'A crimson moon rising behind the card, eclipsed at its edge.', 'Une lune pourpre qui se lève derrière la carte, éclipsée sur son bord.'),
     s('dragonscale', 'Dragonscale', 'Écailles', 'Overlapping scales, a highlight sweeping across them.', 'Des écailles qui se chevauchent, un reflet qui les balaie.'),
     s('inferno', 'Inferno', 'Brasier', 'Flames licking up from the foot of the card.', 'Des flammes qui lèchent le pied de la carte.'),
-    s('sigil', 'Sigil', 'Sceau', 'A glowing geometric seal pulsing over the art.', 'Un sceau géométrique lumineux qui pulse sur l’image.'),
+    s('sigil', 'Sigil', 'Sceau', 'A glowing geometric seal, pulsing under the words.', 'Un sceau géométrique lumineux, qui pulse sous le texte.'),
     s('thorns', 'Thorns', 'Épines', 'A border of thorns closing around the frame.', 'Une bordure d’épines qui se referme autour du cadre.')
   ],
   exotic: [

@@ -31,6 +31,7 @@ import { spawnBurst } from './open.js';
 import { renderBinder } from './binder.js';
 import { renderPacks } from './packs.js';
 import { renderShop } from './shop.js';
+import { fxSampleCard } from './fxcard.js';
 import { frameStyle, pickFrameStyle } from './regalia.js';
 import { wearFx } from './settings.js';
 
@@ -128,7 +129,10 @@ function paintFx() {
       chip.className = `fx-chip atelier-tile${owned ? ' is-owned' : ''}${worn ? ' is-on' : ''}`;
       chip.dataset.fx = style.id;
       chip.style.setProperty('--rarity', rarity.color);
-      chip.innerHTML = `<span class="fx-chip-name"></span><span class="fx-chip-sub"></span>`;
+      chip.innerHTML = `<span class="fx-sample-slot"></span><span class="fx-chip-name"></span><span class="fx-chip-sub"></span>`;
+      // The treatment itself, on a card the size of a card: nobody buys a
+      // look off a sentence describing it.
+      chip.querySelector('.fx-sample-slot').appendChild(fxSampleCard(rarity, style.id));
       chip.querySelector('.fx-chip-name').textContent = tx(style.name);
       chip.querySelector('.fx-chip-sub').textContent = tx(style.note);
       chip.appendChild(priceButton({

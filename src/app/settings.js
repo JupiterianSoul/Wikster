@@ -21,6 +21,7 @@ import { music } from '../ui/music.js';
 import { fill, h } from '../ui/dom.js';
 import { backdrop } from '../ui/backdrop.js';
 import { reportQuest } from './arcade.js';
+import { fxSampleCard } from './fxcard.js';
 import { renderBinder } from './binder.js';
 import { THEME_KEY, el, esc, money, openSheet, refreshWallet, settings, showScreen, showUpdateBar, state, storedTheme, toast, useTheme } from './core.js';
 import { currentStats, describeError, flushSync, leaveAccount, signedIn, syncSoon, syncTimer, userId } from './gate.js';
@@ -465,7 +466,9 @@ export function renderCardFx() {
       chip.type = 'button';
       chip.className = `fx-chip${worn ? ' is-on' : ''}`;
       chip.style.setProperty('--rarity', rarity.color);
-      chip.innerHTML = `<span class="fx-chip-name"></span><span class="fx-chip-sub"></span>`;
+      chip.innerHTML = `<span class="fx-sample-slot"></span><span class="fx-chip-name"></span><span class="fx-chip-sub"></span>`;
+      // Wearing a look is a choice made by eye, so the choice is a card.
+      chip.querySelector('.fx-sample-slot').appendChild(fxSampleCard(rarity, style.id));
       chip.querySelector('.fx-chip-name').textContent = tx(style.name);
       chip.querySelector('.fx-chip-sub').textContent = tx(style.note);
       press(chip, { sound: null });

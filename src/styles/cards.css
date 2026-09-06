@@ -1599,849 +1599,994 @@ html[data-lowpower='1'] [data-rarity="special"] .fx-a::after { animation: none !
 /* ============================================================================
    CHOSEN CARD EFFECTS
    ----------------------------------------------------------------------------
-   An alternate treatment a player bought in the Atelier and put on one
-   rarity. `classic` is the absence of these rules: the bespoke per-tier
-   drawing above stands untouched. Any other value takes the tier's dressing
-   off (its foils, rings and sparks) and paints its own on .fx-p, the plate
-   that sits over the art and under the text, so nothing here can cover a
-   card's words.
+   An alternate treatment bought in the Atelier and put on one rarity.
+   `classic` is the absence of these rules, so the bespoke per-tier drawing
+   above stands untouched.
 
-   Forty of them, five to a rarity, and no two built the same way: each has
-   its own geometry (a crease, a postmark, scales, a crown), its own clock,
-   and paints in var(--rarity) where it paints the tier's colour at all.
-   Animation is gated on .is-lit, the way every treatment's is, and only
-   transform, opacity and filter move.
+   Three rules hold for all forty, and they are what makes them wearable:
+
+   1. THE WORDS COME FIRST. The plate an effect paints on is pushed under the
+      title, the description, the readership, the price and the tier's tag,
+      and under the frame. Nothing here can cover a card's own writing.
+
+   2. NOTHING SETTLES ON THE PICTURE. An effect made of moving pieces (motes,
+      sparks, drops, stars) wears --fx-off-art, a mask that opens above and
+      below the artwork and closes over it. The photograph stays a
+      photograph; the effect happens around it.
+
+   3. ONE COLOUR, MANY TONES. Every effect paints in the tier's own colour,
+      taken pale, light, core, deep or dark. A Rare treatment is five blues,
+      a Legendary five golds. None of them borrows another tier's hue, so
+      wearing one never costs the ladder its legibility.
+
+   Only transform, opacity and filter animate, which is what keeps a shelf of
+   these affordable on a phone.
    ============================================================================ */
 
-.card[data-fx]:not([data-fx='classic']) .fx-p { overflow: hidden; }
-.card[data-fx]:not([data-fx='classic']) .fx-p::before,
-.card[data-fx]:not([data-fx='classic']) .fx-p::after {
+.card[data-fx]:not([data-fx='classic']) {
+  /* The tier's colour, in five tones. */
+  --fx-pale: color-mix(in srgb, var(--rarity) 20%, #fff);
+  --fx-lite: color-mix(in srgb, var(--rarity) 55%, #fff);
+  --fx-core: var(--rarity);
+  --fx-deep: color-mix(in srgb, var(--rarity) 60%, #000);
+  --fx-dark: color-mix(in srgb, var(--rarity) 28%, #000);
+  /* Where the artwork sits on the face, measured in the card's own width so
+     one mask serves both shapes: .card-art carries a 3.2% margin (3.2cqw) and
+     is 46% of a 5-by-7 face, which is 64.4cqw, so the picture runs 3.2cqw to
+     67.6cqw down. A layer wearing this mask paints above and below it and
+     nowhere on it, the short fades falling clear of the picture's own edge. */
+  --fx-off-art: linear-gradient(to bottom,
+    #000 0 1.4cqw, rgba(0, 0, 0, 0) 3.4cqw 67.4cqw, #000 69.4cqw);
+  /* The same geometry, held at a third rather than shut off: what light does
+     to a photograph. The upper tiers use this, so a Prismatic treatment can
+     cross the picture the way its own tier's ribbon does, and the picture
+     still reads as a picture underneath. */
+  --fx-soft-art: linear-gradient(to bottom,
+    #000 0 1.4cqw, rgba(0, 0, 0, 0.32) 3.4cqw 67.4cqw, #000 69.4cqw);
+}
+/* The blown-up card is free-height with a 16-by-10 picture, so its artwork
+   ends higher: 3.2cqw plus 93.6cqw of width at ten sixteenths, or 61.7cqw. */
+.giant-card[data-fx]:not([data-fx='classic']) {
+  --fx-off-art: linear-gradient(to bottom,
+    #000 0 1.4cqw, rgba(0, 0, 0, 0) 3.4cqw 61.5cqw, #000 63.5cqw);
+  --fx-soft-art: linear-gradient(to bottom,
+    #000 0 1.4cqw, rgba(0, 0, 0, 0.32) 3.4cqw 61.5cqw, #000 63.5cqw);
+}
+
+/* The plate sits over the artwork, under the frame, under every word. The
+   reset is written through :where(), which carries no weight at all, so every
+   effect below outranks it without a specificity war over one inset. */
+.card:where([data-fx]:not([data-fx='classic'])) .fx-p { z-index: 3; overflow: hidden; }
+.card:where([data-fx]:not([data-fx='classic'])) .fx-p::before,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-p::after {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
+/* Six of the eight tiers travel a second layer across the face on .fx-b: the
+   prismatic ribbon, the rare sheen, the exotic sweep. A chosen effect stands
+   in for the tier's whole dressing, so that layer goes dark and every effect
+   below draws on .fx-p alone. Without this a dressed prismatic card wears its
+   rainbow AND its treatment, which is what two effects at once looks like. */
+.card[data-fx]:not([data-fx='classic']) .fx-b { display: none; }
+/* The writing and the tier's tag ride above the treatment, always. */
+.card[data-fx]:not([data-fx='classic']) .card-body,
+.card[data-fx]:not([data-fx='classic']) .card-stats,
+.card[data-fx]:not([data-fx='classic']) .card-footer { z-index: 6; }
 /* The tier's own dressing steps aside for the one that was chosen. */
 .card[data-fx]:not([data-fx='classic']) .fx-a,
-.card[data-fx]:not([data-fx='classic']) .fx-b,
 .card[data-fx]:not([data-fx='classic']) .fx-art,
 .card[data-fx]:not([data-fx='classic']) .fx-code,
 .card[data-fx]:not([data-fx='classic']) .fx-p i,
 .card[data-fx]:not([data-fx='classic']) .fx-ring::before,
 .card[data-fx]:not([data-fx='classic']) .fx-ring::after { display: none; }
 .card[data-fx]:not([data-fx='classic']) .card-art::before,
-.card[data-fx]:not([data-fx='classic']) .card-art::after,
+.card[data-fx]:not([data-fx='classic']) .card-art::after { opacity: 0; animation: none !important; }
 .card[data-fx]:not([data-fx='classic']) .card-title,
 .card[data-fx]:not([data-fx='classic']) .card-desc,
 .card[data-fx]:not([data-fx='classic']) .rarity-badge { animation: none !important; }
-.card[data-fx]:not([data-fx='classic']) .card-art::before,
-.card[data-fx]:not([data-fx='classic']) .card-art::after { opacity: 0; }
+/* A quiet frame in the tier's own colour, so a dressed card still has an edge. */
+.card[data-fx]:not([data-fx='classic']) .fx-ring {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fx-lite) 55%, transparent);
+}
 
-/* =================== COMMON: paper, pencil and the post ================== */
+/* =================== COMMON: paper, pencil and the press ================= */
 
-/* --- Pencil: two sets of hatching, the second sliding over the first ------ */
+/* --- Pencil: hatching, laid twice and crossed ---------------------------- */
 .card[data-fx='pencil'] .fx-p::before {
-  background: repeating-linear-gradient(45deg, transparent 0 3px, rgba(20, 20, 30, 0.22) 3px 4px);
-  mix-blend-mode: multiply;
-  opacity: 0.8;
+  background: repeating-linear-gradient(48deg,
+    transparent 0 4px, color-mix(in srgb, var(--fx-dark) 60%, transparent) 4px 5px);
+  opacity: 0.55;
 }
 .card[data-fx='pencil'] .fx-p::after {
-  inset: -20%;
-  background: repeating-linear-gradient(-42deg, transparent 0 5px, rgba(20, 20, 30, 0.16) 5px 6px);
-  mix-blend-mode: multiply;
-  transform: translate3d(calc(var(--lx, 0) * 3%), calc(var(--ly, 0) * 3%), 0);
+  inset: -14%;
+  background: repeating-linear-gradient(-40deg,
+    transparent 0 7px, color-mix(in srgb, var(--fx-deep) 40%, transparent) 7px 8px);
+  opacity: 0.4;
 }
-.card.is-lit[data-fx='pencil'] .fx-p::after { animation: fx-pencil 7s ease-in-out infinite alternate; }
-@keyframes fx-pencil { from { transform: translate3d(-3%, -2%, 0); } to { transform: translate3d(3%, 2%, 0); } }
+.card.is-lit[data-fx='pencil'] .fx-p::after { animation: fx-pencil 9s ease-in-out infinite alternate; }
+@keyframes fx-pencil { from { transform: translate3d(-2%, -1%, 0); } to { transform: translate3d(2%, 1%, 0); } }
 
-/* --- Folded: a crease down the card, lit on one side and shaded on the other */
+/* --- Folded: one crease, a lit half and a shaded one --------------------- */
 .card[data-fx='fold'] .fx-p::before {
-  background: linear-gradient(100deg, rgba(255, 255, 255, 0.09) 0 49%, rgba(0, 0, 0, 0.16) 51% 100%);
+  background: linear-gradient(102deg,
+    color-mix(in srgb, var(--fx-pale) 22%, transparent) 0 49%,
+    color-mix(in srgb, var(--fx-dark) 32%, transparent) 51% 100%);
 }
 .card[data-fx='fold'] .fx-p::after {
-  background: linear-gradient(100deg, transparent 48.4%, rgba(255, 255, 255, 0.55) 49.4%, rgba(0, 0, 0, 0.4) 50.6%, transparent 51.6%);
-  transform: translateX(calc(var(--lx, 0) * 1.5%));
+  background: linear-gradient(102deg,
+    transparent 48.2%, color-mix(in srgb, var(--fx-pale) 85%, transparent) 49.4%,
+    color-mix(in srgb, var(--fx-dark) 70%, transparent) 50.6%, transparent 51.8%);
 }
-.card.is-lit[data-fx='fold'] .fx-p::after { animation: fx-fold 3.6s ease-in-out infinite; }
-@keyframes fx-fold { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+.card.is-lit[data-fx='fold'] .fx-p::after { animation: fx-fold 5s ease-in-out infinite; }
+@keyframes fx-fold { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 
-/* --- Postmark: a round stamp in the corner and the wavy lines beside it --- */
+/* --- Postmark: a cancelled stamp, kept to the foot ----------------------- */
+.card[data-fx='postmark'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='postmark'] .fx-p::before {
-  inset: auto;
-  top: 6%;
-  right: 6%;
-  width: 34cqw;
-  aspect-ratio: 1;
+  inset: auto auto 8.4cqw 8%;
+  width: 30cqw;
+  height: 30cqw;
   border-radius: 50%;
-  border: 1.5px dashed color-mix(in srgb, var(--rarity) 60%, #222);
-  box-shadow: inset 0 0 0 4px transparent, inset 0 0 0 5px color-mix(in srgb, var(--rarity) 60%, #222);
-  opacity: 0.55;
-  mix-blend-mode: multiply;
-  transform: rotate(-12deg);
+  border: 2px dashed color-mix(in srgb, var(--fx-deep) 75%, transparent);
+  box-shadow: inset 0 0 0 3px transparent, inset 0 0 0 4px color-mix(in srgb, var(--fx-deep) 45%, transparent);
+  opacity: 0.7;
 }
 .card[data-fx='postmark'] .fx-p::after {
-  inset: auto;
-  top: 14%;
-  right: 38%;
-  width: 26cqw;
-  height: 14cqw;
-  background: repeating-linear-gradient(180deg, transparent 0 3px, color-mix(in srgb, var(--rarity) 60%, #222) 3px 4px);
-  mask-image: linear-gradient(90deg, transparent, #000 40%, #000);
-  opacity: 0.45;
-  mix-blend-mode: multiply;
+  inset: auto auto 18.2cqw 40%;
+  width: 42cqw;
+  height: 12cqw;
+  background: repeating-linear-gradient(0deg,
+    transparent 0 3px, color-mix(in srgb, var(--fx-deep) 55%, transparent) 3px 4.5px);
+  transform: rotate(-4deg);
+  opacity: 0.6;
 }
-.card.is-lit[data-fx='postmark'] .fx-p::before { animation: fx-postmark 24s linear infinite; }
-@keyframes fx-postmark { from { transform: rotate(-12deg); } to { transform: rotate(348deg); } }
+.card.is-lit[data-fx='postmark'] .fx-p::before { animation: fx-postmark 26s linear infinite; }
+@keyframes fx-postmark { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-/* --- Dust: a shaft of light, and the motes that drift up through it ------- */
+/* --- Dust: motes in a shaft of light, never on the picture --------------- */
+.card[data-fx='dust'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='dust'] .fx-p::before {
-  background: linear-gradient(112deg, transparent 28%, rgba(255, 250, 230, 0.2) 44%, rgba(255, 250, 230, 0.06) 56%, transparent 66%);
+  background: linear-gradient(112deg, transparent 30%,
+    color-mix(in srgb, var(--fx-pale) 30%, transparent) 45%,
+    color-mix(in srgb, var(--fx-pale) 10%, transparent) 56%, transparent 68%);
 }
 .card[data-fx='dust'] .fx-p::after {
   inset: -100% 0 0 0;
   background:
-    radial-gradient(circle, rgba(255, 250, 230, 0.9) 0 0.6px, transparent 1.2px) 0 0 / 23px 31px,
-    radial-gradient(circle, rgba(255, 250, 230, 0.7) 0 0.9px, transparent 1.6px) 9px 17px / 41px 53px;
-  mask-image: linear-gradient(112deg, transparent 30%, #000 45%, #000 55%, transparent 66%);
-  opacity: 0.8;
+    radial-gradient(circle, var(--fx-pale) 0 0.7px, transparent 1.4px) 0 0 / 23px 31px,
+    radial-gradient(circle, var(--fx-lite) 0 1px, transparent 1.8px) 11px 17px / 43px 53px;
+  opacity: 0.75;
 }
-.card.is-lit[data-fx='dust'] .fx-p::after { animation: fx-dust 14s linear infinite; }
-@keyframes fx-dust { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 50%, 0); } }
+.card.is-lit[data-fx='dust'] .fx-p::after { animation: fx-drift-up 15s linear infinite; }
+@keyframes fx-drift-up { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 50%, 0); } }
 
-/* --- Halftone: a newspaper dot screen, and a slight misregistration ------- */
+/* --- Halftone: a press screen, slightly out of register ------------------ */
 .card[data-fx='halftone'] .fx-p::before {
-  inset: -30%;
-  background: radial-gradient(circle, rgba(15, 15, 25, 0.5) 0 1.1px, transparent 1.7px) 0 0 / 5px 5px;
-  mix-blend-mode: multiply;
-  transform: rotate(15deg);
-  opacity: 0.85;
+  inset: -25%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--fx-dark) 75%, transparent) 0 1.2px, transparent 1.9px) 0 0 / 5px 5px;
+  transform: rotate(14deg);
+  opacity: 0.7;
 }
 .card[data-fx='halftone'] .fx-p::after {
-  background: rgba(255, 246, 225, 0.14);
-  mix-blend-mode: screen;
+  inset: -25%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--fx-lite) 55%, transparent) 0 1px, transparent 1.7px) 2px 2px / 5px 5px;
+  transform: rotate(14deg);
+  opacity: 0.5;
 }
-.card.is-lit[data-fx='halftone'] .fx-p::before { animation: fx-halftone 1.4s steps(2, end) infinite; }
-@keyframes fx-halftone { 0%, 100% { transform: rotate(15deg) translate(0, 0); } 50% { transform: rotate(15deg) translate(0.6px, -0.4px); } }
+.card.is-lit[data-fx='halftone'] .fx-p::after { animation: fx-halftone 1.6s steps(2, end) infinite; }
+@keyframes fx-halftone {
+  0%, 100% { transform: rotate(14deg) translate(0, 0); }
+  50% { transform: rotate(14deg) translate(0.7px, -0.5px); }
+}
 
-/* ================ UNCOMMON: green things that grow on things ============= */
+/* ================ UNCOMMON: things that grow on things =================== */
 
-/* --- Moss: blotches creeping in from the corners, breathing --------------- */
+/* --- Moss: blotches creeping in from the corners ------------------------- */
+.card[data-fx='moss'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='moss'] .fx-p::before {
-  inset: -6%;
   background:
-    radial-gradient(ellipse 34% 26% at 4% 6%, color-mix(in srgb, var(--rarity) 80%, #143d1a) 0 55%, transparent 100%),
-    radial-gradient(ellipse 28% 34% at 98% 30%, color-mix(in srgb, var(--rarity) 70%, #143d1a) 0 50%, transparent 100%),
-    radial-gradient(ellipse 40% 22% at 60% 100%, color-mix(in srgb, var(--rarity) 75%, #143d1a) 0 55%, transparent 100%),
-    radial-gradient(ellipse 18% 20% at 10% 80%, color-mix(in srgb, var(--rarity) 70%, #143d1a) 0 50%, transparent 100%);
-  mix-blend-mode: multiply;
-  opacity: 0.7;
-  transform-origin: 50% 50%;
+    radial-gradient(ellipse 32% 24% at 2% 3%, var(--fx-deep) 0 48%, transparent 100%),
+    radial-gradient(ellipse 26% 20% at 99% 8%, var(--fx-core) 0 45%, transparent 100%),
+    radial-gradient(ellipse 40% 26% at 62% 101%, var(--fx-deep) 0 50%, transparent 100%),
+    radial-gradient(ellipse 22% 22% at 6% 96%, var(--fx-core) 0 45%, transparent 100%);
+  opacity: 0.6;
 }
 .card[data-fx='moss'] .fx-p::after {
-  background: radial-gradient(circle, color-mix(in srgb, var(--rarity) 70%, #fff) 0 0.7px, transparent 1.2px) 0 0 / 7px 9px;
-  mask-image: radial-gradient(ellipse 45% 40% at 4% 6%, #000 0 40%, transparent 70%), radial-gradient(ellipse 45% 40% at 98% 30%, #000 0 40%, transparent 70%), radial-gradient(ellipse 50% 30% at 60% 100%, #000 0 40%, transparent 70%);
-  opacity: 0.55;
+  background: radial-gradient(circle, var(--fx-lite) 0 0.8px, transparent 1.4px) 0 0 / 7px 9px;
+  opacity: 0.4;
 }
-.card.is-lit[data-fx='moss'] .fx-p::before { animation: fx-moss 6s ease-in-out infinite alternate; }
-@keyframes fx-moss { from { transform: scale(1); opacity: 0.62; } to { transform: scale(1.06); opacity: 0.8; } }
+.card.is-lit[data-fx='moss'] .fx-p::before { animation: fx-breathe 7s ease-in-out infinite alternate; }
+@keyframes fx-breathe { from { transform: scale(1); opacity: 0.5; } to { transform: scale(1.05); opacity: 0.72; } }
 
-/* --- Vines: thin stems on the diagonal, leaves opening along them --------- */
+/* --- Vines: stems climbing the two margins ------------------------------- */
+.card[data-fx='vines'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='vines'] .fx-p::before {
-  inset: -10%;
-  background: repeating-linear-gradient(-32deg, transparent 0 24cqw, color-mix(in srgb, var(--rarity) 70%, #0a3312) 24cqw calc(24cqw + 1.4px), transparent calc(24cqw + 1.4px) 26cqw);
+  inset: -8%;
+  background: repeating-linear-gradient(-34deg,
+    transparent 0 22cqw,
+    color-mix(in srgb, var(--fx-deep) 85%, transparent) 22cqw calc(22cqw + 1.6px),
+    transparent calc(22cqw + 1.6px) 24cqw);
   opacity: 0.75;
 }
 .card[data-fx='vines'] .fx-p::after {
-  inset: -10%;
+  inset: -8%;
   background:
-    radial-gradient(ellipse 3.2cqw 1.6cqw at 50% 50%, color-mix(in srgb, var(--rarity) 85%, #0a3312) 0 65%, transparent 70%) 0 0 / 11cqw 9cqw,
-    radial-gradient(ellipse 2.4cqw 1.3cqw at 50% 50%, color-mix(in srgb, var(--rarity) 70%, #9f9) 0 65%, transparent 70%) 5cqw 4cqw / 11cqw 9cqw;
-  mask-image: repeating-linear-gradient(-32deg, transparent 0 22cqw, #000 22cqw 28cqw, transparent 28cqw 26cqw);
+    radial-gradient(ellipse 3cqw 1.5cqw at 50% 50%, var(--fx-core) 0 62%, transparent 68%) 0 0 / 11cqw 8cqw,
+    radial-gradient(ellipse 2.2cqw 1.2cqw at 50% 50%, var(--fx-lite) 0 62%, transparent 68%) 5cqw 4cqw / 11cqw 8cqw;
   transform-origin: 0 100%;
-  opacity: 0.85;
+  opacity: 0.8;
 }
-.card.is-lit[data-fx='vines'] .fx-p::after { animation: fx-vines 5s ease-in-out infinite alternate; }
-@keyframes fx-vines { from { transform: scale(0.94) rotate(-1.2deg); } to { transform: scale(1) rotate(0deg); } }
+.card.is-lit[data-fx='vines'] .fx-p::after { animation: fx-vines 6s ease-in-out infinite alternate; }
+@keyframes fx-vines { from { transform: scale(0.95) rotate(-1deg); } to { transform: scale(1) rotate(0deg); } }
 
-/* --- Dew: drops of water on the surface, a light crossing them in turn ---- */
+/* --- Dew: drops on the margins, a light crossing them -------------------- */
+.card[data-fx='dew'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='dew'] .fx-p::before {
+  /* Two sparse fields rather than one packed one: a drop every quarter of the
+     card, so the words behind them are still words. */
   background:
-    radial-gradient(circle at 36% 34%, rgba(255, 255, 255, 0.95) 0 0.8px, rgba(255, 255, 255, 0.3) 2px, color-mix(in srgb, var(--rarity) 45%, transparent) 52%, rgba(0, 0, 0, 0.18) 60%, transparent 64%) 0 0 / 15cqw 15cqw,
-    radial-gradient(circle at 36% 34%, rgba(255, 255, 255, 0.9) 0 0.5px, rgba(255, 255, 255, 0.25) 1.5px, color-mix(in srgb, var(--rarity) 40%, transparent) 50%, rgba(0, 0, 0, 0.16) 58%, transparent 62%) 7cqw 9cqw / 21cqw 19cqw;
-  opacity: 0.85;
+    radial-gradient(circle at 32% 30%, var(--fx-pale) 0 0.7px, color-mix(in srgb, var(--fx-lite) 34%, transparent) 2px,
+      color-mix(in srgb, var(--fx-core) 20%, transparent) 26%, color-mix(in srgb, var(--fx-dark) 26%, transparent) 32%, transparent 36%) 0 0 / 27cqw 25cqw,
+    radial-gradient(circle at 62% 66%, var(--fx-pale) 0 0.5px, color-mix(in srgb, var(--fx-lite) 26%, transparent) 1.4px,
+      color-mix(in srgb, var(--fx-core) 16%, transparent) 20%, color-mix(in srgb, var(--fx-dark) 20%, transparent) 25%, transparent 29%) 9cqw 13cqw / 38cqw 33cqw;
+  opacity: 0.72;
 }
 .card[data-fx='dew'] .fx-p::after {
   inset: -40%;
-  background: linear-gradient(70deg, transparent 44%, rgba(255, 255, 255, 0.35) 50%, transparent 56%);
-  mix-blend-mode: screen;
-  transform: translate3d(calc(var(--lx, 0) * 30%), 0, 0);
+  background: linear-gradient(70deg, transparent 44%, color-mix(in srgb, var(--fx-pale) 55%, transparent) 50%, transparent 56%);
 }
-.card.is-lit[data-fx='dew'] .fx-p::after { animation: fx-dew 5.5s ease-in-out infinite; }
-@keyframes fx-dew { 0% { transform: translate3d(-45%, 0, 0); } 100% { transform: translate3d(45%, 0, 0); } }
+.card.is-lit[data-fx='dew'] .fx-p::after { animation: fx-sweep-x 6s ease-in-out infinite; }
+@keyframes fx-sweep-x { 0% { transform: translate3d(-45%, 0, 0); } 100% { transform: translate3d(45%, 0, 0); } }
 
-/* --- Verdigris: a copper patina washing in from the edges ----------------- */
+/* --- Verdigris: a patina washing in from every edge ---------------------- */
 .card[data-fx='verdigris'] .fx-p::before {
   inset: -4%;
   background:
-    radial-gradient(ellipse 60% 50% at 0 0, color-mix(in srgb, var(--rarity) 55%, #5fd4b5) 0, transparent 60%),
-    radial-gradient(ellipse 55% 60% at 100% 100%, color-mix(in srgb, var(--rarity) 50%, #3aa88a) 0, transparent 60%),
-    radial-gradient(ellipse 30% 40% at 100% 0, color-mix(in srgb, var(--rarity) 40%, #8ee0c8) 0, transparent 60%);
-  mix-blend-mode: color;
-  opacity: 0.85;
-  transform-origin: 0 0;
+    radial-gradient(ellipse 58% 48% at 0 0, var(--fx-lite) 0, transparent 62%),
+    radial-gradient(ellipse 54% 58% at 100% 100%, var(--fx-core) 0, transparent 62%),
+    radial-gradient(ellipse 32% 40% at 100% 0, var(--fx-pale) 0, transparent 62%),
+    radial-gradient(ellipse 36% 34% at 0 100%, var(--fx-deep) 0, transparent 62%);
+  opacity: 0.5;
+  transform-origin: 50% 50%;
 }
 .card[data-fx='verdigris'] .fx-p::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.045' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.75 0 0 0 0 0.6 0 0 0 0.6 -0.2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   background-size: 120px 120px;
-  mask-image: linear-gradient(135deg, #000 0, transparent 45%, transparent 55%, #000 100%);
   mix-blend-mode: overlay;
-  opacity: 0.7;
+  opacity: 0.4;
 }
-.card.is-lit[data-fx='verdigris'] .fx-p::before { animation: fx-verdigris 9s ease-in-out infinite alternate; }
-@keyframes fx-verdigris { from { transform: scale(1); } to { transform: scale(1.07); } }
+.card.is-lit[data-fx='verdigris'] .fx-p::before { animation: fx-breathe 11s ease-in-out infinite alternate; }
 
-/* --- Fern: a frond unrolling across the corner ---------------------------- */
+/* --- Fern: a frond unrolling out of the bottom corner -------------------- */
+.card[data-fx='fern'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='fern'] .fx-p::before {
-  inset: auto;
-  left: -4%;
-  bottom: -2%;
-  width: 62cqw;
-  height: 62cqw;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%2358d68d' stroke-linecap='round'%3E%3Cpath d='M6 96 C 20 70 40 50 78 22' stroke-width='2.2'/%3E%3Cpath d='M14 84 q-8 -6 -12 -14 M19 77 q -3 -10 2 -18 M26 68 q -10 -4 -16 -12 M33 61 q -2 -10 5 -17 M41 54 q -10 -3 -17 -10 M49 47 q 0 -10 8 -15 M57 41 q -10 -2 -16 -8 M64 35 q 2 -9 9 -12 M71 29 q -8 -1 -13 -6' stroke-width='1.8'/%3E%3C/g%3E%3C/svg%3E");
+  inset: auto auto -5.6cqw -6%;
+  width: 66cqw;
+  height: 40cqw;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cg fill='none' stroke='%23ffffff' stroke-linecap='round'%3E%3Cpath d='M4 58 C 22 44 46 30 92 8' stroke-width='2.4'/%3E%3Cpath d='M14 50 q-7 -5 -10 -12 M24 43 q-3 -9 1 -16 M34 36 q-9 -4 -14 -11 M44 30 q-2 -9 5 -15 M55 24 q-9 -3 -15 -9 M66 18 q0 -9 7 -13 M77 13 q-9 -2 -14 -7' stroke-width='1.8'/%3E%3C/g%3E%3C/svg%3E");
   background-size: contain;
   background-repeat: no-repeat;
-  transform-origin: 6% 96%;
-  opacity: 0.85;
-  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--rarity) 60%, transparent));
+  transform-origin: 6% 94%;
+  opacity: 0.8;
+  filter: drop-shadow(0 0 2px var(--fx-deep));
+  mix-blend-mode: soft-light;
 }
 .card[data-fx='fern'] .fx-p::after {
-  background: radial-gradient(ellipse 50% 40% at 6% 96%, color-mix(in srgb, var(--rarity) 35%, transparent), transparent 70%);
+  background: radial-gradient(ellipse 52% 32% at 4% 98%, color-mix(in srgb, var(--fx-core) 45%, transparent), transparent 72%);
 }
-.card.is-lit[data-fx='fern'] .fx-p::before { animation: fx-fern 6s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; }
-@keyframes fx-fern { from { transform: rotate(-16deg) scale(0.92); } to { transform: rotate(0deg) scale(1); } }
+.card.is-lit[data-fx='fern'] .fx-p::before { animation: fx-fern 7s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; }
+@keyframes fx-fern { from { transform: rotate(-14deg) scale(0.9); } to { transform: rotate(0deg) scale(1); } }
 
 /* ===================== RARE: water, ice and cold light =================== */
 
-/* --- Ripple: rings spreading from the centre, two phases apart ------------ */
+/* --- Ripple: rings spreading from the middle ----------------------------- */
 .card[data-fx='ripple'] .fx-p::before,
 .card[data-fx='ripple'] .fx-p::after {
   inset: -30%;
-  background: repeating-radial-gradient(circle at 50% 50%, transparent 0 7cqw, color-mix(in srgb, var(--rarity) 50%, #fff) 7cqw calc(7cqw + 1.5px), transparent calc(7cqw + 1.5px) 14cqw);
-  mix-blend-mode: screen;
-  opacity: 0.35;
+  background: repeating-radial-gradient(circle at 50% 50%,
+    transparent 0 7cqw,
+    color-mix(in srgb, var(--fx-lite) 55%, transparent) 7cqw calc(7cqw + 1.6px),
+    transparent calc(7cqw + 1.6px) 14cqw);
+  opacity: 0.32;
 }
-.card[data-fx='ripple'] .fx-p::after { opacity: 0.2; transform: scale(1.15); }
 .card.is-lit[data-fx='ripple'] .fx-p::before { animation: fx-ripple 6s linear infinite; }
 .card.is-lit[data-fx='ripple'] .fx-p::after { animation: fx-ripple 6s linear infinite; animation-delay: -3s; }
-@keyframes fx-ripple { 0% { transform: scale(0.85); opacity: 0.45; } 100% { transform: scale(1.35); opacity: 0; } }
+@keyframes fx-ripple {
+  0% { transform: scale(0.82); opacity: 0.42; }
+  100% { transform: scale(1.32); opacity: 0; }
+}
 
-/* --- Frostbite: feather crystals reaching in from two corners ------------- */
+/* --- Frostbite: crystals reaching in from two corners -------------------- */
+.card[data-fx='frostbite'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='frostbite'] .fx-p::before,
 .card[data-fx='frostbite'] .fx-p::after {
   background:
-    repeating-conic-gradient(from 0deg at 0 0, transparent 0 7deg, rgba(255, 255, 255, 0.7) 7deg 8deg),
-    radial-gradient(ellipse 60% 55% at 0 0, color-mix(in srgb, var(--rarity) 45%, #fff) 0, transparent 70%);
-  mask-image: radial-gradient(ellipse 70% 65% at 0 0, #000 0 20%, transparent 75%);
+    repeating-conic-gradient(from 0deg at 0 0,
+      transparent 0 7deg, color-mix(in srgb, var(--fx-pale) 70%, transparent) 7deg 8deg),
+    radial-gradient(ellipse 62% 56% at 0 0, color-mix(in srgb, var(--fx-lite) 45%, transparent) 0, transparent 72%);
+  mask-image: radial-gradient(ellipse 72% 66% at 0 0, #000 0 18%, transparent 76%);
+  -webkit-mask-image: radial-gradient(ellipse 72% 66% at 0 0, #000 0 18%, transparent 76%);
   transform-origin: 0 0;
   opacity: 0.8;
 }
 .card[data-fx='frostbite'] .fx-p::after { transform: rotate(180deg); transform-origin: 50% 50%; }
-.card.is-lit[data-fx='frostbite'] .fx-p::before { animation: fx-frost 7s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='frostbite'] .fx-p::after { animation: fx-frost-b 7s ease-in-out infinite alternate; }
-@keyframes fx-frost { from { transform: scale(0.82); } to { transform: scale(1); } }
-@keyframes fx-frost-b { from { transform: rotate(180deg) scale(0.95); } to { transform: rotate(180deg) scale(1.08); } }
+.card.is-lit[data-fx='frostbite'] .fx-p::before { animation: fx-frost 8s ease-in-out infinite alternate; }
+.card.is-lit[data-fx='frostbite'] .fx-p::after { animation: fx-frost-b 8s ease-in-out infinite alternate; }
+@keyframes fx-frost { from { transform: scale(0.85); } to { transform: scale(1); } }
+@keyframes fx-frost-b { from { transform: rotate(180deg) scale(0.92); } to { transform: rotate(180deg) scale(1.06); } }
 
-/* --- Tide: a band of water at the foot, a wavy edge and a line of foam ---- */
+/* --- Tide: a band of water at the foot, rising and falling --------------- */
 .card[data-fx='tide'] .fx-p::before {
-  inset: auto -10% -4% -10%;
-  height: 34%;
-  background: linear-gradient(to top, color-mix(in srgb, var(--rarity) 75%, #063a5c), color-mix(in srgb, var(--rarity) 55%, transparent) 60%, transparent);
-  mask-image: radial-gradient(ellipse 60% 100% at 50% 100%, #000 0 60%, transparent 61%);
-  mask-size: 16cqw 100%;
+  inset: auto -12% -7cqw -12%;
+  height: 24cqw;
+  background: linear-gradient(to top, var(--fx-deep), color-mix(in srgb, var(--fx-core) 50%, transparent) 62%, transparent);
+  /* Wide, shallow swells: a waterline, not a row of spikes. */
+  mask-image: radial-gradient(ellipse 74% 128% at 50% 116%, #000 0 62%, transparent 64%);
+  -webkit-mask-image: radial-gradient(ellipse 74% 128% at 50% 116%, #000 0 62%, transparent 64%);
+  mask-size: 24cqw 100%;
+  -webkit-mask-size: 24cqw 100%;
   mask-repeat: repeat-x;
+  -webkit-mask-repeat: repeat-x;
   opacity: 0.8;
 }
 .card[data-fx='tide'] .fx-p::after {
-  inset: auto -10% 24% -10%;
-  height: 6%;
-  background: radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.85) 0 30%, transparent 32%) 0 0 / 16cqw 100%;
-  opacity: 0.7;
+  inset: auto -12% 16cqw -12%;
+  height: 3.4cqw;
+  background: radial-gradient(circle at 50% 100%, var(--fx-pale) 0 26%, transparent 28%) 0 0 / 24cqw 100%;
+  opacity: 0.5;
 }
-.card.is-lit[data-fx='tide'] .fx-p::before { animation: fx-tide 4.4s ease-in-out infinite; }
-.card.is-lit[data-fx='tide'] .fx-p::after { animation: fx-tide-foam 4.4s ease-in-out infinite; }
-@keyframes fx-tide { 0%, 100% { transform: translate3d(0, 6%, 0); } 50% { transform: translate3d(-8cqw, 0, 0); } }
-@keyframes fx-tide-foam { 0%, 100% { transform: translate3d(0, 6%, 0); opacity: 0.4; } 50% { transform: translate3d(-8cqw, 0, 0); opacity: 0.85; } }
+.card.is-lit[data-fx='tide'] .fx-p::before { animation: fx-tide 5s ease-in-out infinite; }
+.card.is-lit[data-fx='tide'] .fx-p::after { animation: fx-tide 5s ease-in-out infinite; }
+@keyframes fx-tide {
+  0%, 100% { transform: translate3d(0, 6%, 0); }
+  50% { transform: translate3d(-8cqw, 0, 0); }
+}
 
-/* --- Sapphire: the surface cut into facets, a sheen crossing each --------- */
+/* --- Sapphire: the face cut into facets, one sheen crossing them --------- */
+.card[data-fx='sapphire'] .fx-p {
+  mask-image: var(--fx-soft-art);
+  -webkit-mask-image: var(--fx-soft-art);
+}
 .card[data-fx='sapphire'] .fx-p::before {
   inset: -20%;
   background:
-    repeating-conic-gradient(from 0deg at 50% 45%, rgba(255, 255, 255, 0.16) 0 30deg, rgba(0, 0, 0, 0.14) 30deg 60deg),
-    repeating-conic-gradient(from 15deg at 50% 45%, rgba(255, 255, 255, 0.08) 0 45deg, transparent 45deg 90deg);
-  mix-blend-mode: overlay;
+    repeating-conic-gradient(from 0deg at 50% 45%,
+      color-mix(in srgb, var(--fx-pale) 14%, transparent) 0 30deg,
+      color-mix(in srgb, var(--fx-dark) 22%, transparent) 30deg 60deg),
+    repeating-conic-gradient(from 15deg at 50% 45%,
+      color-mix(in srgb, var(--fx-lite) 9%, transparent) 0 45deg, transparent 45deg 90deg);
 }
 .card[data-fx='sapphire'] .fx-p::after {
   inset: -40%;
-  background: linear-gradient(115deg, transparent 40%, color-mix(in srgb, var(--rarity) 30%, #fff) 49%, transparent 58%);
-  mix-blend-mode: screen;
-  opacity: 0.7;
-  transform: translate3d(calc(var(--lx, 0) * 30%), calc(var(--ly, 0) * 20%), 0);
+  background: linear-gradient(115deg, transparent 44%, color-mix(in srgb, var(--fx-pale) 48%, transparent) 50%, transparent 56%);
+  opacity: 0.62;
 }
-.card.is-lit[data-fx='sapphire'] .fx-p::after { animation: fx-sapphire 3.8s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate; }
-@keyframes fx-sapphire { from { transform: translate3d(-40%, -20%, 0); } to { transform: translate3d(40%, 20%, 0); } }
+.card.is-lit[data-fx='sapphire'] .fx-p::after { animation: fx-sweep-xy 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate; }
+@keyframes fx-sweep-xy { from { transform: translate3d(-38%, -18%, 0); } to { transform: translate3d(38%, 18%, 0); } }
 
-/* --- Constellation: stars joined by faint lines, wheeling slowly ---------- */
+/* --- Constellation: stars and their lines, wheeling slowly --------------- */
+.card[data-fx='constellation'] .fx-p {
+  mask-image: var(--fx-soft-art);
+  -webkit-mask-image: var(--fx-soft-art);
+}
 .card[data-fx='constellation'] .fx-p::before {
-  inset: -25%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg stroke='%23bfe3ff' stroke-opacity='.55' stroke-width='.6' fill='none'%3E%3Cpath d='M18 22 L34 40 L52 30 L70 48 L84 34 M34 40 L28 68 L50 88 L72 78 L70 48 M50 88 L46 116 L70 124 M28 68 L12 92'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='18' cy='22' r='1.6'/%3E%3Ccircle cx='34' cy='40' r='2.2'/%3E%3Ccircle cx='52' cy='30' r='1.3'/%3E%3Ccircle cx='70' cy='48' r='2'/%3E%3Ccircle cx='84' cy='34' r='1.2'/%3E%3Ccircle cx='28' cy='68' r='1.5'/%3E%3Ccircle cx='50' cy='88' r='2.4'/%3E%3Ccircle cx='72' cy='78' r='1.4'/%3E%3Ccircle cx='46' cy='116' r='1.7'/%3E%3Ccircle cx='70' cy='124' r='1.1'/%3E%3Ccircle cx='12' cy='92' r='1.3'/%3E%3C/g%3E%3C/svg%3E");
+  inset: -22%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg stroke='%23ffffff' stroke-opacity='.5' stroke-width='.6' fill='none'%3E%3Cpath d='M18 22 L34 40 L52 30 L70 48 L84 34 M34 40 L28 68 L50 88 L72 78 L70 48 M50 88 L46 116 L70 124 M28 68 L12 92'/%3E%3C/g%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='18' cy='22' r='1.6'/%3E%3Ccircle cx='34' cy='40' r='2.2'/%3E%3Ccircle cx='52' cy='30' r='1.3'/%3E%3Ccircle cx='70' cy='48' r='2'/%3E%3Ccircle cx='84' cy='34' r='1.2'/%3E%3Ccircle cx='28' cy='68' r='1.5'/%3E%3Ccircle cx='50' cy='88' r='2.4'/%3E%3Ccircle cx='72' cy='78' r='1.4'/%3E%3Ccircle cx='46' cy='116' r='1.7'/%3E%3Ccircle cx='70' cy='124' r='1.1'/%3E%3Ccircle cx='12' cy='92' r='1.3'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 100% 100%;
-  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--rarity) 80%, #fff));
+  filter: drop-shadow(0 0 3px var(--fx-lite));
   opacity: 0.85;
 }
 .card[data-fx='constellation'] .fx-p::after {
-  background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--rarity) 30%, transparent), transparent 70%);
-  opacity: 0.6;
+  background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--fx-core) 30%, transparent), transparent 72%);
 }
-.card.is-lit[data-fx='constellation'] .fx-p::before { animation: fx-constellation 80s linear infinite; }
-@keyframes fx-constellation { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.card.is-lit[data-fx='constellation'] .fx-p::before { animation: fx-turn 90s linear infinite; }
+@keyframes fx-turn { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-/* ================= EPIC: things from further out than the sky ============ */
+/* ================= EPIC: what is further out than the sky ================ */
 
-/* --- Nebula: two clouds of colour drifting over each other ---------------- */
+/* --- Nebula: two clouds drifting over each other ------------------------- */
 .card[data-fx='nebula'] .fx-p::before,
 .card[data-fx='nebula'] .fx-p::after {
   inset: -30%;
-  filter: blur(6px);
-  mix-blend-mode: screen;
-  opacity: 0.6;
+  filter: blur(7px);
+  opacity: 0.5;
 }
 .card[data-fx='nebula'] .fx-p::before {
   background:
-    radial-gradient(ellipse 30% 26% at 30% 35%, color-mix(in srgb, var(--rarity) 80%, #ff4fd8), transparent 70%),
-    radial-gradient(ellipse 22% 30% at 68% 62%, color-mix(in srgb, var(--rarity) 60%, #6a00ff), transparent 70%);
+    radial-gradient(ellipse 30% 26% at 30% 35%, var(--fx-lite), transparent 72%),
+    radial-gradient(ellipse 22% 30% at 68% 62%, var(--fx-deep), transparent 72%);
 }
 .card[data-fx='nebula'] .fx-p::after {
   background:
-    radial-gradient(ellipse 26% 22% at 62% 30%, color-mix(in srgb, var(--rarity) 45%, #22d3ee), transparent 70%),
-    radial-gradient(ellipse 24% 28% at 34% 70%, color-mix(in srgb, var(--rarity) 55%, #f0abfc), transparent 70%);
+    radial-gradient(ellipse 26% 22% at 62% 30%, var(--fx-core), transparent 72%),
+    radial-gradient(ellipse 24% 28% at 34% 70%, var(--fx-pale), transparent 72%);
 }
-.card.is-lit[data-fx='nebula'] .fx-p::before { animation: fx-nebula-a 13s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='nebula'] .fx-p::after { animation: fx-nebula-b 17s ease-in-out infinite alternate; }
-@keyframes fx-nebula-a { from { transform: translate3d(-6%, -4%, 0) rotate(0deg); } to { transform: translate3d(6%, 5%, 0) rotate(8deg); } }
-@keyframes fx-nebula-b { from { transform: translate3d(5%, 4%, 0) rotate(0deg); } to { transform: translate3d(-5%, -6%, 0) rotate(-10deg); } }
+.card.is-lit[data-fx='nebula'] .fx-p::before { animation: fx-nebula-a 15s ease-in-out infinite alternate; }
+.card.is-lit[data-fx='nebula'] .fx-p::after { animation: fx-nebula-b 19s ease-in-out infinite alternate; }
+@keyframes fx-nebula-a { from { transform: translate3d(-6%, -4%, 0) rotate(0deg); } to { transform: translate3d(6%, 5%, 0) rotate(7deg); } }
+@keyframes fx-nebula-b { from { transform: translate3d(5%, 4%, 0) rotate(0deg); } to { transform: translate3d(-5%, -6%, 0) rotate(-9deg); } }
 
-/* --- Arcane: two rings of runes turning against each other ---------------- */
+/* --- Arcane: two rings of runes, turning against each other -------------- */
+.card[data-fx='arcane'] .fx-p {
+  mask-image: var(--fx-soft-art);
+  -webkit-mask-image: var(--fx-soft-art);
+}
 .card[data-fx='arcane'] .fx-p::before,
 .card[data-fx='arcane'] .fx-p::after {
   inset: auto;
   top: 50%;
   left: 50%;
-  width: 96cqw;
+  width: 118cqw;
   aspect-ratio: 1;
-  margin: -48cqw 0 0 -48cqw;
+  margin: -59cqw 0 0 -59cqw;
   border-radius: 50%;
-  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--rarity) 70%, #fff) 0 3deg, transparent 3deg 6deg, color-mix(in srgb, var(--rarity) 70%, #fff) 6deg 7deg, transparent 7deg 14deg);
-  mask-image: radial-gradient(circle, transparent 0 40%, #000 41%, #000 46%, transparent 47%);
-  opacity: 0.8;
-  filter: drop-shadow(0 0 3px var(--rarity-glow));
+  background: repeating-conic-gradient(from 0deg,
+    var(--fx-lite) 0 3deg, transparent 3deg 6deg,
+    var(--fx-lite) 6deg 7deg, transparent 7deg 14deg);
+  mask-image: radial-gradient(circle, transparent 0 41%, #000 42%, #000 47%, transparent 48%);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 41%, #000 42%, #000 47%, transparent 48%);
+  opacity: 0.75;
 }
 .card[data-fx='arcane'] .fx-p::after {
-  width: 78cqw;
-  margin: -39cqw 0 0 -39cqw;
-  background: repeating-conic-gradient(from 5deg, color-mix(in srgb, var(--rarity) 60%, #fff) 0 2deg, transparent 2deg 10deg);
-  mask-image: radial-gradient(circle, transparent 0 44%, #000 45%, #000 47.5%, transparent 48.5%);
+  width: 96cqw;
+  margin: -48cqw 0 0 -48cqw;
+  background: repeating-conic-gradient(from 5deg, var(--fx-core) 0 2deg, transparent 2deg 10deg);
+  mask-image: radial-gradient(circle, transparent 0 45%, #000 46%, #000 48.5%, transparent 49.5%);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 45%, #000 46%, #000 48.5%, transparent 49.5%);
 }
-.card.is-lit[data-fx='arcane'] .fx-p::before { animation: fx-arcane 30s linear infinite; }
-.card.is-lit[data-fx='arcane'] .fx-p::after { animation: fx-arcane 18s linear infinite reverse; }
-@keyframes fx-arcane { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.card.is-lit[data-fx='arcane'] .fx-p::before { animation: fx-turn 34s linear infinite; }
+.card.is-lit[data-fx='arcane'] .fx-p::after { animation: fx-turn 21s linear infinite reverse; }
 
-/* --- Voltage: a lightning fork flickering down the card ------------------- */
+/* --- Voltage: a fork that strikes, in the margins ------------------------ */
+.card[data-fx='voltage'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='voltage'] .fx-p::before,
 .card[data-fx='voltage'] .fx-p::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cpath d='M58 0 L44 42 L60 46 L36 96 L48 60 L30 56 Z' fill='%23fff' fill-opacity='.85'/%3E%3Cpath d='M44 42 L26 58 M60 46 L74 70' stroke='%23fff' stroke-opacity='.7' stroke-width='1.4' fill='none'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cpath d='M58 0 L44 42 L60 46 L36 96 L48 60 L30 56 Z' fill='%23ffffff' fill-opacity='.9'/%3E%3Cpath d='M44 42 L26 58 M60 46 L74 70' stroke='%23ffffff' stroke-opacity='.7' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
   background-size: 100% 100%;
-  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--rarity) 90%, #fff)) drop-shadow(0 0 10px var(--rarity-glow));
+  filter: drop-shadow(0 0 4px var(--fx-lite)) drop-shadow(0 0 12px var(--fx-core));
   opacity: 0;
 }
-.card[data-fx='voltage'] .fx-p::after { transform: scaleX(-1) translateX(-30%); }
-.card[data-fx='voltage'] .fx-p::before { opacity: 0.55; }
-.card.is-lit[data-fx='voltage'] .fx-p::before { animation: fx-voltage 3.1s steps(1) infinite; }
-.card.is-lit[data-fx='voltage'] .fx-p::after { animation: fx-voltage 4.7s steps(1) infinite; animation-delay: -1.3s; }
+.card[data-fx='voltage'] .fx-p::after { transform: scaleX(-1); }
+.card.is-lit[data-fx='voltage'] .fx-p::before { animation: fx-voltage 3.4s steps(1) infinite; }
+.card.is-lit[data-fx='voltage'] .fx-p::after { animation: fx-voltage 5.2s steps(1) infinite; animation-delay: -1.6s; }
 @keyframes fx-voltage {
   0%, 6%, 100% { opacity: 0; }
-  7% { opacity: 1; } 9% { opacity: 0.2; } 11% { opacity: 0.9; } 16% { opacity: 0; }
-  58% { opacity: 0.6; } 60% { opacity: 0; }
+  7% { opacity: 0.95; }
+  9% { opacity: 0.2; }
+  11% { opacity: 0.8; }
+  16% { opacity: 0; }
+  58% { opacity: 0.5; }
+  60% { opacity: 0; }
 }
 
-/* --- Velvet: a soft nap, and one broad highlight where the pile turns ----- */
+/* --- Velvet: a nap that catches the light where it turns ----------------- */
 .card[data-fx='velvet'] .fx-p::before {
-  background: repeating-linear-gradient(160deg, rgba(255, 255, 255, 0.07) 0 3cqw, rgba(0, 0, 0, 0.16) 3cqw 8cqw, rgba(255, 255, 255, 0.04) 8cqw 12cqw);
-  mix-blend-mode: soft-light;
+  background: repeating-linear-gradient(160deg,
+    color-mix(in srgb, var(--fx-pale) 12%, transparent) 0 3cqw,
+    color-mix(in srgb, var(--fx-dark) 30%, transparent) 3cqw 8cqw,
+    color-mix(in srgb, var(--fx-lite) 8%, transparent) 8cqw 12cqw);
 }
 .card[data-fx='velvet'] .fx-p::after {
   inset: -20%;
-  background: radial-gradient(ellipse 40% 55% at calc(50% + var(--lx, 0) * 30%) calc(45% + var(--ly, 0) * 30%), color-mix(in srgb, var(--rarity) 40%, #fff) 0, transparent 70%);
-  mix-blend-mode: soft-light;
-  opacity: 0.9;
+  background: radial-gradient(ellipse 42% 56% at 50% 45%, color-mix(in srgb, var(--fx-pale) 45%, transparent) 0, transparent 72%);
+  opacity: 0.85;
 }
-.card.is-lit[data-fx='velvet'] .fx-p::after { animation: fx-velvet 6s ease-in-out infinite alternate; }
-@keyframes fx-velvet { from { transform: translate3d(-10%, -8%, 0); } to { transform: translate3d(10%, 8%, 0); } }
+.card.is-lit[data-fx='velvet'] .fx-p::after { animation: fx-velvet 7s ease-in-out infinite alternate; }
+@keyframes fx-velvet { from { transform: translate3d(-11%, -8%, 0); } to { transform: translate3d(11%, 8%, 0); } }
 
-/* --- Orbitals: two rings tilting around the card at two speeds ------------ */
+/* --- Orbitals: two rings tilting at two speeds --------------------------- */
+.card[data-fx='orbitals'] .fx-p {
+  mask-image: var(--fx-soft-art);
+  -webkit-mask-image: var(--fx-soft-art);
+}
 .card[data-fx='orbitals'] .fx-p::before,
 .card[data-fx='orbitals'] .fx-p::after {
   inset: auto;
   top: 50%;
   left: 50%;
-  width: 130cqw;
-  height: 44cqw;
-  margin: -22cqw 0 0 -65cqw;
+  width: 132cqw;
+  height: 46cqw;
+  margin: -23cqw 0 0 -66cqw;
   border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, var(--rarity) 70%, #fff);
-  background: radial-gradient(circle at 0 50%, #fff 0 2.2cqw, transparent 2.6cqw);
-  box-shadow: 0 0 10px -2px var(--rarity-glow);
+  border: 1.6px solid var(--fx-lite);
+  background: radial-gradient(circle at 0 50%, var(--fx-pale) 0 2.2cqw, transparent 2.6cqw);
   opacity: 0.8;
-  transform: rotate(-28deg);
 }
-.card[data-fx='orbitals'] .fx-p::after { width: 110cqw; height: 60cqw; margin: -30cqw 0 0 -55cqw; transform: rotate(40deg); border-color: color-mix(in srgb, var(--rarity) 50%, #fff); }
-.card.is-lit[data-fx='orbitals'] .fx-p::before { animation: fx-orbit-a 9s linear infinite; }
-.card.is-lit[data-fx='orbitals'] .fx-p::after { animation: fx-orbit-b 14s linear infinite; }
-@keyframes fx-orbit-a { from { transform: rotate(-28deg) rotateY(0deg); } to { transform: rotate(-28deg) rotateY(360deg); } }
-@keyframes fx-orbit-b { from { transform: rotate(40deg) rotateY(360deg); } to { transform: rotate(40deg) rotateY(0deg); } }
+.card[data-fx='orbitals'] .fx-p::after {
+  width: 112cqw;
+  height: 62cqw;
+  margin: -31cqw 0 0 -56cqw;
+  border-color: var(--fx-core);
+}
+.card.is-lit[data-fx='orbitals'] .fx-p::before { animation: fx-orbit-a 10s linear infinite; }
+.card.is-lit[data-fx='orbitals'] .fx-p::after { animation: fx-orbit-b 15s linear infinite; }
+@keyframes fx-orbit-a { from { transform: rotate(-26deg) rotateY(0deg); } to { transform: rotate(-26deg) rotateY(360deg); } }
+@keyframes fx-orbit-b { from { transform: rotate(38deg) rotateY(360deg); } to { transform: rotate(38deg) rotateY(0deg); } }
 
 /* =================== LEGENDARY: gold, and what it does =================== */
 
-/* --- Gilt: gold leaf laid in flakes, shimmering where it is thin ---------- */
+/* --- Gilt: leaf laid in flakes, shimmering where it is thin -------------- */
 .card[data-fx='gilt'] .fx-p::before {
   background:
-    radial-gradient(ellipse 12% 9% at 18% 22%, color-mix(in srgb, var(--rarity) 85%, #fff) 0 90%, transparent 100%),
-    radial-gradient(ellipse 9% 14% at 76% 18%, color-mix(in srgb, var(--rarity) 80%, #fff) 0 90%, transparent 100%),
-    radial-gradient(ellipse 14% 8% at 60% 46%, color-mix(in srgb, var(--rarity) 90%, #fff) 0 90%, transparent 100%),
-    radial-gradient(ellipse 8% 12% at 30% 58%, color-mix(in srgb, var(--rarity) 75%, #fff) 0 90%, transparent 100%),
-    radial-gradient(ellipse 11% 10% at 84% 70%, color-mix(in srgb, var(--rarity) 85%, #fff) 0 90%, transparent 100%),
-    radial-gradient(ellipse 13% 7% at 44% 84%, color-mix(in srgb, var(--rarity) 80%, #fff) 0 90%, transparent 100%),
-    radial-gradient(ellipse 7% 9% at 12% 90%, color-mix(in srgb, var(--rarity) 85%, #fff) 0 90%, transparent 100%);
-  mix-blend-mode: overlay;
-  opacity: 0.9;
+    radial-gradient(ellipse 12% 9% at 18% 22%, var(--fx-lite) 0 88%, transparent 100%),
+    radial-gradient(ellipse 9% 14% at 76% 18%, var(--fx-pale) 0 88%, transparent 100%),
+    radial-gradient(ellipse 14% 8% at 60% 46%, var(--fx-lite) 0 88%, transparent 100%),
+    radial-gradient(ellipse 8% 12% at 30% 58%, var(--fx-core) 0 88%, transparent 100%),
+    radial-gradient(ellipse 11% 10% at 84% 70%, var(--fx-lite) 0 88%, transparent 100%),
+    radial-gradient(ellipse 13% 7% at 44% 84%, var(--fx-pale) 0 88%, transparent 100%),
+    radial-gradient(ellipse 7% 9% at 12% 90%, var(--fx-core) 0 88%, transparent 100%);
+  opacity: 0.55;
 }
 .card[data-fx='gilt'] .fx-p::after {
   inset: -40%;
-  background: linear-gradient(120deg, transparent 42%, rgba(255, 255, 255, 0.55) 50%, transparent 58%);
-  mix-blend-mode: overlay;
-  mask-image:
-    radial-gradient(ellipse 12% 9% at 18% 22%, #000 0 90%, transparent), radial-gradient(ellipse 9% 14% at 76% 18%, #000 0 90%, transparent),
-    radial-gradient(ellipse 14% 8% at 60% 46%, #000 0 90%, transparent), radial-gradient(ellipse 8% 12% at 30% 58%, #000 0 90%, transparent),
-    radial-gradient(ellipse 11% 10% at 84% 70%, #000 0 90%, transparent), radial-gradient(ellipse 13% 7% at 44% 84%, #000 0 90%, transparent);
-  mask-size: 71.4% 71.4%;
-  mask-position: 28.6% 28.6%;
+  background: linear-gradient(120deg, transparent 42%, color-mix(in srgb, var(--fx-pale) 75%, transparent) 50%, transparent 58%);
+  opacity: 0.7;
 }
-.card.is-lit[data-fx='gilt'] .fx-p::after { animation: fx-gilt 3s ease-in-out infinite alternate; }
-@keyframes fx-gilt { from { transform: translate3d(-30%, -10%, 0); } to { transform: translate3d(30%, 10%, 0); } }
+.card.is-lit[data-fx='gilt'] .fx-p::after { animation: fx-sweep-xy 3.6s ease-in-out infinite alternate; }
 
-/* --- Sunburst: rays fanning out from the corner and turning --------------- */
+/* --- Sunburst: rays fanning from a corner ------------------------------- */
 .card[data-fx='sunburst'] .fx-p::before {
   inset: auto;
   top: 0;
   left: 0;
-  width: 240cqw;
+  width: 250cqw;
   aspect-ratio: 1;
-  margin: -120cqw 0 0 -120cqw;
-  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--rarity) 55%, #fff) 0 5deg, transparent 5deg 14deg);
-  mix-blend-mode: screen;
-  opacity: 0.32;
-  transform-origin: 50% 50%;
+  margin: -125cqw 0 0 -125cqw;
+  background: repeating-conic-gradient(from 0deg,
+    color-mix(in srgb, var(--fx-lite) 35%, transparent) 0 5deg, transparent 5deg 14deg);
+  opacity: 0.42;
 }
 .card[data-fx='sunburst'] .fx-p::after {
-  background: radial-gradient(circle at 0 0, color-mix(in srgb, var(--rarity) 70%, #fff) 0, transparent 45%);
-  mix-blend-mode: screen;
+  background: radial-gradient(circle at 0 0, color-mix(in srgb, var(--fx-pale) 60%, transparent) 0, transparent 48%);
   opacity: 0.55;
 }
-.card.is-lit[data-fx='sunburst'] .fx-p::before { animation: fx-sunburst 40s linear infinite; }
-.card.is-lit[data-fx='sunburst'] .fx-p::after { animation: fx-sunburst-glow 3s ease-in-out infinite alternate; }
-@keyframes fx-sunburst { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes fx-sunburst-glow { from { opacity: 0.4; } to { opacity: 0.7; } }
+.card.is-lit[data-fx='sunburst'] .fx-p::before { animation: fx-turn 46s linear infinite; }
+.card.is-lit[data-fx='sunburst'] .fx-p::after { animation: fx-glow 4s ease-in-out infinite alternate; }
+@keyframes fx-glow { from { opacity: 0.36; } to { opacity: 0.68; } }
 
-/* --- Laurel: a wreath of leaves running the border ------------------------ */
+/* --- Laurel: a wreath on the border and nowhere else --------------------- */
 .card[data-fx='laurel'] .fx-p::before,
 .card[data-fx='laurel'] .fx-p::after {
   padding: 5.5%;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
+  -webkit-mask-composite: xor;
 }
 .card[data-fx='laurel'] .fx-p::before {
   background:
-    radial-gradient(ellipse 42% 28% at 50% 50%, color-mix(in srgb, var(--rarity) 60%, #3a7d2c) 0 60%, transparent 63%) 0 0 / 6cqw 4.4cqw,
-    radial-gradient(ellipse 30% 20% at 50% 50%, color-mix(in srgb, var(--rarity) 85%, #fff) 0 60%, transparent 63%) 3cqw 2.2cqw / 6cqw 4.4cqw,
-    color-mix(in srgb, var(--rarity) 50%, #3a7d2c);
+    radial-gradient(ellipse 42% 28% at 50% 50%, var(--fx-deep) 0 58%, transparent 62%) 0 0 / 6cqw 4.4cqw,
+    radial-gradient(ellipse 30% 20% at 50% 50%, var(--fx-lite) 0 58%, transparent 62%) 3cqw 2.2cqw / 6cqw 4.4cqw,
+    var(--fx-dark);
   opacity: 0.9;
 }
 .card[data-fx='laurel'] .fx-p::after {
-  background: linear-gradient(120deg, transparent 40%, rgba(255, 255, 255, 0.6) 50%, transparent 60%);
-  mix-blend-mode: overlay;
-  transform: translate3d(calc(var(--lx, 0) * 40%), 0, 0);
+  background: linear-gradient(120deg, transparent 40%, color-mix(in srgb, var(--fx-pale) 70%, transparent) 50%, transparent 60%);
 }
-.card.is-lit[data-fx='laurel'] .fx-p::after { animation: fx-laurel 5s ease-in-out infinite; }
-@keyframes fx-laurel { 0% { transform: translate3d(-60%, 0, 0); } 100% { transform: translate3d(60%, 0, 0); } }
+.card.is-lit[data-fx='laurel'] .fx-p::after { animation: fx-sweep-x 6s ease-in-out infinite; }
 
-/* --- Embers: sparks rising from the foot and going out -------------------- */
+/* --- Embers: sparks rising out of the foot ------------------------------- */
+.card[data-fx='embers'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='embers'] .fx-p::before {
-  background: linear-gradient(to top, color-mix(in srgb, var(--rarity) 60%, #ff4d00) 0, color-mix(in srgb, var(--rarity) 30%, transparent) 20%, transparent 45%);
-  mix-blend-mode: screen;
-  opacity: 0.7;
+  background: linear-gradient(to top, color-mix(in srgb, var(--fx-core) 55%, transparent) 0,
+    color-mix(in srgb, var(--fx-deep) 30%, transparent) 22%, transparent 48%);
+  opacity: 0.75;
 }
 .card[data-fx='embers'] .fx-p::after {
   inset: 0 0 -100% 0;
   background:
-    radial-gradient(circle, #fff3c4 0 0.9px, color-mix(in srgb, var(--rarity) 80%, #ff6a00) 1.4px, transparent 2px) 0 0 / 29px 37px,
-    radial-gradient(circle, color-mix(in srgb, var(--rarity) 90%, #ffb347) 0 0.7px, transparent 1.4px) 13px 21px / 47px 59px;
-  mask-image: linear-gradient(to top, #000 30%, transparent 85%);
-  mask-size: 100% 50%;
-  mask-position: 0 100%;
-  mask-repeat: no-repeat;
-  filter: drop-shadow(0 0 2px var(--rarity-glow));
+    radial-gradient(circle, var(--fx-pale) 0 1px, var(--fx-core) 1.6px, transparent 2.2px) 0 0 / 29px 37px,
+    radial-gradient(circle, var(--fx-lite) 0 0.8px, transparent 1.5px) 13px 21px / 47px 59px;
+  filter: drop-shadow(0 0 3px var(--fx-core));
 }
-.card.is-lit[data-fx='embers'] .fx-p::after { animation: fx-embers 5s linear infinite; }
-.card.is-lit[data-fx='embers'] .fx-p::before { animation: fx-embers-glow 1.8s ease-in-out infinite alternate; }
-@keyframes fx-embers { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, -50%, 0); } }
-@keyframes fx-embers-glow { from { opacity: 0.55; } to { opacity: 0.85; } }
+.card.is-lit[data-fx='embers'] .fx-p::after { animation: fx-rise 6s linear infinite; }
+.card.is-lit[data-fx='embers'] .fx-p::before { animation: fx-glow 2s ease-in-out infinite alternate; }
+@keyframes fx-rise { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, -50%, 0); } }
 
-/* --- Molten: seams of liquid gold flowing across the art ------------------ */
+/* --- Molten: seams of liquid gold running the margins -------------------- */
+.card[data-fx='molten'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='molten'] .fx-p::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fff5c2'/%3E%3Cstop offset='.5' stop-color='%23ffc832'/%3E%3Cstop offset='1' stop-color='%23ff8a00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-linecap='round'%3E%3Cpath d='M-4 30 C 20 22 30 44 52 36 S 84 22 106 34' stroke-width='2.6'/%3E%3Cpath d='M-4 78 C 18 70 26 92 48 84 S 80 70 106 82' stroke-width='1.8'/%3E%3Cpath d='M-4 118 C 22 110 34 130 58 120 S 88 108 106 116' stroke-width='2.2'/%3E%3Cpath d='M30 44 C 34 58 26 66 30 78 M64 34 C 60 50 70 60 66 76' stroke-width='1.1'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg fill='none' stroke='%23ffffff' stroke-linecap='round'%3E%3Cpath d='M-4 18 C 20 10 30 32 52 24 S 84 10 106 22' stroke-width='2.6'/%3E%3Cpath d='M-4 118 C 18 110 26 132 48 124 S 80 110 106 122' stroke-width='2'/%3E%3Cpath d='M-4 132 C 22 124 34 144 58 134 S 88 122 106 130' stroke-width='2.4'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 100% 100%;
-  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--rarity) 80%, #ff8a00));
-  opacity: 0.9;
+  filter: drop-shadow(0 0 4px var(--fx-core));
+  opacity: 0.85;
 }
 .card[data-fx='molten'] .fx-p::after {
   inset: -30%;
-  background: linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, 0.8) 50%, transparent 60%);
-  mix-blend-mode: overlay;
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cpath d='M-4 30 C 20 22 30 44 52 36 S 84 22 106 34' stroke-width='2.6'/%3E%3Cpath d='M-4 78 C 18 70 26 92 48 84 S 80 70 106 82' stroke-width='1.8'/%3E%3Cpath d='M-4 118 C 22 110 34 130 58 120 S 88 108 106 116' stroke-width='2.2'/%3E%3C/g%3E%3C/svg%3E");
+  background: linear-gradient(100deg, transparent 40%, color-mix(in srgb, var(--fx-pale) 80%, transparent) 50%, transparent 60%);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cpath d='M-4 18 C 20 10 30 32 52 24 S 84 10 106 22' stroke-width='2.6'/%3E%3Cpath d='M-4 118 C 18 110 26 132 48 124 S 80 110 106 122' stroke-width='2'/%3E%3Cpath d='M-4 132 C 22 124 34 144 58 134 S 88 122 106 130' stroke-width='2.4'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cpath d='M-4 18 C 20 10 30 32 52 24 S 84 10 106 22' stroke-width='2.6'/%3E%3Cpath d='M-4 118 C 18 110 26 132 48 124 S 80 110 106 122' stroke-width='2'/%3E%3Cpath d='M-4 132 C 22 124 34 144 58 134 S 88 122 106 130' stroke-width='2.4'/%3E%3C/g%3E%3C/svg%3E");
   mask-size: 62.5% 62.5%;
+  -webkit-mask-size: 62.5% 62.5%;
   mask-position: 50% 50%;
+  -webkit-mask-position: 50% 50%;
   mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
 }
-.card.is-lit[data-fx='molten'] .fx-p::after { animation: fx-molten 4s linear infinite; }
-.card.is-lit[data-fx='molten'] .fx-p::before { animation: fx-molten-glow 2.6s ease-in-out infinite alternate; }
-@keyframes fx-molten { from { transform: translate3d(-50%, 0, 0); } to { transform: translate3d(50%, 0, 0); } }
-@keyframes fx-molten-glow { from { filter: drop-shadow(0 0 2px #ff8a00) brightness(1); } to { filter: drop-shadow(0 0 5px #ffc832) brightness(1.25); } }
+.card.is-lit[data-fx='molten'] .fx-p::after { animation: fx-sweep-x 4.5s linear infinite; }
+.card.is-lit[data-fx='molten'] .fx-p::before { animation: fx-glow 2.8s ease-in-out infinite alternate; }
 
 /* ================== MYTHIC: red things, and old dark ones ================ */
 
-/* --- Blood Moon: a crimson moon rising behind the art, eclipsed at its edge */
+/* --- Blood Moon: a disc rising behind the foot of the card --------------- */
+.card[data-fx='bloodmoon'] .fx-p {
+  mask-image: var(--fx-soft-art);
+  -webkit-mask-image: var(--fx-soft-art);
+}
 .card[data-fx='bloodmoon'] .fx-p::before {
   inset: auto;
-  top: 4%;
+  bottom: 2.8cqw;
   left: 50%;
-  width: 62cqw;
+  width: 56cqw;
   aspect-ratio: 1;
-  margin-left: -31cqw;
+  margin-left: -28cqw;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 62% 42%, rgba(10, 0, 0, 0.92) 0 44%, transparent 46%),
-    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--rarity) 85%, #ff1a1a) 0 47%, color-mix(in srgb, var(--rarity) 60%, #fff) 48%, transparent 50%);
-  mix-blend-mode: screen;
-  filter: drop-shadow(0 0 12px var(--rarity-glow));
-  opacity: 0.9;
+    radial-gradient(circle at 62% 42%, var(--fx-dark) 0 44%, transparent 46%),
+    radial-gradient(circle at 50% 50%, var(--fx-core) 0 47%, var(--fx-lite) 48%, transparent 50%);
+  filter: drop-shadow(0 0 14px var(--fx-core));
+  opacity: 0.85;
 }
 .card[data-fx='bloodmoon'] .fx-p::after {
-  background: linear-gradient(to bottom, color-mix(in srgb, var(--rarity) 45%, transparent), transparent 55%);
-  mix-blend-mode: multiply;
+  background: linear-gradient(to top, color-mix(in srgb, var(--fx-deep) 55%, transparent), transparent 52%);
   opacity: 0.8;
 }
-.card.is-lit[data-fx='bloodmoon'] .fx-p::before { animation: fx-bloodmoon 12s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='bloodmoon'] .fx-p::after { animation: fx-bloodmoon-haze 4s ease-in-out infinite alternate; }
-@keyframes fx-bloodmoon { from { transform: translate3d(0, 10%, 0) scale(0.96); } to { transform: translate3d(0, 0, 0) scale(1); } }
-@keyframes fx-bloodmoon-haze { from { opacity: 0.6; } to { opacity: 0.95; } }
+.card.is-lit[data-fx='bloodmoon'] .fx-p::before { animation: fx-moon 13s ease-in-out infinite alternate; }
+.card.is-lit[data-fx='bloodmoon'] .fx-p::after { animation: fx-glow 4.5s ease-in-out infinite alternate; }
+@keyframes fx-moon { from { transform: translate3d(0, 12%, 0) scale(0.94); } to { transform: translate3d(0, 0, 0) scale(1); } }
 
-/* --- Dragonscale: overlapping scales, a highlight sweeping across them ---- */
+/* --- Dragonscale: overlapping scales, a highlight sweeping them ---------- */
 .card[data-fx='dragonscale'] .fx-p::before {
   background:
-    radial-gradient(circle at 50% 0, transparent 0 54%, color-mix(in srgb, var(--rarity) 75%, #000) 55% 62%, transparent 63%) 0 0 / 8cqw 6cqw,
-    radial-gradient(circle at 50% 0, transparent 0 54%, color-mix(in srgb, var(--rarity) 75%, #000) 55% 62%, transparent 63%) 4cqw 3cqw / 8cqw 6cqw;
+    radial-gradient(circle at 50% 0, transparent 0 54%, var(--fx-deep) 55% 62%, transparent 63%) 0 0 / 8cqw 6cqw,
+    radial-gradient(circle at 50% 0, transparent 0 54%, var(--fx-dark) 55% 62%, transparent 63%) 4cqw 3cqw / 8cqw 6cqw;
   opacity: 0.8;
 }
 .card[data-fx='dragonscale'] .fx-p::after {
   inset: -40%;
-  background: linear-gradient(135deg, transparent 40%, color-mix(in srgb, var(--rarity) 50%, #fff) 50%, transparent 60%);
-  mix-blend-mode: overlay;
-  opacity: 0.9;
-  transform: translate3d(calc(var(--lx, 0) * 30%), calc(var(--ly, 0) * 30%), 0);
+  background: linear-gradient(135deg, transparent 41%, color-mix(in srgb, var(--fx-lite) 55%, transparent) 50%, transparent 59%);
+  opacity: 0.85;
 }
-.card.is-lit[data-fx='dragonscale'] .fx-p::after { animation: fx-dragonscale 4.5s ease-in-out infinite alternate; }
-@keyframes fx-dragonscale { from { transform: translate3d(-40%, -40%, 0); } to { transform: translate3d(40%, 40%, 0); } }
+.card.is-lit[data-fx='dragonscale'] .fx-p::after { animation: fx-sweep-xy 5.5s ease-in-out infinite alternate; }
 
-/* --- Inferno: tongues of flame at the foot, heat rising above them -------- */
+/* --- Inferno: flames licking the foot ----------------------------------- */
+.card[data-fx='inferno'] .fx-p {
+  mask-image: var(--fx-off-art);
+  -webkit-mask-image: var(--fx-off-art);
+}
 .card[data-fx='inferno'] .fx-p::before {
-  inset: auto 0 -6% 0;
-  height: 46%;
+  inset: auto 0 -11cqw 0;
+  height: 64cqw;
   background:
-    radial-gradient(ellipse 12% 60% at 12% 100%, #fff1a8 0 20%, color-mix(in srgb, var(--rarity) 80%, #ff7a00) 45%, transparent 70%),
-    radial-gradient(ellipse 14% 80% at 30% 100%, #ffe08a 0 15%, color-mix(in srgb, var(--rarity) 85%, #ff5a00) 45%, transparent 70%),
-    radial-gradient(ellipse 12% 55% at 48% 100%, #fff1a8 0 20%, color-mix(in srgb, var(--rarity) 80%, #ff7a00) 45%, transparent 70%),
-    radial-gradient(ellipse 15% 90% at 66% 100%, #ffe08a 0 15%, color-mix(in srgb, var(--rarity) 90%, #ff3a00) 45%, transparent 70%),
-    radial-gradient(ellipse 12% 65% at 86% 100%, #fff1a8 0 20%, color-mix(in srgb, var(--rarity) 80%, #ff7a00) 45%, transparent 70%);
-  mix-blend-mode: screen;
+    radial-gradient(ellipse 12% 62% at 12% 100%, var(--fx-pale) 0 18%, var(--fx-core) 46%, transparent 72%),
+    radial-gradient(ellipse 14% 82% at 30% 100%, var(--fx-lite) 0 14%, var(--fx-core) 46%, transparent 72%),
+    radial-gradient(ellipse 12% 56% at 48% 100%, var(--fx-pale) 0 18%, var(--fx-core) 46%, transparent 72%),
+    radial-gradient(ellipse 15% 90% at 66% 100%, var(--fx-lite) 0 14%, var(--fx-deep) 46%, transparent 72%),
+    radial-gradient(ellipse 12% 66% at 86% 100%, var(--fx-pale) 0 18%, var(--fx-core) 46%, transparent 72%);
   transform-origin: 50% 100%;
-  opacity: 0.9;
+  opacity: 0.85;
 }
 .card[data-fx='inferno'] .fx-p::after {
   inset: -30% 0 0 0;
-  background: repeating-linear-gradient(180deg, transparent 0 6px, rgba(255, 120, 40, 0.09) 6px 9px);
-  mask-image: linear-gradient(to top, #000 30%, transparent 75%);
+  background: repeating-linear-gradient(180deg, transparent 0 6px, color-mix(in srgb, var(--fx-core) 14%, transparent) 6px 9px);
 }
-.card.is-lit[data-fx='inferno'] .fx-p::before { animation: fx-inferno 0.9s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='inferno'] .fx-p::after { animation: fx-inferno-heat 3s linear infinite; }
-@keyframes fx-inferno { from { transform: scaleY(0.88) skewX(-3deg); } to { transform: scaleY(1.06) skewX(3deg); } }
-@keyframes fx-inferno-heat { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, -23%, 0); } }
+.card.is-lit[data-fx='inferno'] .fx-p::before { animation: fx-inferno 1s ease-in-out infinite alternate; }
+.card.is-lit[data-fx='inferno'] .fx-p::after { animation: fx-rise 3.2s linear infinite; }
+@keyframes fx-inferno { from { transform: scaleY(0.9) skewX(-3deg); } to { transform: scaleY(1.06) skewX(3deg); } }
 
-/* --- Sigil: a geometric seal pulsing over the art, its outer ring turning - */
+/* --- Sigil: a seal pulsing under the words ------------------------------- */
+.card[data-fx='sigil'] .fx-p {
+  mask-image: var(--fx-soft-art);
+  -webkit-mask-image: var(--fx-soft-art);
+}
 .card[data-fx='sigil'] .fx-p::before,
 .card[data-fx='sigil'] .fx-p::after {
   inset: auto;
-  top: 50%;
+  bottom: 5.6cqw;
   left: 50%;
-  width: 84cqw;
+  width: 74cqw;
   aspect-ratio: 1;
-  margin: -42cqw 0 0 -42cqw;
+  margin-left: -37cqw;
   background-size: 100% 100%;
-  filter: drop-shadow(0 0 4px var(--rarity-glow));
-  opacity: 0.75;
+  filter: drop-shadow(0 0 6px var(--fx-core));
+  opacity: 0.4;
 }
 .card[data-fx='sigil'] .fx-p::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23ff3b3b' stroke-width='1.2'%3E%3Cpolygon points='50,8 86,71 14,71'/%3E%3Cpolygon points='50,92 14,29 86,29'/%3E%3Ccircle cx='50' cy='50' r='16'/%3E%3Ccircle cx='50' cy='50' r='4'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1.4'%3E%3Cpolygon points='50,8 86,71 14,71'/%3E%3Cpolygon points='50,92 14,29 86,29'/%3E%3Ccircle cx='50' cy='50' r='16'/%3E%3Ccircle cx='50' cy='50' r='4'/%3E%3C/g%3E%3C/svg%3E");
 }
 .card[data-fx='sigil'] .fx-p::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23ff3b3b' stroke-width='1'%3E%3Ccircle cx='50' cy='50' r='46'/%3E%3Ccircle cx='50' cy='50' r='42' stroke-dasharray='2 3'/%3E%3C/g%3E%3Cg fill='%23ff3b3b'%3E%3Ccircle cx='50' cy='4' r='2'/%3E%3Ccircle cx='96' cy='50' r='2'/%3E%3Ccircle cx='50' cy='96' r='2'/%3E%3Ccircle cx='4' cy='50' r='2'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1'%3E%3Ccircle cx='50' cy='50' r='46'/%3E%3Ccircle cx='50' cy='50' r='42' stroke-dasharray='2 3'/%3E%3C/g%3E%3C/svg%3E");
 }
-.card.is-lit[data-fx='sigil'] .fx-p::before { animation: fx-sigil 2.8s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='sigil'] .fx-p::after { animation: fx-sigil-ring 24s linear infinite; }
-@keyframes fx-sigil { from { transform: scale(0.94); opacity: 0.5; } to { transform: scale(1); opacity: 0.95; } }
-@keyframes fx-sigil-ring { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.card.is-lit[data-fx='sigil'] .fx-p::before { animation: fx-pulse 3s ease-in-out infinite alternate; }
+.card.is-lit[data-fx='sigil'] .fx-p::after { animation: fx-turn 28s linear infinite; }
+@keyframes fx-pulse { from { transform: scale(0.95); opacity: 0.3; } to { transform: scale(1); opacity: 0.56; } }
 
-/* --- Thorns: a border of thorns closing around the frame ------------------ */
+/* --- Thorns: a briar closing round the border --------------------------- */
 .card[data-fx='thorns'] .fx-p::before,
 .card[data-fx='thorns'] .fx-p::after {
   padding: 6%;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
+  -webkit-mask-composite: xor;
 }
 .card[data-fx='thorns'] .fx-p::before {
   background:
-    linear-gradient(45deg, transparent 50%, color-mix(in srgb, var(--rarity) 35%, #1a0505) 50%) 0 0 / 3.2cqw 3.2cqw,
-    linear-gradient(-45deg, transparent 50%, color-mix(in srgb, var(--rarity) 45%, #1a0505) 50%) 1.6cqw 0 / 3.2cqw 3.2cqw,
-    color-mix(in srgb, var(--rarity) 25%, #1a0505);
+    linear-gradient(45deg, transparent 50%, var(--fx-dark) 50%) 0 0 / 3.2cqw 3.2cqw,
+    linear-gradient(-45deg, transparent 50%, var(--fx-deep) 50%) 1.6cqw 0 / 3.2cqw 3.2cqw,
+    var(--fx-dark);
   opacity: 0.9;
 }
 .card[data-fx='thorns'] .fx-p::after {
-  background: radial-gradient(circle, color-mix(in srgb, var(--rarity) 90%, #fff) 0 0.7px, transparent 1.3px) 0 0 / 4.8cqw 4.8cqw;
+  background: radial-gradient(circle, var(--fx-lite) 0 0.8px, transparent 1.4px) 0 0 / 4.8cqw 4.8cqw;
+  filter: drop-shadow(0 0 3px var(--fx-core));
   opacity: 0.9;
-  filter: drop-shadow(0 0 2px var(--rarity-glow));
 }
-.card.is-lit[data-fx='thorns'] .fx-p::before { animation: fx-thorns 5s ease-in-out infinite alternate; }
-@keyframes fx-thorns { from { transform: scale(1.03); } to { transform: scale(1); } }
+.card.is-lit[data-fx='thorns'] .fx-p::before { animation: fx-breathe 6s ease-in-out infinite alternate; }
 
-/* ============= EXOTIC: things a screen does, or a surface does =========== */
+/* ============= EXOTIC: what a screen does, and what a surface does ======= */
 
-/* --- Hologram: diffraction bands cycling through every colour ------------- */
+/* --- Hologram: diffraction bands running the tones ----------------------- */
 .card[data-fx='hologram'] .fx-p::before {
   inset: -30%;
-  background: linear-gradient(118deg, #ff5f6d 0%, #ffc371 14%, #7cff6b 28%, #21d4fd 42%, #b721ff 56%, #ff5f6d 70%, #ffc371 84%, #7cff6b 100%);
-  mix-blend-mode: color-dodge;
-  opacity: 0.28;
-  transform: translate3d(calc(var(--lx, 0) * 8%), 0, 0);
+  background: repeating-linear-gradient(118deg,
+    var(--fx-pale) 0 6px, var(--fx-core) 6px 12px, var(--fx-deep) 12px 18px, var(--fx-lite) 18px 24px);
+  opacity: 0.3;
 }
 .card[data-fx='hologram'] .fx-p::after {
-  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.14) 0 1px, transparent 1px 3px);
-  mix-blend-mode: overlay;
+  background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--fx-pale) 18%, transparent) 0 1px, transparent 1px 3px);
 }
-.card.is-lit[data-fx='hologram'] .fx-p::before { animation: fx-hologram 6s linear infinite; }
-@keyframes fx-hologram { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
+.card.is-lit[data-fx='hologram'] .fx-p::before { animation: fx-holo 7s linear infinite alternate; }
+@keyframes fx-holo { from { transform: translate3d(-8%, 0, 0); } to { transform: translate3d(8%, 0, 0); } }
 
-/* --- Glitch: the picture torn into offset colour channels ----------------- */
-.card[data-fx='glitch'] .fx-p::before,
-.card[data-fx='glitch'] .fx-p::after {
-  background: var(--art, none) center top / 100% auto no-repeat;
-  mix-blend-mode: screen;
-  clip-path: inset(0 0 46% 0);
-  opacity: 0.55;
+/* --- Glitch: bands torn sideways, never a copy of the picture ------------ */
+.card[data-fx='glitch'] .fx-p::before {
+  background:
+    linear-gradient(90deg, var(--fx-lite) 0 40%, transparent 40%) 0 12% / 100% 4%,
+    linear-gradient(90deg, transparent 0 55%, var(--fx-core) 55%) 0 63% / 100% 3%,
+    linear-gradient(90deg, var(--fx-deep) 0 28%, transparent 28%) 0 78% / 100% 5%;
+  background-repeat: no-repeat;
+  opacity: 0.7;
 }
-.card[data-fx='glitch'] .fx-p::before { filter: sepia(1) saturate(6) hue-rotate(-40deg); transform: translate3d(-1.6cqw, 0, 0); }
-.card[data-fx='glitch'] .fx-p::after { filter: sepia(1) saturate(6) hue-rotate(140deg); transform: translate3d(1.6cqw, 0, 0); }
-.card.is-lit[data-fx='glitch'] .fx-p::before { animation: fx-glitch-a 2.4s steps(1) infinite; }
-.card.is-lit[data-fx='glitch'] .fx-p::after { animation: fx-glitch-b 2.4s steps(1) infinite; }
+.card[data-fx='glitch'] .fx-p::after {
+  background:
+    linear-gradient(90deg, transparent 0 62%, var(--fx-pale) 62%) 0 34% / 100% 2.5%,
+    linear-gradient(90deg, var(--fx-core) 0 18%, transparent 18%) 0 88% / 100% 3.5%;
+  background-repeat: no-repeat;
+  opacity: 0.65;
+}
+.card.is-lit[data-fx='glitch'] .fx-p::before { animation: fx-glitch-a 2.6s steps(1) infinite; }
+.card.is-lit[data-fx='glitch'] .fx-p::after { animation: fx-glitch-b 2.6s steps(1) infinite; }
 @keyframes fx-glitch-a {
-  0%, 100% { clip-path: inset(0 0 46% 0); transform: translate3d(-1.6cqw, 0, 0); }
-  10% { clip-path: inset(12% 0 70% 0); transform: translate3d(-3cqw, 0, 0); }
-  14% { clip-path: inset(30% 0 52% 0); transform: translate3d(2cqw, 0, 0); }
-  18% { clip-path: inset(0 0 46% 0); transform: translate3d(-1.6cqw, 0, 0); }
-  62% { clip-path: inset(40% 0 46% 0); transform: translate3d(-4cqw, 0, 0); }
-  66% { clip-path: inset(0 0 46% 0); transform: translate3d(-1.6cqw, 0, 0); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  10% { transform: translate3d(-4cqw, 0, 0); }
+  14% { transform: translate3d(3cqw, 0, 0); }
+  18% { transform: translate3d(0, 0, 0); }
+  62% { transform: translate3d(-6cqw, 0, 0); }
+  66% { transform: translate3d(0, 0, 0); }
 }
 @keyframes fx-glitch-b {
-  0%, 100% { clip-path: inset(0 0 46% 0); transform: translate3d(1.6cqw, 0, 0); }
-  10% { clip-path: inset(5% 0 80% 0); transform: translate3d(3cqw, 0, 0); }
-  14% { clip-path: inset(24% 0 60% 0); transform: translate3d(-2cqw, 0, 0); }
-  18% { clip-path: inset(0 0 46% 0); transform: translate3d(1.6cqw, 0, 0); }
-  62% { clip-path: inset(20% 0 66% 0); transform: translate3d(4cqw, 0, 0); }
-  66% { clip-path: inset(0 0 46% 0); transform: translate3d(1.6cqw, 0, 0); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  10% { transform: translate3d(5cqw, 0, 0); }
+  14% { transform: translate3d(-3cqw, 0, 0); }
+  18% { transform: translate3d(0, 0, 0); }
+  62% { transform: translate3d(6cqw, 0, 0); }
+  66% { transform: translate3d(0, 0, 0); }
 }
 
-/* --- Plasma: two swirls of light turning against each other --------------- */
+/* --- Plasma: two swirls turning against each other ----------------------- */
 .card[data-fx='plasma'] .fx-p::before,
 .card[data-fx='plasma'] .fx-p::after {
   inset: -40%;
-  filter: blur(5px);
-  mix-blend-mode: screen;
-  opacity: 0.55;
+  filter: blur(6px);
+  opacity: 0.45;
 }
 .card[data-fx='plasma'] .fx-p::before {
-  background: conic-gradient(from 0deg at 40% 45%, transparent 0, color-mix(in srgb, var(--rarity) 80%, #fff) 18%, transparent 36%, color-mix(in srgb, var(--rarity) 70%, #ff4fd8) 58%, transparent 78%);
+  background: conic-gradient(from 0deg at 40% 45%, transparent 0, var(--fx-lite) 18%, transparent 36%, var(--fx-core) 58%, transparent 78%);
 }
 .card[data-fx='plasma'] .fx-p::after {
-  background: conic-gradient(from 180deg at 60% 55%, transparent 0, color-mix(in srgb, var(--rarity) 60%, #fff) 22%, transparent 44%, color-mix(in srgb, var(--rarity) 60%, #7dd3fc) 66%, transparent 86%);
+  background: conic-gradient(from 180deg at 60% 55%, transparent 0, var(--fx-pale) 22%, transparent 44%, var(--fx-deep) 66%, transparent 86%);
 }
-.card.is-lit[data-fx='plasma'] .fx-p::before { animation: fx-plasma 8s linear infinite; }
-.card.is-lit[data-fx='plasma'] .fx-p::after { animation: fx-plasma 11s linear infinite reverse; }
-@keyframes fx-plasma { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.card.is-lit[data-fx='plasma'] .fx-p::before { animation: fx-turn 9s linear infinite; }
+.card.is-lit[data-fx='plasma'] .fx-p::after { animation: fx-turn 13s linear infinite reverse; }
 
-/* --- Oil Slick: thin-film iridescence in puddles, sliding with the tilt --- */
+/* --- Oil Slick: thin film in puddles, sliding with the tilt -------------- */
 .card[data-fx='oilslick'] .fx-p::before {
   inset: -30%;
-  background: linear-gradient(35deg, #c8ff00 0%, #ff00c8 12%, #00c8ff 24%, #ffd200 36%, #7a00ff 48%, #00ff9d 60%, #ff0064 72%, #00c8ff 84%, #c8ff00 100%);
-  mix-blend-mode: overlay;
-  opacity: 0.45;
+  background: repeating-linear-gradient(35deg,
+    var(--fx-pale) 0 8px, var(--fx-core) 8px 16px, var(--fx-deep) 16px 24px, var(--fx-lite) 24px 32px);
+  opacity: 0.42;
   mask-image:
     radial-gradient(ellipse 30% 22% at 30% 30%, #000 0 50%, transparent 100%),
     radial-gradient(ellipse 36% 26% at 70% 62%, #000 0 50%, transparent 100%),
-    radial-gradient(ellipse 22% 30% at 40% 80%, #000 0 50%, transparent 100%);
-  transform: translate3d(calc(var(--lx, 0) * 12%), calc(var(--ly, 0) * 8%), 0);
+    radial-gradient(ellipse 22% 30% at 40% 84%, #000 0 50%, transparent 100%);
+  -webkit-mask-image:
+    radial-gradient(ellipse 30% 22% at 30% 30%, #000 0 50%, transparent 100%),
+    radial-gradient(ellipse 36% 26% at 70% 62%, #000 0 50%, transparent 100%),
+    radial-gradient(ellipse 22% 30% at 40% 84%, #000 0 50%, transparent 100%);
 }
 .card[data-fx='oilslick'] .fx-p::after {
-  background: radial-gradient(ellipse 30% 22% at 30% 30%, rgba(0, 0, 0, 0.25), transparent 70%), radial-gradient(ellipse 36% 26% at 70% 62%, rgba(0, 0, 0, 0.25), transparent 70%);
-  mix-blend-mode: multiply;
+  background:
+    radial-gradient(ellipse 30% 22% at 30% 30%, color-mix(in srgb, var(--fx-dark) 45%, transparent), transparent 72%),
+    radial-gradient(ellipse 36% 26% at 70% 62%, color-mix(in srgb, var(--fx-dark) 45%, transparent), transparent 72%);
 }
-.card.is-lit[data-fx='oilslick'] .fx-p::before { animation: fx-oilslick 7s ease-in-out infinite alternate; }
-@keyframes fx-oilslick { from { transform: translate3d(-8%, -5%, 0); } to { transform: translate3d(8%, 5%, 0); } }
+.card.is-lit[data-fx='oilslick'] .fx-p::before { animation: fx-oil 8s ease-in-out infinite alternate; }
+@keyframes fx-oil { from { transform: translate3d(-7%, -4%, 0); } to { transform: translate3d(7%, 4%, 0); } }
 
-/* --- Scanlines: a cathode screen, fine lines and a rolling bar ------------ */
-.card[data-fx='scanlines'] .fx-p { background: rgba(0, 255, 200, 0.05); }
+/* --- Scanlines: a cathode face and its rolling bar ----------------------- */
 .card[data-fx='scanlines'] .fx-p::before {
-  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.26) 0 1px, transparent 1px 3px);
+  background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--fx-dark) 55%, transparent) 0 1px, transparent 1px 3px);
+  opacity: 0.75;
 }
 .card[data-fx='scanlines'] .fx-p::after {
-  inset: auto 0;
-  top: -20%;
-  height: 18%;
-  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--rarity) 30%, #fff) 50%, transparent);
-  mix-blend-mode: screen;
-  opacity: 0.35;
+  inset: auto 0 auto 0;
+  top: -28cqw;
+  height: 25cqw;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--fx-lite) 45%, transparent) 50%, transparent);
+  opacity: 0.5;
 }
-.card.is-lit[data-fx='scanlines'] .fx-p::after { animation: fx-scanlines 3.2s linear infinite; }
-@keyframes fx-scanlines { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 780%, 0); } }
+.card.is-lit[data-fx='scanlines'] .fx-p::after { animation: fx-scan 3.6s linear infinite; }
+@keyframes fx-scan { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 780%, 0); } }
 
-/* =============== PRISMATIC: all the colours, and the crown =============== */
+/* ================ PRISMATIC: the whole spectrum, and a crown ============= */
 
-/* --- Spectrum: a full rainbow wheel turning behind the whole card --------- */
+/* The one tier whose colour is not a colour. Everywhere else the five tones
+   are one hue taken light to dark, because a Rare that goes yellow stops
+   reading as a Rare. Prismatic's identity IS the range, so here the tones are
+   spread across it instead of down it, and the five treatments below draw the
+   rainbow without a line of their own changing. */
+.card[data-rarity='prismatic'][data-fx]:not([data-fx='classic']) {
+  --fx-pale: #fffdf6;
+  --fx-lite: #7df0c8;
+  --fx-core: #7fb0ff;
+  --fx-deep: #c07bff;
+  --fx-dark: #2a1240;
+}
+
+
+/* --- Spectrum: the whole range sweeping the face ------------------------- */
 .card[data-fx='spectrum'] .fx-p::before {
   inset: -60%;
-  background: conic-gradient(from 0deg, #ff004c, #ffb300, #7cff00, #00e5ff, #4c00ff, #ff00e5, #ff004c);
-  mix-blend-mode: soft-light;
-  opacity: 0.85;
+  /* Named for the full range, so it is the full range: the wheel itself,
+     turning once every twenty-four seconds. */
+  background: conic-gradient(from 0deg,
+    #ff9ec4, #ffcf86, #f6f39a, #a6f08a, #78e8dc, #8ab6ff, #b79bff, #f19ce0, #ff9ec4);
+  opacity: 0.5;
 }
 .card[data-fx='spectrum'] .fx-p::after {
-  background: radial-gradient(circle at 50% 45%, transparent 30%, rgba(0, 0, 0, 0.18) 100%);
+  background: radial-gradient(circle at 50% 45%, transparent 28%, color-mix(in srgb, var(--fx-dark) 40%, transparent) 100%);
 }
-.card.is-lit[data-fx='spectrum'] .fx-p::before { animation: fx-spectrum 20s linear infinite; }
-@keyframes fx-spectrum { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.card.is-lit[data-fx='spectrum'] .fx-p::before { animation: fx-turn 24s linear infinite; }
 
-/* --- Shatter: glass shards over the art, each catching its own light ------ */
-.card[data-fx='shatter'] .fx-p::before,
-.card[data-fx='shatter'] .fx-p::after {
-  background-size: 100% 100%;
-}
+/* --- Shatter: glass over the face, each shard its own tone --------------- */
 .card[data-fx='shatter'] .fx-p::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg stroke='%23fff' stroke-opacity='.75' stroke-width='.7' fill='%23fff'%3E%3Cpolygon points='0,0 42,0 30,38' fill-opacity='.14'/%3E%3Cpolygon points='42,0 100,0 70,28 30,38' fill-opacity='.06'/%3E%3Cpolygon points='100,0 100,60 70,28' fill-opacity='.18'/%3E%3Cpolygon points='0,0 30,38 0,70' fill-opacity='.08'/%3E%3Cpolygon points='30,38 70,28 56,74 20,82' fill-opacity='.04'/%3E%3Cpolygon points='70,28 100,60 100,110 56,74' fill-opacity='.12'/%3E%3Cpolygon points='0,70 20,82 8,140 0,140' fill-opacity='.16'/%3E%3Cpolygon points='20,82 56,74 50,140 8,140' fill-opacity='.05'/%3E%3Cpolygon points='56,74 100,110 100,140 50,140' fill-opacity='.1'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg stroke='%23ffffff' stroke-opacity='.7' stroke-width='.7' fill='%23ffffff'%3E%3Cpolygon points='0,0 42,0 30,38' fill-opacity='.12'/%3E%3Cpolygon points='42,0 100,0 70,28 30,38' fill-opacity='.05'/%3E%3Cpolygon points='100,0 100,60 70,28' fill-opacity='.16'/%3E%3Cpolygon points='0,0 30,38 0,70' fill-opacity='.07'/%3E%3Cpolygon points='30,38 70,28 56,74 20,82' fill-opacity='.03'/%3E%3Cpolygon points='70,28 100,60 100,110 56,74' fill-opacity='.1'/%3E%3Cpolygon points='0,70 20,82 8,140 0,140' fill-opacity='.14'/%3E%3Cpolygon points='20,82 56,74 50,140 8,140' fill-opacity='.04'/%3E%3Cpolygon points='56,74 100,110 100,140 50,140' fill-opacity='.09'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  opacity: 0.9;
 }
 .card[data-fx='shatter'] .fx-p::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg fill='%23fff'%3E%3Cpolygon points='42,0 100,0 70,28 30,38' fill-opacity='.22'/%3E%3Cpolygon points='30,38 70,28 56,74 20,82' fill-opacity='.2'/%3E%3Cpolygon points='20,82 56,74 50,140 8,140' fill-opacity='.18'/%3E%3C/g%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
-  opacity: 0.3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg fill='%23ffffff'%3E%3Cpolygon points='42,0 100,0 70,28 30,38' fill-opacity='.25'/%3E%3Cpolygon points='30,38 70,28 56,74 20,82' fill-opacity='.22'/%3E%3Cpolygon points='20,82 56,74 50,140 8,140' fill-opacity='.2'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  opacity: 0.25;
 }
-.card.is-lit[data-fx='shatter'] .fx-p::after { animation: fx-shatter 3.4s ease-in-out infinite alternate; }
-@keyframes fx-shatter { from { opacity: 0.1; } to { opacity: 0.9; } }
+.card.is-lit[data-fx='shatter'] .fx-p::after { animation: fx-shatter 3.8s ease-in-out infinite alternate; }
+@keyframes fx-shatter { from { opacity: 0.08; } to { opacity: 0.5; } }
 
-/* --- Curtain: ribbons of light folding over the card like an aurora ------- */
+/* --- Curtain: ribbons folding over the top margin ------------------------ */
+.card[data-fx='curtain'] .fx-p {
+  mask-image: var(--fx-soft-art);
+  -webkit-mask-image: var(--fx-soft-art);
+}
 .card[data-fx='curtain'] .fx-p::before,
 .card[data-fx='curtain'] .fx-p::after {
   inset: -10% -30%;
-  background: repeating-linear-gradient(90deg, transparent 0 4cqw, #7cff9d 5cqw 8cqw, transparent 9cqw 12cqw, #b48cff 13cqw 15cqw, transparent 16cqw 22cqw, #5ee7ff 23cqw 26cqw, transparent 27cqw 30cqw);
-  mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.6) 35%, transparent 72%);
-  mix-blend-mode: screen;
+  background: repeating-linear-gradient(90deg,
+    transparent 0 4cqw, var(--fx-lite) 5cqw 8cqw, transparent 9cqw 12cqw,
+    var(--fx-core) 13cqw 15cqw, transparent 16cqw 22cqw,
+    var(--fx-pale) 23cqw 26cqw, transparent 27cqw 30cqw);
   filter: blur(3px);
-  opacity: 0.55;
+  opacity: 0.5;
   transform-origin: 50% 0;
 }
-.card[data-fx='curtain'] .fx-p::after { opacity: 0.35; filter: blur(6px); transform: skewX(12deg) translateX(-8cqw); }
-.card.is-lit[data-fx='curtain'] .fx-p::before { animation: fx-curtain-a 9s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='curtain'] .fx-p::after { animation: fx-curtain-b 13s ease-in-out infinite alternate; }
-@keyframes fx-curtain-a { from { transform: skewX(-14deg) translateX(-6cqw); } to { transform: skewX(14deg) translateX(6cqw); } }
-@keyframes fx-curtain-b { from { transform: skewX(16deg) translateX(-12cqw); } to { transform: skewX(-10deg) translateX(10cqw); } }
+.card[data-fx='curtain'] .fx-p::after { opacity: 0.3; filter: blur(7px); }
+.card.is-lit[data-fx='curtain'] .fx-p::before { animation: fx-curtain-a 10s ease-in-out infinite alternate; }
+.card.is-lit[data-fx='curtain'] .fx-p::after { animation: fx-curtain-b 14s ease-in-out infinite alternate; }
+@keyframes fx-curtain-a { from { transform: skewX(-13deg) translateX(-6cqw); } to { transform: skewX(13deg) translateX(6cqw); } }
+@keyframes fx-curtain-b { from { transform: skewX(15deg) translateX(-11cqw); } to { transform: skewX(-9deg) translateX(9cqw); } }
 
-/* --- Starfield: deep space in two layers, drifting at two speeds ---------- */
-.card[data-fx='starfield'] .fx-p::before,
-.card[data-fx='starfield'] .fx-p::after {
-  inset: -50% 0 0 0;
+/* --- Starfield: two depths of stars, drifting at two speeds -------------- */
+.card[data-fx='starfield'] .fx-p {
+  mask-image: var(--fx-soft-art);
+  -webkit-mask-image: var(--fx-soft-art);
 }
+.card[data-fx='starfield'] .fx-p::before,
+.card[data-fx='starfield'] .fx-p::after { inset: -50% 0 0 0; }
 .card[data-fx='starfield'] .fx-p::before {
   background:
-    radial-gradient(circle, #fff 0 0.7px, transparent 1.3px) 0 0 / 19px 23px,
-    radial-gradient(circle, #ffd6f5 0 0.5px, transparent 1px) 7px 11px / 29px 31px;
+    radial-gradient(circle, var(--fx-pale) 0 0.7px, transparent 1.3px) 0 0 / 19px 23px,
+    radial-gradient(circle, var(--fx-lite) 0 0.5px, transparent 1px) 7px 11px / 29px 31px;
   opacity: 0.9;
 }
 .card[data-fx='starfield'] .fx-p::after {
   background:
-    radial-gradient(circle, #9be7ff 0 1.1px, transparent 1.9px) 5px 9px / 43px 53px,
-    radial-gradient(circle, #fff5b8 0 0.9px, transparent 1.6px) 21px 27px / 61px 67px;
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+    radial-gradient(circle, var(--fx-lite) 0 1.1px, transparent 1.9px) 5px 9px / 43px 53px,
+    radial-gradient(circle, var(--fx-pale) 0 0.9px, transparent 1.6px) 21px 27px / 61px 67px;
+  filter: drop-shadow(0 0 2px var(--fx-core));
 }
-.card.is-lit[data-fx='starfield'] .fx-p::before { animation: fx-starfield 40s linear infinite; }
-.card.is-lit[data-fx='starfield'] .fx-p::after { animation: fx-starfield 18s linear infinite; }
+.card.is-lit[data-fx='starfield'] .fx-p::before { animation: fx-starfield 44s linear infinite; }
+.card.is-lit[data-fx='starfield'] .fx-p::after { animation: fx-starfield 20s linear infinite; }
 @keyframes fx-starfield { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 33.3%, 0); } }
 
-/* --- Crown: a radiant crown of light at the top of the card, pulsing ------ */
+/* --- Crown: a radiant crown standing on the foot ------------------------- */
+.card[data-fx='crown'] .fx-p {
+  mask-image: var(--fx-soft-art);
+  -webkit-mask-image: var(--fx-soft-art);
+}
 .card[data-fx='crown'] .fx-p::before {
   inset: auto;
-  top: 3%;
+  bottom: 7cqw;
   left: 50%;
   width: 46cqw;
   height: 28cqw;
   margin-left: -23cqw;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23ff7ad9'/%3E%3Cstop offset='.5' stop-color='%23fff2a8'/%3E%3Cstop offset='1' stop-color='%237ee8ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M8 52 L4 14 L30 34 L50 4 L70 34 L96 14 L92 52 Z' fill='url(%23g)' fill-opacity='.9' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='4' cy='14' r='3'/%3E%3Ccircle cx='50' cy='4' r='3.5'/%3E%3Ccircle cx='96' cy='14' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cpath d='M8 52 L4 14 L30 34 L50 4 L70 34 L96 14 L92 52 Z' fill='%23ffffff' fill-opacity='.85' stroke='%23ffffff' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='4' cy='14' r='3'/%3E%3Ccircle cx='50' cy='4' r='3.5'/%3E%3Ccircle cx='96' cy='14' r='3'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 100% 100%;
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+  filter: drop-shadow(0 0 6px var(--fx-lite));
   transform-origin: 50% 100%;
 }
 .card[data-fx='crown'] .fx-p::after {
   inset: auto;
-  top: -50cqw;
+  bottom: -46cqw;
   left: 50%;
-  width: 140cqw;
+  width: 150cqw;
   aspect-ratio: 1;
-  margin-left: -70cqw;
-  background: repeating-conic-gradient(from 150deg at 50% 50%, rgba(255, 255, 255, 0.5) 0 3deg, transparent 3deg 12deg);
-  mask-image: radial-gradient(circle, #000 0 20%, transparent 50%);
-  mix-blend-mode: screen;
-  opacity: 0.5;
+  margin-left: -75cqw;
+  background: repeating-conic-gradient(from 150deg at 50% 50%,
+    color-mix(in srgb, var(--fx-pale) 45%, transparent) 0 3deg, transparent 3deg 12deg);
+  mask-image: radial-gradient(circle, #000 0 20%, transparent 52%);
+  -webkit-mask-image: radial-gradient(circle, #000 0 20%, transparent 52%);
+  opacity: 0.45;
 }
-.card.is-lit[data-fx='crown'] .fx-p::before { animation: fx-crown 2.6s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='crown'] .fx-p::after { animation: fx-crown-rays 30s linear infinite; }
-@keyframes fx-crown { from { transform: scale(0.95); filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.6)); } to { transform: scale(1.03); filter: drop-shadow(0 0 10px #fff); } }
-@keyframes fx-crown-rays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.card.is-lit[data-fx='crown'] .fx-p::before { animation: fx-pulse 2.8s ease-in-out infinite alternate; }
+.card.is-lit[data-fx='crown'] .fx-p::after { animation: fx-turn 34s linear infinite; }
 
-/* Low power turns every chosen effect still, along with the tiers' own. */
+/* Low power holds every chosen effect still, as it does the tiers' own. */
 html[data-lowpower='1'] .card[data-fx] .fx-p::before,
-html[data-lowpower='1'] .card[data-fx] .fx-p::after { animation: none !important; }
+html[data-lowpower='1'] .card[data-fx] .fx-p::after,
+html[data-lowpower='1'] .card[data-fx] .fx-b::before,
+html[data-lowpower='1'] .card[data-fx] .fx-b::after { animation: none !important; }
 
 /* Prices hidden, for a collection read as a collection rather than a ledger.
    Settings, Show card values. */

@@ -317,6 +317,12 @@ export function renderTimed() {
   el.timedOpen.disabled = held <= 0;
   el.timedOpen.onclick = openTimed;
 
+  // One tear for the whole bank. Only offered when there is a bank: with one
+  // pack waiting, "open all" and "open" are the same button twice.
+  el.timedOpenAll.hidden = held < 2;
+  el.timedOpenAll.textContent = t('timedOpenAll', { n: held });
+  el.timedOpenAll.onclick = openAllTimed;
+
   el.freeTrackLabel.textContent = t('freeTrackLabel');
   const { to } = levelBounds(timed.opened ?? 0);
   const atMax = level >= MAX_TIMED_LEVEL;
@@ -369,6 +375,8 @@ export function tickTimed() {
 
   el.freeCount.textContent = String(held);
   el.timedOpen.disabled = held <= 0;
+  el.timedOpenAll.hidden = held < 2;
+  if (held >= 2) el.timedOpenAll.textContent = t('timedOpenAll', { n: held });
 
   const left = msToNext(timed);
   if (left === null) {
@@ -386,13 +394,39 @@ export function tickTimed() {
 }
 
 export function openTimed() {
+  openSlots(1);
+}
+
+/**
+ * The whole bank in one tear. Every slot waiting is spent at once and their
+ * cards arrive as a single pack, which is the difference between opening
+ * seven boosters and opening one: seven rips, seven summaries, seven walks
+ * back to this screen, against one of each.
+ *
+ * The track is credited per slot spent, not per pack torn, so nothing about
+ * levelling changes for taking the quick way.
+ */
+
+export function openAllTimed() {
+  openSlots(syncTimed().count ?? 0);
+}
+
+/** Spend `slots` timed boosters and open what they hold as one pack. */
+function openSlots(slots) {
   const timed = syncTimed();
-  if ((timed.count ?? 0) <= 0) { synth.playDenied(); return; }
-  const spec = currentTimedSpec();
+  const held = timed.count ?? 0;
+  const take = Math.min(Math.max(1, Math.floor(slots)), held);
+  if (held <= 0) { synth.playDenied(); return; }
+  const base = currentTimedSpec();
+  // One pack of every slot's worth of cards. `specId` reads the count, so a
+  // bundle never shares a shelf slot or a ready draw with a single.
+  const spec = take > 1
+    ? { ...base, cards: base.cards * take, timedSlots: take }
+    : base;
   // Track progress is credited when the pack produces cards, not here: a
   // failed draw refunds the booster and must not also count as an opening.
   gainBooster(spec, 1);
-  timed.count -= 1;
+  timed.count -= take;
   if (!Number.isFinite(timed.last)) timed.last = Date.now();
   store.saveProfile(state.profile);
   updateBadges();

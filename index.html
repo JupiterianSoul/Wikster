@@ -109,6 +109,9 @@
             <p class="free-state" id="free-state"></p>
             <div class="free-pips" id="free-pips" aria-hidden="true"></div>
             <button id="timed-open" class="btn btn-primary btn-block" type="button"></button>
+            <!-- The whole bank, torn as one pack. Only there when there is
+                 more than one waiting. -->
+            <button id="timed-open-all" class="btn btn-ghost btn-block" type="button" hidden></button>
             <p class="free-foot" id="free-foot"></p>
           </div>
 
@@ -692,7 +695,8 @@
           <div class="open-top">
             <button id="open-back" class="icon-btn" type="button" aria-label="Back"></button>
             <h2 class="open-title" id="open-title"></h2>
-            <span style="width:42px"></span>
+            <!-- The way past the cards: straight to what the pack held. -->
+            <button id="open-skip" class="icon-btn" type="button" hidden></button>
           </div>
           <p class="open-progress" id="open-progress"></p>
           <div class="open-stage" id="open-stage">
