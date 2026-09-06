@@ -5,6 +5,7 @@ import { drawCustomSet } from './custom.js';
 import { drawWikipediaSet } from './draw.js';
 import { drawTitleSet } from './translate.js';
 import { fetchTopRead } from './fetch.js';
+import { TODAY_POOL, todayRarityForRank } from '../economy.js';
 
 export const REQUEST_TIMEOUT_MS = 7000;
 /**
@@ -115,17 +116,41 @@ export async function drawArticles(pack) {
 
 /**
  * Wikipedia Today: a hand dealt from what the whole world read yesterday.
- * The top of the list is the day's news and its noise, so the hand is drawn
- * from the first hundred or so at random, a few more than the booster holds
- * in case a page turns out to have no picture, and cut to size.
+ *
+ * The hand comes from the whole front page rather than its first few rows,
+ * so a pack is mostly the day's ordinary reading with a real chance at the
+ * one story everybody opened. A card's TIER is its article's place on that
+ * list (todayRarityForRank): readership cannot grade these articles, since
+ * being read by everyone is what put them on the list in the first place.
+ * The card keeps its true readership all the same, so its value and its
+ * numbers stay the article's own.
+ *
+ * A few spares are drawn: a page whose article carries no picture is passed
+ * over while there is another to take its place.
  */
 async function drawTodaySet(pack) {
-  const top = await fetchTopRead(pack.day, wikiLang());
+  const top = await fetchTopRead(pack.day, wikiLang(), TODAY_POOL);
   if (!top.length) throw new Error('NO_TOP_READ');
-  const pool = top.slice(0, 120);
+  const pool = top.slice(0, TODAY_POOL);
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-  const titles = pool.slice(0, pack.cards + 3).map((row) => ({ title: row.title, fallback: row.title, name: null }));
-  const cards = (await drawTitleSet({ ...pack, source: 'titles', titles, pick: null }))
-    .filter((card) => card && card.key);
-  return cards.slice(0, pack.cards);
+  const wanted = Math.max(1, pack.cards ?? 5);
+  const picks = pool.slice(0, wanted + 3);
+  const cards = await drawTitleSet({
+    ...pack,
+    source: 'titles',
+    pick: null,
+    titles: picks.map((row) => ({ title: row.title, fallback: row.title, name: null }))
+  });
+  const dealt = [];
+  for (let i = 0; i < cards.length && dealt.length < wanted; i++) {
+    const card = cards[i];
+    if (!card?.key) continue;
+    // A plate is drawn, not fetched: the article had no picture to show.
+    const plate = String(card.thumbnail ?? '').startsWith('data:');
+    const spares = cards.length - i - 1;
+    if (plate && dealt.length + spares >= wanted) continue;
+    card.rarityId = todayRarityForRank(picks[i].rank).id;
+    dealt.push(card);
+  }
+  return dealt;
 }

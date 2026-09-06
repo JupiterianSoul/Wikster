@@ -6,7 +6,7 @@ import { Bar, NavBar, Odometer, Rail, Ring, Segmented, Sheet, press, trackDrag }
 import { synth } from '../ui/sound.js';
 import * as store from '../collection.js';
 import { THEME_PACKS } from '../data/packs.js';
-import { STARTER_COINS, STARTER_PACKS, STARTER_PACK_CARDS, drawCapsFor } from '../economy.js';
+import { STARTER_COINS, STARTER_PACKS, STARTER_PACK_CARDS, drawCapsFor, todayRarityForRank } from '../economy.js';
 import { SPECIAL_RARITY_ID, codeByInput, hasRedeemed } from '../codes.js';
 import { popularityFromViews, popularityFromWordCount, priceFor } from '../pricing.js';
 import { RARITIES, rarityById, rarityFromPopularity } from '../data/rarities.js';
@@ -19,7 +19,7 @@ import { canClaim } from '../daily.js';
 import { music } from '../ui/music.js';
 import { onSaveChanged, touch } from '../save.js';
 import * as wikdle from '../wikdle.js';
-import { drawArticles } from '../wiki.js';
+import { drawArticles, fetchTopRead } from '../wiki.js';
 import { generateShop } from '../shop.js';
 import * as odds from '../data/odds.js';
 import { addXp } from '../progression.js';
@@ -459,8 +459,16 @@ export function init() {
   // The sheet shows the row for the booster on the open screen when there is
   // one, and the basic row while browsing.
   el.oddsBtn.addEventListener('click', () => {
-    const onOpen = el.openScreen?.classList.contains('is-active');
-    openOdds(onOpen ? (state.spec?.rarityId ?? null) : null);
+    // The sheet answers for the booster in front of you: the one being
+    // opened, or the one the shelf is showing. Wikipedia Today is graded by
+    // the day's ranking rather than rolled, so it gets a ladder instead of
+    // a row of chances, and the sheet says which it is looking at.
+    const spec = el.openScreen?.classList.contains('is-active')
+      ? state.spec
+      : (el.screens.packs?.classList.contains('is-active')
+          ? state.packSlots?.[packsRail.index]?.spec ?? null
+          : null);
+    openOdds(spec?.rarityId ?? null, { today: spec?.kind === 'today' });
   });
   el.marketSell.addEventListener('click', () => { synth.playTap(); import('./market.js').then((m) => m.openSellSheet()); });
   press(el.marketSell, { sound: null });
@@ -698,6 +706,9 @@ window.__wikster = {
   levelUp: showLevelUp, wikdle,
   codeByInput,
   draw: drawArticles, generateShop, syncSocial, drawCaps: drawCapsFor, drawPack: toDrawPack, odds, specId,
+  // The day's most-read list, so a suite can check a Today card's tier
+  // against the place its article actually holds.
+  topRead: fetchTopRead, todayRarity: todayRarityForRank,
   // A suite signs a player out the way the Settings row does, wires and all.
   signOut: () => leaveAccount(),
   setTheme: (id) => { useTheme(id); renderPacks(); renderShop(); renderBinder(); renderCustomize(); },

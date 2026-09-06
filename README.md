@@ -530,8 +530,15 @@ friend's page reads it in one go. Friends leave a heart per card
 
 Wikipedia Today is a booster whose cards come from what the encyclopaedia's
 readers opened most the day before (`fetchTopRead` in `src/wiki/fetch.js`,
-the `today` source in `src/wiki/core.js`): one a day on the shop floor, and
-not free, because the front page prices like the front page.
+the `today` source in `src/wiki/core.js`): one pack a day on the shop floor.
+Its cards are the one place in the game where a tier is not read off the
+article's readership, because readership cannot tell these articles apart:
+being read by everybody is the entry requirement for the list. A card's tier
+is its article's place on the day instead (`todayRarityForRank` in
+`src/economy.js`), the day's number one down to Rare at two hundred, and the
+price is derived from that ladder by the same rule as every other booster,
+so the pack cannot be opened and sold at a profit. The card keeps its true
+readership, so its value and its numbers stay the article's own.
 
 Notifications: the Android wrapper carries a bridge (`WiksterNotify`) to a
 notification channel, and `src/app/notify.js` raises a line for a message,

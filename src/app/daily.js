@@ -9,6 +9,7 @@ import { press } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
 import { formatCountdown } from '../shop.js';
 import { oddsRows } from '../data/odds.js';
+import { TODAY_POOL, todayBands } from '../economy.js';
 import { reportQuest } from './arcade.js';
 import { esc, money, openSheet, refreshWallet, state, toast } from './core.js';
 import { pushNote } from './drawer.js';
@@ -200,7 +201,7 @@ export function openWallet() {
  * better than the basic one, which is the whole point of paying for it.
  */
 
-export function openOdds(rarityId = null) {
+export function openOdds(rarityId = null, { today = false } = {}) {
   openSheet(t('pullRates'), (body) => {
     body.innerHTML = `
       <p style="margin-bottom:12px" data-note></p>
@@ -209,14 +210,34 @@ export function openOdds(rarityId = null) {
         <thead><tr><th></th><th></th></tr></thead>
         <tbody></tbody>
       </table>`;
-    body.querySelector('[data-note]').textContent = t('oddsNote');
+    body.querySelector('[data-note]').textContent = today ? t('oddsNoteToday') : t('oddsNote');
     const rowNote = body.querySelector('[data-row]');
-    rowNote.textContent = rarityId
-      ? t('oddsRowTier', { rarity: tx(rarityById(rarityId).name) })
-      : t('oddsRowBasic');
+    rowNote.textContent = today ? t('oddsRowToday', { pool: TODAY_POOL })
+      : rarityId ? t('oddsRowTier', { rarity: tx(rarityById(rarityId).name) })
+        : t('oddsRowBasic');
     const [h1, h2] = body.querySelectorAll('th');
     h1.textContent = t('rarity');
-    h2.textContent = t('oddsChance');
+    h2.textContent = today ? t('oddsPlace') : t('oddsChance');
+    // Wikipedia Today is not rolled: the tier is the article's place on the
+    // day's most-read list, so the sheet shows that ladder instead of a row
+    // of chances it does not use.
+    if (today) {
+      body.querySelector('tbody').replaceChildren(...todayBands().map(({ from, to, rarity }) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td><span class="odds-name"><span class="odds-swatch"></span><span></span></span></td><td class="odds-pct tabular"></td>`;
+        const swatch = row.querySelector('.odds-swatch');
+        swatch.style.color = rarity.color;
+        swatch.style.background = rarity.color;
+        const label = row.querySelector('.odds-name span:last-child');
+        label.textContent = tx(rarity.name);
+        label.style.color = rarity.color;
+        row.querySelector('.odds-pct').textContent = to == null ? t('oddsRankRest', { from })
+          : from === to ? t('oddsRankOne', { n: from })
+            : t('oddsRankRange', { from, to });
+        return row;
+      }));
+      return;
+    }
     body.querySelector('tbody').replaceChildren(...oddsRows(rarityId).map(({ rarity, pct }) => {
       const row = document.createElement('tr');
       row.innerHTML = `<td><span class="odds-name"><span class="odds-swatch"></span><span></span></span></td><td class="odds-pct tabular"></td>`;

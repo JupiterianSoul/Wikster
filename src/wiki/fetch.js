@@ -223,7 +223,10 @@ export async function fetchTopRead(day = readDayBefore(), lang = wikiLang(), lim
   for (const row of rows) {
     const raw = String(row.article ?? '');
     if (!raw || raw === '-' || raw === 'Main_Page' || raw.includes(':')) continue;
-    out.push({ title: raw.replace(/_/g, ' '), views: Number(row.views) || 0, rank: Number(row.rank) || out.length + 1 });
+    // The rank is the article's place among ARTICLES, counted here: the
+    // API's own rank counts the main page and the namespaces with them, and
+    // a card's tier is read off this number (see todayRarityForRank).
+    out.push({ title: raw.replace(/_/g, ' '), views: Number(row.views) || 0, rank: out.length + 1 });
     if (out.length >= limit) break;
   }
   return out;

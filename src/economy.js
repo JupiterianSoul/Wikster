@@ -167,13 +167,63 @@ export const windowIndexAt = (now = Date.now()) => Math.floor(now / REFRESH_MS);
 
 export const nextRefreshAt = (now = Date.now()) => (windowIndexAt(now) + 1) * REFRESH_MS;
 
-/* --- Wikipedia Today ------------------------------------------------------ */
+/* --- Wikipedia Today ------------------------------------------------------
+ *
+ * Every other booster grades a card on how read its article is. That rule
+ * cannot work here: this pack draws from the day's most-read list, where
+ * being read by everybody is the entry requirement, so readership grades
+ * the whole pack at the top and the pack pays out several times what it
+ * costs. What DOES tell these articles apart is their place on the list.
+ *
+ * So a Wikipedia Today card's tier is its article's rank on the day: the
+ * one story everyone read is the day's Prismatic, and the two hundredth is
+ * a Rare. The card keeps its true readership, so its base value and
+ * everything else read off the article stay honest; only the tier is the
+ * ranking. The price then follows the same rule as every booster in the
+ * game, off the average of the ladder below, so this pack cannot be a way
+ * of printing money however the table is tuned.
+ */
 
-/** Yesterday's most-read pages as a booster: one a day, and it is not free,
- *  because the day's front page is the most-read of anything and its cards
- *  price accordingly. About two subject boosters' worth. */
-export const TODAY_PRICE = 2800;
+/** How far down the day's list a pack may reach. */
+export const TODAY_POOL = 200;
 export const TODAY_CARDS = 5;
+
+/** Rank on the day, to the tier it earns. */
+const TODAY_LADDER = [
+  { upTo: 1,   id: 'prismatic' },
+  { upTo: 5,   id: 'exotic' },
+  { upTo: 15,  id: 'mythic' },
+  { upTo: 40,  id: 'legendary' },
+  { upTo: 100, id: 'epic' },
+  { upTo: Infinity, id: 'rare' }
+];
+
+/** The ladder as bands, for the sheet that explains the pack. */
+export const todayBands = () => TODAY_LADDER.map((band, i) => ({
+  from: i === 0 ? 1 : TODAY_LADDER[i - 1].upTo + 1,
+  to: Number.isFinite(band.upTo) ? band.upTo : null,
+  rarity: rarityById(band.id)
+}));
+
+export function todayRarityForRank(rank) {
+  const n = Number.isFinite(rank) && rank > 0 ? rank : TODAY_POOL;
+  return rarityById((TODAY_LADDER.find((band) => n <= band.upTo) ?? TODAY_LADDER[TODAY_LADDER.length - 1]).id);
+}
+
+/**
+ * What one card out of this pack is worth on average: every rank in the
+ * pool is equally likely, and every article on the list is famous, so each
+ * is priced at the top of the fame curve times the tier its rank earns.
+ */
+export function todayExpectedCardValue() {
+  let total = 0;
+  for (let rank = 1; rank <= TODAY_POOL; rank++) total += priceFor(1, todayRarityForRank(rank));
+  return total / TODAY_POOL;
+}
+
+/** The same rule as boosterPrice, on this pack's own expected value. */
+export const TODAY_PRICE = Math.max(5, Math.round(
+  ((todayExpectedCardValue() * SELL_RATE) / RETURN_RATE) * (TODAY_CARDS + WRAPPER_CARDS) / 5) * 5);
 
 /* --- starting out --------------------------------------------------------- */
 

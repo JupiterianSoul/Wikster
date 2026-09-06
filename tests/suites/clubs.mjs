@@ -102,21 +102,36 @@ await tab(a, 'shop');
 await a.waitForTimeout(600);
 const stall = a.locator('.shop-today');
 check('the stall is on the floor', (await stall.count()) === 1);
-check('it names yesterday', /front page of/i.test(await stall.locator('.shop-tile-name').textContent()), await stall.locator('.shop-tile-name').textContent());
-check('and costs its price', /2,800/.test(await stall.locator('.buy').textContent()), await stall.locator('.buy').textContent());
+check('it names yesterday', /front page/i.test(await stall.locator('.shop-tile-name').textContent()), await stall.locator('.shop-tile-name').textContent());
+check('and costs its price', /3,785/.test(await stall.locator('.buy').textContent()), await stall.locator('.buy').textContent());
 const before = await wallet(a);
 await stall.locator('.buy').click();
 await a.waitForTimeout(900);
-check('buying takes the coins', (await wallet(a)) === before - 2800, `${before} -> ${await wallet(a)}`);
+check('buying takes the coins', (await wallet(a)) === before - 3785, `${before} -> ${await wallet(a)}`);
 check('and says so on the stall', /bought today/i.test(await stall.locator('.buy').textContent()) && await stall.locator('.buy').isDisabled());
 check('the booster is on the shelf', await a.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('wikster.inventory.v1') ?? '{}')).some((id) => id.startsWith('today|'))));
-// The draw itself: the front page of the stub's world, five cards, none without a key.
+// The draw itself: the front page of the stub's world, five cards, and every
+// one of them graded by the place its article holds on the day rather than by
+// how read it is, which is what put it on the list to begin with.
 const drawn = await a.evaluate(async () => {
   const day = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const top = await window.__wikster.topRead(day, 'en', 200);
+  const rankOf = new Map(top.map((row, i) => [row.title, i + 1]));
   const cards = await window.__wikster.draw({ name: 'today', cards: 5, source: 'today', day, titles: [], extra: [], queries: [] });
-  return cards.map((c) => ({ key: c.key, title: c.title }));
+  return cards.map((c) => {
+    const title = c.article ?? c.title;
+    const rank = rankOf.get(title) ?? null;
+    return {
+      key: c.key, title, rank, rarityId: c.rarityId,
+      wanted: rank ? window.__wikster.todayRarity(rank).id : null,
+      plate: String(c.thumbnail ?? '').startsWith('data:')
+    };
+  });
 });
-check('the draw deals five of yesterday\'s most-read', drawn.length === 5 && drawn.every((c) => c.key), JSON.stringify(drawn));
+check('the draw deals five of yesterday\'s most-read', drawn.length === 5 && drawn.every((c) => c.key), JSON.stringify(drawn.map((c) => c.title)));
+check('each card is placed on the day\'s list', drawn.every((c) => c.rank), JSON.stringify(drawn));
+check('and graded by that place, not by its readership', drawn.every((c) => c.rarityId && c.rarityId === c.wanted), JSON.stringify(drawn.map((c) => `#${c.rank} ${c.rarityId}`)));
+check('a pictureless page is passed over while a spare is left', drawn.every((c) => !c.plate), JSON.stringify(drawn.filter((c) => c.plate)));
 // Written to the profile, so it survives a relaunch (the harness reseeds
 // storage on a reload, so the save itself is what is checked here).
 check('the day is written to the profile', await a.evaluate(() => JSON.parse(localStorage.getItem('wikster.profile.v1') ?? '{}').todayBought === new Date(Date.now() - 86400000).toISOString().slice(0, 10)));

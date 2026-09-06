@@ -91,7 +91,9 @@ export function buildTodayStall() {
   art.appendChild(buildBooster(spec, { size: 'is-tiny' }));
   const name = document.createElement('p');
   name.className = 'shop-tile-name';
-  name.textContent = t('todayFor', { day: new Date(`${day}T12:00:00Z`).toLocaleDateString(getLanguage(), { weekday: 'long', day: 'numeric', month: 'long' }) });
+  // The weekday is left out: the tile is one column wide and a full date
+  // wraps past the two lines the name is allowed.
+  name.textContent = t('todayFor', { day: new Date(`${day}T12:00:00Z`).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'long' }) });
   const meta = document.createElement('p');
   meta.className = 'shop-tile-meta';
   meta.textContent = t('todayMeta', { n: TODAY_CARDS });
