@@ -367,6 +367,25 @@ export function iconSvg(id, { size = 24, className = '' } = {}) {
     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 }
 
+/*
+ * The same icon as a node rather than a string. A list of hundreds pays the
+ * HTML parser once per icon shape here instead of once per row, which is the
+ * difference between a screen that opens and a screen that arrives.
+ */
+const iconNodes = new Map();
+
+export function iconNode(id, { size = 24, className = '' } = {}) {
+  const key = `${id}|${size}|${className}`;
+  let held = iconNodes.get(key);
+  if (!held) {
+    const box = document.createElement('span');
+    box.innerHTML = iconSvg(id, { size, className });
+    held = box.firstElementChild;
+    iconNodes.set(key, held);
+  }
+  return held.cloneNode(true);
+}
+
 /** The big logo lockup drawn on the booster wrapper. */
 export function logoSvg({ size = 64, className = '' } = {}) {
   return `<svg class="logo-mark ${className}" viewBox="0 0 64 64" width="${size}" height="${size}"

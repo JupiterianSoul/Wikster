@@ -1901,10 +1901,24 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 
 /* Off-screen rows cost nothing: the browser skips laying out and painting
    what cannot be seen, which is most of a long shelf or list. */
-.album-cover, .ach, .pick-row, .shop-tile { content-visibility: auto; }
+/* Every one of them needs a size to stand in with. Without it a skipped
+   element is zero pixels tall, its own contents spill out over whatever comes
+   after, and the page height jumps about as you scroll: the shop's bundle
+   tiles were landing on the headings of the two sections below them. */
+.album-cover, .ach, .pick-row, .shop-tile,
+.theme-card, .frame-card, .badge-chip { content-visibility: auto; }
 .album-cover { contain-intrinsic-size: 170px 190px; }
 .ach { contain-intrinsic-size: auto 92px; }
 .pick-row { contain-intrinsic-size: auto 58px; }
+/* The cosmetics shelves: nine themed plates, ten frames whose rings turn, and
+   the badge wall. Off screen they cost a box each rather than a drawing. */
+.theme-card { contain-intrinsic-size: auto 176px; }
+.frame-card { contain-intrinsic-size: auto 86px; }
+.badge-chip { contain-intrinsic-size: auto 104px; }
+/* A plain tile is about 290 tall, a bundle carries a fan of cards and runs to
+   410: guessing low is what puts a Buy button on the next section's heading. */
+.shop-tile { contain-intrinsic-size: auto 290px; }
+.shop-tile.is-bundle { contain-intrinsic-size: auto 410px; }
 
 /* --- the updates timeline ------------------------------------------------------ */
 
@@ -2304,8 +2318,11 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .market-cell b { font-size: 0.62rem; font-weight: 700; color: var(--ink-dim); max-width: 70px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.frames-note { font-size: 0.8rem; color: var(--ink-dim); margin: 4px 0 12px; }
-.frame-styles { display: grid; grid-template-columns: 1fr; gap: 12px; }
+/* The same gutter every other section on these two screens keeps: the frame
+   list, the effect list and their notes were running edge to edge while the
+   themes above them sat inside it. */
+.frames-note { font-size: 0.8rem; color: var(--ink-dim); margin: 4px 0 12px; padding-inline: var(--gutter); }
+.frame-styles { display: grid; grid-template-columns: 1fr; gap: 12px; padding-inline: var(--gutter); }
 .frame-card {
   display: flex;
   align-items: center;
@@ -2494,7 +2511,7 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 }
 
 /* --- card effects: one row per rarity, one chip per style ------------------ */
-.fx-tiers { display: grid; gap: 14px; }
+.fx-tiers { display: grid; gap: 14px; padding-inline: var(--gutter); }
 .fx-tier { display: grid; gap: 8px; }
 .fx-tier-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .fx-tier-name { font-weight: 700; font-size: 0.9rem; letter-spacing: 0.01em; }

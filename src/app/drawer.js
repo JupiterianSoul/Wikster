@@ -5,7 +5,7 @@ import { claimableTiers } from '../season.js';
 import * as quests from '../quests.js';
 import * as account from '../account.js';
 import { iconSvg, logoSvg } from '../data/icons.js';
-import { t } from '../i18n.js';
+import { getLanguage, t } from '../i18n.js';
 import { dur, press } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
 import * as store from '../collection.js';
@@ -85,9 +85,24 @@ export function drawerItems() {
   ];
 }
 
+/* What the drawer was last built from: the language it was written in and the
+   list of links it holds. The counts on those links change constantly and are
+   painted separately, so a drawer opened twice in a row is not rebuilt twice:
+   twenty-two rows of parsed markup and bound presses was most of the cost of
+   tapping the menu. */
+let drawerBuilt = '';
+
 export function buildDrawer() {
+  const items = drawerItems();
+  const signature = `${getLanguage()}|${items.map((i) => i.sep ? '-' : i.id).join(',')}`;
+  if (signature === drawerBuilt && el.drawerLinks.children.length) {
+    placeDrawerLinks();
+    paintDrawerLinks();
+    return;
+  }
+  drawerBuilt = signature;
   el.drawerMark.innerHTML = logoSvg({ size: 34 });
-  el.drawerLinks.replaceChildren(...drawerItems().map((item) => {
+  el.drawerLinks.replaceChildren(...items.map((item) => {
     if (item.sep) {
       const rule = document.createElement('div');
       rule.className = 'drawer-sep';

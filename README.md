@@ -733,7 +733,10 @@ src/
   albums.js        filing cards, and how big an album really is
   wikdle.js  slots.js  quests.js  leaderboard.js  house.js
   achievements.js  badges.js  frames.js  progression.js  daily.js  quiz.js
-  timed.js  pricing.js  packstyle.js  packview.js  save.js  i18n.js
+  timed.js  pricing.js  packstyle.js  packview.js  save.js
+  i18n.js          the English strings and the lookup
+  i18n-fr.js       the French ones, their own chunk: an English
+                   device never downloads or parses them
   data/            rarities, subjects, icons, emblems, release notes,
                    the arcade's books and the Wikdle words
   ui/              themes, animated backdrops, the synth, the music player,

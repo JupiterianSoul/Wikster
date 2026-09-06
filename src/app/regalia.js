@@ -9,9 +9,9 @@ import { levelFraction } from '../progression.js';
 import { t } from '../i18n.js';
 import { evaluate as evaluateAchievements, measure as measureAchievements, redeemableCount } from '../achievements.js';
 import { badgeStates, badgeSvg, romanRank } from '../badges.js';
-import { press, reveal } from '../ui/components.js';
+import { fillList, press, reveal } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
-import { iconSvg } from '../data/icons.js';
+import { iconNode, iconSvg } from '../data/icons.js';
 import { albumsDeep, albumsHundred, albumsStarted } from '../albums.js';
 import { loadStats as loadWikdleStats } from '../wikdle.js';
 import { formatViews } from '../pricing.js';
@@ -137,11 +137,29 @@ export function wornBadges(states) {
     .slice(0, 4);
 }
 
+/* A badge's drawing depends on the badge, its rank and its ceiling and on
+   nothing else, so it is drawn once per combination and cloned after: fifty
+   chips otherwise means fifty runs of the gradient-and-pips builder. */
+const badgeArt = new Map();
+
+function badgeNode(st) {
+  const key = `${st.badge.id}|${st.rank}|${st.max}`;
+  let held = badgeArt.get(key);
+  if (!held) {
+    const box = document.createElement('span');
+    box.innerHTML = badgeSvg(st.badge, st.rank, st.max, { size: 62 });
+    held = box.firstElementChild;
+    badgeArt.set(key, held);
+  }
+  return held.cloneNode(true);
+}
+
 export function badgeChip(st, { worn = false, readOnly = false } = {}) {
   const chip = document.createElement('button');
   chip.type = 'button';
   chip.className = `badge-chip${st.rank > 0 ? '' : ' is-locked'}`;
-  chip.innerHTML = `${badgeSvg(st.badge, st.rank, st.max, { size: 62 })}<b></b><span class="badge-rank"></span>`;
+  chip.innerHTML = '<b></b><span class="badge-rank"></span>';
+  chip.prepend(badgeNode(st));
   chip.querySelector('b').textContent = st.name;
   const sub = chip.querySelector('.badge-rank');
   if (worn) {
@@ -192,7 +210,7 @@ export function renderBadgesScreen() {
   el.badgesTitle.textContent = t('badgesTitle');
   el.badgesIntro.textContent = t('badgesIntro');
   const wornIds = new Set(wornBadges(states).map((st) => st.badge.id));
-  el.badgesAll.replaceChildren(...states.map((st) => badgeChip(st, { worn: wornIds.has(st.badge.id) })));
+  fillList(el.badgesAll, states, (st) => badgeChip(st, { worn: wornIds.has(st.badge.id) }), { first: 12, batch: 24 });
 }
 /** Put a chip on the profile, or take it off. A first explicit choice adopts
  *  the automatic shelf as its starting point, so the tag and the button never
@@ -284,6 +302,17 @@ export function achRedeemableCount() {
   return redeemableCount(achFacts(), state.profile.achievements?.redeemed ?? []);
 }
 
+/* The shape of one achievement row, parsed once at load. */
+const ACH_ROW = (() => {
+  const row = document.createElement('div');
+  row.className = 'ach';
+  row.innerHTML = '<span class="ach-icon"></span>'
+    + '<span class="ach-copy"><b></b><span class="ach-desc"></span>'
+    + '<span class="ach-track"><i></i></span></span>'
+    + '<span class="ach-side"></span>';
+  return row;
+})();
+
 export function renderAchievements() {
   el.achTitle.textContent = t('achTitle');
   const list = evaluateAchievements(achFacts(), state.profile.achievements?.redeemed ?? []);
@@ -295,16 +324,13 @@ export function renderAchievements() {
   list.sort((a, b) => order(a) - order(b)
     || (b.have / b.need) - (a.have / a.need));
 
-  el.achList.replaceChildren(...list.map((a) => {
-    const row = document.createElement('div');
+  // Three hundred and sixty five rows, so the shape is parsed once and cloned,
+  // not written out as HTML per row: the browser's parser is the expensive
+  // part of a list this long, and cloneNode is the cheap one.
+  const makeRow = (a) => {
+    const row = ACH_ROW.cloneNode(true);
     row.className = `ach${a.redeemable ? ' is-ready' : ''}${a.redeemed ? ' is-done' : ''}`;
-    row.innerHTML = `
-      <span class="ach-icon">${iconSvg(a.icon, { size: 20 })}</span>
-      <span class="ach-copy">
-        <b></b><span class="ach-desc"></span>
-        <span class="ach-track"><i></i></span>
-      </span>
-      <span class="ach-side"></span>`;
+    row.querySelector('.ach-icon').replaceChildren(iconNode(a.icon, { size: 20 }));
     row.querySelector('b').textContent = a.name;
     row.querySelector('.ach-desc').textContent = a.desc;
     row.querySelector('.ach-track i').style.width = `${Math.round((a.have / a.need) * 100)}%`;
@@ -335,9 +361,11 @@ export function renderAchievements() {
       : t('achRewardPack', { name: specName(a.reward.spec) })) + ` + ${ink(inkForAchievement(a.reward))}`;
     row.querySelector('.ach-copy').appendChild(label);
     return row;
-  }));
-  // A hundred rows now: a tighter stagger, or the tail waits two seconds.
-  reveal(el.achList.children, { step: 6, from: 8 });
+  };
+  // The screenful is built and shown on this frame; the other three hundred
+  // are built and shown over the next few, so opening the screen costs a
+  // screen rather than a list.
+  reveal(fillList(el.achList, list, makeRow, { first: 12, batch: 60 }), { step: 24, from: 8 });
 }
 
 export function redeemAchievement(a, btn) {

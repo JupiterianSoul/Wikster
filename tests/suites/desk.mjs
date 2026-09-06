@@ -6,6 +6,7 @@
 import { chromium, devices } from 'playwright';
 import { launchOptions } from '../lib/browser.mjs';
 import { installStubs } from '../lib/stubs.mjs';
+import { RELEASES } from '../../src/data/releases.js';
 
 let fails = 0;
 const check = (l, c, e = '') => { if (!c) fails++; console.log(`${c ? 'PASS' : 'FAIL'}  ${l}${e ? '  ' + e : ''}`); };
@@ -31,7 +32,7 @@ async function open(viewport) {
   const p = await ctx.newPage();
   p.on('pageerror', (e) => errors.push(e.message));
   installStubs(p);
-  await p.addInitScript(({ entries }) => {
+  await p.addInitScript(({ entries, seen }) => {
     localStorage.setItem('wikster.language', 'en');
     const now = Date.now();
     localStorage.setItem('wikster.profile.v1', JSON.stringify({
@@ -42,7 +43,13 @@ async function open(viewport) {
     }));
     localStorage.setItem('wikster.wallet.v1', '48000');
     localStorage.setItem('wikster.collection.v3', JSON.stringify({ entries }));
-  }, { entries });
+    // A device already up to date. This suite measures where things sit at
+    // desktop widths and spends several seconds reading boxes before it
+    // clicks anything; the what's-new sheet opens on its own a couple of
+    // seconds in, and a sheet over the screen is a click that never lands.
+    // The sheet itself has its own suite.
+    localStorage.setItem('wikster.seenRelease.v1', seen);
+  }, { entries, seen: RELEASES.at(-1).id });
   await p.goto(BASE, { waitUntil: 'domcontentloaded' });
   await p.waitForTimeout(2400);
   for (let i = 0; i < 6; i++) {

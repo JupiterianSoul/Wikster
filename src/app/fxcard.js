@@ -48,7 +48,9 @@ function sampleArticle() {
 const watcher = typeof IntersectionObserver === 'function'
   ? new IntersectionObserver((entries) => {
     for (const { target, isIntersecting } of entries) target.classList.toggle('is-lit', isIntersecting);
-  }, { rootMargin: '120px 0px', threshold: 0.02 })
+    // No margin: a sample animates while it is actually being looked at, so a
+    // fling down a wall of forty starts four of them, not forty.
+  }, { threshold: 0.02 })
   : null;
 
 /**

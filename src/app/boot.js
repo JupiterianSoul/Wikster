@@ -2,7 +2,7 @@
 
 import { iconSvg, logoSvg } from '../data/icons.js';
 import { checkWhatsNew } from './whatsnew.js';
-import { LANGUAGES, getLanguage, languageChosen, setLanguage, t, tx } from '../i18n.js';
+import { LANGUAGES, getLanguage, languageChosen, loadLanguage, setLanguage, t, tx } from '../i18n.js';
 import { Bar, NavBar, Odometer, Rail, Ring, Segmented, Sheet, press, trackDrag } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
 import * as store from '../collection.js';
@@ -740,7 +740,13 @@ onInk((kind, n) => { bump(state.profile, kind === 'earn' ? 'inkEarned' : 'inkSpe
   const day = Math.floor(Date.now() / 86400000);
   if (ledger(state.profile).lastPlayDay !== day) { ledger(state.profile).lastPlayDay = day; bump(state.profile, 'playDays'); store.saveProfile(state.profile); }
 }
-init();
+/*
+ * The first paint waits on one thing: the chosen language's strings. English
+ * ships with the app and resolves at once; French is its own chunk, so an
+ * English device never downloads or parses it, and a French one is written in
+ * French from its first frame rather than corrected a moment later.
+ */
+loadLanguage().then(init);
 
 window.__wikster = {
   state, store, debug, RARITIES, synth, music, backdrop, THEMES, THEME_PACKS, regrade: regradeCollection,

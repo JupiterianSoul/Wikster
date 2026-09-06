@@ -570,8 +570,46 @@ export class Rail {
 /* --- entrance --------------------------------------------------------------- */
 
 /** Stagger a set of nodes in. Used whenever a screen's content is replaced. */
-export function reveal(nodes, { step = 45, from = 14 } = {}) {
-  [...nodes].forEach((node, i) => {
+/*
+ * A long list, put in without holding the frame. The rows a screen can show
+ * go in at once so the screen is there immediately; the rest follow a few
+ * frames later, in batches. A second fill of the same container cancels the
+ * first, so a repaint mid-fill never interleaves two lists.
+ */
+const filling = new WeakMap();
+
+export function fillList(container, items, make, { first = 24, batch = 60 } = {}) {
+  cancelAnimationFrame(filling.get(container) ?? 0);
+  const all = [...items];
+  const head = all.slice(0, first).map(make);
+  container.replaceChildren(...head);
+  if (all.length <= first) return head;
+  let at = first;
+  const step = () => {
+    const chunk = document.createDocumentFragment();
+    // The rows are BUILT here too, not just inserted: making three hundred
+    // nodes to show twelve is the same waste as painting them.
+    for (let n = 0; n < batch && at < all.length; n++, at++) chunk.appendChild(make(all[at], at));
+    container.appendChild(chunk);
+    if (at < all.length) filling.set(container, requestAnimationFrame(step));
+    else filling.delete(container);
+  };
+  filling.set(container, requestAnimationFrame(step));
+  return head;
+}
+
+/**
+ * The stagger that brings a list in. Only the rows a screen can actually show
+ * are animated: a list of three hundred would otherwise schedule three hundred
+ * animations, three hundred listeners and two seconds of tail for the six
+ * rows anybody sees, and pay for all of it on the first frame. `cap` is how
+ * many lead the way in; the rest are simply there.
+ */
+
+export function reveal(nodes, { step = 45, from = 14, cap = 14 } = {}) {
+  const all = [...nodes];
+  for (let i = 0; i < all.length && i < cap; i++) {
+    const node = all[i];
     node.style.setProperty('--enter-from', `${from}px`);
     node.style.animationDelay = `${i * step}ms`;
     node.classList.add('entering');
@@ -579,7 +617,7 @@ export function reveal(nodes, { step = 45, from = 14 } = {}) {
       node.classList.remove('entering');
       node.style.animationDelay = '';
     }, { once: true });
-  });
+  }
 }
 
 /** Wait one paint, so a just-inserted node can be transitioned from. */
