@@ -21,7 +21,7 @@ const card = (key, title, rarityId, price, pack) => ({
   thumbnail: PX, firstPulledAt: 1, lastPulledAt: 1, description: 'A thing', extract: 'Some words about it.'
 });
 const MINE = {
-  'en:Cat': card('en:Cat', 'Cat', 'rare', 300, 'animals'),
+  'en:Cat': { ...card('en:Cat', 'Cat', 'rare', 300, 'animals'), count: 2 },
   'en:Paris': card('en:Paris', 'Paris', 'prismatic', 9000, 'geography')
 };
 const until = async (fn, ms = 6000) => {
@@ -170,6 +170,7 @@ check('A takes the card down', (await a.locator('#showcase-grid .showcase-empty'
 
 /* --- guilds -------------------------------------------------------------------- */
 section('guilds');
+shared.goalKind = 'open';
 await viaDrawer(a, 'guilds');
 await a.waitForTimeout(900);
 check('without a guild, the search and the form are up', await a.locator('#guild-join').isVisible() && await a.locator('#guild-home').isHidden());
@@ -202,14 +203,90 @@ shared.scores = [
 shared.emitChange('guild_daily', 'UPDATE', { guild_id: shared.guilds[0].id, score: 800, updated_at: new Date().toISOString() });
 check('the guild board shows the sum, live', await until(async () => /800/.test(await a.locator('#guild-board').textContent()) && /Night Owls/.test(await a.locator('#guild-board').textContent())), (await a.locator('#guild-board').textContent()).slice(0, 160));
 check('and the card says #1', await until(async () => /#1 of 1/.test(await a.locator('#guild-scores').textContent())), await a.locator('#guild-scores').textContent());
+
+/* --- the hall: the room, the goal, the table, the match --------------------- */
+section('the guild hall');
+// The room: A says something, B hears it without asking.
+check('the goal is up, sized for two', await until(async () => /Open 18 boosters/.test(await a.locator('#guild-goal-text').textContent())), await a.locator('#guild-goal-text').textContent());
+check('the room is open', await a.locator('#guild-room-chat').isVisible() && /nobody has said/i.test(await a.locator('#guild-chat-log').textContent()));
+await a.locator('#guild-chat-input').fill('owls assemble');
+await a.locator('#guild-chat-form button[type="submit"]').click();
+await a.waitForTimeout(600);
+check('A\'s line is in the room', /owls assemble/.test(await a.locator('#guild-chat-log').textContent()));
+check('B hears it live, under A\'s name', await until(async () => /owls assemble/.test(await b.locator('#guild-chat-log').textContent()) && /ada_lovelace/i.test(await b.locator('#guild-chat-log').textContent())), (await b.locator('#guild-chat-log').textContent()).slice(0, 120));
+check('the server keeps the line', shared.guildMessages.length === 1 && shared.guildMessages[0].sender_name === 'ada_lovelace');
+
+// The goal: eighteen boosters between two. A opens ten, B eight, both see it move.
+await a.evaluate(() => { for (let i = 0; i < 10; i++) window.__wikster.guildGoal('open', { kind: 'theme' }); return window.__wikster.guildGoal('open', { kind: 'theme' }); });
+await a.waitForTimeout(400);
+check('A\'s openings count', shared.guildGoals[0].progress === 11, String(shared.guildGoals[0].progress));
+check('and B watches the bar move', await until(async () => /11 \/ 18/.test(await b.locator('#guild-goal-count').textContent())), await b.locator('#guild-goal-count').textContent());
+check('a new card does not count toward an opening goal', (await a.evaluate(() => window.__wikster.guildGoal('pull', { isNew: true })), shared.guildGoals[0].progress === 11));
+await b.evaluate(() => { for (let i = 0; i < 6; i++) window.__wikster.guildGoal('open', { kind: 'open' }); return window.__wikster.guildGoal('open', { kind: 'open' }); });
+await b.waitForTimeout(400);
+check('the guild made it', shared.guildGoals[0].done_at != null && shared.guildGoals[0].progress === 18);
+check('both see Done and a Claim', await until(async () => await a.locator('#guild-goal-claim').isVisible() && await b.locator('#guild-goal-claim').isVisible()));
+const purseA = await wallet(a);
+await a.locator('#guild-goal-claim').click();
+await a.waitForTimeout(900);
+check('claiming pays A nine hundred', (await wallet(a)) === purseA + 900, `${purseA} -> ${await wallet(a)}`);
+check('and a Rare booster', await a.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('wikster.inventory.v1') ?? '{}')).some((id) => id === 'open|any|rare|5')));
+check('and only once', await a.locator('#guild-goal-claim').isDisabled() && /claimed/i.test(await a.locator('#guild-goal-claim').textContent()));
+check('B is paid separately', shared.guildGoalClaims.length === 1 && shared.guildGoalClaims[0].user_id === idA);
+
+// The table: A puts a spare Cat down, B takes it.
+await a.locator('#guild-rooms-seg .seg-option[data-value="bank"]').click();
+await a.waitForTimeout(300);
+check('the table is empty', /empty/i.test(await a.locator('#guild-bank').textContent()));
+await a.locator('#guild-bank-donate').click();
+await a.waitForTimeout(600);
+check('only spares are offered', /Cat/.test(await a.locator('#sheet').textContent()) && !/Paris/.test(await a.locator('#sheet').textContent()), (await a.locator('#sheet').textContent()).slice(0, 100));
+await a.locator('#sheet .pick-row').first().click();
+await a.waitForTimeout(800);
+check('the Cat is on the table', shared.guildBank.length === 1 && shared.guildBank[0].card.key === 'en:Cat' && shared.guildBank[0].donor_name === 'ada_lovelace');
+check('and A has one copy left', await a.evaluate(() => JSON.parse(localStorage.getItem('wikster.collection.v3')).entries['en:Cat'].count === 1));
+await closeSheets(a);
+await b.locator('#guild-rooms-seg .seg-option[data-value="bank"]').click();
+check('B sees it arrive', await until(async () => /Cat/.test(await b.locator('#guild-bank').textContent()) && /from ada_lovelace/i.test(await b.locator('#guild-bank').textContent())), (await b.locator('#guild-bank').textContent()).slice(0, 100));
+await b.locator('#guild-bank .btn-primary').first().click();
+await b.waitForTimeout(800);
+check('B takes it home', await b.evaluate(() => JSON.parse(localStorage.getItem('wikster.collection.v3')).entries['en:Cat']?.count === 1));
+check('and the table is empty again', shared.guildBank.length === 0 && await until(async () => /empty/i.test(await b.locator('#guild-bank').textContent())));
+check('with two takes left today', /2 take/.test(await b.locator('#guild-bank-note').textContent()), await b.locator('#guild-bank-note').textContent());
+
+// The match: a second guild shows up, and the two are paired.
+check('alone, there is nobody to play', /no other guild/i.test(await a.locator('#guild-versus').textContent()));
+const rival = { id: 'guild-rival', name: 'Day Larks', tag: 'LARK', about: '', owner: 'nobody', members: 3, created_at: new Date().toISOString() };
+shared.guilds.push(rival);
+shared.guildMembers.push({ user_id: 'lark-1', guild_id: rival.id, joined_at: new Date().toISOString() });
+shared.scores.push({ user_id: 'lark-1', username: 'lark_1', game: 'duel', day: '2026-01-01', score: 650 });
+shared.emitChange('guild_weekly', 'UPDATE', { guild_id: rival.id, score: 650, updated_at: new Date().toISOString() });
+check('the match is made, live', await until(async () => /Day Larks/.test(await a.locator('#guild-versus').textContent())), (await a.locator('#guild-versus').textContent()).slice(0, 120));
+check('with both scores', /800/.test(await a.locator('#guild-versus').textContent()) && /650/.test(await a.locator('#guild-versus').textContent()));
+check('and the pairing is written down', shared.guildMatches.length === 1 && shared.guildMatches[0].guild_b === rival.id);
+check('the leader is marked', await a.locator('#guild-versus .guild-side.is-mine.is-leading').count() === 1);
+// Last week, settled: the Owls won, and the win pays.
+const lastWeek = String(Math.floor((Math.floor((Date.now() - 7 * 86400000) / 86400000) + 4) / 7));
+shared.guildMatches.push({ week: lastWeek, guild_a: shared.guilds[0].id, guild_b: rival.id, score_a: 1200, score_b: 900 });
+await viaDrawer(a, 'leaderboard');
+await viaDrawer(a, 'guilds');
+await a.waitForTimeout(600);
+check('last week\'s win is announced', await until(async () => /beat Day Larks/.test(await a.locator('#guild-match-last').textContent())), await a.locator('#guild-match-last').textContent());
+const purseA2 = await wallet(a);
+await a.locator('#guild-match-last .btn').click();
+await a.waitForTimeout(800);
+check('and pays seven hundred and fifty', (await wallet(a)) === purseA2 + 750 && shared.guildMatchClaims.length === 1);
+// Back to two members for what follows; the rival stays on the board.
+await b.locator('#guild-rooms-seg .seg-option[data-value="chat"]').click();
+
 // B leaves; A's guild is one member again.
 await b.locator('#guild-leave').click();
 await b.waitForTimeout(300);
 check('leaving asks twice', /sure/i.test(await b.locator('#guild-leave').textContent()));
 await b.locator('#guild-leave').click();
 await b.waitForTimeout(1000);
-check('B is out, back to the search', await b.locator('#guild-join').isVisible() && shared.guildMembers.length === 1);
-check('the guild is still standing with one member', shared.guilds.length === 1 && shared.guilds[0].members === 1);
+check('B is out, back to the search', await b.locator('#guild-join').isVisible() && shared.guildMembers.filter((m) => m.guild_id === shared.guilds[0].id).length === 1);
+check('the guild is still standing with one member', shared.guilds[0].members === 1);
 check('the panel knows the guild on a desk build', true);
 
 /* --- invitations, and closing the guild --------------------------------------- */
@@ -246,7 +323,7 @@ await closeSheets(a);
 check('B is asked again', await until(async () => /Night Owls/.test(await b.locator('#guild-invites').textContent())));
 await b.locator('#guild-invites .btn-primary').first().click();
 await b.waitForTimeout(1400);
-check('accepting puts B in', await b.locator('#guild-home').isVisible() && shared.guildMembers.length === 2);
+check('accepting puts B in', await b.locator('#guild-home').isVisible() && shared.guildMembers.filter((m) => m.guild_id === shared.guilds[0].id).length === 2);
 check('and spends the invitation', shared.guildInvites.length === 0);
 check('a member cannot close the guild', await b.locator('#guild-delete').isHidden());
 check('the founder can', await a.locator('#guild-delete').isVisible());
@@ -259,7 +336,7 @@ await a.waitForTimeout(400);
 check('closing asks twice', /sure/i.test(await a.locator('#guild-delete').textContent()), await a.locator('#guild-delete').textContent());
 await a.locator('#guild-delete').click();
 await a.waitForTimeout(1400);
-check('the guild is gone from the server', shared.guilds.length === 0 && shared.guildMembers.length === 0);
+check('the guild is gone from the server', !shared.guilds.some((g) => g.tag === 'OWL') && !shared.guildMembers.some((m) => m.user_id === idA || m.user_id === idB));
 check('A is back at the search', await a.locator('#guild-join').isVisible() && await a.locator('#guild-home').isHidden());
 check('and B finds out without asking', await until(async () => await b.locator('#guild-join').isVisible()));
 

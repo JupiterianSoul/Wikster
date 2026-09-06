@@ -111,6 +111,30 @@ export function openGuildInviteFeed(selfId, onInvite) {
   return { close() { drop(channel); channel = null; } };
 }
 
+/**
+ * The guild hall: a line said in the room, a card put on or taken off the
+ * table, the goal moving. One channel for the guild being looked at, opened
+ * while its screen is up. `onEvent` gets { kind: 'message' | 'bank' | 'goal' | 'match', type, row }.
+ */
+export function openGuildRoom(guildId, onEvent) {
+  if (!configured || !guildId) return { close() {} };
+  let channel = null;
+  try {
+    channel = supabase.channel(`guild-room:${guildId}`);
+    const tell = (kind) => (payload) => {
+      try { onEvent?.({ kind, type: payload.eventType, row: payload.new ?? payload.old ?? null }); } catch { /* a listener's problem */ }
+    };
+    const filter = `guild_id=eq.${guildId}`;
+    channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'guild_messages', filter }, tell('message'));
+    channel.on('postgres_changes', { event: '*', schema: 'public', table: 'guild_bank', filter }, tell('bank'));
+    channel.on('postgres_changes', { event: '*', schema: 'public', table: 'guild_goals', filter }, tell('goal'));
+    channel.subscribe();
+  } catch {
+    channel = null;
+  }
+  return { close() { drop(channel); channel = null; } };
+}
+
 /** The three windows of the board moving under someone's score. */
 export function openBoardFeed(onChange) {
   if (!configured) return { close() {} };

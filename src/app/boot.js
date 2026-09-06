@@ -30,6 +30,7 @@ import { openFilters, renderBinder, turnAlbumPage } from './binder.js';
 import { $, THEME_KEY, WIDE, applyStrings, bind, debug, el, flushPlaytime, lookForUpdate, migrateLanguages, migrateSpecialCards, migrateViews, money, placeDrawerLinks, refreshWallet, setTickerJob, showScreen, shuffle, state, storedTheme, syncTicker, toast, useTheme } from './core.js';
 import { openDaily, openOdds, openWallet } from './daily.js';
 import * as leaderboard from '../leaderboard.js';
+import { flushGuildGoal, reportGuildGoal } from '../guildgoal.js';
 import { tilt } from './detail.js';
 import { buildDrawer, closeDrawer, openDrawer, openHelp, openNotifications, paintDrawerLinks } from './drawer.js';
 import { flushSync, gateAltAction, leaveAccount, onSession, purgeRetiredCodes, purgeRetiredThemes, resumeAccount, showGate, stopSocialPoll, submitGate, syncSoon } from './gate.js';
@@ -121,6 +122,12 @@ bind({
   guildScores: $('#guild-scores'), guildLeave: $('#guild-leave'), guildDelete: $('#guild-delete'), guildInvite: $('#guild-invite'),
   guildInvitesRoom: $('#guild-invites-room'), guildInvitesLabel: $('#guild-invites-label'), guildInvites: $('#guild-invites'),
   guildRosterLabel: $('#guild-roster-label'), guildRoster: $('#guild-roster'),
+  guildGoal: $('#guild-goal'), guildGoalLabel: $('#guild-goal-label'), guildGoalLeft: $('#guild-goal-left'), guildGoalText: $('#guild-goal-text'),
+  guildGoalBar: $('#guild-goal-bar'), guildGoalCount: $('#guild-goal-count'), guildGoalReward: $('#guild-goal-reward'), guildGoalClaim: $('#guild-goal-claim'),
+  guildMatch: $('#guild-match'), guildMatchLabel: $('#guild-match-label'), guildMatchLeft: $('#guild-match-left'), guildVersus: $('#guild-versus'), guildMatchLast: $('#guild-match-last'),
+  guildRoomsSeg: $('#guild-rooms-seg'), guildRoomChat: $('#guild-room-chat'), guildRoomBank: $('#guild-room-bank'), guildRoomMembers: $('#guild-room-members'),
+  guildChatLog: $('#guild-chat-log'), guildChatForm: $('#guild-chat-form'), guildChatInput: $('#guild-chat-input'), guildChatSend: $('#guild-chat-send'),
+  guildBankNote: $('#guild-bank-note'), guildBankDonate: $('#guild-bank-donate'), guildBank: $('#guild-bank'),
   guildFind: $('#guild-find'), guildFindMark: $('#guild-find-mark'), guildFindInput: $('#guild-find-input'), guildFindGo: $('#guild-find-go'),
   guildFindStatus: $('#guild-find-status'), guildResults: $('#guild-results'), guildCreateLabel: $('#guild-create-label'),
   guildCreate: $('#guild-create'), guildCreateGo: $('#guild-create-go'), guildCreateStatus: $('#guild-create-status'),
@@ -626,7 +633,7 @@ export function init() {
     if (state.tab === 'profile') paintPlaytime();
   }, 60000);
   // A score that could not be sent is sent when the network comes back.
-  window.addEventListener('online', () => { leaderboard.flushScores().catch(() => {}); });
+  window.addEventListener('online', () => { leaderboard.flushScores().catch(() => {}); flushGuildGoal().catch(() => {}); });
 
   backdrop.start();
   startSession();
@@ -713,6 +720,8 @@ window.__wikster = {
   topRead: fetchTopRead, todayRarity: todayRarityForRank,
   // A suite signs a player out the way the Settings row does, wires and all.
   signOut: () => leaveAccount(),
+  // A suite moves the guild's weekly goal the way a booster or a Wikdle would.
+  guildGoal: (metric, detail) => { reportGuildGoal(metric, detail); return flushGuildGoal(); },
   setTheme: (id) => { useTheme(id); renderPacks(); renderShop(); renderBinder(); renderCustomize(); },
   debugRarity(id) {
     const forced = rarityById(id);

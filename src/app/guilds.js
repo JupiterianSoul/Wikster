@@ -14,16 +14,21 @@
 
 import { t, tx } from '../i18n.js';
 import { iconSvg } from '../data/icons.js';
-import { Segmented, press } from '../ui/components.js';
+import { Bar, Segmented, press } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
-import { formatAmount } from '../pricing.js';
+import { CURRENCY_NAME, formatAmount } from '../pricing.js';
 import { rankFor } from '../progression.js';
+import * as store from '../collection.js';
+import { rarityById, rarityRank } from '../data/rarities.js';
 import { formatCountdown } from '../shop.js';
 import * as leaderboard from '../leaderboard.js';
 import * as account from '../account.js';
 import { on } from '../ui/bus.js';
 import { gameStage, houseError } from './arcade.js';
-import { el, esc, openSheet, state, toast } from './core.js';
+import { el, esc, money, openSheet, refreshWallet, state, toast } from './core.js';
+import { pushNote, whenText } from './drawer.js';
+import { gainBooster } from './open.js';
+import { live } from './live.js';
 import { describeError, showGate, signedIn, userId } from './gate.js';
 import { boardNode, boardRow } from './quests.js';
 import { paintPanel } from './panel.js';
@@ -31,12 +36,21 @@ import { paintPanel } from './panel.js';
 const WINDOWS = ['daily', 'weekly', 'alltime'];
 
 /** What the screen holds between paints. */
-export const guildView = { window: 'daily', page: 0, rows: [], roster: [], results: [], ranks: {}, invites: [] };
+export const guildView = {
+  window: 'daily', page: 0, rows: [], roster: [], results: [], ranks: {}, invites: [],
+  room: 'chat', chat: [], bank: [], takesLeft: 3, goal: null, match: null
+};
+
+/** The pay for a week's goal, on top of the money: five cards, Rare guaranteed. */
+const GOAL_BOOSTER = { kind: 'open', themeId: null, rarityId: 'rare', cards: 5 };
 
 const CAP = 50;
 
 let seg = null;
+let roomSeg = null;
+let goalBar = null;
 let feed = null;
+let room = null;
 let repaint = null;
 let leaveArmed = null;
 let deleteArmed = null;
@@ -44,7 +58,7 @@ let wired = false;
 
 const guildError = (error) => {
   const code = String(error?.message ?? '');
-  return /^(ALREADY_IN_GUILD|NAME_TAKEN|TAG_TAKEN|GUILD_FULL|NOT_IN_GUILD|NOT_FRIEND|ALREADY_MEMBER|INVITE_GONE|NOT_OWNER|NOT_FOUND|SCHEMA)$/.test(code)
+  return /^(ALREADY_IN_GUILD|NAME_TAKEN|TAG_TAKEN|GUILD_FULL|NOT_IN_GUILD|NOT_FRIEND|ALREADY_MEMBER|INVITE_GONE|NOT_OWNER|NOT_FOUND|NOT_DONE|CLAIMED|BANK_FULL|TAKE_LIMIT|BAD_CARD|GONE|SCHEMA)$/.test(code)
     ? t(`guildErr_${code}`) : describeError(error);
 };
 
@@ -64,6 +78,11 @@ export async function renderGuilds() {
   el.guildsIntro.textContent = t('guildsIntro');
   el.guildRosterLabel.textContent = t('guildRoster');
   el.guildInvitesLabel.textContent = t('guildInvitesLabel');
+  el.guildGoalLabel.textContent = t('guildGoalLabel');
+  el.guildMatchLabel.textContent = t('guildMatchLabel');
+  el.guildChatSend.textContent = t('chatSend');
+  el.guildChatInput.placeholder = t('guildChatPlaceholder');
+  el.guildBankDonate.textContent = t('guildBankDonate');
   el.guildCreateLabel.textContent = t('guildCreateLabel');
   el.guildBoardLabel.textContent = t('guildBoard');
   el.guildFindMark.innerHTML = iconSvg('search', { size: 18 });
@@ -108,6 +127,7 @@ function paintRooms() {
   const g = state.guild;
   el.guildHome.hidden = !g;
   el.guildJoin.hidden = Boolean(g);
+  watchRoom(g);
   if (g) paintHome(g);
   else {
     el.guildResults.replaceChildren(...guildView.results.map(resultRow));
@@ -142,6 +162,7 @@ function paintHome(g) {
   el.guildDelete.classList.remove('btn-danger', 'is-armed');
   paintScores();
   loadRoster(g);
+  paintHall();
 }
 
 /** The three windows, with the guild's standing in each. */
@@ -381,6 +402,361 @@ async function openInviteSheet() {
   });
 }
 
+/* --- the hall: the goal, the match, the rooms ------------------------------ */
+
+/** Everything under the card, loaded together and painted as each answers. */
+function paintHall() {
+  if (!roomSeg) {
+    roomSeg = new Segmented(el.guildRoomsSeg, [
+      { id: 'chat', label: t('guildRoomChat') }, { id: 'bank', label: t('guildRoomBank') }, { id: 'members', label: t('guildRoster') }
+    ], (id) => { guildView.room = id; showRoom(); });
+  } else {
+    roomSeg.relabel([{ label: t('guildRoomChat') }, { label: t('guildRoomBank') }, { label: t('guildRoster') }]);
+  }
+  roomSeg.select(guildView.room, { silent: true });
+  showRoom();
+  loadGoal();
+  loadMatch();
+  loadChat();
+  loadBank();
+}
+
+function showRoom() {
+  el.guildRoomChat.hidden = guildView.room !== 'chat';
+  el.guildRoomBank.hidden = guildView.room !== 'bank';
+  el.guildRoomMembers.hidden = guildView.room !== 'members';
+  if (guildView.room === 'chat') keepChatBottom();
+}
+
+/** The one wire for the guild on screen: the room, the table and the goal. */
+function watchRoom(g) {
+  if (room && room.id === g?.id) return;
+  room?.close();
+  room = null;
+  if (!g) return;
+  const wire = account.openGuildRoom(g.id, (event) => {
+    if (state.tab !== 'guilds' || state.guild?.id !== g.id) return;
+    if (event.kind === 'message' && event.row) {
+      const line = { id: event.row.id, sender: event.row.sender, name: event.row.sender_name || '?', body: event.row.body, createdAt: event.row.created_at };
+      if (!guildView.chat.some((m) => m.id === line.id)) { guildView.chat.push(line); paintChat(); }
+      if (line.sender !== userId()) synth.playMessage();
+    } else if (event.kind === 'bank') loadBank();
+    else if (event.kind === 'goal') loadGoal();
+  });
+  room = { id: g.id, close: () => wire.close() };
+}
+
+/* --- the goal ----------------------------------------------------------------- */
+
+async function loadGoal() {
+  const g = state.guild;
+  let goal = null;
+  try { goal = await account.guildGoal(); } catch (error) {
+    if (String(error?.message) === 'SCHEMA') { el.guildGoal.hidden = true; el.guildMatch.hidden = true; el.guildRoomsSeg.hidden = true; el.guildRoomChat.hidden = true; el.guildRoomBank.hidden = true; el.guildRoomMembers.hidden = false; }
+    return;
+  }
+  if (state.tab !== 'guilds' || state.guild?.id !== g?.id) return;
+  guildView.goal = goal;
+  paintGoal();
+}
+
+/** What the goal asks, in words. */
+export function goalText(goal) {
+  return t(`guildGoal_${goal.kind}`, { n: formatAmount(goal.target) });
+}
+
+function paintGoal() {
+  const goal = guildView.goal;
+  el.guildGoal.hidden = !goal;
+  if (!goal) return;
+  if (!goalBar) goalBar = new Bar(el.guildGoalBar);
+  const done = Boolean(goal.doneAt) || goal.progress >= goal.target;
+  el.guildGoalText.textContent = goalText(goal);
+  el.guildGoalLeft.textContent = done ? t('guildGoalDone') : t('guildEndsIn', { time: formatCountdown(leaderboard.msToReset('weekly') ?? 0) });
+  goalBar.set(goal.target ? goal.progress / goal.target : 0);
+  el.guildGoalCount.textContent = `${formatAmount(goal.progress)} / ${formatAmount(goal.target)}`;
+  el.guildGoalReward.innerHTML = `${t('guildGoalPays')} ${money(goal.reward)} + ${esc(t('guildGoalBooster'))}`;
+  el.guildGoalClaim.hidden = !done;
+  el.guildGoalClaim.disabled = goal.claimed;
+  el.guildGoalClaim.textContent = goal.claimed ? t('guildGoalClaimed') : t('guildGoalClaim');
+  el.guildGoal.classList.toggle('is-done', done);
+}
+
+async function claimGoal() {
+  el.guildGoalClaim.disabled = true;
+  try {
+    const paid = await account.guildGoalClaim();
+    store.saveWallet(store.loadWallet() + paid);
+    refreshWallet();
+    gainBooster(GOAL_BOOSTER, 1);
+    if (guildView.goal) guildView.goal.claimed = true;
+    synth.playFanfare();
+    toast(esc(t('guildGoalPaid', { amount: `${formatAmount(paid)} ${CURRENCY_NAME}` })), 'ok');
+    pushNote('shield', t('guildGoalPaid', { amount: `${formatAmount(paid)} ${CURRENCY_NAME}` }), 'guilds');
+    paintGoal();
+  } catch (error) {
+    toast(esc(guildError(error)), 'error');
+    synth.playDenied();
+    el.guildGoalClaim.disabled = false;
+  }
+}
+
+/* --- the match ---------------------------------------------------------------- */
+
+async function loadMatch() {
+  const g = state.guild;
+  let match = null;
+  try { match = await account.guildMatch(); } catch { return; }
+  if (state.tab !== 'guilds' || state.guild?.id !== g?.id) return;
+  guildView.match = match;
+  paintMatch();
+}
+
+function paintMatch() {
+  const g = state.guild;
+  const match = guildView.match;
+  el.guildMatch.hidden = !match || !g;
+  if (!match || !g) return;
+  el.guildMatchLeft.textContent = t('guildEndsIn', { time: formatCountdown(leaderboard.msToReset('weekly') ?? 0) });
+  const side = (tag, name, score, mine, leading) => {
+    const cell = document.createElement('div');
+    cell.className = `guild-side${mine ? ' is-mine' : ''}${leading ? ' is-leading' : ''}`;
+    cell.innerHTML = '<span class="guild-side-tag"></span><b class="guild-side-name"></b><span class="guild-side-score tabular"></span>';
+    cell.querySelector('.guild-side-tag').textContent = tag;
+    cell.querySelector('.guild-side-name').textContent = name;
+    cell.querySelector('.guild-side-score').textContent = formatAmount(score);
+    return cell;
+  };
+  const vs = document.createElement('span');
+  vs.className = 'guild-vs';
+  vs.textContent = t('guildVersus');
+  if (match.opponent) {
+    const lead = match.myScore === match.theirScore ? null : match.myScore > match.theirScore;
+    el.guildVersus.replaceChildren(
+      side(g.tag, g.name, match.myScore, true, lead === true), vs,
+      side(match.opponent.tag, match.opponent.name, match.theirScore, false, lead === false)
+    );
+  } else {
+    const alone = document.createElement('p');
+    alone.className = 'muted';
+    alone.textContent = t('guildMatchNone');
+    el.guildVersus.replaceChildren(side(g.tag, g.name, match.myScore, true, false), alone);
+  }
+  const last = match.last;
+  el.guildMatchLast.hidden = !last || last.won == null;
+  if (last && last.won != null) {
+    el.guildMatchLast.replaceChildren();
+    const line = document.createElement('span');
+    line.textContent = t(last.won ? 'guildMatchWon' : 'guildMatchLost', { name: last.opponentName, mine: formatAmount(last.myScore), theirs: formatAmount(last.theirScore) });
+    el.guildMatchLast.appendChild(line);
+    if (last.won) {
+      const claim = document.createElement('button');
+      claim.type = 'button';
+      claim.className = 'btn btn-primary btn-sm';
+      claim.textContent = last.claimed ? t('guildGoalClaimed') : t('guildMatchClaim');
+      claim.disabled = last.claimed;
+      press(claim, { sound: null });
+      claim.addEventListener('click', async () => {
+        claim.disabled = true;
+        try {
+          const paid = await account.guildMatchClaim();
+          store.saveWallet(store.loadWallet() + paid);
+          refreshWallet();
+          last.claimed = true;
+          synth.playFanfare();
+          toast(esc(t('guildMatchPaid', { amount: `${formatAmount(paid)} ${CURRENCY_NAME}` })), 'ok');
+          paintMatch();
+        } catch (error) {
+          toast(esc(guildError(error)), 'error');
+          synth.playDenied();
+          claim.disabled = false;
+        }
+      });
+      el.guildMatchLast.appendChild(claim);
+    }
+  }
+}
+
+/* --- the room ----------------------------------------------------------------- */
+
+async function loadChat() {
+  const g = state.guild;
+  let lines = [];
+  try { lines = await account.guildChat(); } catch { return; }
+  if (state.tab !== 'guilds' || state.guild?.id !== g?.id) return;
+  guildView.chat = lines;
+  paintChat();
+}
+
+function keepChatBottom() {
+  requestAnimationFrame(() => { el.guildChatLog.scrollTop = el.guildChatLog.scrollHeight; });
+}
+
+/** The room's lines: name over each bubble that is not mine, time in the corner. */
+function paintChat() {
+  const mine = userId();
+  const lines = guildView.chat;
+  if (!lines.length) {
+    const empty = document.createElement('p');
+    empty.className = 'muted guild-chat-empty';
+    empty.textContent = t('guildChatEmpty');
+    el.guildChatLog.replaceChildren(empty);
+    return;
+  }
+  let lastSender = null;
+  el.guildChatLog.replaceChildren(...lines.map((m) => {
+    const own = m.sender === mine;
+    const bubble = document.createElement('div');
+    bubble.className = `bubble${own ? ' is-mine' : ''}`;
+    if (!own && m.sender !== lastSender) {
+      const who = document.createElement('span');
+      who.className = 'bubble-who';
+      who.textContent = m.name;
+      bubble.appendChild(who);
+    }
+    lastSender = m.sender;
+    bubble.appendChild(document.createTextNode(m.body));
+    const when = document.createElement('span');
+    when.className = 'bubble-when';
+    when.textContent = whenText(m.createdAt);
+    bubble.appendChild(when);
+    return bubble;
+  }));
+  keepChatBottom();
+}
+
+async function sayInRoom(event) {
+  event.preventDefault();
+  const text = el.guildChatInput.value.trim();
+  if (!text || !state.guild) return;
+  el.guildChatInput.value = '';
+  try {
+    const line = await account.guildSay(text);
+    if (!guildView.chat.some((m) => m.id === line.id)) { guildView.chat.push(line); paintChat(); }
+    synth.playMessage();
+  } catch (error) {
+    el.guildChatInput.value = text;
+    toast(esc(guildError(error)), 'error');
+  }
+}
+
+/* --- the bank ----------------------------------------------------------------- */
+
+async function loadBank() {
+  const g = state.guild;
+  let deposits = [];
+  let left = guildView.takesLeft;
+  try { [deposits, left] = await Promise.all([account.guildBank(), account.guildBankTakesLeft().catch(() => left)]); } catch { return; }
+  if (state.tab !== 'guilds' || state.guild?.id !== g?.id) return;
+  guildView.bank = deposits;
+  guildView.takesLeft = Math.max(0, Number(left) || 0);
+  paintBank();
+}
+
+function paintBank() {
+  const deposits = guildView.bank;
+  el.guildBankNote.textContent = t('guildBankNote', { n: deposits.length, left: guildView.takesLeft });
+  if (!deposits.length) {
+    const empty = document.createElement('p');
+    empty.className = 'muted';
+    empty.textContent = t('guildBankEmpty');
+    el.guildBank.replaceChildren(empty);
+    return;
+  }
+  el.guildBank.replaceChildren(...deposits.map((d) => {
+    const card = d.card ?? {};
+    const rarity = rarityById(card.rarityId);
+    const row = document.createElement('div');
+    row.className = 'person guild-deposit';
+    row.innerHTML = `
+      <span class="pick-thumb" aria-hidden="true"></span>
+      <span class="person-copy"><b></b><span></span></span>
+      <span class="person-actions"></span>`;
+    if (card.thumbnail) row.querySelector('.pick-thumb').style.backgroundImage = `url("${card.thumbnail}")`;
+    row.querySelector('b').textContent = card.title ?? '?';
+    const line = row.querySelector('.person-copy span');
+    line.textContent = `${tx(rarity.name)} · ${t('guildBankFrom', { name: d.donorName })}`;
+    line.style.color = rarity.color;
+    const take = document.createElement('button');
+    take.type = 'button';
+    take.className = 'btn btn-sm btn-primary';
+    take.textContent = t('guildBankTake');
+    take.disabled = guildView.takesLeft <= 0;
+    press(take, { sound: null });
+    take.addEventListener('click', async () => {
+      take.disabled = true;
+      try {
+        const taken = await account.guildBankTake(d.id);
+        store.receiveCardEntry(state.collection, { ...taken, count: 1 });
+        guildView.bank = guildView.bank.filter((x) => x.id !== d.id);
+        guildView.takesLeft = Math.max(0, guildView.takesLeft - 1);
+        synth.playResolved();
+        toast(esc(t('guildBankTaken', { card: card.title ?? '?' })), 'ok');
+        paintBank();
+      } catch (error) {
+        toast(esc(guildError(error)), 'error');
+        synth.playDenied();
+        if (String(error?.message) === 'GONE') { guildView.bank = guildView.bank.filter((x) => x.id !== d.id); paintBank(); }
+        else take.disabled = false;
+      }
+    });
+    row.querySelector('.person-actions').appendChild(take);
+    return row;
+  }));
+}
+
+/** Putting a duplicate on the table: only cards with a spare copy are offered. */
+function openDonateSheet() {
+  const spare = store.allEntries(state.collection)
+    .filter((c) => !store.isLocked(c) && (c.count ?? 1) > 1)
+    .sort((a, b) => rarityRank(b.rarityId) - rarityRank(a.rarityId));
+  openSheet(t('guildBankDonateTitle'), (body) => {
+    const note = document.createElement('p');
+    note.className = 'muted';
+    note.textContent = spare.length ? t('guildBankDonateNote') : t('guildBankNoSpare');
+    body.appendChild(note);
+    if (!spare.length) return;
+    const list = document.createElement('div');
+    list.className = 'pick-list';
+    list.replaceChildren(...spare.map((card) => {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'pick-row';
+      row.innerHTML = `
+        <span class="pick-thumb"></span>
+        <span class="pick-copy"><b></b><span></span></span>
+        <span class="chip tabular">×${card.count}</span>`;
+      if (card.thumbnail) row.querySelector('.pick-thumb').style.backgroundImage = `url("${card.thumbnail}")`;
+      row.querySelector('b').textContent = card.title;
+      const tier = row.querySelector('.pick-copy span');
+      tier.textContent = tx(rarityById(card.rarityId).name);
+      tier.style.color = rarityById(card.rarityId).color;
+      press(row, { sound: null });
+      row.addEventListener('click', async () => {
+        row.disabled = true;
+        const snapshot = store.takeCardCopy(state.collection, card.key);
+        if (!snapshot) return;
+        try {
+          const deposit = await account.guildBankDonate(snapshot);
+          guildView.bank.unshift(deposit);
+          synth.playResolved();
+          toast(esc(t('guildBankDonated', { card: card.title })), 'ok');
+          live.sheet.hide();
+          paintBank();
+        } catch (error) {
+          // The card comes home when the table would not take it.
+          store.receiveCardEntry(state.collection, snapshot);
+          toast(esc(guildError(error)), 'error');
+          synth.playDenied();
+          row.disabled = false;
+        }
+      });
+      return row;
+    }));
+    body.appendChild(list);
+  });
+}
+
 /** The forms and the buttons, bound once. */
 function wire() {
   if (wired) return;
@@ -478,6 +854,12 @@ function wire() {
     }
     el.guildDelete.disabled = false;
   });
+  press(el.guildGoalClaim, { sound: null });
+  el.guildGoalClaim.addEventListener('click', claimGoal);
+  el.guildChatForm.addEventListener('submit', sayInRoom);
+  press(el.guildBankDonate, { sound: null });
+  el.guildBankDonate.addEventListener('click', () => { synth.playTap(); openDonateSheet(); });
+  on('guild-goal', () => { if (state.tab === 'guilds' && state.guild) loadGoal(); });
   on('score', boardMoved);
   // The heartbeat and the live wire both end at the same list; the screen
   // takes what they found rather than asking the server a second time.
@@ -553,6 +935,7 @@ function boardMoved() {
     loadGuildBoard({ quiet: true });
     if (!state.guild) return;
     paintScores();
+    loadMatch();
     const was = state.guild;
     let fresh = was;
     try { fresh = await account.myGuild(); } catch { return; }
@@ -570,6 +953,6 @@ function watchBoard() {
   if (feed) return;
   feed = account.openBoardFeed(boardMoved);
   const tick = setInterval(() => {
-    if (state.tab !== 'guilds') { clearInterval(tick); feed?.close(); feed = null; clearTimeout(repaint); }
+    if (state.tab !== 'guilds') { clearInterval(tick); feed?.close(); feed = null; room?.close(); room = null; clearTimeout(repaint); }
   }, 1000);
 }

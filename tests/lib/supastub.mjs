@@ -32,6 +32,14 @@ export const newDatabase = () => ({
   guilds: [],               // { id, name, tag, about, owner, members, created_at }
   guildMembers: [],         // { user_id, guild_id, joined_at }
   guildInvites: [],         // { id, guild_id, inviter, invitee, created_at }
+  guildMessages: [],        // { id, guild_id, sender, sender_name, body, created_at }
+  guildGoals: [],           // { guild_id, week, kind, target, progress, members, done_at }
+  guildGoalClaims: [],      // { guild_id, week, user_id }
+  guildBank: [],            // { id, guild_id, donor, donor_name, card, created_at }
+  guildBankTakes: [],       // { user_id, day, n }
+  guildMatches: [],         // { week, guild_a, guild_b, score_a, score_b }
+  guildMatchClaims: [],     // { week, user_id }
+  goalKind: null,           // a suite may pin the week's goal kind
   tokens: new Map(),        // access_token -> user id
   seq: 0
 });
@@ -149,6 +157,9 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
     if (table === 'friendships') return row.requester === user || row.addressee === user;
     if (table === 'trades') return row.proposer === user || row.recipient === user;
     if (table === 'guild_invites') return row.inviter === user || row.invitee === user;
+    if (table === 'guild_messages' || table === 'guild_bank' || table === 'guild_goals') {
+      return db.guildMembers.some((m) => m.user_id === user && m.guild_id === row.guild_id);
+    }
     return true;   // the board is public
   };
   const bindingMatches = (binding, table, type, row) => {
@@ -336,6 +347,34 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
       const page = Number(body.p_page) || 0;
       return json(route, all.slice(page * 20, page * 20 + 20).map((r, i) => ({ rank: page * 20 + i + 1, user_id: r.user_id, username: r.username, score: r.score })));
     }
+    /* -- the hall: schema V10 -- */
+    const weekKey = (at = Date.now()) => String(Math.floor((Math.floor(at / 86400000) + 4) / 7));
+    const GOAL_BASE = { open: 12, points: 1500, new: 15, wikdle: 3 };
+    const goalEnsure = (g) => {
+      const wk = weekKey();
+      const n = Math.max(1, db.guilds.find((x) => x.id === g)?.members ?? 1);
+      let goal = db.guildGoals.find((x) => x.guild_id === g && x.week === wk);
+      if (goal) {
+        if (n > goal.members && !goal.done_at) {
+          goal.members = n;
+          goal.target = Math.max(goal.progress, Math.round(GOAL_BASE[goal.kind] * (1 + 0.5 * (n - 1))));
+        }
+        return goal;
+      }
+      const kind = db.goalKind ?? ['open', 'points', 'new', 'wikdle'][(g.charCodeAt(0) + Number(wk)) % 4];
+      goal = { guild_id: g, week: wk, kind, target: Math.round(GOAL_BASE[kind] * (1 + 0.5 * (n - 1))), progress: 0, members: n, done_at: null };
+      db.guildGoals.push(goal);
+      return goal;
+    };
+    db.goalBump = (g, kind, amount) => {
+      if (!g || !(amount > 0)) return;
+      const goal = goalEnsure(g);
+      if (goal.kind !== kind || goal.done_at) return;
+      goal.progress = Math.min(goal.target, goal.progress + amount);
+      if (goal.progress >= goal.target) goal.done_at = new Date().toISOString();
+      db.emitChange?.('guild_goals', 'UPDATE', { ...goal });
+    };
+    const weeklyScore = (g) => guildTotals().find((x) => x.id === g)?.score ?? 0;
     if (path === 'rpc/submit_score') {
       // The server's rule: one row per game and day; a round replaces the
       // day's when it beats it (Wikdle counts once), never above the game's
@@ -346,6 +385,7 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
       db.scores ??= [];
       const username = db.profiles.get(me)?.username ?? 'someone';
       const found = db.scores.find((r) => r.user_id === me && r.game === body.p_game && r.day === body.p_day);
+      const delta = found ? body.p_points - found.score : body.p_points;
       if (found) {
         if (body.p_game === 'wikdle' || body.p_points <= found.score) return json(route, null, 204);
         found.score = body.p_points;
@@ -358,6 +398,7 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
       }
       const g = db.guildMembers.find((m) => m.user_id === me)?.guild_id;
       if (g) for (const table of ['guild_daily', 'guild_weekly', 'guild_alltime']) db.emitChange?.(table, 'UPDATE', { guild_id: g, updated_at: new Date().toISOString() });
+      if (g) db.goalBump(g, 'points', delta);
       return json(route, null, 204);
     }
     if (path === 'rpc/my_rank') {
@@ -474,6 +515,111 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
     if (path === 'rpc/decline_guild_invite') {
       db.guildInvites = db.guildInvites.filter((i) => !(i.id === body.p_invite && i.invitee === me));
       return json(route, null, 204);
+    }
+    if (path === 'rpc/guild_say') {
+      const g = guildOf(me);
+      if (!g) return fail(route, 'NOT_IN_GUILD', 400);
+      const text = String(body.p_body ?? '').trim().slice(0, 500);
+      if (!text) return fail(route, 'violates check constraint', 400);
+      const row = { id: uuid(), guild_id: g, sender: me, sender_name: db.profiles.get(me)?.username ?? '', body: text, created_at: new Date().toISOString() };
+      db.guildMessages.push(row);
+      db.emitChange?.('guild_messages', 'INSERT', row);
+      return json(route, row);
+    }
+    if (path === 'rpc/guild_chat') {
+      const g = guildOf(me);
+      return json(route, db.guildMessages.filter((m) => m.guild_id === g).slice(-60));
+    }
+    if (path === 'rpc/guild_goal') {
+      const g = guildOf(me);
+      if (!g) return json(route, []);
+      const goal = goalEnsure(g);
+      return json(route, [{ ...goal, claimed: db.guildGoalClaims.some((c) => c.guild_id === g && c.week === goal.week && c.user_id === me), reward: 900 }]);
+    }
+    if (path === 'rpc/guild_goal_add') {
+      if (!['open', 'new', 'wikdle'].includes(body.p_kind)) return fail(route, 'not a client kind', 400);
+      db.goalBump(guildOf(me), body.p_kind, Math.min(100, Math.max(0, Number(body.p_amount) || 0)));
+      return json(route, null, 204);
+    }
+    if (path === 'rpc/guild_goal_claim') {
+      const g = guildOf(me);
+      if (!g) return fail(route, 'NOT_IN_GUILD', 400);
+      const goal = db.guildGoals.find((x) => x.guild_id === g && x.week === weekKey());
+      if (!goal?.done_at) return fail(route, 'NOT_DONE', 400);
+      if (db.guildGoalClaims.some((c) => c.guild_id === g && c.week === goal.week && c.user_id === me)) return fail(route, 'CLAIMED', 400);
+      db.guildGoalClaims.push({ guild_id: g, week: goal.week, user_id: me });
+      return json(route, 900);
+    }
+    if (path === 'rpc/guild_bank') {
+      const g = guildOf(me);
+      return json(route, db.guildBank.filter((d) => d.guild_id === g).slice().reverse().slice(0, 200));
+    }
+    if (path === 'rpc/guild_bank_donate') {
+      const g = guildOf(me);
+      if (!g) return fail(route, 'NOT_IN_GUILD', 400);
+      const card = body.p_card;
+      if (!card?.key || !card?.title) return fail(route, 'BAD_CARD', 400);
+      if (db.guildBank.filter((d) => d.guild_id === g).length >= 200) return fail(route, 'BANK_FULL', 400);
+      const row = { id: uuid(), guild_id: g, donor: me, donor_name: db.profiles.get(me)?.username ?? '', card, created_at: new Date().toISOString() };
+      db.guildBank.push(row);
+      db.emitChange?.('guild_bank', 'INSERT', row);
+      return json(route, row);
+    }
+    if (path === 'rpc/guild_bank_take') {
+      const g = guildOf(me);
+      if (!g) return fail(route, 'NOT_IN_GUILD', 400);
+      const day = new Date().toISOString().slice(0, 10);
+      const takes = db.guildBankTakes.find((x) => x.user_id === me && x.day === day);
+      if ((takes?.n ?? 0) >= 3) return fail(route, 'TAKE_LIMIT', 400);
+      const at = db.guildBank.findIndex((d) => d.id === body.p_id && d.guild_id === g);
+      if (at < 0) return fail(route, 'GONE', 400);
+      const [taken] = db.guildBank.splice(at, 1);
+      if (takes) takes.n += 1; else db.guildBankTakes.push({ user_id: me, day, n: 1 });
+      db.emitChange?.('guild_bank', 'DELETE', null, taken);
+      return json(route, taken.card);
+    }
+    if (path === 'rpc/guild_bank_takes_left') {
+      const day = new Date().toISOString().slice(0, 10);
+      return json(route, 3 - (db.guildBankTakes.find((x) => x.user_id === me && x.day === day)?.n ?? 0));
+    }
+    if (path === 'rpc/guild_match') {
+      const g = guildOf(me);
+      if (!g) return json(route, []);
+      const wk = weekKey();
+      const prev = weekKey(Date.now() - 7 * 86400000);
+      let m = db.guildMatches.find((x) => x.week === wk && (x.guild_a === g || x.guild_b === g));
+      if (!m) {
+        const mine = weeklyScore(g);
+        const other = db.guilds.filter((x) => x.id !== g && !db.guildMatches.some((y) => y.week === wk && (y.guild_a === x.id || y.guild_b === x.id)))
+          .sort((a, b) => Math.abs(weeklyScore(a.id) - mine) - Math.abs(weeklyScore(b.id) - mine) || b.members - a.members)[0];
+        if (other) { m = { week: wk, guild_a: g, guild_b: other.id, score_a: null, score_b: null }; db.guildMatches.push(m); }
+      }
+      const other = m ? (m.guild_a === g ? m.guild_b : m.guild_a) : null;
+      const og = db.guilds.find((x) => x.id === other);
+      const lm = db.guildMatches.find((x) => x.week === prev && (x.guild_a === g || x.guild_b === g));
+      const lo = lm ? (lm.guild_a === g ? lm.guild_b : lm.guild_a) : null;
+      const lmine = lm ? (lm.guild_a === g ? lm.score_a : lm.score_b) : null;
+      const ltheirs = lm ? (lm.guild_a === g ? lm.score_b : lm.score_a) : null;
+      return json(route, [{
+        week: wk, opponent_id: other, opponent_name: og?.name ?? null, opponent_tag: og?.tag ?? null, opponent_members: og?.members ?? null,
+        my_score: weeklyScore(g), their_score: other ? weeklyScore(other) : 0,
+        last_week: lm?.week ?? null, last_opponent_name: db.guilds.find((x) => x.id === lo)?.name ?? null,
+        last_my_score: lmine, last_their_score: ltheirs,
+        last_won: lm && lm.score_a != null ? lmine > ltheirs : null,
+        last_claimed: db.guildMatchClaims.some((c) => c.week === prev && c.user_id === me)
+      }]);
+    }
+    if (path === 'rpc/guild_match_claim') {
+      const g = guildOf(me);
+      if (!g) return fail(route, 'NOT_IN_GUILD', 400);
+      const prev = weekKey(Date.now() - 7 * 86400000);
+      const lm = db.guildMatches.find((x) => x.week === prev && (x.guild_a === g || x.guild_b === g));
+      if (!lm || lm.score_a == null) return fail(route, 'NOT_DONE', 400);
+      const won = lm.guild_a === g ? lm.score_a > lm.score_b : lm.score_b > lm.score_a;
+      if (!won) return fail(route, 'NOT_DONE', 400);
+      if (db.guildMatchClaims.some((c) => c.week === prev && c.user_id === me)) return fail(route, 'CLAIMED', 400);
+      db.guildMatchClaims.push({ week: prev, user_id: me });
+      return json(route, 750);
     }
     if (path === 'rpc/search_guilds') {
       const term = String(body.p_term ?? '').toLowerCase();

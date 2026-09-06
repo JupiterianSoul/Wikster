@@ -525,6 +525,20 @@ last one out closes the guild, and the founder can close it outright with
 cascade from. The guild leaderboard is painted by the same code as the
 players' (`boardNode` in `src/app/quests.js`) and moves live.
 
+The hall (schema V10) is what happens inside a guild. `guild_messages`
+is a room on its own Realtime channel (`openGuildRoom`), opened while the
+guild's screen is up and closed when it is left. `guild_goals` holds one
+shared target a week per guild, picked from the guild id and the week key
+so it cannot be re-rolled, and sized for the roster with a slope that makes
+every member cheaper per head; the points kind is moved by the score
+trigger itself and the other kinds by `guild_goal_add`, batched on the
+client in `src/guildgoal.js` off the same reports the daily quests get.
+`guild_bank` is a table of donated card entries anyone in the guild may
+take, three a day each, and `guild_matches` pairs a guild with the nearest
+unpaired guild on the weekly board the first time anyone in it looks;
+`week_turn()` writes the final scores down before pg_cron empties the
+weekly windows, so last week's win is still there to be paid for.
+
 An invitation is an offer, not a membership: `invite_to_guild()` writes a
 row in `guild_invites` and `accept_guild_invite()` is where the room is
 checked for space and the guest for a guild of their own, so nothing that

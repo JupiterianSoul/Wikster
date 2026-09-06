@@ -15,6 +15,10 @@ import { paintDrawerLinks, pushNote } from './drawer.js';
 import { gainBooster } from './open.js';
 import { updateBadges } from './regalia.js';
 import { signedIn, userId } from './gate.js';
+import { guildGoalSetup, reportGuildGoal } from '../guildgoal.js';
+
+// The guild's weekly goal hears the same reports the quests do.
+guildGoalSetup(() => signedIn() && Boolean(state.guild));
 
 /* --- the arcade: minigames, quests and the leaderboard ------------------------------------------------------------ */
 
@@ -29,6 +33,7 @@ export function questUserKey() {
  */
 
 export function reportQuest(metric, detail = {}) {
+  try { reportGuildGoal(metric, detail); } catch { /* the goal is not the game */ }
   try {
     const done = quests.track(metric, detail, questUserKey());
     for (const id of done) {

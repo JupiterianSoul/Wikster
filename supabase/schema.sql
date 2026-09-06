@@ -1447,3 +1447,409 @@ grant execute on function public.delete_guild() to authenticated;
 do $$ begin
   alter publication supabase_realtime add table public.guild_invites;
 exception when others then null; end $$;
+
+-- ============================================================================
+-- V10 - THE GUILD HALL
+-- ----------------------------------------------------------------------------
+-- A guild was a name, a tag and a board. This is what happens inside it.
+--
+--   guild_messages   a room the whole roster talks in
+--   guild_goals      one shared target a week, picked for the guild, that
+--                    every member chips at and every member is paid for
+--   guild_bank       duplicates put on the table for anyone in the guild
+--   guild_matches    a weekly match against the nearest guild on the board
+--
+-- The week is the leaderboard's week: Sunday 00:00 UTC to Sunday 00:00 UTC,
+-- which is when the weekly windows are emptied. week_key names one.
+-- ============================================================================
+
+create or replace function public.week_key(p_at timestamptz default now())
+returns text language sql immutable as $$
+  select (((extract(epoch from p_at)::bigint / 86400) + 4) / 7)::text;
+$$;
+
+-- Whether the caller is in a guild, and which.
+create or replace function public.my_guild_id()
+returns uuid language sql stable security definer set search_path = public as $$
+  select guild_id from guild_members where user_id = auth.uid();
+$$;
+
+-- --- the room ------------------------------------------------------------------
+
+create table if not exists public.guild_messages (
+  id          uuid primary key default gen_random_uuid(),
+  guild_id    uuid not null references public.guilds on delete cascade,
+  sender      uuid not null references auth.users on delete cascade,
+  sender_name text not null default '',
+  body        text not null check (char_length(body) between 1 and 500),
+  created_at  timestamptz not null default now()
+);
+create index if not exists guild_messages_guild_idx on public.guild_messages (guild_id, created_at desc);
+alter table public.guild_messages enable row level security;
+drop policy if exists "members read their guild's room" on public.guild_messages;
+create policy "members read their guild's room"
+  on public.guild_messages for select to authenticated
+  using (exists (select 1 from guild_members m where m.user_id = auth.uid() and m.guild_id = guild_messages.guild_id));
+-- Writes go through guild_say, which stamps the name.
+
+create or replace function public.guild_say(p_body text)
+returns public.guild_messages language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); g uuid; row_out guild_messages;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  g := my_guild_id();
+  if g is null then raise exception 'NOT_IN_GUILD'; end if;
+  insert into guild_messages (guild_id, sender, sender_name, body)
+    values (g, me, coalesce((select username from profiles where id = me), ''), left(trim(p_body), 500))
+    returning * into row_out;
+  return row_out;
+end $$;
+
+-- The last sixty lines, oldest first.
+create or replace function public.guild_chat()
+returns setof public.guild_messages language sql stable security definer set search_path = public as $$
+  select * from (
+    select m.* from guild_messages m where m.guild_id = my_guild_id() order by m.created_at desc limit 60
+  ) recent order by created_at asc;
+$$;
+
+-- --- the weekly goal -----------------------------------------------------------
+--
+-- One goal a week per guild, chosen from the guild and the week so it cannot
+-- be re-rolled. The target grows with the roster, but slower than the roster
+-- does: a guild of ten shares a target five and a half times a guild of one,
+-- so every member who joins makes it easier per head. That is the point.
+
+create table if not exists public.guild_goals (
+  guild_id   uuid not null references public.guilds on delete cascade,
+  week       text not null,
+  kind       text not null check (kind in ('open', 'points', 'new', 'wikdle')),
+  target     integer not null,
+  progress   integer not null default 0,
+  members    integer not null default 1,
+  done_at    timestamptz,
+  created_at timestamptz not null default now(),
+  primary key (guild_id, week)
+);
+create table if not exists public.guild_goal_claims (
+  guild_id   uuid not null,
+  week       text not null,
+  user_id    uuid not null references auth.users on delete cascade,
+  claimed_at timestamptz not null default now(),
+  primary key (guild_id, week, user_id),
+  foreign key (guild_id, week) references public.guild_goals on delete cascade
+);
+alter table public.guild_goals enable row level security;
+alter table public.guild_goal_claims enable row level security;
+drop policy if exists "members read their guild's goal" on public.guild_goals;
+create policy "members read their guild's goal"
+  on public.guild_goals for select to authenticated
+  using (exists (select 1 from guild_members m where m.user_id = auth.uid() and m.guild_id = guild_goals.guild_id));
+drop policy if exists "you read your own goal claims" on public.guild_goal_claims;
+create policy "you read your own goal claims"
+  on public.guild_goal_claims for select to authenticated using (auth.uid() = user_id);
+
+create or replace function public.guild_goal_base(p_kind text)
+returns integer language sql immutable as $$
+  select case p_kind when 'open' then 12 when 'points' then 1500 when 'new' then 15 when 'wikdle' then 3 else 10 end;
+$$;
+
+-- The week's goal for a guild, made now if it is not there yet.
+create or replace function public.guild_goal_ensure(p_guild uuid)
+returns public.guild_goals language plpgsql security definer set search_path = public as $$
+declare wk text := week_key(); row_out guild_goals; n integer; k text; kinds text[] := array['open', 'points', 'new', 'wikdle'];
+begin
+  select greatest(1, members) into n from guilds where id = p_guild;
+  select * into row_out from guild_goals where guild_id = p_guild and week = wk;
+  if row_out.guild_id is not null then
+    -- The roster grew since the week began: the target grows with it, so a
+    -- guild cannot fill up on the last day for a goal one member met alone.
+    if n > row_out.members and row_out.done_at is null then
+      update guild_goals set members = n, target = greatest(progress, round(guild_goal_base(kind) * (1 + 0.5 * (n - 1)))::integer)
+        where guild_id = p_guild and week = wk returning * into row_out;
+    end if;
+    return row_out;
+  end if;
+  k := kinds[1 + (abs(hashtext(p_guild::text || ':' || wk)) % 4)];
+  insert into guild_goals (guild_id, week, kind, target, members)
+    values (p_guild, wk, k, round(guild_goal_base(k) * (1 + 0.5 * (n - 1)))::integer, n)
+    on conflict (guild_id, week) do nothing;
+  select * into row_out from guild_goals where guild_id = p_guild and week = wk;
+  return row_out;
+end $$;
+
+-- Progress lands here from the client (a booster opened, a new card, a
+-- Wikdle solved) and from the score trigger (points). Never past the target.
+create or replace function public.guild_goal_bump(p_guild uuid, p_kind text, p_amount integer)
+returns void language plpgsql security definer set search_path = public as $$
+declare goal guild_goals;
+begin
+  if p_guild is null or p_amount is null or p_amount <= 0 then return; end if;
+  goal := guild_goal_ensure(p_guild);
+  if goal.kind <> p_kind or goal.done_at is not null then return; end if;
+  update guild_goals set progress = least(target, progress + p_amount),
+    done_at = case when progress + p_amount >= target then now() else null end
+    where guild_id = p_guild and week = goal.week;
+end $$;
+
+create or replace function public.guild_goal_add(p_kind text, p_amount integer)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'sign in'; end if;
+  if p_kind not in ('open', 'new', 'wikdle') then raise exception 'not a client kind'; end if;
+  perform guild_goal_bump(my_guild_id(), p_kind, least(100, greatest(0, p_amount)));
+end $$;
+
+-- What the screen shows: the goal (made now if the week has not been looked
+-- at yet), and whether I have been paid for it.
+create or replace function public.guild_goal()
+returns table (week text, kind text, target integer, progress integer, members integer, done_at timestamptz, claimed boolean, reward integer)
+language plpgsql security definer set search_path = public as $$
+declare g uuid := my_guild_id(); goal guild_goals;
+begin
+  if g is null then return; end if;
+  goal := guild_goal_ensure(g);
+  if goal.guild_id is null then return; end if;
+  return query select goal.week, goal.kind, goal.target, goal.progress, goal.members, goal.done_at,
+    exists (select 1 from guild_goal_claims c where c.guild_id = g and c.week = goal.week and c.user_id = auth.uid()),
+    900;
+end $$;
+
+-- Paid once per member, once the target is met, and only to members.
+create or replace function public.guild_goal_claim()
+returns integer language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); g uuid; goal guild_goals;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  g := my_guild_id();
+  if g is null then raise exception 'NOT_IN_GUILD'; end if;
+  select * into goal from guild_goals where guild_id = g and week = week_key();
+  if goal.guild_id is null or goal.done_at is null then raise exception 'NOT_DONE'; end if;
+  if exists (select 1 from guild_goal_claims where guild_id = g and week = goal.week and user_id = me) then raise exception 'CLAIMED'; end if;
+  insert into guild_goal_claims (guild_id, week, user_id) values (g, goal.week, me);
+  return 900;
+end $$;
+
+-- Points count for the goal too, from the same trigger that fills the windows.
+create or replace function public.guild_windows_add(p_user uuid, p_delta integer)
+returns void language plpgsql security definer set search_path = public as $$
+declare g uuid;
+begin
+  if p_delta = 0 then return; end if;
+  select guild_id into g from guild_members where user_id = p_user;
+  if g is null then return; end if;
+  insert into guild_daily (guild_id, score) values (g, greatest(0, p_delta))
+    on conflict (guild_id) do update set score = greatest(0, guild_daily.score + p_delta), updated_at = now();
+  insert into guild_weekly (guild_id, score) values (g, greatest(0, p_delta))
+    on conflict (guild_id) do update set score = greatest(0, guild_weekly.score + p_delta), updated_at = now();
+  insert into guild_alltime (guild_id, score) values (g, greatest(0, p_delta))
+    on conflict (guild_id) do update set score = greatest(0, guild_alltime.score + p_delta), updated_at = now();
+  if p_delta > 0 then perform guild_goal_bump(g, 'points', p_delta); end if;
+end $$;
+
+-- --- the bank ------------------------------------------------------------------
+--
+-- A card put on the table is anyone's to take, three a day each, so the pile
+-- of duplicates in every collection turns into something to talk about.
+
+create table if not exists public.guild_bank (
+  id         uuid primary key default gen_random_uuid(),
+  guild_id   uuid not null references public.guilds on delete cascade,
+  donor      uuid not null references auth.users on delete cascade,
+  donor_name text not null default '',
+  card       jsonb not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists guild_bank_guild_idx on public.guild_bank (guild_id, created_at desc);
+create table if not exists public.guild_bank_takes (
+  user_id uuid not null references auth.users on delete cascade,
+  day     date not null,
+  n       integer not null default 0,
+  primary key (user_id, day)
+);
+alter table public.guild_bank enable row level security;
+alter table public.guild_bank_takes enable row level security;
+drop policy if exists "members see their guild's bank" on public.guild_bank;
+create policy "members see their guild's bank"
+  on public.guild_bank for select to authenticated
+  using (exists (select 1 from guild_members m where m.user_id = auth.uid() and m.guild_id = guild_bank.guild_id));
+drop policy if exists "you see your own takes" on public.guild_bank_takes;
+create policy "you see your own takes"
+  on public.guild_bank_takes for select to authenticated using (auth.uid() = user_id);
+
+create or replace function public.guild_bank()
+returns setof public.guild_bank language sql stable security definer set search_path = public as $$
+  select * from guild_bank where guild_id = my_guild_id() order by created_at desc limit 200;
+$$;
+
+create or replace function public.guild_bank_donate(p_card jsonb)
+returns public.guild_bank language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); g uuid; row_out guild_bank;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  g := my_guild_id();
+  if g is null then raise exception 'NOT_IN_GUILD'; end if;
+  if p_card is null or p_card->>'key' is null or p_card->>'title' is null then raise exception 'BAD_CARD'; end if;
+  if (select count(*) from guild_bank where guild_id = g) >= 200 then raise exception 'BANK_FULL'; end if;
+  insert into guild_bank (guild_id, donor, donor_name, card)
+    values (g, me, coalesce((select username from profiles where id = me), ''), p_card)
+    returning * into row_out;
+  return row_out;
+end $$;
+
+create or replace function public.guild_bank_take(p_id uuid)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); g uuid; taken guild_bank; today date := (now() at time zone 'utc')::date; n integer;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  g := my_guild_id();
+  if g is null then raise exception 'NOT_IN_GUILD'; end if;
+  select coalesce(t.n, 0) into n from guild_bank_takes t where t.user_id = me and t.day = today;
+  if coalesce(n, 0) >= 3 then raise exception 'TAKE_LIMIT'; end if;
+  delete from guild_bank where id = p_id and guild_id = g returning * into taken;
+  if taken.id is null then raise exception 'GONE'; end if;
+  insert into guild_bank_takes (user_id, day, n) values (me, today, 1)
+    on conflict (user_id, day) do update set n = guild_bank_takes.n + 1;
+  return taken.card;
+end $$;
+
+-- How many more a member may take today.
+create or replace function public.guild_bank_takes_left()
+returns integer language sql stable security definer set search_path = public as $$
+  select 3 - coalesce((select n from guild_bank_takes where user_id = auth.uid() and day = (now() at time zone 'utc')::date), 0);
+$$;
+
+-- --- guild versus guild ----------------------------------------------------------
+--
+-- Each week a guild is paired with the nearest guild on the weekly board that
+-- has no match yet, the first time anyone in it looks. The pair holds for the
+-- week; the scores are the weekly window, live. At the turn of the week the
+-- final scores are written down here before the window is emptied, so last
+-- week's result is still there to be paid for.
+
+create table if not exists public.guild_matches (
+  week       text not null,
+  guild_a    uuid not null references public.guilds on delete cascade,
+  guild_b    uuid not null references public.guilds on delete cascade,
+  score_a    bigint,
+  score_b    bigint,
+  created_at timestamptz not null default now(),
+  primary key (week, guild_a),
+  unique (week, guild_b)
+);
+create table if not exists public.guild_match_claims (
+  week       text not null,
+  user_id    uuid not null references auth.users on delete cascade,
+  claimed_at timestamptz not null default now(),
+  primary key (week, user_id)
+);
+alter table public.guild_matches enable row level security;
+alter table public.guild_match_claims enable row level security;
+drop policy if exists "matches are public" on public.guild_matches;
+create policy "matches are public" on public.guild_matches for select to authenticated using (true);
+drop policy if exists "you see your own match claims" on public.guild_match_claims;
+create policy "you see your own match claims"
+  on public.guild_match_claims for select to authenticated using (auth.uid() = user_id);
+
+create or replace function public.guild_match()
+returns table (week text, opponent_id uuid, opponent_name text, opponent_tag text, opponent_members integer,
+               my_score bigint, their_score bigint,
+               last_week text, last_opponent_name text, last_my_score bigint, last_their_score bigint, last_won boolean, last_claimed boolean)
+language plpgsql security definer set search_path = public as $$
+declare g uuid := my_guild_id(); wk text := week_key(); prev text := week_key(now() - interval '7 days');
+        other uuid; m guild_matches; lm guild_matches; last_other uuid;
+begin
+  if g is null then return; end if;
+  select * into m from guild_matches gm where gm.week = wk and (gm.guild_a = g or gm.guild_b = g);
+  if m.week is null then
+    -- The nearest guild by this week's score that nobody has claimed yet.
+    select x.id into other from guilds x
+      left join guild_weekly w on w.guild_id = x.id
+      where x.id <> g
+        and not exists (select 1 from guild_matches gm where gm.week = wk and (gm.guild_a = x.id or gm.guild_b = x.id))
+      order by abs(coalesce(w.score, 0) - coalesce((select score from guild_weekly where guild_id = g), 0)) asc, x.members desc, x.created_at asc
+      limit 1;
+    if other is not null then
+      begin
+        insert into guild_matches (week, guild_a, guild_b) values (wk, g, other);
+      exception when unique_violation then null; end;
+      select * into m from guild_matches gm where gm.week = wk and (gm.guild_a = g or gm.guild_b = g);
+    end if;
+  end if;
+  other := case when m.guild_a = g then m.guild_b when m.guild_b = g then m.guild_a else null end;
+  select * into lm from guild_matches gm where gm.week = prev and (gm.guild_a = g or gm.guild_b = g);
+  last_other := case when lm.guild_a = g then lm.guild_b when lm.guild_b = g then lm.guild_a else null end;
+  return query select wk, other,
+    (select name from guilds where id = other), (select tag from guilds where id = other), (select members from guilds where id = other),
+    coalesce((select score from guild_weekly where guild_id = g), 0)::bigint,
+    coalesce((select score from guild_weekly where guild_id = other), 0)::bigint,
+    lm.week, (select name from guilds where id = last_other),
+    case when lm.guild_a = g then lm.score_a else lm.score_b end,
+    case when lm.guild_a = g then lm.score_b else lm.score_a end,
+    case when lm.week is null or lm.score_a is null then null
+         else (case when lm.guild_a = g then lm.score_a > lm.score_b else lm.score_b > lm.score_a end) end,
+    exists (select 1 from guild_match_claims c where c.week = prev and c.user_id = auth.uid());
+end $$;
+
+create or replace function public.guild_match_claim()
+returns integer language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); g uuid; prev text := week_key(now() - interval '7 days'); lm guild_matches; won boolean;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  g := my_guild_id();
+  if g is null then raise exception 'NOT_IN_GUILD'; end if;
+  select * into lm from guild_matches where week = prev and (guild_a = g or guild_b = g);
+  if lm.week is null or lm.score_a is null then raise exception 'NOT_DONE'; end if;
+  won := case when lm.guild_a = g then lm.score_a > lm.score_b else lm.score_b > lm.score_a end;
+  if not won then raise exception 'NOT_DONE'; end if;
+  if exists (select 1 from guild_match_claims where week = prev and user_id = me) then raise exception 'CLAIMED'; end if;
+  insert into guild_match_claims (week, user_id) values (prev, me);
+  return 750;
+end $$;
+
+-- The turn of the week: the matches are settled from the window before the
+-- window is emptied. pg_cron calls this instead of truncating on its own.
+create or replace function public.week_turn()
+returns void language plpgsql security definer set search_path = public as $$
+declare ending text := week_key(now() - interval '1 hour');
+begin
+  update guild_matches gm set
+    score_a = coalesce((select score from guild_weekly where guild_id = gm.guild_a), 0),
+    score_b = coalesce((select score from guild_weekly where guild_id = gm.guild_b), 0)
+    where gm.week = ending and gm.score_a is null;
+  truncate table public.leaderboard_weekly;
+  truncate table public.guild_weekly;
+end $$;
+
+grant execute on function public.week_key(timestamptz) to authenticated;
+grant execute on function public.my_guild_id() to authenticated;
+grant execute on function public.guild_say(text) to authenticated;
+grant execute on function public.guild_chat() to authenticated;
+grant execute on function public.guild_goal() to authenticated;
+grant execute on function public.guild_goal_add(text, integer) to authenticated;
+grant execute on function public.guild_goal_claim() to authenticated;
+grant execute on function public.guild_bank() to authenticated;
+grant execute on function public.guild_bank_donate(jsonb) to authenticated;
+grant execute on function public.guild_bank_take(uuid) to authenticated;
+grant execute on function public.guild_bank_takes_left() to authenticated;
+grant execute on function public.guild_match() to authenticated;
+grant execute on function public.guild_match_claim() to authenticated;
+revoke all on function public.guild_goal_ensure(uuid) from public;
+revoke all on function public.guild_goal_bump(uuid, text, integer) from public;
+revoke all on function public.week_turn() from public;
+
+select cron.unschedule(jobid) from cron.job where jobname = 'wikster-weekly-flush';
+select cron.schedule('wikster-weekly-flush', '0 0 * * 0', $$select public.week_turn()$$);
+
+do $$ begin
+  alter publication supabase_realtime add table public.guild_messages;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.guild_bank;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.guild_goals;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.guild_matches;
+exception when others then null; end $$;

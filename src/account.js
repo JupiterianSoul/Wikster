@@ -30,7 +30,7 @@ export {
   subscribeAuctions,
   openChatChannel
 } from './account/market.js';
-export { openSocialFeed, openPresence, openBoardFeed, openGuildInviteFeed } from './account/realtime.js';
+export { openSocialFeed, openPresence, openBoardFeed, openGuildInviteFeed, openGuildRoom } from './account/realtime.js';
 export { getProfile, ensureProfile, profileForSession, publishStats } from './account/profile.js';
 export {
   remoteBuildStamp,
@@ -98,5 +98,16 @@ export {
   searchGuilds,
   guildRoster,
   guildBoard,
-  myGuildRank
+  myGuildRank,
+  guildChat,
+  guildSay,
+  guildGoal,
+  guildGoalAdd,
+  guildGoalClaim,
+  guildBank,
+  guildBankDonate,
+  guildBankTake,
+  guildBankTakesLeft,
+  guildMatch,
+  guildMatchClaim
 } from './account/guilds.js';

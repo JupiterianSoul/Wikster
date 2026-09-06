@@ -455,8 +455,47 @@
                 <button id="guild-delete" class="btn btn-ghost btn-sm" type="button" hidden></button>
               </div>
             </div>
-            <div class="section-head"><h3 class="label" id="guild-roster-label"></h3></div>
-            <div class="people" id="guild-roster"></div>
+            <!-- The week's shared target, and the guild the roster is up against. -->
+            <div class="guild-goal panel" id="guild-goal">
+              <div class="guild-goal-head">
+                <span class="label" id="guild-goal-label"></span>
+                <span class="guild-goal-left tabular" id="guild-goal-left"></span>
+              </div>
+              <p class="guild-goal-text" id="guild-goal-text"></p>
+              <div class="guild-goal-bar" id="guild-goal-bar"></div>
+              <div class="guild-goal-foot">
+                <span class="tabular" id="guild-goal-count"></span>
+                <span class="guild-goal-reward" id="guild-goal-reward"></span>
+                <button id="guild-goal-claim" class="btn btn-primary btn-sm" type="button" hidden></button>
+              </div>
+            </div>
+            <div class="guild-match panel" id="guild-match">
+              <div class="guild-goal-head">
+                <span class="label" id="guild-match-label"></span>
+                <span class="guild-goal-left tabular" id="guild-match-left"></span>
+              </div>
+              <div class="guild-versus" id="guild-versus"></div>
+              <p class="guild-match-last" id="guild-match-last" hidden></p>
+            </div>
+            <div class="pad" id="guild-rooms-seg"></div>
+            <div id="guild-room-chat" hidden>
+              <div class="guild-chat-log" id="guild-chat-log" aria-live="polite"></div>
+              <form class="guild-chat-bar" id="guild-chat-form" autocomplete="off">
+                <input id="guild-chat-input" class="chat-input" type="text" maxlength="500" />
+                <button id="guild-chat-send" class="btn btn-primary btn-sm" type="submit"></button>
+              </form>
+            </div>
+            <div id="guild-room-bank" hidden>
+              <div class="guild-bank-head pad">
+                <p class="muted" id="guild-bank-note"></p>
+                <button id="guild-bank-donate" class="btn btn-primary btn-sm" type="button"></button>
+              </div>
+              <div class="people" id="guild-bank"></div>
+            </div>
+            <div id="guild-room-members" hidden>
+              <div class="section-head"><h3 class="label" id="guild-roster-label"></h3></div>
+              <div class="people" id="guild-roster"></div>
+            </div>
           </div>
           <div id="guild-join" class="guild-join" hidden>
             <div id="guild-invites-room" hidden>
