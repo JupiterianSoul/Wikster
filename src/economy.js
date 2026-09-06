@@ -167,6 +167,14 @@ export const windowIndexAt = (now = Date.now()) => Math.floor(now / REFRESH_MS);
 
 export const nextRefreshAt = (now = Date.now()) => (windowIndexAt(now) + 1) * REFRESH_MS;
 
+/* --- Wikipedia Today ------------------------------------------------------ */
+
+/** Yesterday's most-read pages as a booster: one a day, and it is not free,
+ *  because the day's front page is the most-read of anything and its cards
+ *  price accordingly. About two subject boosters' worth. */
+export const TODAY_PRICE = 2800;
+export const TODAY_CARDS = 5;
+
 /* --- starting out --------------------------------------------------------- */
 
 export const STARTER_COINS = 1500;

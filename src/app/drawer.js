@@ -59,6 +59,9 @@ export function drawerItems() {
       badge: () => quests.claimableCount(questUserKey()),
       run: go('quests', renderQuests) },
     { id: 'leaderboard', icon: 'podium', key: 'tabLeaderboard', run: go('leaderboard', renderLeaderboard) },
+    ...(account.configured
+      ? [{ id: 'guilds', icon: 'shield', key: 'tabGuilds', run: go('guilds', lazy(() => import('./guilds.js'), 'renderGuilds')) }]
+      : []),
     { sep: true },
     ...(account.configured
       ? [{ id: 'friends', icon: 'friends', key: 'tabFriends',
@@ -359,7 +362,8 @@ export const HELP = {
   duel:    { steps: 3, tip: true },
   reveal:  { steps: 3, tip: true },
   quests:  { steps: 3, tip: true },
-  leaderboard: { steps: 3, tip: true }
+  leaderboard: { steps: 3, tip: true },
+  guilds:  { steps: 3, tip: true }
 };
 
 export function openHelp(topic) {

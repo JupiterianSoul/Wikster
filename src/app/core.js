@@ -121,7 +121,9 @@ export const state = {
   account: { session: null, profile: null, mode: 'signin', syncing: false, syncedAt: null, failed: false },
   // The friends screen, and whichever friend is being looked at.
   social: { friends: [], incoming: [], outgoing: [], results: [], loaded: false, unread: new Map(), trades: [] },
-  viewing: null
+  viewing: null,
+  // My guild, once the server has said which (null for none, undefined for not asked yet).
+  guild: undefined
 };
 /** Test-only switches, reachable through window.__wikster. */
 
@@ -343,7 +345,7 @@ export function navTabFor(screen) {
     : screen === 'cardindex' ? 'binder'
       : screen === 'glossary' ? 'packs'
         : ['wikdle', 'slots', 'duel', 'reveal'].includes(screen) ? 'games'
-          : (['settings', 'customize', 'badges', 'friends', 'friend', 'chat', 'ach', 'updates', 'quiz', 'games', 'quests', 'leaderboard'].includes(screen) ? 'profile' : screen));
+          : (['settings', 'customize', 'badges', 'friends', 'friend', 'chat', 'ach', 'updates', 'quiz', 'games', 'quests', 'leaderboard', 'guilds'].includes(screen) ? 'profile' : screen));
 }
 
 export function refreshWallet() {

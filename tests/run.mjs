@@ -16,7 +16,7 @@ import { createConnection } from 'node:net';
 
 const MODES = {
   app: 'offline', hellfire: 'offline', games: 'offline', regalia: 'offline', offline: 'offline', product: 'offline', arcade2: 'offline', desk: 'offline',
-  fixes6: 'stub', worldclock: 'stub', facetoface: 'stub', g4: 'stub', sync: 'stub', live: 'stub'
+  fixes6: 'stub', worldclock: 'stub', facetoface: 'stub', g4: 'stub', sync: 'stub', live: 'stub', clubs: 'stub'
 };
 const PORT = Number(process.env.PORT) || 4173;
 const OUT = 'tests/out';
@@ -79,6 +79,15 @@ for (const mode of modes) {
       const seconds = Math.round((Date.now() - started) / 1000);
       results.push({ name, mode, ok: code === 0, seconds });
       console.log(`${code === 0 ? 'ok  ' : 'FAIL'}  ${name} (${mode}, ${seconds}s)`);
+      // A failed suite says what failed here, not only in a log a runner
+      // keeps in an artifact nobody opens.
+      if (code !== 0) {
+        try {
+          const lines = readFileSync(`${OUT}/${name}.log`, 'utf8').split('\n')
+            .filter((l) => /^(FAIL|ERRORS|== |[A-Z] PAGE:)|Error|Timeout|exceeded/.test(l) && !/^\s+at /.test(l));
+          for (const l of lines.slice(0, 40)) console.log(`      ${l}`);
+        } catch { /* no log */ }
+      }
     }
   } finally {
     preview.kill('SIGTERM');

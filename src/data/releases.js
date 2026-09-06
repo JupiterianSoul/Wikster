@@ -520,5 +520,22 @@ export const RELEASES = [
       { en: 'The slot machine and the quiz score on the leaderboard too; a score that could not be sent waits on the device and goes up on the next connection; the board repaints as scores land, yours or anyone’s', fr: 'La machine à sous et le quiz comptent aussi au classement ; un score qui n’a pu partir attend sur l’appareil et monte à la prochaine connexion ; le classement se repeint quand les scores tombent, les vôtres ou ceux des autres' },
       { en: 'Time played is written every minute while the app is open, so the profile, the friends’ view of it and the achievements never lag a session behind', fr: 'Le temps de jeu s’écrit chaque minute tant que l’application est ouverte : le profil, ce qu’en voient les amis et les succès n’ont plus une session de retard' }
     ]
+  },
+  {
+    id: 'clubs', icon: 'shield', accent: '#c4b5fd',
+    title: { en: 'The clubhouse', fr: 'Le club' },
+    points: [
+      { en: 'Guilds: fifty players under one name, with a board of their own', fr: 'Des guildes : cinquante joueurs sous un même nom, avec leur propre classement' },
+      { en: 'A showcase of three cards on your profile, with hearts from friends', fr: 'Une vitrine de trois cartes sur votre profil, avec les cœurs des amis' },
+      { en: 'Wikipedia Today: yesterday’s most-read articles as a booster', fr: 'Wikipédia du jour : les articles les plus lus d’hier en booster' },
+      { en: 'Notifications in the phone’s shade while the app is put away', fr: 'Des notifications dans le volet du téléphone quand l’application est rangée' }
+    ],
+    changelog: [
+      { en: 'Guilds: found one with a name and a tag, or search and join; one guild at a time, fifty players at most. Every point you score lands on your guild’s daily, weekly and all-time windows the moment it lands on yours, through the same trigger, and the guild leaderboard moves live', fr: 'Guildes : fondez-en une avec un nom et un tag, ou cherchez et rejoignez ; une guilde à la fois, cinquante joueurs au plus. Chaque point marqué tombe sur les fenêtres du jour, de la semaine et de toujours de votre guilde à l’instant où il tombe sur les vôtres, par le même déclencheur, et le classement des guildes bouge en direct' },
+      { en: 'The guild screen shows the guild’s standing in each window, its roster with everyone’s points, and the way out; leaving hands the guild to its oldest member', fr: 'L’écran de guilde montre sa place dans chaque fenêtre, ses membres avec leurs points, et la sortie ; partir confie la guilde à son plus ancien membre' },
+      { en: 'The showcase: pin up to three cards on your profile. Friends see them on your page and leave a heart on each; a second tap takes it back', fr: 'La vitrine : épinglez jusqu’à trois cartes sur votre profil. Les amis les voient sur votre page et laissent un cœur sur chacune ; un second appui le reprend' },
+      { en: 'Wikipedia Today on the shop floor: five cards dealt from what the whole world read yesterday, one a day, priced like the front page it is', fr: 'Wikipédia du jour dans la boutique : cinq cartes tirées de ce que le monde entier a lu hier, un par jour, au prix de la une qu’il est' },
+      { en: 'On Android, a message, a request, a gift or a trade that arrives while the app is put away shows in the phone’s shade, and opening the conversation takes it down; in a browser, the same as a notification once allowed from Settings', fr: 'Sur Android, un message, une demande, un cadeau ou un échange qui arrive quand l’application est rangée s’affiche dans le volet du téléphone, et ouvrir la conversation l’efface ; dans un navigateur, la même chose en notification une fois autorisée dans les Réglages' }
+    ]
   }
 ];

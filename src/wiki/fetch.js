@@ -201,3 +201,30 @@ export async function fetchMonthlyViews(title) {
     return null;
   }
 }
+
+/* --- the day's most-read ------------------------------------------------- */
+
+/** The UTC day before a moment, as YYYY-MM-DD: the last day the readership
+ *  figures are complete for. */
+export const readDayBefore = (now = Date.now()) => new Date(now - 86400000).toISOString().slice(0, 10);
+
+/**
+ * What the encyclopaedia's readers opened most on a day, in this language:
+ * the front page of the world's attention. The main page, the namespaces
+ * (Special:, Wikipedia:, File:) and the unknown-page marker are dropped;
+ * what is left is articles, most read first, up to `limit`.
+ */
+export async function fetchTopRead(day = readDayBefore(), lang = wikiLang(), limit = 300) {
+  const [y, m, d] = String(day).split('-');
+  const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/top/${lang}.wikipedia/all-access/${y}/${m}/${d}`;
+  const data = await fetchJson(url);
+  const rows = data?.items?.[0]?.articles ?? [];
+  const out = [];
+  for (const row of rows) {
+    const raw = String(row.article ?? '');
+    if (!raw || raw === '-' || raw === 'Main_Page' || raw.includes(':')) continue;
+    out.push({ title: raw.replace(/_/g, ' '), views: Number(row.views) || 0, rank: Number(row.rank) || out.length + 1 });
+    if (out.length >= limit) break;
+  }
+  return out;
+}

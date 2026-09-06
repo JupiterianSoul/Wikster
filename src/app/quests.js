@@ -170,6 +170,59 @@ export function renderLeaderboard() {
   loadLeaderboard();
 }
 
+/**
+ * One row of a board. Shared by the players' board and the guilds': the
+ * rank, the name, the score, with the top three marked and mine lit.
+ */
+export function boardRow(r, { isMe, nameOf, subOf = null, cls = '' }) {
+  const row = document.createElement('div');
+  row.className = `lb-row${isMe(r) ? ' is-me' : ''}${r.rank <= 3 ? ` is-top${r.rank}` : ''} ${cls}`;
+  row.innerHTML = `<span class="lb-rank tabular"></span><span class="lb-name"></span><span class="lb-score tabular"></span>`;
+  row.querySelector('.lb-rank').textContent = `#${r.rank}`;
+  const name = row.querySelector('.lb-name');
+  name.textContent = nameOf(r);
+  if (subOf) { const sub = document.createElement('small'); sub.className = 'lb-sub'; sub.textContent = subOf(r); name.appendChild(sub); }
+  row.querySelector('.lb-score').textContent = formatAmount(r.score);
+  return row;
+}
+
+/**
+ * A whole board: the podium for the first three, first in the middle and a
+ * step higher, then the rows. `faceOf` is what the podium shows on the
+ * medal face (an initial, a guild's tag).
+ */
+export function boardNode(rows, { isMe, nameOf, faceOf, subOf = null, empty, guild = false }) {
+  const step = (r, rank) => {
+    const node = document.createElement('div');
+    node.className = `lb-step is-r${rank}${r ? '' : ' is-empty'}${r && isMe(r) ? ' is-me' : ''}${guild ? ' is-guild' : ''}`;
+    node.innerHTML = `
+      <span class="lb-medal tabular"></span>
+      <span class="person-mark lb-face" aria-hidden="true"></span>
+      <span class="lb-step-name"></span>
+      <span class="lb-step-score tabular"></span>`;
+    node.querySelector('.lb-medal').textContent = String(rank);
+    node.querySelector('.lb-face').textContent = r ? faceOf(r) : '·';
+    node.querySelector('.lb-step-name').textContent = r ? nameOf(r) : t('lbOpenStep');
+    node.querySelector('.lb-step-score').textContent = r ? formatAmount(r.score) : '';
+    return node;
+  };
+  const list = document.createElement('div');
+  list.className = 'lb';
+  if (!rows.length) { list.appendChild(gameStage('podium', empty)); return list; }
+  const podium = document.createElement('div');
+  podium.className = 'lb-podium';
+  podium.replaceChildren(step(rows[1], 2), step(rows[0], 1), step(rows[2], 3));
+  list.appendChild(podium);
+  const rest = rows.slice(3);
+  if (rest.length) {
+    const wrap = document.createElement('div');
+    wrap.className = 'leaderboard';
+    wrap.replaceChildren(...rest.map((r) => boardRow(r, { isMe, nameOf, subOf })));
+    list.appendChild(wrap);
+  }
+  return list;
+}
+
 /*
  * The board moves while it is being looked at: a score of mine that just
  * landed, or anyone else's, repaints it. The feed is opened with the screen
@@ -226,46 +279,13 @@ export async function loadLeaderboard({ quiet = false } = {}) {
   view.rows = view.page === 0 ? page.rows : [...view.rows, ...page.rows];
   view.more = page.more;
   const me = userId();
-  const rowNode = (r, cls = '') => {
-    const row = document.createElement('div');
-    row.className = `lb-row${r.userId === me ? ' is-me' : ''}${r.rank <= 3 ? ` is-top${r.rank}` : ''} ${cls}`;
-    row.innerHTML = `<span class="lb-rank tabular"></span><span class="lb-name"></span><span class="lb-score tabular"></span>`;
-    row.querySelector('.lb-rank').textContent = `#${r.rank}`;
-    row.querySelector('.lb-name').textContent = r.username;
-    row.querySelector('.lb-score').textContent = formatAmount(r.score);
-    return row;
-  };
-  // The three on the podium, first in the middle and a step higher.
-  const step = (r, rank) => {
-    const node = document.createElement('div');
-    node.className = `lb-step is-r${rank}${r ? '' : ' is-empty'}${r && r.userId === me ? ' is-me' : ''}`;
-    node.innerHTML = `
-      <span class="lb-medal tabular"></span>
-      <span class="person-mark lb-face" aria-hidden="true"></span>
-      <span class="lb-step-name"></span>
-      <span class="lb-step-score tabular"></span>`;
-    node.querySelector('.lb-medal').textContent = String(rank);
-    node.querySelector('.lb-face').textContent = r ? String(r.username).slice(0, 1) : '·';
-    node.querySelector('.lb-step-name').textContent = r ? r.username : t('lbOpenStep');
-    node.querySelector('.lb-step-score').textContent = r ? formatAmount(r.score) : '';
-    return node;
-  };
-  const list = document.createElement('div');
-  list.className = 'lb';
-  if (!view.rows.length) list.appendChild(gameStage('podium', t('lbEmpty')));
-  else {
-    const podium = document.createElement('div');
-    podium.className = 'lb-podium';
-    podium.replaceChildren(step(view.rows[1], 2), step(view.rows[0], 1), step(view.rows[2], 3));
-    list.appendChild(podium);
-    const rest = view.rows.slice(3);
-    if (rest.length) {
-      const rows = document.createElement('div');
-      rows.className = 'leaderboard';
-      rows.replaceChildren(...rest.map((r) => rowNode(r)));
-      list.appendChild(rows);
-    }
-  }
+  const list = boardNode(view.rows, {
+    isMe: (r) => r.userId === me,
+    nameOf: (r) => r.username,
+    faceOf: (r) => String(r.username).slice(0, 1),
+    empty: t('lbEmpty')
+  });
+  const rowNode = (r) => boardRow(r, { isMe: (x) => x.userId === me, nameOf: (x) => x.username });
   // The world clock: the window turns at midnight UTC, and says so.
   const reset = document.createElement('p');
   reset.className = 'lb-foot';

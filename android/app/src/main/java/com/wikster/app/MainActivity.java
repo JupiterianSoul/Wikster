@@ -1,7 +1,13 @@
 package com.wikster.app;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.os.Build;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Color;
@@ -74,6 +80,12 @@ public class MainActivity extends Activity {
         // The web side calls WiksterIcon.setIcon(themeId) when the theme
         // changes, and the launcher icon follows it. See IconBridge below.
         webView.addJavascriptInterface(new IconBridge(), "WiksterIcon");
+        // The web side calls WiksterNotify.notify(title, body, tag) for a
+        // message, a request, a gift or a trade that arrives while the app
+        // is not on screen. See NotifyBridge below.
+        webView.addJavascriptInterface(new NotifyBridge(), "WiksterNotify");
+        ensureNotifyChannel();
+        askNotifyPermission();
         settings.setDomStorageEnabled(true);
         // Honour <meta name="viewport" content="width=device-width">. Without
         // this the WebView lays the page out at its own default width rather
@@ -243,6 +255,78 @@ public class MainActivity extends Activity {
             // theme the web layer can ask for must have somewhere to land.
             "apotheosis", "raclette", "lecture", "yaourt"
     };
+
+    /* --- notifications ---------------------------------------------------
+     *
+     * The app has no push service behind it: a notification is raised by the
+     * page itself, from the live wire it keeps open while the app is in the
+     * background. That covers the minutes and hours the process lives on
+     * after the player switches away, which is when a reply is answered; it
+     * stops when Android reclaims the process, and starts again with the app.
+     */
+    private static final String NOTIFY_CHANNEL = "wikster.social";
+    private static final int NOTIFY_PERMISSION = 7;
+
+    private void ensureNotifyChannel() {
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        if (manager == null || manager.getNotificationChannel(NOTIFY_CHANNEL) != null) return;
+        NotificationChannel channel = new NotificationChannel(NOTIFY_CHANNEL,
+                getString(R.string.notify_channel), NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setDescription(getString(R.string.notify_channel_note));
+        manager.createNotificationChannel(channel);
+    }
+
+    private boolean notifyAllowed() {
+        return Build.VERSION.SDK_INT < 33
+                || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void askNotifyPermission() {
+        if (Build.VERSION.SDK_INT >= 33 && !notifyAllowed()) {
+            requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS }, NOTIFY_PERMISSION);
+        }
+    }
+
+    private final class NotifyBridge {
+        /** Whether a notification would be shown at all. */
+        @JavascriptInterface
+        public boolean enabled() { return notifyAllowed(); }
+
+        /** Asks again, for a Settings row that wants to switch them on. */
+        @JavascriptInterface
+        public void request() { runOnUiThread(MainActivity.this::askNotifyPermission); }
+
+        /**
+         * One notification, replacing the previous one with the same tag, so
+         * a conversation stays one line in the shade rather than a stack.
+         */
+        @JavascriptInterface
+        public void notify(String title, String body, String tag) {
+            if (!notifyAllowed()) return;
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager == null) return;
+            Intent open = new Intent(MainActivity.this, MainActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent tap = PendingIntent.getActivity(MainActivity.this, 0, open,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            Notification note = new Notification.Builder(MainActivity.this, NOTIFY_CHANNEL)
+                    .setSmallIcon(R.drawable.ic_notify)
+                    .setContentTitle(title == null ? getString(R.string.app_name) : title)
+                    .setContentText(body == null ? "" : body)
+                    .setStyle(new Notification.BigTextStyle().bigText(body == null ? "" : body))
+                    .setContentIntent(tap)
+                    .setAutoCancel(true)
+                    .build();
+            manager.notify(tag == null ? "wikster" : tag, 0, note);
+        }
+
+        /** Takes a notification down: the conversation was opened. */
+        @JavascriptInterface
+        public void clear(String tag) {
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) manager.cancel(tag == null ? "wikster" : tag, 0);
+        }
+    }
 
     private static final String ICON_PREFS = "wikster.icon";
     private static final String KEY_WANTED = "wanted";

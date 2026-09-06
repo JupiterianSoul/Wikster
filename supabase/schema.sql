@@ -1074,3 +1074,263 @@ begin
   insert into scores (user_id, game, points, detail) values (auth.uid(), p_game, p_points, jsonb_build_object('day', p_day));
 end $$;
 grant execute on function public.submit_score(text, integer, text) to authenticated;
+
+-- ============================================================================
+-- V8 - THE SHOWCASE AND THE GUILDS
+-- ----------------------------------------------------------------------------
+-- A player pins up to three cards on their profile (a copy of each card, as
+-- the profile row already carries a copy of the stats) and friends leave a
+-- heart on them. A guild is a name, a tag and up to fifty players; every
+-- point a member scores lands on the guild's three windows the moment it
+-- lands on their own, through the same trigger, and the windows are emptied
+-- on the same clocks.
+-- ============================================================================
+
+alter table public.profiles add column if not exists showcase jsonb not null default '[]'::jsonb;
+
+create table if not exists public.showcase_kudos (
+  owner      uuid not null references auth.users on delete cascade,
+  key        text not null,
+  sender     uuid not null references auth.users on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (owner, key, sender),
+  check (owner <> sender)
+);
+alter table public.showcase_kudos enable row level security;
+drop policy if exists "hearts are readable by signed-in players" on public.showcase_kudos;
+create policy "hearts are readable by signed-in players"
+  on public.showcase_kudos for select to authenticated using (true);
+drop policy if exists "you leave hearts as yourself, on friends" on public.showcase_kudos;
+create policy "you leave hearts as yourself, on friends"
+  on public.showcase_kudos for insert to authenticated
+  with check (auth.uid() = sender and exists (
+    select 1 from friendships f where f.status = 'accepted'
+      and ((f.requester = auth.uid() and f.addressee = owner) or (f.addressee = auth.uid() and f.requester = owner))));
+drop policy if exists "you take back your own hearts" on public.showcase_kudos;
+create policy "you take back your own hearts"
+  on public.showcase_kudos for delete to authenticated using (auth.uid() = sender);
+
+-- --- guilds -------------------------------------------------------------------
+
+create table if not exists public.guilds (
+  id         uuid primary key default gen_random_uuid(),
+  name       text not null check (char_length(name) between 3 and 24),
+  tag        text not null check (tag ~ '^[A-Z0-9]{2,5}$'),
+  about      text not null default '' check (char_length(about) <= 140),
+  owner      uuid not null references auth.users on delete cascade,
+  members    integer not null default 0,
+  created_at timestamptz not null default now()
+);
+create unique index if not exists guilds_name_lower_idx on public.guilds (lower(name));
+create unique index if not exists guilds_tag_idx on public.guilds (tag);
+
+create table if not exists public.guild_members (
+  user_id   uuid primary key references auth.users on delete cascade,
+  guild_id  uuid not null references public.guilds on delete cascade,
+  joined_at timestamptz not null default now()
+);
+create index if not exists guild_members_guild_idx on public.guild_members (guild_id, joined_at);
+
+create table if not exists public.guild_daily   (guild_id uuid primary key references public.guilds on delete cascade, score bigint not null default 0, updated_at timestamptz not null default now());
+create table if not exists public.guild_weekly  (guild_id uuid primary key references public.guilds on delete cascade, score bigint not null default 0, updated_at timestamptz not null default now());
+create table if not exists public.guild_alltime (guild_id uuid primary key references public.guilds on delete cascade, score bigint not null default 0, updated_at timestamptz not null default now());
+create index if not exists guild_daily_score_idx   on public.guild_daily   (score desc, updated_at asc);
+create index if not exists guild_weekly_score_idx  on public.guild_weekly  (score desc, updated_at asc);
+create index if not exists guild_alltime_score_idx on public.guild_alltime (score desc, updated_at asc);
+
+alter table public.guilds enable row level security;
+alter table public.guild_members enable row level security;
+alter table public.guild_daily enable row level security;
+alter table public.guild_weekly enable row level security;
+alter table public.guild_alltime enable row level security;
+drop policy if exists "guilds are public" on public.guilds;
+create policy "guilds are public" on public.guilds for select to authenticated using (true);
+drop policy if exists "rosters are public" on public.guild_members;
+create policy "rosters are public" on public.guild_members for select to authenticated using (true);
+drop policy if exists "the guild board is public" on public.guild_daily;
+create policy "the guild board is public" on public.guild_daily for select to authenticated using (true);
+drop policy if exists "the guild board is public" on public.guild_weekly;
+create policy "the guild board is public" on public.guild_weekly for select to authenticated using (true);
+drop policy if exists "the guild board is public" on public.guild_alltime;
+create policy "the guild board is public" on public.guild_alltime for select to authenticated using (true);
+-- No write policies on purpose: membership and scores move through the
+-- functions below and the trigger.
+
+-- A member's points move their guild's windows by the same amount.
+create or replace function public.guild_windows_add(p_user uuid, p_delta integer)
+returns void language plpgsql security definer set search_path = public as $$
+declare g uuid;
+begin
+  if p_delta = 0 then return; end if;
+  select guild_id into g from guild_members where user_id = p_user;
+  if g is null then return; end if;
+  insert into guild_daily (guild_id, score) values (g, greatest(0, p_delta))
+    on conflict (guild_id) do update set score = greatest(0, guild_daily.score + p_delta), updated_at = now();
+  insert into guild_weekly (guild_id, score) values (g, greatest(0, p_delta))
+    on conflict (guild_id) do update set score = greatest(0, guild_weekly.score + p_delta), updated_at = now();
+  insert into guild_alltime (guild_id, score) values (g, greatest(0, p_delta))
+    on conflict (guild_id) do update set score = greatest(0, guild_alltime.score + p_delta), updated_at = now();
+end $$;
+
+create or replace function public.scores_into_windows()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  insert into leaderboard_daily (user_id, score) values (new.user_id, new.points)
+    on conflict (user_id) do update set score = leaderboard_daily.score + excluded.score, updated_at = now();
+  insert into leaderboard_weekly (user_id, score) values (new.user_id, new.points)
+    on conflict (user_id) do update set score = leaderboard_weekly.score + excluded.score, updated_at = now();
+  insert into leaderboard_alltime (user_id, score) values (new.user_id, new.points)
+    on conflict (user_id) do update set score = leaderboard_alltime.score + excluded.score, updated_at = now();
+  perform guild_windows_add(new.user_id, new.points);
+  return new;
+end $$;
+
+create or replace function public.scores_windows_delta()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare d integer := new.points - old.points;
+begin
+  if d = 0 then return new; end if;
+  update leaderboard_daily   set score = greatest(0, score + d), updated_at = now() where user_id = new.user_id;
+  update leaderboard_weekly  set score = greatest(0, score + d), updated_at = now() where user_id = new.user_id;
+  update leaderboard_alltime set score = greatest(0, score + d), updated_at = now() where user_id = new.user_id;
+  perform guild_windows_add(new.user_id, d);
+  return new;
+end $$;
+
+-- Founding, joining, leaving. One guild per player; fifty players per guild.
+create or replace function public.create_guild(p_name text, p_tag text, p_about text default '')
+returns public.guilds language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); row_out guilds;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  if exists (select 1 from guild_members where user_id = me) then raise exception 'ALREADY_IN_GUILD'; end if;
+  if exists (select 1 from guilds where lower(name) = lower(trim(p_name))) then raise exception 'NAME_TAKEN'; end if;
+  if exists (select 1 from guilds where tag = upper(trim(p_tag))) then raise exception 'TAG_TAKEN'; end if;
+  insert into guilds (name, tag, about, owner, members)
+    values (trim(p_name), upper(trim(p_tag)), coalesce(trim(p_about), ''), me, 1)
+    returning * into row_out;
+  insert into guild_members (user_id, guild_id) values (me, row_out.id);
+  return row_out;
+end $$;
+
+create or replace function public.join_guild(p_guild uuid)
+returns public.guilds language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); row_out guilds;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  if exists (select 1 from guild_members where user_id = me) then raise exception 'ALREADY_IN_GUILD'; end if;
+  select * into row_out from guilds where id = p_guild for update;
+  if row_out.id is null then raise exception 'NOT_FOUND'; end if;
+  if row_out.members >= 50 then raise exception 'GUILD_FULL'; end if;
+  insert into guild_members (user_id, guild_id) values (me, p_guild);
+  update guilds set members = members + 1 where id = p_guild returning * into row_out;
+  return row_out;
+end $$;
+
+-- Leaving hands the guild to its oldest remaining member; the last one out
+-- takes the guild with them, windows and all.
+create or replace function public.leave_guild()
+returns void language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); g uuid; heir uuid; left_n integer;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  select guild_id into g from guild_members where user_id = me;
+  if g is null then return; end if;
+  delete from guild_members where user_id = me;
+  select count(*) into left_n from guild_members where guild_id = g;
+  if left_n = 0 then
+    delete from guilds where id = g;
+    return;
+  end if;
+  update guilds set members = left_n where id = g;
+  if (select owner from guilds where id = g) = me then
+    select user_id into heir from guild_members where guild_id = g order by joined_at asc limit 1;
+    update guilds set owner = heir where id = g;
+  end if;
+end $$;
+
+create or replace function public.my_guild()
+returns public.guilds language sql stable security definer set search_path = public as $$
+  select g.* from guilds g join guild_members m on m.guild_id = g.id where m.user_id = auth.uid();
+$$;
+
+create or replace function public.search_guilds(p_term text)
+returns setof public.guilds language sql stable security definer set search_path = public as $$
+  select * from guilds
+    where p_term is null or p_term = '' or name ilike '%' || p_term || '%' or tag ilike '%' || p_term || '%'
+    order by members desc, created_at asc limit 20;
+$$;
+
+create or replace function public.guild_roster(p_guild uuid)
+returns table (user_id uuid, username text, level integer, joined_at timestamptz, score bigint)
+language sql stable security definer set search_path = public as $$
+  select m.user_id, p.username, p.level, m.joined_at, coalesce(a.score, 0)
+    from guild_members m join profiles p on p.id = m.user_id
+    left join leaderboard_alltime a on a.user_id = m.user_id
+    where m.guild_id = p_guild order by coalesce(a.score, 0) desc, m.joined_at asc;
+$$;
+
+create or replace function public.guild_board(p_window text, p_page integer default 0)
+returns table (rank bigint, guild_id uuid, name text, tag text, members integer, score bigint)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if p_window = 'daily' then
+    return query select row_number() over (order by d.score desc, d.updated_at asc), g.id, g.name, g.tag, g.members, d.score
+      from guild_daily d join guilds g on g.id = d.guild_id order by d.score desc, d.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  elsif p_window = 'weekly' then
+    return query select row_number() over (order by w.score desc, w.updated_at asc), g.id, g.name, g.tag, g.members, w.score
+      from guild_weekly w join guilds g on g.id = w.guild_id order by w.score desc, w.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  else
+    return query select row_number() over (order by a.score desc, a.updated_at asc), g.id, g.name, g.tag, g.members, a.score
+      from guild_alltime a join guilds g on g.id = a.guild_id order by a.score desc, a.updated_at asc limit 20 offset greatest(0, p_page) * 20;
+  end if;
+end $$;
+
+create or replace function public.my_guild_rank(p_window text)
+returns table (rank bigint, score bigint, total bigint)
+language plpgsql stable security definer set search_path = public as $$
+declare g uuid; my_score bigint; my_at timestamptz;
+begin
+  select guild_id into g from guild_members where user_id = auth.uid();
+  if g is null then return; end if;
+  if p_window = 'daily' then
+    select d.score, d.updated_at into my_score, my_at from guild_daily d where d.guild_id = g;
+    if my_score is null then return query select null::bigint, 0::bigint, (select count(*) from guild_daily); return; end if;
+    return query select (select count(*) + 1 from guild_daily x where x.score > my_score or (x.score = my_score and x.updated_at < my_at)), my_score, (select count(*) from guild_daily);
+  elsif p_window = 'weekly' then
+    select w.score, w.updated_at into my_score, my_at from guild_weekly w where w.guild_id = g;
+    if my_score is null then return query select null::bigint, 0::bigint, (select count(*) from guild_weekly); return; end if;
+    return query select (select count(*) + 1 from guild_weekly x where x.score > my_score or (x.score = my_score and x.updated_at < my_at)), my_score, (select count(*) from guild_weekly);
+  else
+    select a.score, a.updated_at into my_score, my_at from guild_alltime a where a.guild_id = g;
+    if my_score is null then return query select null::bigint, 0::bigint, (select count(*) from guild_alltime); return; end if;
+    return query select (select count(*) + 1 from guild_alltime x where x.score > my_score or (x.score = my_score and x.updated_at < my_at)), my_score, (select count(*) from guild_alltime);
+  end if;
+end $$;
+
+grant execute on function public.create_guild(text, text, text) to authenticated;
+grant execute on function public.join_guild(uuid) to authenticated;
+grant execute on function public.leave_guild() to authenticated;
+grant execute on function public.my_guild() to authenticated;
+grant execute on function public.search_guilds(text) to authenticated;
+grant execute on function public.guild_roster(uuid) to authenticated;
+grant execute on function public.guild_board(text, integer) to authenticated;
+grant execute on function public.my_guild_rank(text) to authenticated;
+
+-- The guild windows turn with the players' (see V6 for switching pg_cron on).
+select cron.unschedule(jobid) from cron.job where jobname in ('wikster-daily-flush', 'wikster-weekly-flush');
+select cron.schedule('wikster-daily-flush',  '0 0 * * *', $$truncate table public.leaderboard_daily; truncate table public.guild_daily$$);
+select cron.schedule('wikster-weekly-flush', '0 0 * * 0', $$truncate table public.leaderboard_weekly; truncate table public.guild_weekly$$);
+
+do $$ begin
+  alter publication supabase_realtime add table public.guild_daily;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.guild_weekly;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.guild_alltime;
+exception when others then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.showcase_kudos;
+exception when others then null; end $$;

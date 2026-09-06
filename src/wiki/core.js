@@ -4,6 +4,7 @@ import { wikiLang } from '../i18n.js';
 import { drawCustomSet } from './custom.js';
 import { drawWikipediaSet } from './draw.js';
 import { drawTitleSet } from './translate.js';
+import { fetchTopRead } from './fetch.js';
 
 export const REQUEST_TIMEOUT_MS = 7000;
 /**
@@ -102,6 +103,7 @@ export async function drawArticles(pack) {
     // A written list of pages: exactly these, in this order, no band, no
     // search. Used by the personal boosters behind a secret code.
     if (pack.source === 'titles') return await drawTitleSet(pack);
+    if (pack.source === 'today') return await drawTodaySet(pack);
     if (pack.source === 'custom') return await drawCustomSet(pack);
     return await drawWikipediaSet(pack);
   } finally {
@@ -109,4 +111,21 @@ export async function drawArticles(pack) {
     // line: how many requests the draw made, and how long they took.
     console.info(`Wikster draw: "${pack.name}" in ${Date.now() - started} ms, ${takeRequestCount()} requests`);
   }
+}
+
+/**
+ * Wikipedia Today: a hand dealt from what the whole world read yesterday.
+ * The top of the list is the day's news and its noise, so the hand is drawn
+ * from the first hundred or so at random, a few more than the booster holds
+ * in case a page turns out to have no picture, and cut to size.
+ */
+async function drawTodaySet(pack) {
+  const top = await fetchTopRead(pack.day, wikiLang());
+  if (!top.length) throw new Error('NO_TOP_READ');
+  const pool = top.slice(0, 120);
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const titles = pool.slice(0, pack.cards + 3).map((row) => ({ title: row.title, fallback: row.title, name: null }));
+  const cards = (await drawTitleSet({ ...pack, source: 'titles', titles, pick: null }))
+    .filter((card) => card && card.key);
+  return cards.slice(0, pack.cards);
 }

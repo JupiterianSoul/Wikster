@@ -1,8 +1,9 @@
 /* shop: split out of main.js */
 
-import { t, tx } from '../i18n.js';
+import { getLanguage, t, tx } from '../i18n.js';
 import { crateReel, formatCountdown, generateShop, rollCrate } from '../shop.js';
-import { CUSTOM_CARD_RANGE, boosterPrice, cratePriceAt, freeWindowAt, nextFreeAt, nextRefreshAt, windowIndexAt } from '../economy.js';
+import { CUSTOM_CARD_RANGE, TODAY_CARDS, TODAY_PRICE, boosterPrice, cratePriceAt, freeWindowAt, nextFreeAt, nextRefreshAt, windowIndexAt } from '../economy.js';
+import { readDayBefore } from '../wiki/fetch.js';
 import { press, reveal } from '../ui/components.js';
 import * as store from '../collection.js';
 import { rarityById, rarityRank } from '../data/rarities.js';
@@ -40,6 +41,7 @@ export function renderShop() {
   const market = generateShop(windowIndexAt(), state.customPacks, freeWindowAt());
   const sections = [
     buildFeatured(market.featured),
+    buildTodayStall(),
     buildShopSection({
       title: t('shopFreeRow'), note: freeNoteText(), noteAttr: 'data-free-note',
       body: shopGrid(market.free.map((item) => shopTile(item, { free: true })))
@@ -65,6 +67,64 @@ export function renderShop() {
   reveal(el.shopMarket.children, { step: 60 });
   tickRestock();
 }
+/**
+ * Wikipedia Today: the day's front page as a booster. Five cards dealt from
+ * what the whole world read yesterday, once a day, and not free: the most
+ * read pages are the most valuable cards there are. The stall names the day
+ * it is about and says so when today's has been bought.
+ */
+export function buildTodayStall() {
+  const day = readDayBefore();
+  const spec = { kind: 'today', day, cards: TODAY_CARDS };
+  const bought = state.profile.todayBought === day;
+  const sec = document.createElement('section');
+  sec.className = 'shop-sec shop-today';
+  sec.innerHTML = `<div class="shop-sec-head"><h3></h3></div><p class="shop-sec-note"></p>`;
+  sec.querySelector('h3').textContent = t('todayBooster');
+  sec.querySelector('.shop-sec-note').textContent = t('todayNote');
+
+  const tile = document.createElement('div');
+  tile.className = 'shop-tile is-today';
+  tile.dataset.spec = specId(spec);
+  const art = document.createElement('div');
+  art.className = 'shop-tile-art';
+  art.appendChild(buildBooster(spec, { size: 'is-tiny' }));
+  const name = document.createElement('p');
+  name.className = 'shop-tile-name';
+  name.textContent = t('todayFor', { day: new Date(`${day}T12:00:00Z`).toLocaleDateString(getLanguage(), { weekday: 'long', day: 'numeric', month: 'long' }) });
+  const meta = document.createElement('p');
+  meta.className = 'shop-tile-meta';
+  meta.textContent = t('todayMeta', { n: TODAY_CARDS });
+  tile.append(art, name, meta);
+
+  const buy = document.createElement('button');
+  buy.type = 'button';
+  buy.className = 'buy';
+  press(buy, { sound: null });
+  const paint = () => {
+    const done = state.profile.todayBought === day;
+    buy.disabled = done;
+    buy.classList.toggle('is-out', done);
+    buy.classList.toggle('is-poor', !done && TODAY_PRICE > state.wallet);
+    buy.innerHTML = done
+      ? `<span class="buy-label">${esc(t('todayBought'))}</span>`
+      : `<span class="buy-label">${esc(t('buy'))}</span><span class="buy-price">${money(TODAY_PRICE)}</span>`;
+  };
+  paint();
+  shopPainters.push(paint);
+  buy.addEventListener('click', () => {
+    if (state.profile.todayBought === day) return;
+    if (!purchase(spec, TODAY_PRICE, buy)) return;
+    state.profile.todayBought = day;
+    store.saveProfile(state.profile);
+    paint();
+  });
+  tile.appendChild(buy);
+  sec.appendChild(shopGrid([tile]));
+  if (bought) tile.classList.add('is-bought-today');
+  return sec;
+}
+
 /** Every tile's stock and price repaints itself after a purchase; these are the repainters. */
 
 export const shopPainters = [];

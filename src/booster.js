@@ -33,6 +33,8 @@ export function specId(spec) {
   const rarity = spec.rarityId ?? 'std';
   // A timed booster is defined entirely by its track level.
   if (spec.kind === 'timed') return `timed|${spec.timedLevel ?? 1}|std|${spec.cards}`;
+  // Wikipedia Today is a different booster every day: the day is its name.
+  if (spec.kind === 'today') return `today|${spec.day}|std|${spec.cards}`;
   if (spec.kind === 'code') return `code|${spec.codeId}|${rarity}|${spec.cards}`;
   if (spec.kind === 'custom') {
     const host = spec.wiki ? new URL(spec.wiki.apiUrl).host + new URL(spec.wiki.apiUrl).pathname.replace('/api.php', '') : spec.customId;
@@ -50,6 +52,7 @@ export function specName(spec) {
   const tier = spec.rarityId ? tx(rarityById(spec.rarityId).name) : null;
 
   if (spec.kind === 'timed') return t('timedBooster');
+  if (spec.kind === 'today') return t('todayBooster');
   if (spec.kind === 'code') {
     const base = codeLook(codeById(spec.codeId)).name || t('codeBooster');
     return tier ? `${base} · ${tier}` : base;
@@ -72,6 +75,7 @@ export function specName(spec) {
  */
 export function specBaseName(spec) {
   if (spec.kind === 'timed') return t('timedBooster');
+  if (spec.kind === 'today') return t('todayBooster');
   // The pack face has room for a name and a tier line, not a sentence.
   if (spec.kind === 'code') return codeById(spec.codeId)?.person ?? t('codeBooster');
   if (spec.kind === 'custom') return spec.customName ?? spec.wiki?.sitename ?? 'Custom';
@@ -84,6 +88,7 @@ export const specTierName = (spec) =>
 
 export function specTagline(spec) {
   if (spec.kind === 'timed') return t('timedTagline');
+  if (spec.kind === 'today') return t('todayTagline', { day: spec.day ?? '' });
   if (spec.kind === 'code') return codeLook(codeById(spec.codeId)).tagline;
   if (spec.kind === 'custom') return spec.customTagline ?? '';
   if (spec.themeId) return tx(themeById(spec.themeId)?.tagline);
@@ -100,6 +105,8 @@ export function specTagline(spec) {
  */
 export function specColours(spec) {
   if (spec.kind === 'timed') return { accent: '#38bdf8', accent2: '#0c4a6e' };
+  // Newsprint and headline red: the front page.
+  if (spec.kind === 'today') return { accent: '#f8fafc', accent2: '#7f1d1d' };
   if (spec.kind === 'code') {
     const look = codeLook(codeById(spec.codeId));
     return { accent: look.accent, accent2: look.accent2 };
@@ -119,6 +126,7 @@ export function specColours(spec) {
 
 export const specIcon = (spec) =>
   spec.kind === 'timed' ? 'clock'
+    : spec.kind === 'today' ? 'globe'
     : spec.kind === 'code' ? 'gift'
     : spec.kind === 'custom' ? (spec.icon ?? 'wand')
       : themeById(spec.themeId)?.icon ?? (spec.rarityId ? 'gem' : 'packs');
@@ -156,7 +164,8 @@ export function toDrawPack(spec) {
   return {
     name: specName(spec),
     cards: spec.cards,
-    source: (code || roll) ? 'titles' : spec.kind === 'custom' ? 'custom' : 'wikipedia',
+    source: (code || roll) ? 'titles' : spec.kind === 'today' ? 'today' : spec.kind === 'custom' ? 'custom' : 'wikipedia',
+    day: spec.kind === 'today' ? spec.day : null,
     titles,
     pick: roll ? spec.cards : null,
     extra: code ? [creatorCard(code.id)] : [],

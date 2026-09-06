@@ -7,7 +7,7 @@ import { Bar, Segmented, press, reveal } from '../ui/components.js';
 import { iconSvg } from '../data/icons.js';
 import { synth } from '../ui/sound.js';
 import * as store from '../collection.js';
-import { RARITIES, rarityById, rarityRank } from '../data/rarities.js';
+import { RARITIES, rarityById, rarityOfCard, rarityRank } from '../data/rarities.js';
 import { specId, specName } from '../booster.js';
 import { frameTier } from '../frames.js';
 import { isSensitive } from '../sensitive.js';
@@ -20,6 +20,7 @@ import { buildStaticCard, openCardDetail, refreshWishes } from './detail.js';
 import { pushNote, whenText } from './drawer.js';
 import { describeError, signedIn, syncSoon, userId } from './gate.js';
 import { live } from './live.js';
+import { clearNotify, shouldNotify, systemNotify } from './notify.js';
 import { gainBooster } from './open.js';
 import { buildBooster, renderPacks } from './packs.js';
 import { formatDuration, renderProfile } from './profile.js';
@@ -211,6 +212,7 @@ export function settlePresence() {
 function onSocialEvent(event) {
   if (event.kind === 'status') return;
   const row = event.row ?? {};
+  shadeLine(event, row);
   if (event.kind === 'message' && state.tab === 'chat' && state.chat?.otherId === row.sender) {
     showTyping(false);
     refreshChat({ markRead: true });
@@ -222,6 +224,44 @@ function onSocialEvent(event) {
   }
   clearTimeout(liveSocial.timer);
   liveSocial.timer = setTimeout(() => { syncSocial().catch(() => {}); }, 250);
+}
+
+/** A friend's name from what is loaded, or a fetch of their row. */
+async function nameOf(id) {
+  const known = state.social.friends.find((f) => f.otherId === id)?.profile?.username
+    ?? state.social.incoming.find((f) => f.otherId === id)?.profile?.username;
+  if (known) return known;
+  try { return (await account.getProfile(id))?.username ?? t('friendSomeone'); } catch { return t('friendSomeone'); }
+}
+
+/**
+ * What the shade says when the app is away: the message itself under the
+ * sender's name, a request, a parcel, a trade. Never while the app is on
+ * screen, and never for a conversation that is open.
+ */
+async function shadeLine(event, row) {
+  if (!shouldNotify()) return;
+  const me = userId();
+  if (event.kind === 'message' && row.sender && row.recipient === me) {
+    if (state.tab === 'chat' && state.chat?.otherId === row.sender && document.visibilityState === 'visible') return;
+    systemNotify(await nameOf(row.sender), String(row.body ?? ''), `chat:${row.sender}`);
+  } else if (event.kind === 'friendship' && event.type === 'INSERT' && row.addressee === me && row.status === 'pending') {
+    systemNotify(t('notifTitle'), t('notifRequest', { name: await nameOf(row.requester) }), 'friends');
+  } else if (event.kind === 'friendship' && event.type === 'UPDATE' && row.requester === me && row.status === 'accepted') {
+    systemNotify(t('notifTitle'), t('friendsAccepted', { name: await nameOf(row.addressee) }), 'friends');
+  } else if (event.kind === 'delivery' && row.recipient === me) {
+    const from = await nameOf(row.sender);
+    const line = row.kind === 'booster' ? t('notifGiftBooster', { name: from })
+      : row.kind === 'card' ? t('notifGiftCard', { name: from, card: row.payload?.title ?? '?' })
+        : row.kind === 'auction-card' ? t('notifAuctionCard', { card: row.payload?.title ?? '?' })
+          : row.kind === 'auction-money' ? t(row.payload?.reason === 'sale' ? 'notifAuctionSold' : 'notifAuctionRefund', { amount: `${formatAmount(row.payload?.amount ?? 0)} ${CURRENCY_NAME}`, card: row.payload?.title ?? '?' })
+            : row.kind === 'trade-return' ? t('notifTradeDone', { name: from }) : '';
+    if (line) systemNotify(t('notifTitle'), line, 'postbox');
+  } else if (event.kind === 'trade' && event.type === 'INSERT' && row.recipient === me) {
+    systemNotify(t('notifTitle'), t('notifTrade', { name: await nameOf(row.proposer) }), 'trades');
+  } else if (event.kind === 'trade' && event.type === 'UPDATE' && row.proposer === me && row.status === 'declined') {
+    systemNotify(t('notifTitle'), t('notifTradeDeclined', { name: await nameOf(row.recipient) }), 'trades');
+  }
 }
 
 function onPresenceSync(ids) {
@@ -627,6 +667,7 @@ export let typedAt = 0;
 
 export function openChat(entry) {
   state.chat = entry;
+  clearNotify(`chat:${entry.otherId}`);
   state.chatRows = [];
   renderChatFrame();
   showScreen('chat');
@@ -1279,6 +1320,57 @@ export function renderFriend() {
   friendSeg.select(state.friendView, { silent: true });
 
   paintFriendStats(entry);
+  paintFriendShowcase(entry);
+}
+
+/**
+ * A friend's pinned cards, with the hearts under them: how many, and
+ * whether one of them is mine. A heart is a row on the server, written as
+ * me; tapping again takes it back.
+ */
+export async function paintFriendShowcase(entry) {
+  const person = entry.profile;
+  const pins = (Array.isArray(person?.showcase) ? person.showcase : []).filter((c) => c && c.key).slice(0, 3);
+  el.friendShowcaseHead.hidden = !pins.length;
+  el.friendShowcase.hidden = !pins.length;
+  if (!pins.length) return;
+  el.friendShowcaseLabel.textContent = t('showcaseFriendLabel');
+  const me = userId();
+  let hearts = [];
+  try { hearts = await account.showcaseKudos(entry.otherId); } catch { hearts = []; }
+  if (state.viewing !== entry) return;
+  const count = (key) => hearts.filter((k) => k.key === key).length;
+  const mine = (key) => hearts.some((k) => k.key === key && k.sender === me);
+  el.friendShowcase.replaceChildren(...pins.map((card) => {
+    const slot = document.createElement('div');
+    slot.className = 'showcase-slot';
+    const node = buildStaticCard(card, rarityOfCard(card), null, { fav: false, wish: false });
+    node.addEventListener('click', () => openCardDetail(card.key, card, rarityOfCard(card)));
+    const heart = document.createElement('button');
+    heart.type = 'button';
+    heart.className = `showcase-kudos${mine(card.key) ? ' is-on' : ''}`;
+    const paint = () => {
+      heart.classList.toggle('is-on', mine(card.key));
+      heart.innerHTML = `${iconSvg('heart', { size: 14 })}<span class="tabular"></span>`;
+      heart.querySelector('span').textContent = String(count(card.key));
+      heart.setAttribute('aria-label', t(mine(card.key) ? 'showcaseKudosTaken' : 'showcaseKudosLabel'));
+    };
+    paint();
+    press(heart, { sound: null });
+    heart.addEventListener('click', async () => {
+      heart.disabled = true;
+      const on = !mine(card.key);
+      try {
+        await account.setKudos(entry.otherId, card.key, me, on);
+        hearts = on ? [...hearts, { key: card.key, sender: me }] : hearts.filter((k) => !(k.key === card.key && k.sender === me));
+        synth.playTap();
+        paint();
+      } catch (error) { toast(esc(describeError(error)), 'error'); }
+      heart.disabled = false;
+    });
+    slot.append(node, heart);
+    return slot;
+  }));
 }
 /**
  * The same stats block as your own profile, from what the profile row says

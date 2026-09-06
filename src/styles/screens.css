@@ -2486,3 +2486,79 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .frame-card.is-locked { opacity: 0.5; }
 .frame-card.is-locked .frame-copy small { display: block; font-size: 0.68rem; color: var(--ink-faint); margin-top: 2px; }
 .frame-card .frame-copy small:empty { display: none; }
+
+/* --- the showcase --------------------------------------------------------- */
+/* Three cards pinned on a profile. Yours have a way to take them down and a
+   way to fill an empty slot; a friend's carry the hearts under them. */
+.showcase-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0 var(--gutter); }
+.showcase-slot { position: relative; display: grid; gap: 6px; justify-items: center; min-width: 0; }
+.showcase-slot .card { width: 100%; }
+.showcase-empty {
+  width: 100%;
+  aspect-ratio: 63 / 88;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  border-radius: var(--radius);
+  border: 2px dashed var(--line-strong);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  color: var(--ink-faint);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 8px;
+}
+.showcase-empty:hover { border-color: var(--accent); color: var(--ink); }
+.showcase-remove { position: absolute; top: -6px; right: -6px; z-index: 2; }
+.showcase-kudos {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: var(--border) var(--border-style) var(--line);
+  background: var(--surface);
+  color: var(--ink-dim);
+  font-size: 0.74rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.showcase-kudos.is-on { color: #fb7185; border-color: color-mix(in srgb, #fb7185 55%, var(--line)); }
+.showcase-kudos.is-on svg { fill: #fb7185; }
+.showcase-kudos:disabled { opacity: 0.7; }
+.section-note { font-size: 0.74rem; color: var(--ink-faint); margin: 0; }
+
+/* --- guilds ---------------------------------------------------------------- */
+.guild-home, .guild-join { display: grid; gap: 14px; }
+.guild-card { margin: 0 var(--gutter); padding: 16px; display: grid; gap: 14px; }
+.guild-id { display: flex; align-items: flex-start; gap: 14px; }
+.guild-tag {
+  flex: none;
+  min-width: 56px;
+  height: 56px;
+  padding: 0 10px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface-2));
+  border: var(--border) var(--border-style) color-mix(in srgb, var(--accent) 50%, var(--line));
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+.guild-copy { min-width: 0; display: grid; gap: 4px; }
+.guild-copy h3 { font-size: 1.2rem; line-height: 1.15; }
+.guild-copy p { font-size: 0.84rem; color: var(--ink-dim); line-height: 1.45; }
+.guild-meta { font-size: 0.74rem !important; color: var(--ink-faint) !important; }
+.guild-scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.guild-score { display: grid; gap: 2px; padding: 10px; border-radius: var(--radius); background: var(--surface-2); text-align: center; }
+.guild-score b { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.guild-score span { font-size: 0.66rem; letter-spacing: var(--label-tracking); text-transform: uppercase; color: var(--ink-faint); }
+.guild-score small { font-size: 0.72rem; color: var(--ink-dim); }
+.guild-actions { display: flex; justify-content: flex-end; }
+.guild-form { margin: 0 var(--gutter); padding: 16px; display: grid; gap: 12px; }
+.guild-row-tag { flex: none; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.08em; color: var(--accent); }
+.person-copy .guild-line { font-variant-numeric: tabular-nums; }
+.lb-step.is-guild .lb-face { font-size: 0.7rem; letter-spacing: 0.06em; }

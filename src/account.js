@@ -84,3 +84,5 @@ export {
   openTrades,
   setTradeStatus
 } from './account/social.js';
+export { setShowcase, showcaseKudos, setKudos } from './account/social.js';
+export { myGuild, createGuild, joinGuild, leaveGuild, searchGuilds, guildRoster, guildBoard, myGuildRank } from './account/guilds.js';

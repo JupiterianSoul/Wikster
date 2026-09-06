@@ -513,6 +513,33 @@ Wikdle plays in the app's language: `src/data/wikdle-words-fr.js` carries
 the French answers and dictionary, accents dropped, and the hints come from
 the word's article on that language's Wikipedia.
 
+### The clubhouse
+
+Guilds are a name, a tag and up to fifty players (`supabase/schema.sql`
+V8, `src/account/guilds.js`, `src/app/guilds.js`). A guild has three
+windows of its own, filled by the same trigger that fills a player's: every
+point scored lands on both at once, so there is nothing to sum and nothing
+to sync. Founding, joining and leaving are functions on the server; the
+last one out closes the guild. The guild leaderboard is painted by the same
+code as the players' (`boardNode` in `src/app/quests.js`) and moves live.
+
+The showcase is up to three cards pinned on the profile: a copy of each,
+kept in the profile so it syncs, and published on the profile row so a
+friend's page reads it in one go. Friends leave a heart per card
+(`showcase_kudos`, one row per friend and card).
+
+Wikipedia Today is a booster whose cards come from what the encyclopaedia's
+readers opened most the day before (`fetchTopRead` in `src/wiki/fetch.js`,
+the `today` source in `src/wiki/core.js`): one a day on the shop floor, and
+not free, because the front page prices like the front page.
+
+Notifications: the Android wrapper carries a bridge (`WiksterNotify`) to a
+notification channel, and `src/app/notify.js` raises a line for a message,
+a request, a parcel or a trade that the live wire delivers while the app is
+not on screen; a browser does the same through the Notification API once
+allowed from Settings. There is no push service behind it: it works for as
+long as the page lives in the background.
+
 ### On a desk
 
 `src/styles/desktop.css` has two widths in it, and they are different rooms.

@@ -61,7 +61,7 @@ export function isSchemaGap(error) {
 }
 /** The v2 columns on `profiles`, asked for only where they exist. */
 
-export const SOCIAL_COLS = 'avatar, presence, last_seen_at, visibility';
+export const SOCIAL_COLS = 'avatar, presence, last_seen_at, visibility, showcase';
 /**
  * Run a profiles read that WANTS the social columns. `build` is handed the
  * column list to use; on a pre-social project it is called again with the

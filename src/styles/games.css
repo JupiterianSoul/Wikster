@@ -348,6 +348,8 @@
 .lb-rank { justify-self: start; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; color: var(--ink-dim); background: var(--surface-2); }
 .lb-row.is-me .lb-rank { color: var(--accent-ink); background: var(--accent); }
 .lb-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.lb-sub { display: block; font-size: 0.68rem; font-weight: 600; color: var(--ink-faint); }
+.lb-row.is-pinned { margin-top: 10px; border-style: dashed; }
 .lb-score { font-weight: 800; }
 .lb-foot { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 0.74rem; color: var(--ink-faint); padding: 2px 0; }
 .lb-more { justify-self: center; }

@@ -164,6 +164,14 @@ function screenBlock(tab) {
       action(t('marketSell'), () => import('./market.js').then((mod) => mod.openSellSheet()))
     ]);
   }
+  if (tab === 'guilds' || tab === 'leaderboard') {
+    const g = state.guild;
+    return block(t('tabGuilds'), [
+      line('shield', g ? t('panelGuild', { tag: g.tag, name: g.name }) : t('panelGuildNone')),
+      line('friends', g ? t('guildMembers', { n: g.members }) : t('guildsIntro')),
+      action(t(tab === 'guilds' ? 'tabLeaderboard' : 'tabGuilds'), () => showScreen(tab === 'guilds' ? 'leaderboard' : 'guilds'))
+    ]);
+  }
   if (['games', 'wikdle', 'slots', 'duel', 'reveal'].includes(tab)) {
     const game = wikdle.loadGame(wikdle.utcDay(), wikdle.langFor(getLanguage()));
     return block(t('tabGames'), [
@@ -189,7 +197,7 @@ function currentSignature() {
     progress.level, progress.xp, state.wallet, unreadCount(),
     canClaim(state.profile.daily), board.quests.filter((q) => q.progress >= q.target).length,
     quests.claimableCount(questUserKey()),
-    duel.roundsLeft(), reveal.roundsLeft(), activeFilterCount(),
+    duel.roundsLeft(), reveal.roundsLeft(), activeFilterCount(), state.guild?.id, state.guild?.members,
     Object.keys(state.collection?.entries ?? {}).length,
     Object.values(state.inventory ?? {}).reduce((s, r) => s + (r.count ?? 0), 0)
   ].join('|');

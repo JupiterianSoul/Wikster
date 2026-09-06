@@ -253,6 +253,8 @@ const ICONS = {
       stroke-linecap="round" stroke-linejoin="round">
       <path d="M7 3h10a1 1 0 0 1 1 1v17l-6-4.2L6 21V4a1 1 0 0 1 1-1Z"/>
     </svg>`,
+  shield: `<path d="M12 3.2 5 6v5.2c0 4.3 3 7.6 7 9.6 4-2 7-5.3 7-9.6V6z"/><path d="m9.3 12 1.9 1.9 3.6-3.8"/>`,
+  heart: `<path d="M12 20.3 4.6 13a4.2 4.2 0 0 1 6-6l1.4 1.4L13.4 7a4.2 4.2 0 0 1 6 6z"/>`,
   bell: `
     <path d="M18 9.4a6 6 0 0 0-12 0c0 5-2.2 6.4-2.2 6.4h16.4S18 14.4 18 9.4z"/>
     <path d="M13.6 19.2a1.9 1.9 0 0 1-3.2 0"/>`,

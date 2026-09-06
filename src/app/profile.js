@@ -8,9 +8,14 @@ import { formatAmount } from '../pricing.js';
 import { albumsDeep } from '../albums.js';
 import { evaluate as evaluateAchievements } from '../achievements.js';
 import * as account from '../account.js';
-import { RARITIES } from '../data/rarities.js';
+import { RARITIES, rarityById, rarityOfCard, rarityRank } from '../data/rarities.js';
 import { Bar } from '../ui/components.js';
-import { el, state } from './core.js';
+import { el, openSheet, state } from './core.js';
+import { iconSvg } from '../data/icons.js';
+import { press } from '../ui/components.js';
+import { synth } from '../ui/sound.js';
+import { buildStaticCard, openCardDetail } from './detail.js';
+import { signedIn, userId } from './gate.js';
 import { live } from './live.js';
 import { rewardCard } from './open.js';
 import { achFacts, frameStyle, paintFrameInto, renderBadges } from './regalia.js';
@@ -53,6 +58,7 @@ export function renderProfile() {
       : rewardCard(rewardForLevel(level + 1), { art: false })
   );
 
+  paintShowcase();
   renderBadges();
 
   el.statsLabel.textContent = t('profileStats');
@@ -98,4 +104,102 @@ export function renderProfile() {
     return row;
   }));
 
+}
+
+/* --- the showcase -------------------------------------------------------------
+ *
+ * Three cards pinned on the profile for friends to see. A pin is a copy of
+ * the card as it was pinned (the card can be sold or traded afterwards and
+ * the pin stays), kept in the profile so it syncs, and published to the
+ * profile row so a friend's screen reads it in one go.
+ */
+
+const MAX_PINS = 3;
+
+export function pinnedCards() {
+  return (Array.isArray(state.profile.showcase) ? state.profile.showcase : []).filter((c) => c && c.key).slice(0, MAX_PINS);
+}
+
+function savePins(pins) {
+  state.profile.showcase = pins.slice(0, MAX_PINS);
+  store.saveProfile(state.profile);
+  paintShowcase();
+  if (signedIn()) account.setShowcase(userId(), state.profile.showcase).catch(() => { /* next sync */ });
+}
+
+export function paintShowcase() {
+  if (!el.showcaseGrid) return;
+  el.showcaseLabel.textContent = t('showcaseLabel');
+  el.showcaseNote.textContent = t('showcaseNote');
+  const pins = pinnedCards();
+  el.showcaseGrid.replaceChildren(...Array.from({ length: MAX_PINS }, (_, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'showcase-slot';
+    const card = pins[i];
+    if (card) {
+      const node = buildStaticCard(card, rarityOfCard(card), null, { fav: false, wish: false });
+      node.addEventListener('click', () => {
+        const owned = state.collection.entries?.[card.key];
+        if (owned) openCardDetail(card.key, owned, rarityOfCard(owned));
+      });
+      const off = document.createElement('button');
+      off.type = 'button';
+      off.className = 'icon-btn is-mini showcase-remove';
+      off.setAttribute('aria-label', t('showcaseRemove'));
+      off.innerHTML = iconSvg('close', { size: 14 });
+      press(off, { sound: null });
+      off.addEventListener('click', (e) => { e.stopPropagation(); synth.playTap(); savePins(pins.filter((_, j) => j !== i)); });
+      slot.append(node, off);
+    } else {
+      const add = document.createElement('button');
+      add.type = 'button';
+      add.className = 'showcase-empty';
+      add.innerHTML = `${iconSvg('plus', { size: 22 })}<span></span>`;
+      add.querySelector('span').textContent = t('showcaseEmpty');
+      press(add, { sound: null });
+      add.addEventListener('click', () => { synth.playTap(); openShowcasePicker(); });
+      slot.appendChild(add);
+    }
+    return slot;
+  }));
+}
+
+/** Choose a card of mine to pin: the picker the gift sheet uses, rarest first. */
+export function openShowcasePicker() {
+  const pins = pinnedCards();
+  const taken = new Set(pins.map((c) => c.key));
+  const mine = store.allEntries(state.collection)
+    .filter((c) => !taken.has(c.key))
+    .sort((a, b) => rarityRank(b.rarityId) - rarityRank(a.rarityId));
+  openSheet(t('showcasePick'), (body) => {
+    if (!mine.length) {
+      body.innerHTML = '<p class="muted"></p>';
+      body.querySelector('p').textContent = t('giftNothing');
+      return;
+    }
+    const list = document.createElement('div');
+    list.className = 'pick-list';
+    list.replaceChildren(...mine.map((card) => {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'pick-row';
+      row.innerHTML = `
+        <span class="pick-thumb"></span>
+        <span class="pick-copy"><b></b><span></span></span>
+        <span class="chip tabular">×${card.count}</span>`;
+      if (card.thumbnail) row.querySelector('.pick-thumb').style.backgroundImage = `url("${card.thumbnail}")`;
+      row.querySelector('b').textContent = card.title;
+      const tier = row.querySelector('.pick-copy span');
+      tier.textContent = tx(rarityById(card.rarityId).name);
+      tier.style.color = rarityById(card.rarityId).color;
+      press(row, { sound: null });
+      row.addEventListener('click', () => {
+        synth.playResolved();
+        savePins([...pins, { ...card, count: 1, favorite: false }]);
+        live.sheet.hide();
+      });
+      return row;
+    }));
+    body.appendChild(list);
+  });
 }

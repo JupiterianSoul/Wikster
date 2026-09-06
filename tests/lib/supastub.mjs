@@ -28,6 +28,9 @@ export const newDatabase = () => ({
   auctions: [],             // { id, seller, seller_name, card, start_price, current_bid, bidder, bidder_name, bid_count, ends_at, status, created_at }
   codex: new Map(),         // key -> { key, title, rarity, price, views, thumbnail, lang, found_at, found_by }
   wishlists: [],            // { owner, key, card, created_at }
+  kudos: [],                // { owner, key, sender, created_at }: hearts on a showcase
+  guilds: [],               // { id, name, tag, about, owner, members, created_at }
+  guildMembers: [],         // { user_id, guild_id, joined_at }
   tokens: new Map(),        // access_token -> user id
   seq: 0
 });
@@ -351,12 +354,92 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
       for (const table of ['leaderboard_daily', 'leaderboard_weekly', 'leaderboard_alltime']) {
         db.emitChange?.(table, 'UPDATE', { user_id: me, score: mine?.score ?? 0, updated_at: new Date().toISOString() });
       }
+      const g = db.guildMembers.find((m) => m.user_id === me)?.guild_id;
+      if (g) for (const table of ['guild_daily', 'guild_weekly', 'guild_alltime']) db.emitChange?.(table, 'UPDATE', { guild_id: g, updated_at: new Date().toISOString() });
       return json(route, null, 204);
     }
     if (path === 'rpc/my_rank') {
       const all = board();
       const at = all.findIndex((r) => r.user_id === me);
       return json(route, at < 0 ? [] : [{ rank: at + 1, score: all[at].score, total: all.length }]);
+    }
+    /* -- guilds: the functions of schema V8, over the same score rows -- */
+    const guildOf = (user) => db.guildMembers.find((m) => m.user_id === user)?.guild_id ?? null;
+    const guildTotals = () => {
+      const perUser = new Map(board().map((r) => [r.user_id, r.score]));
+      const totals = new Map();
+      for (const m of db.guildMembers) totals.set(m.guild_id, (totals.get(m.guild_id) ?? 0) + (perUser.get(m.user_id) ?? 0));
+      return [...db.guilds].map((g) => ({ ...g, score: totals.get(g.id) ?? 0 })).filter((g) => g.score > 0)
+        .sort((a, b) => b.score - a.score || a.created_at.localeCompare(b.created_at));
+    };
+    const emitGuild = (id) => {
+      const row = guildTotals().find((g) => g.id === id);
+      for (const table of ['guild_daily', 'guild_weekly', 'guild_alltime']) db.emitChange?.(table, 'UPDATE', { guild_id: id, score: row?.score ?? 0, updated_at: new Date().toISOString() });
+    };
+    if (path === 'rpc/my_guild') {
+      const id = guildOf(me);
+      return json(route, id ? db.guilds.find((g) => g.id === id) ?? null : null);
+    }
+    if (path === 'rpc/create_guild') {
+      if (guildOf(me)) return fail(route, 'ALREADY_IN_GUILD', 400);
+      const name = String(body.p_name ?? '').trim();
+      const tag = String(body.p_tag ?? '').trim().toUpperCase();
+      if (name.length < 3 || name.length > 24) return fail(route, 'violates check constraint', 400);
+      if (!/^[A-Z0-9]{2,5}$/.test(tag)) return fail(route, 'violates check constraint', 400);
+      if (db.guilds.some((g) => g.name.toLowerCase() === name.toLowerCase())) return fail(route, 'NAME_TAKEN', 400);
+      if (db.guilds.some((g) => g.tag === tag)) return fail(route, 'TAG_TAKEN', 400);
+      const row = { id: uuid(), name, tag, about: String(body.p_about ?? '').trim(), owner: me, members: 1, created_at: new Date().toISOString() };
+      db.guilds.push(row);
+      db.guildMembers.push({ user_id: me, guild_id: row.id, joined_at: new Date().toISOString() });
+      return json(route, row);
+    }
+    if (path === 'rpc/join_guild') {
+      if (guildOf(me)) return fail(route, 'ALREADY_IN_GUILD', 400);
+      const row = db.guilds.find((g) => g.id === body.p_guild);
+      if (!row) return fail(route, 'NOT_FOUND', 400);
+      if (row.members >= 50) return fail(route, 'GUILD_FULL', 400);
+      db.guildMembers.push({ user_id: me, guild_id: row.id, joined_at: new Date().toISOString() });
+      row.members += 1;
+      emitGuild(row.id);
+      return json(route, row);
+    }
+    if (path === 'rpc/leave_guild') {
+      const id = guildOf(me);
+      if (!id) return json(route, null, 204);
+      db.guildMembers = db.guildMembers.filter((m) => m.user_id !== me);
+      const left = db.guildMembers.filter((m) => m.guild_id === id);
+      const row = db.guilds.find((g) => g.id === id);
+      if (!left.length) db.guilds = db.guilds.filter((g) => g.id !== id);
+      else {
+        row.members = left.length;
+        if (row.owner === me) row.owner = [...left].sort((a, b) => a.joined_at.localeCompare(b.joined_at))[0].user_id;
+      }
+      emitGuild(id);
+      return json(route, null, 204);
+    }
+    if (path === 'rpc/search_guilds') {
+      const term = String(body.p_term ?? '').toLowerCase();
+      return json(route, db.guilds.filter((g) => !term || g.name.toLowerCase().includes(term) || g.tag.toLowerCase().includes(term))
+        .sort((a, b) => b.members - a.members).slice(0, 20));
+    }
+    if (path === 'rpc/guild_roster') {
+      const perUser = new Map(board().map((r) => [r.user_id, r.score]));
+      return json(route, db.guildMembers.filter((m) => m.guild_id === body.p_guild).map((m) => ({
+        user_id: m.user_id, username: db.profiles.get(m.user_id)?.username ?? '?', level: db.profiles.get(m.user_id)?.level ?? 1,
+        joined_at: m.joined_at, score: perUser.get(m.user_id) ?? 0
+      })).sort((a, b) => b.score - a.score));
+    }
+    if (path === 'rpc/guild_board') {
+      const all = guildTotals();
+      const page = Number(body.p_page) || 0;
+      return json(route, all.slice(page * 20, page * 20 + 20).map((g, i) => ({ rank: page * 20 + i + 1, guild_id: g.id, name: g.name, tag: g.tag, members: g.members, score: g.score })));
+    }
+    if (path === 'rpc/my_guild_rank') {
+      const id = guildOf(me);
+      if (!id) return json(route, []);
+      const all = guildTotals();
+      const at = all.findIndex((g) => g.id === id);
+      return json(route, [{ rank: at < 0 ? null : at + 1, score: at < 0 ? 0 : all[at].score, total: all.length }]);
     }
     if (path === 'rpc/friend_cards') {
       // The whole point of the function: only a friend gets anything, and only
@@ -716,6 +799,30 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
           db.emitChange('messages', 'UPDATE', m, before);
         }
         return rows(route, changed);
+      }
+    }
+
+    /* -- showcase hearts -- */
+    if (path === 'showcase_kudos') {
+      if (method === 'GET') {
+        const owner = (params.get('owner') ?? '').slice(3);
+        return rows(route, db.kudos.filter((k) => !owner || k.owner === owner));
+      }
+      if (method === 'POST') {
+        if (body.sender !== me) return fail(route, 'row-level security policy', 403);
+        if (!areFriends(body.sender, body.owner)) return fail(route, 'row-level security policy', 403);
+        if (db.kudos.some((k) => k.owner === body.owner && k.key === body.key && k.sender === body.sender)) return fail(route, 'duplicate key value violates unique constraint', 409);
+        const row = { created_at: new Date().toISOString(), ...body };
+        db.kudos.push(row);
+        return rows(route, [row], 201);
+      }
+      if (method === 'DELETE') {
+        const sender = (params.get('sender') ?? '').slice(3);
+        if (sender !== me) return fail(route, 'row-level security policy', 403);
+        const owner = (params.get('owner') ?? '').slice(3);
+        const key = (params.get('key') ?? '').slice(3);
+        db.kudos = db.kudos.filter((k) => !(k.owner === owner && k.key === key && k.sender === sender));
+        return json(route, [], 204);
       }
     }
 

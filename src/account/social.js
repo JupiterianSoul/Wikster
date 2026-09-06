@@ -265,3 +265,33 @@ export async function setTradeStatus(id, status) {
     if (error) throw error;
   });
 }
+
+/* --- the showcase -------------------------------------------------------- */
+
+/** Pins these cards (at most three, a copy of each) on my profile row.
+ *  A project without the column is left alone. */
+export async function setShowcase(userId, cards) {
+  if (live.socialColumns === false) return;
+  const { error } = await supabase.from('profiles')
+    .update({ showcase: (cards ?? []).slice(0, 3) }).eq('id', userId);
+  if (error && !isSchemaGap(error)) throw error;
+}
+
+/** Every heart on someone's showcase: [{ key, sender }]. */
+export async function showcaseKudos(owner) {
+  return readSocialTable(async () => {
+    const { data, error } = await supabase.from('showcase_kudos')
+      .select('key, sender').eq('owner', owner);
+    if (error) throw error;
+    return data ?? [];
+  }, []);
+}
+
+/** Leave a heart on a friend's pinned card, or take mine back. */
+export async function setKudos(owner, key, sender, on) {
+  const table = supabase.from('showcase_kudos');
+  const { error } = on
+    ? await table.insert({ owner, key, sender })
+    : await table.delete().eq('owner', owner).eq('key', key).eq('sender', sender);
+  if (error && !/duplicate key/i.test(String(error.message ?? ''))) throw error;
+}

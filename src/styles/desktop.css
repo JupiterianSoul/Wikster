@@ -503,6 +503,8 @@
      label is the one the screen reader already reads, so the two can never
      drift apart. */
   .icon-btn[aria-label], [data-tip] { position: relative; }
+  /* The one icon button that sits on a corner rather than in a row. */
+  .showcase-remove { position: absolute; }
   .icon-btn[aria-label]:hover::after,
   .icon-btn[aria-label]:focus-visible::after,
   [data-tip]:hover::after,

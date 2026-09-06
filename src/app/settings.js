@@ -27,6 +27,7 @@ import { buildBooster, renderPacks } from './packs.js';
 import { frameStyle, pickFrameStyle, updateBadges, wearBadge } from './regalia.js';
 import { renderShop } from './shop.js';
 import { openAvatarPicker, paintAvatarInto, settlePresence } from './social.js';
+import { askNotify, inWrapper, notifyState } from './notify.js';
 
 /* --- settings ------------------------------------------------------------------------------------------- */
 
@@ -616,7 +617,18 @@ export function accountRows() {
     btn.disabled = false;
   });
 
-  return [who, visRow, presRow, out];
+  // Notifications while the app is away: the wrapper's shade, or the browser's.
+  const notifyRow = settingsRowShell('notifyTitle', inWrapper() ? 'notifyNoteWrapper' : 'notifyNoteBrowser');
+  const notifyLabel = (s) => t(s === 'on' ? 'notifyOn' : s === 'off' ? 'notifyOff' : s === 'none' ? 'notifyNone' : 'notifyAsk');
+  settingsRowButton(notifyRow, notifyLabel(notifyState()), async (btn) => {
+    btn.disabled = true;
+    const now = await askNotify();
+    btn.textContent = notifyLabel(now);
+    if (now === 'off') toast(esc(t('notifyRefused')), 'error');
+    btn.disabled = false;
+  });
+
+  return [who, visRow, presRow, notifyRow, out];
 }
 /** A new name, checked and claimed. */
 

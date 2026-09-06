@@ -296,6 +296,9 @@ export async function flushSync() {
     // are in storage now, and the screen has to be read back from it.
     if (pushed === 'merged') takeMerge();
     await account.publishStats(userId(), currentStats());
+    // The showcase rides on the profile row too, in its own call: a project
+    // without the column loses nothing else.
+    if (Array.isArray(state.profile.showcase)) account.setShowcase(userId(), state.profile.showcase).catch(() => {});
     state.account.syncedAt = Date.now();
     state.account.failed = false;
   } catch {
@@ -366,6 +369,8 @@ export async function resumeAccount() {
   startSocialPoll();
   startLiveSocial();
   leaderboard.flushScores().catch(() => {});
+  // Which guild is mine, for the panel and the board, without opening the screen.
+  import('./guilds.js').then((m) => m.loadMyGuild({ fresh: true })).catch(() => {});
 }
 /**
  * Sign in has happened. Pull the account's save over the local one, then start
@@ -397,6 +402,8 @@ export async function enterApp() {
   startSocialPoll();
   startLiveSocial();
   leaderboard.flushScores().catch(() => {});
+  // Which guild is mine, for the panel and the board, without opening the screen.
+  import('./guilds.js').then((m) => m.loadMyGuild({ fresh: true })).catch(() => {});
 
   if (!languageChosen() || !state.profile.started) showWelcome();
   else {
@@ -520,6 +527,7 @@ export async function leaveAccount() {
   state.social = { friends: [], incoming: [], outgoing: [], results: [], loaded: false, unread: new Map(), trades: [] };
   stopSocialPoll();
   stopLiveSocial();
+  state.guild = undefined;
   el.welcome.hidden = true;
   showScreen('packs');
   showGate();

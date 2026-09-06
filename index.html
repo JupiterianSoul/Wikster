@@ -218,7 +218,10 @@
             </div>
           </div>
 
-          <div class="section-head"><h3 class="label" id="badges-label"></h3></div>
+          <div class="section-head"><h3 class="label" id="showcase-label"></h3><p class="section-note" id="showcase-note"></p></div>
+          <div class="showcase-grid" id="showcase-grid"></div>
+
+          <div class="section-head" style="padding-top:24px"><h3 class="label" id="badges-label"></h3></div>
           <div class="badge-grid" id="badge-grid"></div>
 
           <div class="section-head" style="padding-top:24px"><h3 class="label" id="stats-label"></h3></div>
@@ -295,7 +298,10 @@
 
           <div class="friend-actions pad" id="friend-actions"></div>
 
-          <div class="section-head"><h3 class="label" id="friend-stats-label"></h3></div>
+          <div class="section-head" id="friend-showcase-head" hidden><h3 class="label" id="friend-showcase-label"></h3></div>
+          <div class="showcase-grid" id="friend-showcase" hidden></div>
+
+          <div class="section-head" style="padding-top:24px"><h3 class="label" id="friend-stats-label"></h3></div>
           <div class="stat-grid" id="friend-stats"></div>
 
           <div class="section-head" style="padding-top:24px"><h3 class="label" id="friend-rarity-label"></h3></div>
@@ -423,6 +429,53 @@
           <div class="pad" id="leaderboard-seg"></div>
           <div class="pad" id="leaderboard-body"></div>
           <div class="leaderboard-me" id="leaderboard-me" hidden></div>
+        </section>
+
+        <!-- GUILDS: a name, a tag, fifty players and a board of their own ------- -->
+        <section id="screen-guilds" class="screen">
+          <div class="screen-head">
+            <h2 id="guilds-title"></h2>
+            <p id="guilds-intro"></p>
+            <button class="help-btn" data-help="guilds" type="button" aria-label="What is this?">?</button>
+          </div>
+          <div id="guild-home" class="guild-home" hidden>
+            <div class="guild-card panel">
+              <div class="guild-id">
+                <span class="guild-tag" id="guild-tag"></span>
+                <div class="guild-copy">
+                  <h3 id="guild-name"></h3>
+                  <p id="guild-about"></p>
+                  <p class="guild-meta" id="guild-meta"></p>
+                </div>
+              </div>
+              <div class="guild-scores" id="guild-scores"></div>
+              <div class="guild-actions">
+                <button id="guild-leave" class="btn btn-ghost btn-sm" type="button"></button>
+              </div>
+            </div>
+            <div class="section-head"><h3 class="label" id="guild-roster-label"></h3></div>
+            <div class="people" id="guild-roster"></div>
+          </div>
+          <div id="guild-join" class="guild-join" hidden>
+            <form id="guild-find" class="find panel" autocomplete="off">
+              <span class="find-mark" id="guild-find-mark" aria-hidden="true"></span>
+              <input id="guild-find-input" class="find-input" type="search" spellcheck="false" enterkeyhint="search">
+              <button id="guild-find-go" class="btn btn-primary btn-sm" type="submit"></button>
+            </form>
+            <p id="guild-find-status" class="find-status" role="status" aria-live="polite"></p>
+            <div class="people" id="guild-results"></div>
+            <div class="section-head" style="padding-top:20px"><h3 class="label" id="guild-create-label"></h3></div>
+            <form class="guild-form panel" id="guild-create" autocomplete="off">
+              <label class="field"><span id="guild-create-name-label"></span><span class="field-box"><input name="name" class="field-input" maxlength="24" required></span></label>
+              <label class="field"><span id="guild-create-tag-label"></span><span class="field-box"><input name="tag" class="field-input" maxlength="5" pattern="[A-Za-z0-9]{2,5}" required></span></label>
+              <label class="field"><span id="guild-create-about-label"></span><span class="field-box"><input name="about" class="field-input" maxlength="140"></span></label>
+              <button class="btn btn-primary" type="submit" id="guild-create-go"></button>
+              <p id="guild-create-status" class="find-status" role="status" aria-live="polite"></p>
+            </form>
+          </div>
+          <div class="section-head" style="padding-top:24px"><h3 class="label" id="guild-board-label"></h3></div>
+          <div class="pad" id="guild-seg"></div>
+          <div class="pad" id="guild-board"></div>
         </section>
 
         <!-- CARD INDEX: everything anyone has ever found ----------------------- -->
