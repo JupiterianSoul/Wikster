@@ -179,28 +179,32 @@ check('a five-card booster deals five', five === 5, String(five));
 section('Wikdle');
 const hints = await p.evaluate(async () => {
   const mod = window.__wikster.wikdle;
-  const word = 'crane';
   const out = {};
-  const first = await mod.fetchHint(word, 0, { greens: [], hints: [] });
-  out.first = first;
-  // Wikipedia answering with a page of meanings: the hint falls back to a letter.
   const realFetch = window.fetch;
+  // Wikipedia answering with a page of meanings, and a search that finds
+  // nothing better: the hint falls back to a letter, from the first.
   window.fetch = async () => ({ ok: true, json: async () => ({ type: 'disambiguation', description: 'Topics referred to by the same term', extract: 'Crane may refer to:' }) });
-  out.second = await mod.fetchHint(word, 1, { greens: [], hints: [first] });
-  // And a real article: the hint is the meaning, with the word blanked out.
-  window.fetch = async () => ({ ok: true, json: async () => ({ type: 'standard', description: 'Machine for lifting heavy loads', extract: 'A crane is a machine used to lift and move loads.' }) });
-  out.meaning = await mod.fetchHint(word, 1, { greens: [], hints: [first] });
+  out.first = await mod.fetchHint('crane', 0, { greens: [], hints: [] });
+  out.second = await mod.fetchHint('crane', 1, { greens: [], hints: [out.first] });
+  // A real article: what Wikipedia calls it, then how the article begins,
+  // the word blanked out of both; the third is a letter.
+  window.fetch = async () => ({ ok: true, json: async () => ({ type: 'standard', description: 'Machine for lifting heavy loads', extract: 'A hoist is a machine used to lift and move loads. Hoists are found on building sites.' }) });
+  out.about = await mod.fetchHint('hoist', 0, { greens: [], hints: [] });
+  out.meaning = await mod.fetchHint('hoist', 1, { greens: [], hints: [out.about] });
+  out.third = await mod.fetchHint('hoist', 2, { greens: [], hints: [out.about, out.meaning] });
   window.fetch = realFetch;
   out.points = mod.WIKDLE_POINTS;
   out.cost = mod.HINT_COST;
   out.paid = mod.wikdlePoints({ status: 'won', rows: [1, 2, 3], hints: [{}, {}] });
   return out;
 });
-check('the first hint is a letter of the answer', Number.isInteger(hints.first?.at) && /letter/i.test(hints.first.text), JSON.stringify(hints.first));
+check('a page of meanings is never handed over: the hint is a letter', Number.isInteger(hints.first?.at) && /letter/i.test(hints.first.text), JSON.stringify(hints.first));
 check('it names the letter that is really there', 'crane'[hints.first.at].toUpperCase() === (hints.first.text.match(/is ([A-Z])/) ?? [])[1], hints.first.text);
-check('a page of meanings is never handed over as a hint', Number.isInteger(hints.second?.at) && hints.second.at !== hints.first.at, JSON.stringify(hints.second));
-check('a real article is', !Number.isInteger(hints.meaning?.at) && /machine/i.test(hints.meaning.text), JSON.stringify(hints.meaning));
-check('and the answer is blanked out of it', !/crane/i.test(hints.meaning.text), hints.meaning.text);
+check('and the next letter is another place', Number.isInteger(hints.second?.at) && hints.second.at !== hints.first.at, JSON.stringify(hints.second));
+check('a real article gives what Wikipedia calls it', hints.about?.kind === 'about' && /machine/i.test(hints.about.text), JSON.stringify(hints.about));
+check('then how the article begins', hints.meaning?.kind === 'sentence' && /lift/i.test(hints.meaning.text), JSON.stringify(hints.meaning));
+check('with the answer blanked out of both', !/hoist/i.test(hints.about.text) && !/hoist/i.test(hints.meaning.text) && /▮/.test(hints.meaning.text), hints.meaning.text);
+check('and the third is a letter', Number.isInteger(hints.third?.at), JSON.stringify(hints.third));
 check('a solve is worth several slot spins', hints.points[0] >= 1200 && hints.paid >= 600, `${hints.points[0]} / ${hints.paid}`);
 
 /* --- the adult-content blur ---------------------------------------------------- */

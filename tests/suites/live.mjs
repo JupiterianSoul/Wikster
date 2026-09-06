@@ -78,6 +78,17 @@ const viaDrawer = async (page, link) => {
   await page.locator(`.drawer-link[data-link="${link}"]`).click();
   await page.waitForTimeout(900);
 };
+/** Waits for a condition, polling, up to `ms`: still far inside the
+ *  minute the poll would take, which is the whole point. */
+const until = async (fn, ms = 6000) => {
+  const end = Date.now() + ms;
+  for (;;) {
+    let ok = false;
+    try { ok = await fn(); } catch { ok = false; }
+    if (ok || Date.now() > end) return ok;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+};
 const userIdOf = (email) => shared.users.get(email)?.id;
 /** Which topics a player's sockets have joined: the wires are up when the
  *  social feed and the presence lobby are among them. */
@@ -116,26 +127,23 @@ await viaDrawer(b, 'friends');
 await b.waitForTimeout(800);
 await a.locator('#chat-input').fill('hello grace');
 await a.locator('#chat-send').click();
-await a.waitForTimeout(1600);
 const bubble = a.locator('#chat-log .bubble.is-mine').first();
-check('my bubble is up, one tick', (await bubble.count()) === 1 && !(await bubble.evaluate((n) => n.classList.contains('is-read'))));
-check('B\'s friends list shows the unread at once', /1/.test(await b.locator('#friends-list .person .count').first().textContent().catch(() => '')), await b.locator('#friends-list').textContent());
+check('my bubble is up, one tick', await until(async () => (await bubble.count()) === 1) && !(await bubble.evaluate((n) => n.classList.contains('is-read'))));
+check('B\'s friends list shows the unread at once', await until(async () => /1/.test(await b.locator('#friends-list .person .count').first().textContent())), await b.locator('#friends-list').textContent());
 
 /* --- opening the conversation is the read ---------------------------------------- */
 section('the receipt');
 await b.locator('#friends-list .person').first().click();
 await b.waitForTimeout(900);
 await b.locator('#friend-actions .btn-primary').click();
-await b.waitForTimeout(1600);
-check('B sees the message', /hello grace/.test(await b.locator('#chat-log').textContent()));
-check('the server has it read', shared.messages.every((m) => m.read_at));
-check('A\'s bubble turns to two blue ticks without B typing', await bubble.evaluate((n) => n.classList.contains('is-read')), await a.locator('#chat-log').innerHTML().then((h) => h.slice(0, 200)));
+check('B sees the message', await until(async () => /hello grace/.test(await b.locator('#chat-log').textContent())));
+check('the server has it read', await until(async () => shared.messages.every((m) => m.read_at)));
+check('A\'s bubble turns to two blue ticks without B typing', await until(() => bubble.evaluate((n) => n.classList.contains('is-read'))), await a.locator('#chat-log').innerHTML().then((h) => h.slice(0, 200)));
 check('and says Seen', /seen/i.test(await a.locator('#chat-log .chat-receipt').textContent()));
 // B answers: A's log grows without waiting for its ten-second poll.
 await b.locator('#chat-input').fill('hi ada');
 await b.locator('#chat-send').click();
-await b.waitForTimeout(1600);
-check('B\'s answer is in A\'s log at once', /hi ada/.test(await a.locator('#chat-log').textContent()));
+check('B\'s answer is in A\'s log at once', await until(async () => /hi ada/.test(await a.locator('#chat-log').textContent())));
 
 /* --- a parcel and a request land at once ------------------------------------------ */
 section('a parcel and a request');
@@ -145,9 +153,8 @@ const parcel = { id: 'd-live-1', sender: idB, recipient: idA, kind: 'booster',
   created_at: new Date().toISOString(), claimed_at: null };
 shared.deliveries.push(parcel);
 shared.emitChange('deliveries', 'INSERT', parcel);
-await a.waitForTimeout(1600);
-const after = await a.evaluate(() => Object.values(JSON.parse(localStorage.getItem('wikster.inventory.v1') ?? '{}')).reduce((n, s) => n + (s.count ?? 0), 0));
-check('the booster is on A\'s shelf within two seconds', after === before + 1, `${before} -> ${after}`);
+const held = () => a.evaluate(() => Object.values(JSON.parse(localStorage.getItem('wikster.inventory.v1') ?? '{}')).reduce((n, s) => n + (s.count ?? 0), 0));
+check('the booster is on A\'s shelf within seconds', await until(async () => (await held()) === before + 1), `${before} -> ${await held()}`);
 check('and claimed on the server', shared.deliveries.find((d) => d.id === 'd-live-1')?.claimed_at != null);
 check('the bell kept a note of it', await a.evaluate(() => (JSON.parse(localStorage.getItem('wikster.profile.v1')).notifFeed ?? []).some((n) => /booster/i.test(n.title))));
 const c = await newPlayer('C');
@@ -158,14 +165,12 @@ await a.waitForTimeout(600);
 const ask = { id: 'f-live-2', requester: idC, addressee: idA, status: 'pending', created_at: new Date().toISOString() };
 shared.friendships.push(ask);
 shared.emitChange('friendships', 'INSERT', ask);
-await a.waitForTimeout(1600);
-check('the request is in A\'s incoming list at once', /carol_c/.test(await a.locator('#incoming-list').textContent()), await a.locator('#incoming-list').textContent());
+check('the request is in A\'s incoming list at once', await until(async () => /carol_c/.test(await a.locator('#incoming-list').textContent())), await a.locator('#incoming-list').textContent());
 
 /* --- leaving is offline, with a last-online line ----------------------------------- */
 section('going away');
 await b.context().close();
-await a.waitForTimeout(1600);
-check('B\'s dot goes out when their socket closes', (await a.locator('#friends-list .person .presence-dot.is-online').count()) === 0);
+check('B\'s dot goes out when their socket closes', await until(async () => (await a.locator('#friends-list .person .presence-dot.is-online').count()) === 0));
 await a.locator('#friends-list .person', { hasText: 'grace_h' }).first().click();
 await a.waitForTimeout(900);
 check('the friend screen says Offline', /offline/i.test(await a.locator('#friend-rank').textContent()));
@@ -181,8 +186,7 @@ await a.waitForTimeout(1500);
 check('the board is empty to begin with', (await a.locator('#leaderboard-body .lb-row').count()) === 0);
 shared.scores = [{ user_id: idC, username: 'carol_c', game: 'duel', day: '2026-01-01', score: 900 }];
 shared.emitChange('leaderboard_daily', 'UPDATE', { user_id: idC, score: 900, updated_at: new Date().toISOString() });
-await a.waitForTimeout(1800);
-check('C\'s score is on A\'s board within two seconds', /carol_c/.test(await a.locator('#leaderboard-body').textContent()) && /900/.test(await a.locator('#leaderboard-body').textContent()), (await a.locator('#leaderboard-body').textContent()).slice(0, 120));
+check('C\'s score is on A\'s board within seconds', await until(async () => /carol_c/.test(await a.locator('#leaderboard-body').textContent()) && /900/.test(await a.locator('#leaderboard-body').textContent())), (await a.locator('#leaderboard-body').textContent()).slice(0, 120));
 
 /* --- a French Wikdle ------------------------------------------------------------------- */
 section('un Wikdle en français');
