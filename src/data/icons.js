@@ -200,6 +200,19 @@ const ICONS = {
     <path d="M8.2 10.4V7.8a3.8 3.8 0 0 1 7.6 0v2.6"/>`,
   spark: `
     <path d="M12 3.2 13.9 9.3 20 11.2 13.9 13.1 12 19.2 10.1 13.1 4 11.2 10.1 9.3z"/>`,
+
+  /* The two seasons wanted marks the set did not have: a six-armed flake for
+   * the frozen seasons, and a leaf for the turning one. */
+  snowflake: `
+    <path d="M12 3.1v17.8M4.3 7.6l15.4 8.8M19.7 7.6 4.3 16.4"/>
+    <path d="m12 3.1-2.3 2.4M12 3.1l2.3 2.4M12 20.9l-2.3-2.4M12 20.9l2.3-2.4"/>
+    <path d="m4.3 7.6 3.2-.7M4.3 7.6l.4 3.2M19.7 16.4l-3.2.7M19.7 16.4l-.4-3.2"/>
+    <path d="m19.7 7.6-3.2-.7M19.7 7.6l-.4 3.2M4.3 16.4l3.2.7M4.3 16.4l.4-3.2"/>`,
+
+  leaf: `
+    <path d="M19.9 4.2c.8 9.8-4.7 15.6-12.1 14.9-2.7-.3-3.9-2.5-3.4-5.6C5.4 7.5 11.5 4.4 19.9 4.2z"/>
+    <path d="M3.4 20.6C6.4 14 11.4 9.6 17.6 7.3"/>
+    <path d="m8.6 15.4 2.7.4M11.8 11.6l2.7.4"/>`,
   chevron: `<path d="M9.5 5.5 16 12l-6.5 6.5"/>`,
   chevronRight: `<path d="M9.5 5.5 16 12l-6.5 6.5"/>`,
   calendar: `<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>`,

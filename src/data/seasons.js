@@ -25,7 +25,7 @@ export const SEASONS = [
     name: { en: 'Frost', fr: 'Givre' },
     tagline: { en: 'The year begins under ice.', fr: 'L’année commence sous la glace.' },
     blurb: { en: 'Ice, snow, the poles, the long nights and the first days of the year.', fr: 'Glace, neige, les pôles, les longues nuits et les premiers jours de l’année.' },
-    icon: 'star', emblem: 'space', accent: '#bfe9ff', accent2: '#0b2a4a', swatch: ['#071426', '#bfe9ff', '#7dd3fc'],
+    icon: 'snowflake', emblem: 'space', accent: '#bfe9ff', accent2: '#0b2a4a', swatch: ['#071426', '#bfe9ff', '#7dd3fc'],
     particle: 'snow', theme: 'frost', badge: { motif: 'flake', foil: ['#eaf8ff', '#7dd3fc', '#1e3a5f'] },
     pack: {
       hero: { en: 'Iceberg', fr: 'Iceberg' },
@@ -137,7 +137,7 @@ export const SEASONS = [
     name: { en: 'Harvest', fr: 'Moisson' },
     tagline: { en: 'Back to the fields and the desks.', fr: 'Retour aux champs et aux pupitres.' },
     blurb: { en: 'Harvests, vineyards, apples, the first day of school and the turning leaves.', fr: 'Moissons, vignobles, pommes, la rentrée des classes et les feuilles qui tournent.' },
-    icon: 'food', emblem: 'food', accent: '#f59e0b', accent2: '#3b1f0b', swatch: ['#1f1108', '#f59e0b', '#fde68a'],
+    icon: 'leaf', emblem: 'plants', accent: '#f59e0b', accent2: '#3b1f0b', swatch: ['#1f1108', '#f59e0b', '#fde68a'],
     particle: 'leaf', theme: 'harvest', badge: { motif: 'leaf', foil: ['#fef3c7', '#f59e0b', '#78350f'] },
     pack: {
       hero: { en: 'Harvest', fr: 'Moisson' },

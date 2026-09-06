@@ -2656,6 +2656,9 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .season-row-copy b { font-size: 0.9rem; }
 .season-row-copy span { font-size: 0.74rem; color: var(--ink-dim); }
 .season-row-played { color: var(--season-accent) !important; font-weight: 700; }
-.season-row-when { flex: none; font-size: 0.72rem; font-weight: 700; color: var(--ink-faint); }
-.season-row.is-now .season-row-when { color: var(--season-accent); }
+.season-row-when { flex: none; display: grid; gap: 1px; justify-items: end; text-align: right; }
+.season-row-when b { font-size: 0.74rem; font-weight: 700; color: var(--ink-dim); white-space: nowrap; }
+.season-row-when small { font-size: 0.66rem; font-weight: 700; color: var(--ink-faint); white-space: nowrap; }
+.season-row.is-now .season-row-when b { color: var(--season-accent); }
+.season-row.is-now .season-row-when small { color: var(--season-accent); }
 .shop-season .shop-sec-head h3 { color: var(--season-accent); }

@@ -34,6 +34,9 @@ let bar = null;
 let wired = false;
 
 const dateText = (ms) => new Date(ms).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'long' });
+/** The short form, for the year's list where two dates share one line. */
+const shortDate = (ms) => new Date(ms).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'short' });
+const spanDays = (row) => Math.round((row.endsAt - row.startsAt) / 86400000);
 
 export function renderSeason() {
   wire();
@@ -54,8 +57,9 @@ export function renderSeason() {
   el.seasonMark.innerHTML = iconSvg(season.icon, { size: 30 });
   el.seasonName.textContent = tx(season.name);
   el.seasonTagline.textContent = tx(season.blurb);
-  const days = daysLeft();
-  el.seasonDates.textContent = `${dateText(current.startsAt)} · ${dateText(current.endsAt - 1)} · ${t('seasonDays', { n: days })}`;
+  // A season is a stretch of weeks, so the banner says so outright: the two
+  // ends joined by a word rather than a dot, then how much of it is left.
+  el.seasonDates.textContent = `${t('seasonSpan', { from: dateText(current.startsAt), to: dateText(current.endsAt - 1) })} · ${t('seasonDays', { n: daysLeft() })}`;
 
   paintPoints();
   paintTrack();
@@ -278,9 +282,14 @@ function paintCalendar() {
       <span class="season-row-when tabular"></span>`;
     node.querySelector('b').textContent = tx(season.name);
     node.querySelector('.season-row-copy span').textContent = tx(season.tagline);
+    // Every row carries its whole stretch, not just the day it opens: the
+    // list is a year of seasons, and a lone date reads as a lone day.
     const when = node.querySelector('.season-row-when');
-    if (row.current) when.textContent = t('seasonNow');
-    else when.textContent = t('seasonSoon', { date: dateText(row.startsAt) });
+    when.innerHTML = '<b></b><small></small>';
+    when.querySelector('b').textContent = t('seasonSpan', { from: shortDate(row.startsAt), to: shortDate(row.endsAt - 1) });
+    when.querySelector('small').textContent = row.current
+      ? t('seasonNowLeft', { n: daysLeft() })
+      : t('seasonLength', { n: spanDays(row) });
     // A season this save has played, in any year, says how far it got.
     const played = Object.entries(state.profile.seasons ?? {})
       .filter(([key]) => key.endsWith(`-${season.id}`))
