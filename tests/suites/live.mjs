@@ -169,6 +169,12 @@ check('the request is in A\'s incoming list at once', await until(async () => /c
 
 /* --- leaving is offline, with a last-online line ----------------------------------- */
 section('going away');
+// B signs out: the wires close with a leave, which is what a phone does
+// when the app is put away. (Tearing the context down instead depends on
+// the browser delivering a close for a mocked socket, which not every
+// build does.)
+await b.evaluate(() => window.__wikster.signOut());
+await b.waitForTimeout(800);
 await b.context().close();
 check('B\'s dot goes out when their socket closes', await until(async () => (await a.locator('#friends-list .person .presence-dot.is-online').count()) === 0));
 await a.locator('#friends-list .person', { hasText: 'grace_h' }).first().click();

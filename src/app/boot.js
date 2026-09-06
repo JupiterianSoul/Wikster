@@ -32,7 +32,7 @@ import { openDaily, openOdds, openWallet } from './daily.js';
 import * as leaderboard from '../leaderboard.js';
 import { tilt } from './detail.js';
 import { buildDrawer, closeDrawer, openDrawer, openHelp, openNotifications, paintDrawerLinks } from './drawer.js';
-import { flushSync, gateAltAction, onSession, purgeRetiredCodes, purgeRetiredThemes, resumeAccount, showGate, stopSocialPoll, submitGate, syncSoon } from './gate.js';
+import { flushSync, gateAltAction, leaveAccount, onSession, purgeRetiredCodes, purgeRetiredThemes, resumeAccount, showGate, stopSocialPoll, submitGate, syncSoon } from './gate.js';
 import { live } from './live.js';
 import { applyRarityVars, drainLevelUps, gainBooster, homeTabFor, initSwipe, paintOpenHint, showLevelUp, warmDrawer } from './open.js';
 import { buildBooster, createCustomPack, paintForgeSeal, paintPackCaption, renderPacks, renderTimed, syncTimed } from './packs.js';
@@ -698,6 +698,8 @@ window.__wikster = {
   levelUp: showLevelUp, wikdle,
   codeByInput,
   draw: drawArticles, generateShop, syncSocial, drawCaps: drawCapsFor, drawPack: toDrawPack, odds, specId,
+  // A suite signs a player out the way the Settings row does, wires and all.
+  signOut: () => leaveAccount(),
   setTheme: (id) => { useTheme(id); renderPacks(); renderShop(); renderBinder(); renderCustomize(); },
   debugRarity(id) {
     const forced = rarityById(id);
