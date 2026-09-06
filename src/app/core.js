@@ -389,7 +389,6 @@ export function applyStrings() {
   document.documentElement.lang = getLanguage();
   el.menuIcon.innerHTML = iconSvg('menu', { size: 20 });
   el.bellIcon.innerHTML = iconSvg('bell', { size: 19 });
-  el.giftIcon.innerHTML = iconSvg('gift', { size: 19 });
   el.walletMark.innerHTML = buckSvg({ size: 12 });
   el.sheetClose.innerHTML = iconSvg('close', { size: 17 });
   el.openBack.innerHTML = iconSvg('chevronLeft', { size: 18 });

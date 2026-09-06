@@ -486,6 +486,8 @@ const STRINGS = {
     // the atelier and Ink
     friendBadgesLabel: 'Badges',
     friendBadgesEmpty: '{name} has not earned a badge yet.',
+    friendBadgesAll: 'All {n}',
+    friendBadgesTitle: '{name}’s badges',
     // versus: the friend games
     versusTitle: 'Play with friends',
     gamesVersusNote: 'Two games that only work with a friend: Card Clash and Speed Sort. Set one up, they answer when they like.',
@@ -1754,6 +1756,8 @@ const STRINGS = {
 
     friendBadgesLabel: 'Badges',
     friendBadgesEmpty: '{name} n’a pas encore gagné de badge.',
+    friendBadgesAll: 'Les {n}',
+    friendBadgesTitle: 'Badges de {name}',
     // versus : les jeux entre amis
     versusTitle: 'Jouer entre amis',
     gamesVersusNote: 'Deux jeux qui ne marchent qu’avec un ami : le Duel de cartes et le Tri chrono. Lancez-en un, l’autre répond quand il veut.',

@@ -79,7 +79,7 @@ bind({
   leaderboardBody: $('#leaderboard-body'), leaderboardMe: $('#leaderboard-me'),
   backdrop: $('#backdrop'), navbar: $('#navbar'),
   menuBtn: $('#menu-btn'), menuIcon: $('#menu-icon'),
-  giftBtn: $('#gift-btn'), giftIcon: $('#gift-icon'), giftDot: $('#gift-dot'),
+
   levelBadge: $('#level-badge'),
   wallet: $('#wallet'), walletMark: $('#wallet-mark'), walletAmount: $('#wallet-amount'),
   bell: $('#bell'), bellIcon: $('#bell-icon'), bellCount: $('#bell-count'),
@@ -129,7 +129,6 @@ bind({
   panel: $('#panel'), panelBody: $('#panel-body'), panelToggle: $('#panel-toggle'),
   showcaseLabel: $('#showcase-label'), showcaseNote: $('#showcase-note'), showcaseGrid: $('#showcase-grid'),
   friendShowcaseHead: $('#friend-showcase-head'), friendShowcaseLabel: $('#friend-showcase-label'), friendShowcase: $('#friend-showcase'),
-  profileFace: $('#profile-face'), friendFace: $('#friend-face'),
   friendBadgesLabel: $('#friend-badges-label'), friendBadgesEmpty: $('#friend-badges-empty'), friendBadges: $('#friend-badges'),
   guildsTitle: $('#guilds-title'), guildsIntro: $('#guilds-intro'), guildHome: $('#guild-home'), guildJoin: $('#guild-join'),
   guildTag: $('#guild-tag'), guildName: $('#guild-name'), guildAbout: $('#guild-about'), guildMeta: $('#guild-meta'),
@@ -411,7 +410,8 @@ export function init() {
   el.duelBack.addEventListener('click', () => { synth.playTap(); showScreen('games'); });
   el.revealBack.addEventListener('click', () => { synth.playTap(); import('./reveal.js').then((m) => m.leaveReveal()); showScreen('games'); });
   el.versusBack.addEventListener('click', () => { synth.playTap(); showScreen('games'); });
-  quests.onQuestsChange(() => paintDrawerLinks());
+  // The chip and the panel both read the board, so both follow a claim at once.
+  quests.onQuestsChange(() => { paintDrawerLinks(); paintPanel({ force: true }); });
   reportAlbums();
   applyPanelState();
   paintPanel({ force: true });
@@ -473,14 +473,13 @@ export function init() {
   renderBinder();
   // Pack art is language-specific, so it waits until a language exists.
 
-  [el.wallet, el.menuBtn, el.bell, el.giftBtn, el.levelBadge, el.packsOpen, el.timedOpen,
+  [el.wallet, el.menuBtn, el.bell, el.levelBadge, el.packsOpen, el.timedOpen,
    el.filterOpen, el.openBack, el.openDone, el.sheetClose, el.starterGo,
    el.packsEmptyCta, el.creatorGo, el.findGo, el.friendBack,
    el.friendRemove, el.gateAlt, el.oddsBtn, el.albumBack, el.chatBack, el.quizBack].forEach((node) => press(node));
 
   el.wallet.addEventListener('click', openWallet);
   el.bell.addEventListener('click', openNotifications);
-  el.giftBtn.addEventListener('click', () => openDaily());
   el.menuBtn.addEventListener('click', () => (el.drawer.hidden ? openDrawer() : closeDrawer()));
   el.drawerScrim.addEventListener('click', closeDrawer);
   el.levelBadge.addEventListener('click', () => { renderProfile(); showScreen('profile'); });

@@ -63,14 +63,13 @@
   }
 
   /* --- the toolbar ------------------------------------------------------- */
-  /* A phone keeps the purse dead centre between two wings so a thumb finds
-     it. A pointer does not need it in the middle: the header becomes a
-     toolbar on the right, in one line: purse, gift, bell, level. */
-  .appbar-side { flex: none; }
-  .appbar-side.is-right { display: contents; }
-  .appbar > .wallet-chip { order: 1; }
-  #gift-btn { order: 2; }
-  .appbar-side.is-left { order: 3; }
+  /* A phone puts the purse on the left, where a thumb finds it. A pointer
+     does not need it there: both wings dissolve and the header becomes one
+     toolbar on the right, in a line: purse, menu, bell, level. */
+  .appbar-side { flex: none; display: contents; }
+  #wallet { order: 1; }
+  #menu-btn { order: 2; }
+  #bell { order: 3; }
   #level-badge { order: 4; margin-left: 4px; }
 
   /* A pointer has no thumb reach to respect, and hover is real input. */

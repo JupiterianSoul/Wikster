@@ -126,8 +126,10 @@ export const PAYTABLE = {
   globe: { 2: 2,   3: 16 },
   quill: { 2: 3,   3: 32 },
   star:  { 2: 5,   3: 100 },
-  wiki:  { 3: 350 },
-  wild:  { 3: 700 }
+  // Every symbol pays its pair, the two best included: a run of two that
+  // scores nothing reads as a win the machine forgot to count.
+  wiki:  { 2: 6,   3: 350 },
+  wild:  { 2: 9,   3: 700 }
 };
 
 /** Three bonus symbols anywhere in the window, and the house spins this many times for free. */

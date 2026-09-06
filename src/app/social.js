@@ -13,7 +13,7 @@ import { specId, specName } from '../booster.js';
 import { frameTier } from '../frames.js';
 import { isSensitive } from '../sensitive.js';
 import { CURRENCY_NAME, formatAmount } from '../pricing.js';
-import { albumsDeep, buildAlbums } from '../albums.js';
+import { buildAlbums } from '../albums.js';
 import { emit } from '../ui/bus.js';
 import { reportQuest } from './arcade.js';
 import { buildAlbumCover, classicSections, renderBinder } from './binder.js';
@@ -951,6 +951,30 @@ export function paintAvatarInto(node, profile, { frame = null } = {}) {
   paintFrameInto(node, worn.style ?? null, worn.style ? worn.tier : 0);
 }
 /**
+ * The picture inside a level ring, where the number was. The number is
+ * already spelled out beside the ring on both profiles, so the ring is free
+ * to carry the face instead; without a picture it keeps the number.
+ */
+export function paintRingFace(ring, profile) {
+  if (!ring) return;
+  const url = profile?.avatar?.url;
+  let face = ring.querySelector(':scope > .ring-face');
+  if (!url) { face?.remove(); ring.classList.remove('has-face'); return; }
+  if (!face) {
+    face = document.createElement('span');
+    face.className = 'ring-face';
+    face.setAttribute('aria-hidden', 'true');
+    // Under the frame overlay, over the ring's own track.
+    ring.insertBefore(face, ring.querySelector(':scope > .frame-overlay'));
+  }
+  const place = avatarPlacement(profile.avatar);
+  face.style.backgroundImage = `url("${String(url).replace(/"/g, '%22')}")`;
+  face.style.backgroundSize = place.size;
+  face.style.backgroundPosition = place.position;
+  ring.classList.add('has-face');
+}
+
+/**
  * Choose a card as your face. Step one: pick any card you own that has a
  * picture. Step two: move the picture behind a fixed circle, and zoom it,
  * until the circle holds what you want; that circle is the picture.
@@ -1340,7 +1364,7 @@ export function renderFriend() {
   el.friendName.textContent = person.username ?? '';
   live.friendRing.set(0, String(level));
   paintFrameInto(el.friendRing, person.avatar?.frame?.style ?? null, person.avatar?.frame?.style ? frameTier(level) : 0);
-  paintAvatarInto(el.friendFace, person, { frame: { style: null, tier: 0 } });
+  paintRingFace(el.friendRing, person);
   el.friendLevel.textContent = t('profileLevel', { n: level });
   paintFriendPresence();
   el.friendStatsLabel.textContent = t('profileStats');
@@ -1389,13 +1413,49 @@ export function renderFriend() {
  * hold it, from the list their profile row carries. A tap opens the same
  * sheet as on your own shelf, minus the button to wear it.
  */
+export function friendShelf(profile) {
+  // A build before the shelf published what was on show sent a plain array of
+  // everything earned; that reads as "nothing chosen", and the four best
+  // stand in, which is what that player's own profile showed anyway.
+  const raw = profile?.badges;
+  const earned = (Array.isArray(raw) ? raw : raw?.earned ?? [])
+    .map((r) => badgeStateFromRank(r?.id, r?.rank)).filter((st) => st && st.rank > 0);
+  const wornIds = Array.isArray(raw) ? [] : (raw?.worn ?? []);
+  const worn = wornIds.length
+    ? wornIds.map((id) => earned.find((st) => st.badge.id === id)).filter(Boolean)
+    : [...earned].sort((a, b) => (b.rank / b.max) - (a.rank / a.max) || b.rank - a.rank).slice(0, 4);
+  const ach = Array.isArray(raw) ? null : (Number.isFinite(raw?.ach) ? raw.ach : null);
+  return { earned, worn, ach };
+}
+
 export function paintFriendBadges(entry) {
-  const rows = Array.isArray(entry.profile?.badges) ? entry.profile.badges : [];
-  const states = rows.map((r) => badgeStateFromRank(r?.id, r?.rank)).filter((st) => st && st.rank > 0);
-  el.friendBadgesLabel.textContent = `${t('friendBadgesLabel')} · ${states.length}`;
-  el.friendBadgesEmpty.hidden = states.length > 0;
+  const { earned, worn } = friendShelf(entry.profile);
+  el.friendBadgesLabel.textContent = t('friendBadgesLabel');
+  el.friendBadgesEmpty.hidden = earned.length > 0;
   el.friendBadgesEmpty.textContent = t('friendBadgesEmpty', { name: entry.profile?.username ?? '' });
-  el.friendBadges.replaceChildren(...states.map((st) => badgeChip(st, { readOnly: true })));
+  // Only what they chose to wear, the way their own profile shows it. The
+  // rest of the cabinet is a tap away rather than spilled onto the page.
+  el.friendBadges.replaceChildren(...worn.map((st) => badgeChip(st, { readOnly: true })));
+  const head = el.friendBadgesLabel.parentElement;
+  head.querySelector('.badges-manage')?.remove();
+  if (!earned.length) return;
+  const all = document.createElement('button');
+  all.type = 'button';
+  all.className = 'btn btn-ghost btn-sm badges-manage';
+  all.textContent = t('friendBadgesAll', { n: earned.length });
+  press(all, { sound: null });
+  all.addEventListener('click', () => { synth.playTap(); openFriendBadges(entry, earned); });
+  head.appendChild(all);
+}
+
+/** Every badge they have actually earned. A locked chip is not their business. */
+export function openFriendBadges(entry, earned) {
+  openSheet(t('friendBadgesTitle', { name: entry.profile?.username ?? '' }), (body) => {
+    const grid = document.createElement('div');
+    grid.className = 'badge-grid is-all';
+    grid.replaceChildren(...earned.map((st) => badgeChip(st, { readOnly: true })));
+    body.appendChild(grid);
+  });
 }
 
 /**
@@ -1465,7 +1525,7 @@ export function paintFriendStats(entry) {
     [t('statBoosters'), (person.boosters_opened ?? 0).toLocaleString()],
     [t('statCards'), (person.cards ?? 0).toLocaleString()],
     [t('statValue'), formatAmount(person.collection_value ?? 0)],
-    [t('statAlbums'), cards ? String(albumsDeep(cards, [])) : '…'],
+    [t('statAchievements'), (() => { const n = friendShelf(person).ach; return n == null ? '…' : String(n); })()],
     [t('statBest'), person.best_rarity && best ? tx(best.name) : t('none')]
   ];
   el.friendStats.replaceChildren(...stats.map(([label, value]) => {

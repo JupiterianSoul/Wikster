@@ -1,12 +1,11 @@
 /* profile: split out of main.js */
 
 import { MAX_LEVEL, levelFraction, rankFor, rewardForLevel, xpForLevel } from '../progression.js';
-import { paintAvatarInto } from './social.js';
+import { paintRingFace } from './social.js';
 import { frameTier } from '../frames.js';
 import { getLanguage, t, tx } from '../i18n.js';
 import * as store from '../collection.js';
 import { formatAmount } from '../pricing.js';
-import { albumsDeep } from '../albums.js';
 import { evaluate as evaluateAchievements } from '../achievements.js';
 import * as account from '../account.js';
 import { RARITIES, rarityById, rarityOfCard, rarityRank } from '../data/rarities.js';
@@ -46,9 +45,9 @@ export function renderProfile() {
 
   live.profileRing.set(levelFraction(progress), String(level));
   paintFrameInto(el.profileRing, frameStyle(), frameTier(level));
-  // The picture beside the ring: the account's, or the initial of the name.
-  paintAvatarInto(el.profileFace, state.account?.profile ?? { username: t('lbYou') }, { frame: { style: null, tier: 0 } });
-  el.profileFace.hidden = !state.account?.profile;
+  // The ring shows the face rather than the number: the number is spelled
+  // out beside it either way.
+  paintRingFace(el.profileRing, state.account?.profile);
   el.profileLevel.textContent = atMax ? t('profileMax') : t('profileLevel', { n: level });
   el.profileRank.textContent = tx(rank.name);
   live.xpBar.set(levelFraction(progress));
@@ -76,7 +75,6 @@ export function renderProfile() {
     [t('statBoosters'), (state.profile.boostersOpened ?? 0).toLocaleString()],
     [t('statCards'), pulled.toLocaleString()],
     [t('statValue'), formatAmount(entries.reduce((sum, e) => sum + e.price * e.count, 0))],
-    [t('statAlbums'), String(albumsDeep(entries, state.customPacks))],
     [t('statAchievements'), String(evaluateAchievements(achFacts(),
       state.profile.achievements?.redeemed ?? []).filter((a) => a.unlocked).length)],
     ...(account.configured ? [[t('statFriends'), String(state.social.friends.length)]] : [])

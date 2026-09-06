@@ -155,12 +155,17 @@ h1, h2, h3, h4 {
 }
 
 /*
- * Two equal wings keep the purse dead centre: menu and bell on the left,
- * the daily gift and your level on the right. The name lives in the drawer.
+ * The purse rides with the menu on the left, where it has the whole width to
+ * grow into; the bell and your level sit on the right. The daily gift is a
+ * drawer link, so the bar is four things and never crowds.
  */
-.appbar-side { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
-.appbar-side.is-right { justify-content: flex-end; }
-.appbar > .wallet-chip { flex: none; }
+.appbar-side { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.appbar-side.is-left { flex: 1 1 auto; }
+.appbar-side.is-right { flex: none; justify-content: flex-end; }
+/* The number gives way before the bar does: a six-figure purse ellipsises
+   rather than pushing the level off the edge. */
+.appbar .wallet-chip { min-width: 0; }
+.appbar .wallet-chip #wallet-amount { min-width: 0; overflow: hidden; }
 
 /* The unread count on the bell. Sits on the icon rather than beside it, so a
    two-digit count does not push the level badge off the row. */

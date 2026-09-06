@@ -54,7 +54,7 @@ check('the Solar Crown asks for level 200 at most', !frameCards.some((x) => /Sol
 section('the daily week');
 const migrated = await p.evaluate(() => JSON.parse(localStorage.getItem('wikster.profile.v1')).daily);
 check('the old record was carried into the week', migrated.v === 2 && migrated.day === 2 && migrated.weeks === 5 && migrated.lastDay === Math.floor(Date.now() / 86400000) - 2, JSON.stringify(migrated));
-await p.locator('#gift-btn').click(); await p.waitForTimeout(900);
+await viaDrawer('daily'); await p.waitForTimeout(400);
 check('the sheet shows seven rungs', (await p.locator('#sheet .daily-tile').count()) === 7);
 check('the streak was missed, so it starts at day 1', await p.locator('#sheet .daily-tile').nth(0).evaluate((n) => n.classList.contains('is-ready')) && (await p.locator('#sheet [data-note]').isVisible()));
 check('the footer speaks UTC', /UTC/.test(await p.locator('#sheet [data-reset]').textContent()) && /Week 6/.test(await p.locator('#sheet [data-week-n]').textContent()), await p.locator('#sheet .daily-foot').textContent());
@@ -69,7 +69,7 @@ check('the record moved to day 1, claimed today (UTC)', after.day === 1 && after
 check('the sheet repainted claimed', await p.locator('#sheet .daily-tile').nth(0).evaluate((n) => n.classList.contains('is-claimed')) && await p.locator('#sheet .daily-tile').nth(1).evaluate((n) => n.classList.contains('is-next')));
 check('the toast is the new card', (await p.locator('#toast .toast-mark').count()) === 1 && (await p.locator('#toast .toast-bar').count()) === 1);
 await p.screenshot({ path: 'wc-daily-claimed.png' });
-check('the gift dot went out', await p.locator('#gift-dot').isHidden());
+check('the gift link\'s dot went out', await p.locator('.drawer-link[data-link="daily"] .chip').isHidden());
 await closeSheets();
 
 section('quests, in place');

@@ -1492,16 +1492,53 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .atelier-banner #atelier-exchange { flex-basis: 100%; }
 .atelier-banner .shop-banner-cell:first-child b { color: var(--ink-accent, #818cf8); }
 .atelier-tile { cursor: default; }
+/* A theme tile previews its theme by carrying that theme's variables, which
+   is what makes the swatch and the type read true. The buy button must NOT
+   join in: a button drawn in the theme being sold is unreadable on half the
+   shelf. These four are resolved here, in the app's own theme, and a tile
+   below cannot redefine them, so every button on the floor reads the same. */
+#screen-atelier {
+  --ui-accent: var(--accent);
+  --ui-accent-ink: var(--accent-ink);
+  --ui-ink: var(--ink);
+  --ui-plate: var(--surface-solid);
+  --ui-line: var(--line-strong);
+}
 .atelier-buy {
   justify-self: start;
   display: inline-flex; align-items: center; gap: 8px;
   margin-top: 4px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  padding: 9px 15px;
 }
+/* On sale: the app's accent, flat, with its own ink on top. */
+.atelier-buy.btn-primary {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: var(--ui-accent-ink);
+  box-shadow: none;
+  text-shadow: none;
+}
+/* Owned: a solid plate rather than a see-through ghost, so "Wear it" is as
+   readable over Paper's cream as over Noir's black. */
+.atelier-buy.btn-ghost {
+  background: var(--ui-plate);
+  border-color: var(--ui-line);
+  color: var(--ui-ink);
+}
+.atelier-buy .buy-label { color: inherit; }
 .frame-card .atelier-buy { margin: 0 0 0 auto; flex: none; }
 .frame-card .frame-copy { flex: 1; min-width: 0; }
 .fx-chip .atelier-buy { margin-top: 6px; }
 .atelier-buy .buy-price { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; }
-.atelier-buy.is-short { opacity: 0.6; }
+.atelier-buy.is-short {
+  background: var(--ui-plate);
+  border-color: var(--ui-line);
+  color: var(--ui-ink);
+  filter: none;
+}
+.atelier-buy.is-short .buy-price { opacity: 0.75; }
 .atelier-tile.is-owned .theme-check { opacity: 1; transform: none; background: var(--surface-2); color: var(--ink-dim); }
 .atelier-tile.is-on .theme-check { background: var(--accent); color: var(--accent-ink); }
 .fx-chip.is-hint { border-style: dashed; cursor: default; opacity: 0.8; }
@@ -1992,8 +2029,17 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .lb-row { grid-template-columns: 2.8em auto 1fr auto; }
 .lb-row-face { width: 30px; height: 30px; font-size: 0.72rem; }
 .lb-row-face .frame-overlay { width: 210%; height: 210%; }
-.hero-face { width: 56px; height: 56px; font-size: 1.2rem; }
-.hero-face[hidden] { display: none; }
+/* The picture sits inside the level ring, where the number was: inset past
+   the ring's own stroke, under the frame overlay, and the number steps
+   aside for it. Both profiles spell the level out beside the ring anyway. */
+.ring-face {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: var(--surface-2) center / cover no-repeat;
+  z-index: 1;
+}
+.ring.has-face .ring-label { display: none; }
 .hero-id { gap: 18px; }
 .index-counts .wish-match { flex: none; margin-left: auto; white-space: nowrap; }
 .whatsnew { display: grid; gap: 14px; }
@@ -2138,7 +2184,8 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 }
 .wish-button {
   position: absolute;
-  top: 44px; right: 8px;
+  top: calc(44px + var(--card-inset, 0px));
+  right: calc(8px + var(--card-inset, 0px));
   z-index: 3;
   display: grid;
   place-items: center;
@@ -2149,7 +2196,7 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
   backdrop-filter: blur(4px);
   border: none;
 }
-.wish-button.is-alone { top: 8px; }
+.wish-button.is-alone { top: calc(8px + var(--card-inset, 0px)); }
 .wish-button.is-on { color: var(--accent-2); }
 .wish-giant.is-wished { color: var(--accent-2); border-color: var(--accent-2); }
 .wish-friends { font-size: 0.74rem; color: var(--accent-2); padding-top: 6px; }

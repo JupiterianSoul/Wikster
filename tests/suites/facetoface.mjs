@@ -103,23 +103,36 @@ check('B\'s save carries the cards', Boolean(shared.saves.get(idB)?.data?.data?.
 /* --- a friend's profile ------------------------------------------------------ */
 section('a friend\'s profile');
 // B's row carries the shelf a sync would publish: two badges, one at rank two.
-shared.profiles.get(idB).badges = [{ id: 'ripper', rank: 2 }, { id: 'climber', rank: 1 }];
+// B's row carries the shelf a sync publishes: what is on show, everything
+// earned behind it, and how many achievements they have unlocked.
+shared.profiles.get(idB).badges = {
+  worn: ['ripper'],
+  earned: [{ id: 'ripper', rank: 2 }, { id: 'climber', rank: 1 }],
+  ach: 42
+};
+shared.profiles.get(idB).avatar = { url: PX };
 await viaDrawer(a, 'friends');
 await a.waitForTimeout(1200);
 await a.locator('#friends-list .person').first().click();
 await a.waitForTimeout(1800);
 check('the friend screen is up', await a.locator('#screen-friend').isVisible());
-check('their face sits beside their ring', (await a.locator('#friend-face').count()) === 1 && /^g$/i.test((await a.locator('#friend-face').textContent()).trim()));
+check('their picture is inside the level ring, in place of the number', (await a.locator('#friend-ring .ring-face').count()) === 1 && await a.locator('#friend-ring').evaluate((n) => n.classList.contains('has-face') && getComputedStyle(n.querySelector('.ring-label')).display === 'none'));
 check('the stats label reads like the profile', /stat/i.test(await a.locator('#friend-stats-label').textContent()));
 check('seven stat cells', (await a.locator('#friend-stats .stat-cell').count()) === 7, String(await a.locator('#friend-stats .stat-cell').count()));
 check('albums are counted off their cards', /^[0-9]+$/.test((await a.locator('#friend-stats .stat-cell b').nth(5).textContent()).trim()));
 check('the tier breakdown is painted', (await a.locator('#friend-rarity-bars .rarity-row').count()) === 8);
 check('legendary counts their three copies', /3/.test(await a.locator('#friend-rarity-bars .rarity-row', { hasText: 'Legendary' }).locator('.rarity-count').textContent()));
-check('the friend\'s badge shelf shows what their row says', (await a.locator('#friend-badges .badge-chip').count()) === 2 && /Badges · 2/.test(await a.locator('#friend-badges-label').textContent()), await a.locator('#friend-badges-label').textContent());
-check('at the rank they hold it', /II/.test(await a.locator('#friend-badges .badge-chip').first().textContent()));
-await a.locator('#friend-badges .badge-chip').nth(1).click();
+check('the shelf shows only what they chose to wear', (await a.locator('#friend-badges .badge-chip').count()) === 1 && /Ripper/i.test(await a.locator('#friend-badges').textContent()), await a.locator('#friend-badges').textContent());
+check('and their achievement count is a stat', /42/.test(await a.locator('#friend-stats').textContent()));
+await a.locator('.badges-manage').click();
 await a.waitForTimeout(600);
-check('a tap opens the sheet, with no button to wear it', /Climber/.test(await a.locator('#sheet-title').textContent()) && (await a.locator('#sheet .badge-rung').count()) === 2 && (await a.locator('#sheet .badge-sheet .btn').count()) === 0);
+check('the whole cabinet is a tap away, unlocked ones only', (await a.locator('#sheet .badge-chip').count()) === 2 && /grace_h/.test(await a.locator('#sheet-title').textContent()));
+await a.locator('#sheet-close').click();
+await a.waitForTimeout(400);
+check('at the rank they hold it', /II/.test(await a.locator('#friend-badges .badge-chip').first().textContent()));
+await a.locator('#friend-badges .badge-chip').first().click();
+await a.waitForTimeout(600);
+check('a tap opens the sheet, with no button to wear it', /Ripper/.test(await a.locator('#sheet-title').textContent()) && (await a.locator('#sheet .badge-rung').count()) > 0 && (await a.locator('#sheet .badge-sheet .btn').count()) === 0);
 await a.locator('#sheet-close').click();
 await a.waitForTimeout(400);
 
@@ -343,9 +356,12 @@ await a.locator('#sheet [data-save]').click();
 await a.waitForTimeout(1200);
 const saved = shared.profiles.get(idA)?.avatar;
 check('the crop is saved with zoom and shape', saved && saved.z > 0 && saved.r > 0 && Math.abs(saved.z - 0.5) < 0.02, JSON.stringify(saved));
-check('the mark wears the crop, not a cover', await a.evaluate(() => {
-  const m = document.querySelector('.person-mark.has-avatar');
-  return m && /%/.test(m.style.backgroundSize) && m.style.backgroundSize !== 'cover';
+check('every face wears the crop, not a cover', await a.evaluate(() => {
+  // On the screen being looked at: the row's mark, or the level ring on a
+  // profile. Other screens are still in the DOM carrying other people's
+  // pictures, and those are not this crop.
+  const faces = [...document.querySelectorAll('.screen.is-active .person-mark.has-avatar, .screen.is-active .ring-face')];
+  return faces.length > 0 && faces.every((m) => /%/.test(m.style.backgroundSize) && m.style.backgroundSize !== 'cover');
 }));
 
 /* --- the wishlist match ---------------------------------------------------- */

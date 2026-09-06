@@ -287,7 +287,8 @@ html[data-blur-adult='1'] [data-adult] .adult-reveal { display: inline-flex; }
    the wish bookmark below it. */
 .fav-button {
   position: absolute;
-  top: -5px; right: -6px;
+  top: calc(var(--card-inset, 0px) - 5px);
+  right: calc(var(--card-inset, 0px) - 6px);
   z-index: 3;
   display: grid;
   place-items: center;
@@ -329,7 +330,7 @@ html[data-blur-adult='1'] [data-adult] .adult-reveal { display: inline-flex; }
   display: flex;
   flex-direction: column;
   gap: 1.2cqw;
-  padding: 3.4cqw 4.9cqw 0;
+  padding: calc(3.4cqw + var(--card-inset, 0px)) calc(4.9cqw + var(--card-inset, 0px)) 0;
 }
 .card-title {
   flex: none;
@@ -387,7 +388,7 @@ html[data-blur-adult='1'] [data-adult] .adult-reveal { display: inline-flex; }
 .card-footer {
   position: relative;
   z-index: 2;
-  padding: 0 4.9cqw 4cqw;
+  padding: 0 calc(4.9cqw + var(--card-inset, 0px)) calc(4cqw + var(--card-inset, 0px));
 }
 /* With the setting on, every tier carries its own mark before its name, so
    a tier reads without its colour: dot, square, triangle, diamond, pentagon,
@@ -508,6 +509,14 @@ html[data-rarity-shapes='1'] .rarity-badge::before {
    ========================================================================== */
 
 .card { --tx: 0; --ty: 0; --lx: 0; --ly: 0; }
+/* How far in a tier's own frame reaches. Everything that sits on the face
+   and must not land on that frame (the star, the bookmark, the words, the
+   tier's tag) is pushed in by it. Nearly every tier draws a hairline and
+   leaves this at zero; Legendary's stamped bezel is eight pixels of gold,
+   which on a mini card is most of the margin those controls had. */
+.card { --card-inset: 0px; }
+[data-rarity="legendary"] { --card-inset: 7px; }
+[data-rarity="mythic"] { --card-inset: 3px; }
 /* A stacking root of its own, so a treatment can put layers UNDER the
    plate's children with z-index: -1 without them falling behind the card. */
 .card-front { isolation: isolate; }

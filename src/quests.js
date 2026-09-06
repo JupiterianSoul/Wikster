@@ -229,16 +229,29 @@ export async function claim(questId, userKey = 'local') {
   if (!row || !quest) throw new Error('NOT_DONE');
   if (row.claimed) throw new Error('CLAIMED');
   if (row.progress < row.target) throw new Error('NOT_DONE');
+
+  // Marked claimed here, before the server is asked, so every counter that
+  // reads the board (the drawer's chip, the panel, the screen) drops on the
+  // tap rather than a round trip later. A refusal puts it back.
+  row.claimed = true;
+  write(board);
+  onChange(loadBoard(userKey));
+
   if (userKey !== 'local' && supabase) {
-    // The server has to know the progress before it can honour the claim.
-    const updates = {};
-    for (const q of board.quests) updates[q.id] = q.progress;
-    await ask({ action: 'progress', updates });
-    const answer = await ask({ action: 'claim', questId });
-    adopt(board, answer, userKey);
-  } else {
-    row.claimed = true;
-    write(board);
+    try {
+      // The server has to know the progress before it can honour the claim.
+      const updates = {};
+      for (const q of board.quests) updates[q.id] = q.progress;
+      await ask({ action: 'progress', updates });
+      const answer = await ask({ action: 'claim', questId });
+      adopt(board, answer, userKey);
+    } catch (error) {
+      const back = loadBoard(userKey);
+      const mine = back.quests.find((q) => q.id === questId);
+      if (mine) { mine.claimed = false; write(back); }
+      onChange(loadBoard(userKey));
+      throw error;
+    }
   }
   onChange(loadBoard(userKey));
   return quest.reward;

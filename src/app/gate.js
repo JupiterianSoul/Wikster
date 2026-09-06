@@ -19,7 +19,7 @@ import { openDaily } from './daily.js';
 import { live } from './live.js';
 import { dropReady, warmDrawer } from './open.js';
 import { renderPacks } from './packs.js';
-import { allBadgeStates, refreshLevelBadge, updateBadges } from './regalia.js';
+import { achievementsUnlocked, allBadgeStates, refreshLevelBadge, updateBadges, wornBadges } from './regalia.js';
 import { applySettings, renderAccountRow } from './settings.js';
 import { payStipend, renderShop } from './shop.js';
 import { startLiveSocial, stopLiveSocial, syncSocial } from './social.js';
@@ -256,8 +256,18 @@ export function currentStats() {
     value: entries.reduce((sum, e) => sum + e.price * e.count, 0),
     bestRarity: best?.id ?? null,
     playMs: state.profile.playMs ?? 0,
-    // Every badge earned, with its rank: what a friend's page shows.
-    badges: allBadgeStates().filter((st) => st.rank > 0).map((st) => ({ id: st.badge.id, rank: st.rank }))
+    // The shelf a friend sees: the four on show, everything earned behind
+    // them, and how many achievements are unlocked. One column, and an older
+    // build's plain array still reads (see paintFriendBadges).
+    badges: (() => {
+      const states = allBadgeStates();
+      const earned = states.filter((st) => st.rank > 0);
+      return {
+        worn: wornBadges(states).map((st) => st.badge.id),
+        earned: earned.map((st) => ({ id: st.badge.id, rank: st.rank })),
+        ach: achievementsUnlocked()
+      };
+    })()
   };
 }
 /**

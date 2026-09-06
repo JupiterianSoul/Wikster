@@ -7,7 +7,6 @@ import * as store from '../collection.js';
 import * as account from '../account.js';
 import { levelFraction } from '../progression.js';
 import { t } from '../i18n.js';
-import { canClaim } from '../daily.js';
 import { evaluate as evaluateAchievements, measure as measureAchievements, redeemableCount } from '../achievements.js';
 import { badgeStates, badgeSvg, romanRank } from '../badges.js';
 import { press, reveal } from '../ui/components.js';
@@ -94,8 +93,7 @@ export function updateBadges() {
     pushNote('trophy', t('notifAchReady', { n: achReady }), 'ach');
   }
   state.lastAchReady = achReady;
-  const ready = canClaim(state.profile.daily);
-  el.giftDot.hidden = !ready;
+  // The gift lives in the drawer now, and its link carries the dot.
   paintBell();
 }
 /* --- badges ------------------------------------------------------------------------------
@@ -275,6 +273,11 @@ export function achFacts() {
     signedIn: signedIn(),
     specials: store.allEntries(state.collection).filter((e) => e.special).length
   });
+}
+
+/** How many achievements are unlocked: the profile stat, and a friend's. */
+export function achievementsUnlocked() {
+  return evaluateAchievements(achFacts(), state.profile.achievements?.redeemed ?? []).filter((a) => a.unlocked).length;
 }
 
 export function achRedeemableCount() {
