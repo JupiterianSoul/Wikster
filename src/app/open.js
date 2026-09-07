@@ -870,10 +870,20 @@ export function dressFront(front, data, rarity) {
   code?.replaceChildren();
   front.style.setProperty('--art',
     data.thumbnail ? `url("${String(data.thumbnail).replace(/["\\]/g, '\\$&')}")` : 'none');
-  if (rarity.id === 'legendary' && particles) {
-    particles.replaceChildren(...sparks(6, { d: [4.5, 7.5] }));
-  } else if (rarity.id === 'mythic' && particles) {
-    particles.replaceChildren(...sparks(8, { d: [3, 5.5], s: [2, 3], c: ['#ffb347', '#ff5a1f'] }));
+  // Legendary and Mythic carry sparks of their own; the other tiers only need
+  // them when a chosen treatment asks, and the CSS keeps them hidden until one
+  // does, so building them costs a handful of elements and saves knowing here
+  // which treatment is worn.
+  const RISERS = {
+    legendary: [6, { d: [4.5, 7.5] }],
+    mythic: [8, { d: [3, 5.5], s: [2, 3], c: ['#ffb347', '#ff5a1f'] }],
+    uncommon: [9, { d: [5, 9] }],
+    rare: [7, { d: [5, 9] }],
+    epic: [7, { d: [5, 8.5] }],
+    prismatic: [9, { d: [3.5, 6.5] }]
+  };
+  if (RISERS[rarity.id] && particles) {
+    particles.replaceChildren(...sparks(RISERS[rarity.id][0], RISERS[rarity.id][1]));
   } else if (rarity.id === 'exotic' && code) {
     const lines = wikitextLines(data);
     code.replaceChildren(...[['6%', '14s'], ['38%', '19s'], ['70%', '11s']].map(([x, d], i) => {

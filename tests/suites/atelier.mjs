@@ -108,15 +108,15 @@ await p.locator('#atelier-frames .frame-card[data-frame="comet"] .atelier-buy').
 await p.waitForTimeout(800);
 check('a frame costs its price', (await inkHeld()) === 450 - THEME_PRICE - FRAME_PRICE);
 check('and is owned', (await profile()).owned?.frames?.includes('comet'));
-const rareChip = p.locator('#atelier-fx .fx-chip[data-fx="glass"]');
+const rareChip = p.locator('#atelier-fx .fx-chip[data-fx="deepcurrent"]');
 await rareChip.locator('.atelier-buy').click();
 await p.waitForTimeout(800);
 check('an effect costs its rarity\'s price', (await inkHeld()) === 450 - THEME_PRICE - FRAME_PRICE - fxPrice('rare'));
-check('and is owned for that rarity', (await profile()).owned?.fx?.includes('rare:glass'));
+check('and is owned for that rarity', (await profile()).owned?.fx?.includes('rare:deepcurrent'));
 check('the wear button on the effect is there', /wear/i.test(await rareChip.locator('.atelier-buy').textContent()));
 await rareChip.locator('.atelier-buy').click();
 await p.waitForTimeout(600);
-check('wearing it from the shelf works', await p.evaluate(() => window.__wikster.state.cardFx.rare === 'glass'));
+check('wearing it from the shelf works', await p.evaluate(() => window.__wikster.state.cardFx.rare === 'deepcurrent'));
 check('the shelf marks it worn', /worn/i.test(await rareChip.locator('.atelier-buy').textContent()));
 
 section('customization');
@@ -155,8 +155,10 @@ const worn = await p.evaluate(() => {
     const front = card.querySelector('.card-front');
     const read = () => ({
       plate: getComputedStyle(front).backgroundImage,
-      sheen: getComputedStyle(card.querySelector('.fx-b'), '::before').backgroundImage,
-      anim: getComputedStyle(card.querySelector('.fx-b'), '::before').animationName,
+      sheen: getComputedStyle(card.querySelector('.fx-b')).backgroundImage,
+      anim: getComputedStyle(card.querySelector('.fx-b')).animationName,
+      // A treatment may restyle everything except the article's picture.
+      artZ: getComputedStyle(card.querySelector('.card-art')).zIndex,
       // The ring is a border because a mask cuts its middle out; lose that and
       // it floods the whole face.
       ringMask: getComputedStyle(card.querySelector('.fx-ring')).maskImage
@@ -167,8 +169,9 @@ const worn = await p.evaluate(() => {
   };
   return { plain: build(null), dressed: build(window.__wikster.state.cardFx.rare), fx: window.__wikster.state.cardFx.rare };
 });
-check('a rare card carries the effect', worn.fx === 'glass', JSON.stringify(worn.fx));
-check('the treatment paints and moves', /gradient/.test(worn.dressed.sheen) && worn.dressed.anim === 'bx-r-glass', JSON.stringify(worn.dressed.anim));
+check('a rare card carries the effect', worn.fx === 'deepcurrent', JSON.stringify(worn.fx));
+check('the treatment paints and moves', /gradient/.test(worn.dressed.sheen) && /^bx-/.test(worn.dressed.anim), JSON.stringify(worn.dressed.anim));
+check('and the picture stays above every layer it draws', Number(worn.dressed.artZ) > Number(worn.plain.artZ) || worn.dressed.artZ === '6', `${worn.plain.artZ} -> ${worn.dressed.artZ}`);
 check('the tier\'s own plate steps aside', worn.dressed.plate !== worn.plain.plate, `${worn.plain.plate.slice(0, 40)} vs ${worn.dressed.plate.slice(0, 40)}`);
 check('and the ring is still a ring, not a flood', /gradient/.test(worn.dressed.ringMask), worn.dressed.ringMask.slice(0, 60));
 

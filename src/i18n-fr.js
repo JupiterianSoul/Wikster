@@ -558,7 +558,7 @@ export const fr = {
   atelierThemes: 'Thèmes',
   atelierFrames: 'Cadres de niveau',
   atelierFx: 'Effets de carte',
-  atelierFxNote: 'Cinq par rareté, tous différents. Un effet s’achète pour une rareté et habille toutes les cartes de ce palier.',
+  atelierFxNote: 'Quatre ou cinq par rareté, toutes différentes, toutes issues d’une planche de design. Un effet s’achète pour une rareté et habille chaque carte de ce palier, sans jamais peindre sur l’image de l’article.',
   atelierFxPrice: '{price} pièce',
   atelierFrameNote: 'Porté dès le niveau 1, et monte tous les dix niveaux comme les autres.',
   atelierWorn: 'Porté',

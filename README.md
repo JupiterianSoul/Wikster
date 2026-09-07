@@ -260,21 +260,23 @@ owned: the door to the rest is the Atelier.
 
 **Card effects** choose the look each rarity wears, one row per tier. Classic,
 the treatment drawn for that tier, is always there; the Atelier sells the
-alternates. Every one of them comes off a design board rather than being
-invented for the shop: two boards were drawn and shown before any of this, one
-with three executions for each of the eight tiers and one with five more for
-Prismatic. The pick from each tier became that tier's own drawing, which is what
-Classic means, and the eighteen that were passed over are what the shop sells,
-kept exactly as they were drawn, on the tier they were drawn for. That is why
-the counts do not fall round: two for most tiers, four for Prismatic. A Common
-can wear cardstock or slate; a Prismatic holofoil, an oil slick, a cut crystal
-or a spectrum beam. Each is bought for one rarity and dresses every card of that
-tier; the ones that paint a colour paint in the rarity's own, so a choice never
-costs the ladder its legibility. A chosen effect takes the tier's own dressing
-off and restyles the whole face: plate, frame, ring, the artwork's mount, the
-title's colour and the tag. The table is `src/data/fx.js`; the CSS lives under
-`[data-fx]` in `src/styles/cards.css`, and the boards themselves are kept in
-`tools/boards/`.
+alternates, and every one of them comes off a design board rather than being
+invented for the shop. The third board held ten treatments for each of the eight
+tiers, eighty in all, every one drawn as a real card at real size on the layers
+the app actually uses; thirty-nine were chosen and carried across rule for rule.
+That is five a tier, four for Rare. A Common can wear newsprint, graph paper, a
+carbon copy, a photocopy or an index card; a Prismatic an aurora veil, a
+diffraction grating, refraction, spectral rain or a supernova. Each is bought
+for one rarity and dresses every card of that tier; the ones that paint a colour
+paint in the rarity's own, so a choice never costs the ladder its legibility.
+
+A chosen effect takes the tier's own dressing off and restyles the whole face:
+plate, frame, ring, the artwork's mount, the title's colour and the tag. The one
+thing it never touches is the article's picture, which is raised above every
+effect layer, so a treatment that wants to act on the photograph filters it from
+inside the mount rather than painting over it. The table is `src/data/fx.js`;
+the CSS lives under `[data-fx]` in `src/styles/cards.css`, and the board itself
+is kept in `tools/boards/`.
 
 **Level frames** open at a level of their own, from 15 to 200 across eight
 styles, and a ninth, the Singularity, waits at the level cap of 500. A locked

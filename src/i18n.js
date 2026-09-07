@@ -578,7 +578,7 @@ const STRINGS = {
     atelierThemes: 'Themes',
     atelierFrames: 'Level frames',
     atelierFx: 'Card effects',
-    atelierFxNote: 'Five for each rarity, none alike. An effect is bought for one rarity and dresses every card of that tier.',
+    atelierFxNote: 'Four or five for each rarity, none alike, all picked off a design board. An effect is bought for one rarity and dresses every card of that tier, and never paints on the article picture.',
     atelierFxPrice: '{price} each',
     atelierFrameNote: 'Worn from level 1, and climbs every ten levels like the others.',
     atelierWorn: 'Worn',

@@ -1602,14 +1602,15 @@ html[data-lowpower='1'] [data-rarity="special"] .fx-a::after { animation: none !
 /* ============================================================================
    CHOSEN CARD EFFECTS
    ----------------------------------------------------------------------------
-   The twenty-one treatments sold in the Atelier, and where they come from.
+   The thirty-nine treatments sold in the Atelier, and where they come from.
 
-   Two boards were built and shown, three executions for each of the eight
-   tiers and five more for Prismatic. One per tier was picked and became that
-   tier's own drawing, which is what `classic` means and what these sit beside.
-   The rest were never used. They are the twenty-one here: not one is invented,
-   every one was drawn for the tier it belongs to and looked at on a real card
-   before it was passed over.
+   A third board was built and shown: ten treatments for every one of the eight
+   tiers, eighty in all, each drawn as a real card at real size on these very
+   layers. Thirty-nine were picked and they are what follows, carried across
+   rule for rule with nothing but the selector and the keyframe names changed.
+   Not one is invented, and every one was looked at on a card of its own tier
+   before it was chosen. `classic`, which these sit beside, is still the
+   drawing made for the tier itself.
 
    That is why a treatment here is not an overlay. It restyles the whole face
    the way the tier drawings do: the plate, the frame, the ring, the artwork's
@@ -1621,6 +1622,12 @@ html[data-lowpower='1'] [data-rarity="special"] .fx-a::after { animation: none !
    whole dressing cannot have the tier's dressing showing through it. The wipe
    is written through :where(), which carries no weight at all, so every rule
    below outranks it without a specificity war over one inset.
+
+   The one thing a treatment may never touch is the article's picture. The
+   photograph is raised above every effect layer, so a design restyles the
+   plate, the frame, the ring and the writing around it and never lands on the
+   image itself. A design that wants to act on the picture does it from inside
+   the mount, by filtering the image rather than by covering it.
    ============================================================================ */
 
 /* The drawings the boards generated, baked in: the same paper grain, circuit
@@ -1788,986 +1795,570 @@ html[data-lowpower='1'] [data-rarity="special"] .fx-a::after { animation: none !
 .giant-card[data-fx]:not([data-fx='classic']) .fx-b { display: block; }
 
 
-@keyframes bx-spin { to { transform: rotate(1turn); } }
-.card[data-fx='cardstock'] .card-front {
-  background: #2b2e37;
-  box-shadow: inset 0 0 0 2px rgba(154,165,177,.42);
-}
-.card[data-fx='cardstock'] .fx-a {
-  z-index: 0;
-  background: var(--noise) 0 0 / 140px 140px;
-  opacity: .22;
-  mix-blend-mode: soft-light;
-}
-.card[data-fx='cardstock'] .card-art {
-  box-shadow: 0 0 0 1px rgba(154,165,177,.35);
-}
-.card[data-fx='cardstock'] .card-art::after {
-  background: none;
-}
-.card[data-fx='cardstock'] .rarity-badge {
-  background: #9aa5b1;
-  color: #1b1e25;
-  border-color: #9aa5b1;
-}
-.card[data-fx='slate'] .card-front {
-  background: #1c202a;
-  box-shadow: inset 0 0 0 2px rgba(154,165,177,.3), inset 0 0 0 6px #1c202a, inset 0 0 0 7px rgba(154,165,177,.18);
-}
-.card[data-fx='slate'] .fx-a {
-  z-index: -1;
-  background: repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px);
-}
-.card[data-fx='slate'] .card-art {
-  border-radius: 4px;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.12);
-}
-.card[data-fx='slate'] .card-art::after {
-  background: none;
-}
-.card[data-fx='slate'] .card-title {
-  color: #d5d9e2;
-}
-.card[data-fx='slate'] .rarity-badge {
-  background: transparent;
-}
-.card[data-fx='runner'] .card-front {
-  box-shadow: inset 0 0 0 2px rgba(74,222,128,.12);
-}
-.card[data-fx='runner'] .fx-ring {
-  padding: 3px;
-}
-.card[data-fx='runner'] .fx-ring::before {
-  background: conic-gradient(from 0deg, transparent 0 .62turn, rgba(74,222,128,.4) .72turn, #4ade80 .82turn, rgba(74,222,128,.4) .92turn, transparent 1turn);
-  animation: bx-spin 7s linear infinite;
-}
-.card[data-fx='runner'] .fx-ring::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(74,222,128,.28);
-}
-.card[data-fx='ripple'] .fx-ring {
-  padding: 3px;
-}
-.card[data-fx='ripple'] .fx-ring::before {
-  inset: -100%;
-  background: linear-gradient(135deg, transparent 46%, rgba(74,222,128,.55) 48.5%, #d9ffe6 50%, rgba(74,222,128,.55) 51.5%, transparent 54%);
-  animation: bx-u-ripple 4.2s ease-in-out infinite;
-}
-.card[data-fx='ripple'] .fx-ring::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(74,222,128,.22);
-}
-.card[data-fx='ripple'] .fx-a {
-  z-index: -1;
-  background: radial-gradient(ellipse at 50% 100%, rgba(74,222,128,.16), transparent 60%);
-  animation: bx-u-wash 4.2s ease-in-out infinite;
-}
-@keyframes bx-u-ripple { 0% { transform: translate(-33%, -33%); opacity: 0 } 15% { opacity: 1 } 85% { opacity: 1 } 100% { transform: translate(33%, 33%); opacity: 0 } }
-@keyframes bx-u-wash { 0%, 100% { opacity: .4 } 50% { opacity: 1 } }
-.card[data-fx='glass'] .fx-b {
-  z-index: 3;
-  mix-blend-mode: screen;
-  overflow: hidden;
-}
-.card[data-fx='glass'] .fx-b::before {
-  content: '';
-  position: absolute;
-  left: -70%;
-  top: -20%;
-  width: 240%;
-  height: 140%;
-  background: linear-gradient(105deg, transparent 30%, rgba(59,130,246,.10) 40%, rgba(244,114,182,.12) 45%, rgba(255,255,255,.16) 50%, rgba(34,211,238,.12) 55%, rgba(99,102,241,.10) 60%, transparent 70%);
-  animation: bx-r-glass 7s ease-in-out infinite alternate;
-}
-@keyframes bx-r-glass { from { transform: translateX(-30%) } to { transform: translateX(30%) } }
-.card[data-fx='glass'] .card-title {
-  color: #bfdbfe;
-  text-shadow: 0 0 8px rgba(59,130,246,.55);
-  transition: color .9s, text-shadow .9s;
-}
-.card[data-fx='glass'] .card-desc {
-  color: #60a5fa;
-  text-shadow: 0 0 8px rgba(59,130,246,.5);
-  transition: color .9s, text-shadow .9s;
-}
-.card[data-fx='glass'].is-hot .card-title {
-  color: #f0f7ff;
-  text-shadow: 0 0 3px #fff, 0 0 12px #3b82f6, 0 0 28px #3b82f6;
-  text-decoration: underline;
-  text-decoration-color: #60a5fa;
-  text-underline-offset: .12em;
-  transition: color .15s, text-shadow .15s;
-}
-.card[data-fx='glass'].is-hot .card-desc {
-  color: #dbeafe;
-  text-shadow: 0 0 3px #fff, 0 0 12px #3b82f6;
-  transition: color .15s, text-shadow .15s;
-}
-.card[data-fx='prism'] .fx-a {
-  z-index: -1;
-  background: repeating-linear-gradient(45deg, rgba(255,255,255,.07) 0 1px, transparent 1px 4px);
-}
-.card[data-fx='prism'] .fx-b {
-  z-index: 3;
-  mix-blend-mode: overlay;
-  -webkit-mask: repeating-linear-gradient(45deg, #000 0 1px, transparent 1px 4px);
-  mask: repeating-linear-gradient(45deg, #000 0 1px, transparent 1px 4px);
-  overflow: hidden;
-}
-.card[data-fx='prism'] .fx-b::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  width: 300%;
-  background: linear-gradient(90deg, #3b82f6, #22d3ee, #a78bfa, #f472b6, #3b82f6) 0 0 / 120px 100% repeat-x;
-  opacity: .55;
-  animation: bx-r-prism 9s linear infinite;
-}
-@keyframes bx-r-prism { to { transform: translateX(-120px) } }
-.card[data-fx='prism'] .card-title {
-  color: #cfe3ff;
-  text-shadow: 0 0 1px #fff, 0 0 10px rgba(59,130,246,.75);
-  transition: color .9s, text-shadow .9s;
-}
-.card[data-fx='prism'] .card-desc {
-  transition: color .9s, text-shadow .9s;
-}
-.card[data-fx='prism'] .card-body::before {
-  content: '';
-  position: absolute;
-  left: 2cqw;
-  top: 1cqw;
-  width: 60%;
-  height: 9cqw;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(59,130,246,.35), transparent 70%);
-  opacity: 0;
-  pointer-events: none;
-}
-.card[data-fx='prism'].is-hot .card-body::before {
-  animation: bx-r-pulse .9s ease-out;
-}
-.card[data-fx='prism'].is-hot .card-title {
-  color: #fff;
-  text-shadow: 0 0 2px #fff, 0 0 14px #3b82f6, 0 0 32px #60a5fa;
-  transition-duration: .15s;
-}
-.card[data-fx='prism'].is-hot .card-desc {
-  color: #dbeafe;
-  text-shadow: 0 0 10px #3b82f6;
-  transition-duration: .15s;
-}
-@keyframes bx-r-pulse { 0% { opacity: 1; transform: scale(.6) } 100% { opacity: 0; transform: scale(1.6) } }
-.card[data-fx='nebula'] .card-front {
-  background: linear-gradient(180deg, #2a1445, #14092b 45%, #1d0f3a);
-}
-.card[data-fx='nebula'] .fx-a {
-  z-index: -1;
-  overflow: hidden;
-}
-.card[data-fx='nebula'] .fx-a::before {
-  content: '';
-  position: absolute;
-  inset: -50%;
-  background: radial-gradient(ellipse at 30% 30%, rgba(168,85,247,.55), transparent 45%), radial-gradient(ellipse at 70% 65%, rgba(236,72,153,.35), transparent 40%), radial-gradient(ellipse at 55% 20%, rgba(99,102,241,.45), transparent 42%);
-  animation: bx-e-nebula 16s ease-in-out infinite alternate;
-}
-.card[data-fx='nebula'] .fx-a::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, #fff 0 .6px, transparent 1px) 3px 5px / 23px 29px, radial-gradient(circle, rgba(255,255,255,.8) 0 .5px, transparent 1px) 11px 17px / 37px 41px;
-  opacity: .55;
-}
-@keyframes bx-e-nebula { from { transform: translate(-6%, -4%) rotate(0) scale(1) } to { transform: translate(6%, 5%) rotate(12deg) scale(1.15) } }
-.card[data-fx='nebula'] .card-art img {
-  transform: scale(1.1) translate(calc(var(--tx) * -3.5%), calc(var(--ty) * -3.5%));
-}
-.card[data-fx='nebula'] .card-art {
-  box-shadow: 0 0 0 1px rgba(192,132,252,.6), 0 10px 24px -10px rgba(0,0,0,.6);
-}
-.card[data-fx='deepspace'] .card-front {
-  background: #0b0618;
-}
-.card[data-fx='deepspace'] .fx-a {
-  z-index: -1;
-  overflow: hidden;
-  transform: translate(calc(var(--tx) * 1.5%), calc(var(--ty) * 1.5%));
-}
-.card[data-fx='deepspace'] .fx-a::before {
-  content: '';
-  position: absolute;
-  left: -30%;
-  top: -20%;
-  width: 160%;
-  height: 140%;
-  background: conic-gradient(from 0deg at 50% 50%, #1a0b33, #6d28d9 40deg, #1a0b33 90deg, #db2777 150deg, #1a0b33 200deg, #7c3aed 260deg, #1a0b33 320deg, #1a0b33);
-  filter: blur(14px);
-  opacity: .8;
-  animation: bx-spin 48s linear infinite;
-}
-.card[data-fx='deepspace'] .fx-a::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, #fff 0 .6px, transparent 1px) 7px 3px / 29px 31px;
-  animation: bx-e-twinkle 3s ease-in-out infinite alternate;
-}
-.card[data-fx='deepspace'] .fx-c {
-  z-index: -1;
-  background: radial-gradient(circle, rgba(255,255,255,.9) 0 .5px, transparent 1px) 17px 13px / 41px 37px;
-  animation: bx-e-twinkle 3s ease-in-out infinite alternate-reverse;
-}
-@keyframes bx-e-twinkle { from { opacity: .4 } to { opacity: 1 } }
-.card[data-fx='deepspace'] .card-art img {
-  transform: scale(1.16) translate(calc(var(--tx) * -6%), calc(var(--ty) * -6%));
-}
-.card[data-fx='deepspace'] .fx-art {
-  box-shadow: inset 0 0 0 1px rgba(216,180,254,.55), inset 0 0 18px rgba(0,0,0,.6);
-}
-.card[data-fx='classicfoil'] .card-front {
-  background: linear-gradient(180deg, #2a2210, #171208 45%, #241b0a);
-  box-shadow: inset 0 0 0 7px rgba(60,40,5,.85), inset 0 0 0 8px rgba(255,225,140,.3);
-}
-.card[data-fx='classicfoil'] .fx-ring {
-  padding: 6px;
-}
-.card[data-fx='classicfoil'] .fx-ring::before {
-  inset: -50%;
-  background: linear-gradient(135deg, #6b4a0e, #c7962b 20%, #fff2b8 35%, #e2b53d 45%, #8a6414 58%, #f7dd86 74%, #b4841c 88%, #6b4a0e);
-  transform: translate(calc(var(--lx) * -18%), calc(var(--ly) * -18%));
-}
-.card[data-fx='classicfoil'] .fx-ring::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,.18), transparent 30% 70%, rgba(0,0,0,.25));
-}
-.card[data-fx='classicfoil'] .fx-p {
-  z-index: 5;
-  overflow: hidden;
-}
-.card[data-fx='classicfoil'] .fx-p i {
-  left: var(--x);
-  bottom: -4px;
-  width: 3px;
-  height: 3px;
-  background: #ffe9a3;
-  box-shadow: 0 0 6px 1px rgba(251,191,36,.8);
-  opacity: 0;
-  animation: bx-l-spark var(--d) linear infinite;
-  animation-delay: var(--delay);
-}
-@keyframes bx-l-spark { 0% { transform: translateY(0) scale(.6); opacity: 0 } 8% { opacity: 1 } 60% { opacity: .9 } 100% { transform: translateY(-150cqw) translateX(var(--sx)) scale(1); opacity: 0 } }
-.card[data-fx='classicfoil'] .rarity-badge {
-  background: linear-gradient(180deg, #f7dd86, #c7962b);
-  color: #2b1d05;
-  border-color: #a9791a;
-}
-.card[data-fx='ornate'] .card-front {
-  background: radial-gradient(ellipse at 50% 30%, #2c2410, #150f05 70%);
-  box-shadow: inset 0 0 0 7px #2d1f06, inset 0 0 0 8px rgba(255,236,170,.3), inset 0 0 40px -14px rgba(251,191,36,.55);
-}
-.card[data-fx='ornate'] .fx-ring {
-  padding: 6px;
-}
-.card[data-fx='ornate'] .fx-ring::before {
-  inset: -50%;
-  background: linear-gradient(120deg, #5c3f0b, #b8892a 25%, #ffe9a8 40%, #d4a73b 50%, #7d5a13 62%, #f6dc8f 80%, #6b4a0e);
-  transform: translate(calc(var(--lx) * -16%), calc(var(--ly) * -12%));
-}
-.card[data-fx='ornate'] .fx-ring::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 2px, transparent 2px 6px);
-}
-.card[data-fx='ornate'] .fx-c, .card[data-fx='ornate'] .fx-b {
-  z-index: 5;
-}
-.card[data-fx='ornate'] .fx-c::before, .card[data-fx='ornate'] .fx-c::after, .card[data-fx='ornate'] .fx-b::before, .card[data-fx='ornate'] .fx-b::after {
-  content: '';
-  position: absolute;
-  width: 14cqw;
-  height: 14cqw;
-  background: var(--corner) center / contain no-repeat;
-  opacity: .9;
-}
-.card[data-fx='ornate'] .fx-c::before {
-  left: 2.4cqw;
-  top: 2.4cqw;
-}
-.card[data-fx='ornate'] .fx-c::after {
-  right: 2.4cqw;
-  top: 2.4cqw;
-  transform: scaleX(-1);
-}
-.card[data-fx='ornate'] .fx-b::before {
-  left: 2.4cqw;
-  bottom: 2.4cqw;
-  transform: scaleY(-1);
-}
-.card[data-fx='ornate'] .fx-b::after {
-  right: 2.4cqw;
-  bottom: 2.4cqw;
-  transform: scale(-1);
-}
-.card[data-fx='ornate'] .fx-p {
-  z-index: 5;
-  overflow: hidden;
-}
-.card[data-fx='ornate'] .fx-p i {
-  left: var(--x);
-  bottom: -3px;
-  width: var(--s, 2px);
-  height: var(--s, 2px);
-  background: #ffe7a0;
-  box-shadow: 0 0 4px rgba(251,191,36,.9);
-  opacity: 0;
-  animation: bx-l-dust var(--d) linear infinite;
-  animation-delay: var(--delay);
-}
-@keyframes bx-l-dust { 0% { transform: translateY(0); opacity: 0 } 10% { opacity: .7 } 90% { opacity: .5 } 100% { transform: translateY(-150cqw) translateX(var(--sx)); opacity: 0 } }
-.card[data-fx='ornate'] .card-title {
-  color: #ffe9a8;
-}
-.card[data-fx='ornate'] .rarity-badge {
-  background: linear-gradient(180deg, #ffe9a8, #b8892a);
-  color: #2b1d05;
-  border-color: #8a6414;
-}
-.card[data-fx='tear'] .card-front {
-  background: linear-gradient(180deg, #2a0b0f, #160507 45%, #2b0a06);
-  box-shadow: inset 0 0 0 2px rgba(224,33,52,.55), inset 0 0 30px -12px rgba(224,33,52,.6);
-}
-.card[data-fx='tear'] .fx-ring {
-  padding: 3px;
-}
-.card[data-fx='tear'] .fx-ring::before {
-  background: conic-gradient(#e02134, #ff7a1a .18turn, #7a0a12 .34turn, #ff3d2e .5turn, #e02134 .62turn, #ffb347 .78turn, #8a0f1a .9turn, #e02134);
-  animation: bx-m-ring-jitter 4s steps(1) infinite;
-}
-@keyframes bx-m-ring-jitter { 0%, 84% { transform: none; opacity: 1 } 85% { transform: translate(-2px, 1px); opacity: .7 } 86.5% { transform: translate(2px, -1px) scale(1.01); opacity: 1 } 88% { transform: translate(-1px, 0); opacity: .5 } 89.5% { transform: translate(1px, 1px); opacity: 1 } 91% { transform: translate(-2px, 0); opacity: .8 } 93%, 100% { transform: none; opacity: 1 } }
-.card[data-fx='tear'] .fx-ring::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: conic-gradient(#e02134, #ff7a1a .18turn, #7a0a12 .34turn, #ff3d2e .5turn, #e02134 .62turn, #ffb347 .78turn, #8a0f1a .9turn, #e02134);
-  clip-path: inset(30% 0 55% 0);
-  opacity: 0;
-  animation: bx-m-tear 4s steps(1) infinite;
-}
-@keyframes bx-m-tear { 0%, 84% { opacity: 0; transform: translateX(3px); clip-path: inset(30% 0 55% 0) } 85% { opacity: 1; transform: translateX(3px); clip-path: inset(30% 0 55% 0) } 87% { opacity: 1; transform: translateX(-3px); clip-path: inset(55% 0 20% 0) } 89% { opacity: 1; transform: translateX(2px); clip-path: inset(10% 0 70% 0) } 91%, 100% { opacity: 0; transform: translateX(3px); clip-path: inset(30% 0 55% 0) } }
-.card[data-fx='tear'] .card-art::before, .card[data-fx='tear'] .card-art::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(#ff2a2a, #ff2a2a), var(--art) center / cover;
-  background-blend-mode: multiply;
-  mix-blend-mode: screen;
-  opacity: 0;
-}
-.card[data-fx='tear'] .card-art::before {
-  animation: bx-m-ghost-r 4s steps(1) infinite;
-}
-.card[data-fx='tear'] .card-art::after {
-  background-image: linear-gradient(#00e5ff, #00e5ff), var(--art);
-  animation: bx-m-ghost-c 4s steps(1) infinite;
-}
-@keyframes bx-m-ghost-r { 0%, 84% { opacity: 0; transform: none; clip-path: none } 85% { opacity: .9; transform: translateX(-4px); clip-path: inset(0 0 55% 0) } 87% { opacity: .9; transform: translateX(3px); clip-path: inset(20% 0 30% 0) } 89% { opacity: .9; transform: translateX(-2px); clip-path: inset(45% 0 5% 0) } 91% { opacity: .6; transform: translateX(-1px); clip-path: none } 93%, 100% { opacity: 0; transform: none; clip-path: none } }
-@keyframes bx-m-ghost-c { 0%, 84% { opacity: 0; transform: none; clip-path: none } 85% { opacity: .9; transform: translateX(4px); clip-path: inset(0 0 55% 0) } 87% { opacity: .9; transform: translateX(-3px); clip-path: inset(20% 0 30% 0) } 89% { opacity: .9; transform: translateX(2px); clip-path: inset(45% 0 5% 0) } 91% { opacity: .6; transform: translateX(1px); clip-path: none } 93%, 100% { opacity: 0; transform: none; clip-path: none } }
-.card[data-fx='tear'] .card-body {
-  animation: bx-m-text 4s steps(1) infinite;
-}
-@keyframes bx-m-text { 0%, 84% { transform: none } 85% { transform: translateX(-3px) } 87% { transform: translateX(2px) } 89% { transform: translateX(-1px) } 91%, 100% { transform: none } }
-.card[data-fx='tear'] .card-title, .card[data-fx='tear'] .card-desc {
-  animation: bx-m-title-split 4s steps(1) infinite;
-}
-@keyframes bx-m-title-split { 0%, 84% { text-shadow: none } 85% { text-shadow: -3px 0 rgba(255,40,40,.85), 3px 0 rgba(0,229,255,.85) } 87% { text-shadow: 2px 0 rgba(255,40,40,.85), -2px 0 rgba(0,229,255,.85) } 89% { text-shadow: -1px 0 rgba(255,40,40,.7), 1px 0 rgba(0,229,255,.7) } 91%, 100% { text-shadow: none } }
-.card[data-fx='tear'] .fx-b {
-  z-index: 3;
-  background: rgba(255,60,40,.15);
-  opacity: 0;
-  animation: bx-m-reset 4s linear infinite;
-}
-@keyframes bx-m-reset { 0%, 90% { opacity: 0 } 91% { opacity: 1 } 100% { opacity: 0 } }
-.card[data-fx='tear'] .fx-a {
-  z-index: -1;
-  background: radial-gradient(ellipse at 50% 100%, rgba(255,80,20,.45), transparent 55%);
-}
-.card[data-fx='tear'] .card-desc {
-  color: #ff4d5e;
-}
-.card[data-fx='static'] .card-front {
-  background: #120406;
-  box-shadow: inset 0 0 0 2px rgba(224,33,52,.35);
-}
-.card[data-fx='static'] .fx-ring {
-  padding: 3px;
-}
-.card[data-fx='static'] .fx-ring::before {
-  background: repeating-conic-gradient(#ff2d3a 0 .03turn, transparent .03turn .06turn);
-  animation: bx-m-dash 3s steps(1) infinite;
-}
-@keyframes bx-m-dash { 0% { transform: rotate(0); opacity: 1 } 17% { transform: rotate(.01turn); opacity: 1 } 33% { transform: rotate(-.006turn); opacity: .3 } 36% { transform: rotate(-.006turn); opacity: 1 } 50% { transform: rotate(.02turn); opacity: 1 } 70% { transform: rotate(.005turn); opacity: .15 } 73% { transform: rotate(.005turn); opacity: 1 } 85% { transform: rotate(-.012turn); opacity: 1 } 100% { transform: rotate(0); opacity: 1 } }
-.card[data-fx='static'] .fx-ring::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(224,33,52,.35);
-}
-.card[data-fx='static'] .fx-b {
-  z-index: 5;
-  background: repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px);
-  opacity: .7;
-}
-.card[data-fx='static'] .fx-c {
-  z-index: 5;
-  overflow: hidden;
-}
-.card[data-fx='static'] .fx-c::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -20%;
-  height: 20%;
-  background: linear-gradient(180deg, transparent, rgba(255,40,40,.14) 50%, transparent);
-  animation: bx-m-roll 4s linear infinite;
-}
-@keyframes bx-m-roll { to { transform: translateY(600%) } }
-.card[data-fx='static'] .card-art::before, .card[data-fx='static'] .card-art::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(#ff2a2a, #ff2a2a), var(--art) center / cover;
-  background-blend-mode: multiply;
-  mix-blend-mode: screen;
-  opacity: .35;
-  animation: bx-m-static-r 5s steps(1) infinite;
-}
-.card[data-fx='static'] .card-art::after {
-  background-image: linear-gradient(#00e5ff, #00e5ff), var(--art);
-  animation-name: bx-m-static-c;
-}
-@keyframes bx-m-static-r { 0%, 19% { opacity: .35; transform: translateX(-1px); clip-path: none } 20% { opacity: .9; transform: translateX(-5px); clip-path: inset(10% 40% 70% 0) } 22% { opacity: .9; transform: translateX(3px); clip-path: inset(50% 0 20% 30%) } 24%, 61% { opacity: .35; transform: translateX(-1px); clip-path: none } 62% { opacity: .9; transform: translateX(4px); clip-path: inset(30% 0 40% 50%) } 64% { opacity: .9; transform: translateX(-4px); clip-path: inset(0 20% 80% 0) } 66%, 100% { opacity: .35; transform: translateX(-1px); clip-path: none } }
-@keyframes bx-m-static-c { 0%, 19% { opacity: .35; transform: translateX(1px); clip-path: none } 20% { opacity: .9; transform: translateX(5px); clip-path: inset(10% 40% 70% 0) } 22% { opacity: .9; transform: translateX(-3px); clip-path: inset(50% 0 20% 30%) } 24%, 61% { opacity: .35; transform: translateX(1px); clip-path: none } 62% { opacity: .9; transform: translateX(-4px); clip-path: inset(30% 0 40% 50%) } 64% { opacity: .9; transform: translateX(4px); clip-path: inset(0 20% 80% 0) } 66%, 100% { opacity: .35; transform: translateX(1px); clip-path: none } }
-.card[data-fx='static'] .card-title {
-  animation: bx-m-static-title 5s steps(1) infinite;
-}
-@keyframes bx-m-static-title { 0%, 19% { text-shadow: 1px 0 rgba(255,40,40,.5), -1px 0 rgba(0,229,255,.5); transform: none } 20% { text-shadow: 3px 0 rgba(255,40,40,.85), -3px 0 rgba(0,229,255,.85); transform: translateX(2px) } 22% { text-shadow: -2px 0 rgba(255,40,40,.85), 2px 0 rgba(0,229,255,.85); transform: translateX(-2px) } 24%, 61% { text-shadow: 1px 0 rgba(255,40,40,.5), -1px 0 rgba(0,229,255,.5); transform: none } 62% { text-shadow: -3px 0 rgba(255,40,40,.85), 3px 0 rgba(0,229,255,.85); transform: translateX(-2px) } 64% { text-shadow: 3px 0 rgba(255,40,40,.85), -3px 0 rgba(0,229,255,.85); transform: translateX(1px) } 66%, 100% { text-shadow: 1px 0 rgba(255,40,40,.5), -1px 0 rgba(0,229,255,.5); transform: none } }
-.card[data-fx='static'] .card-desc {
-  color: #ff5a63;
-}
-.card[data-fx='projection'] .card-face, .card[data-fx='laseretch'] .card-face {
-  border-color: rgba(34,211,238,.35);
-}
-@keyframes bx-x-scroll { to { transform: translateY(-50%) } }
-.card[data-fx='laseretch'] .card-front {
-  background: linear-gradient(180deg, rgba(5,25,35,.66), rgba(3,16,24,.58));
-  box-shadow: inset 0 0 0 1px rgba(34,211,238,.45), inset 0 0 0 2px rgba(34,211,238,.12);
-}
-.card[data-fx='laseretch'] .fx-a {
-  z-index: -1;
-  background: var(--trace) 0 0 / 120px 120px;
-  opacity: .55;
-  animation: bx-x-jitter 6s steps(1) infinite;
-}
-@keyframes bx-x-jitter { 0%, 92% { transform: none } 93% { transform: translateX(1px) } 94% { transform: translateX(-1px) } 95%, 100% { transform: none } }
-.card[data-fx='laseretch'] .fx-a::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--trace-nodes) 0 0 / 120px 120px;
-  animation: bx-x-nodes 2.6s ease-in-out infinite alternate;
-}
-@keyframes bx-x-nodes { from { opacity: .2 } to { opacity: 1 } }
-.card[data-fx='laseretch'] .fx-code {
-  z-index: -1;
-  overflow: hidden;
-  opacity: .24;
-  color: #67e8f9;
-  font: 600 3.2cqw / 1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  white-space: pre;
-  transform: rotate(-14deg) scale(1.3);
-}
-.card[data-fx='laseretch'] .fx-code .col {
-  position: absolute;
-  top: 0;
-  left: var(--x);
-  animation: bx-x-scroll var(--d) linear infinite;
-}
-.card[data-fx='laseretch'] .card-art img {
-  filter: grayscale(1) sepia(1) hue-rotate(150deg) saturate(2.4) brightness(.95);
-}
-.card[data-fx='laseretch'] .card-art {
-  box-shadow: 0 0 0 1px rgba(103,232,249,.7), 0 0 26px -2px rgba(34,211,238,.6);
-}
-.card[data-fx='laseretch'] .card-art::after {
-  background: linear-gradient(180deg, rgba(34,211,238,.12), transparent 30% 70%, rgba(0,0,0,.35));
-}
-.card[data-fx='laseretch'] .fx-ring::before {
-  background: linear-gradient(180deg, rgba(34,211,238,.9), rgba(34,211,238,.25) 50%, rgba(34,211,238,.9));
-}
-.card[data-fx='laseretch'] .fx-ring::after {
-  content: '';
-  position: absolute;
-  inset: -60%;
-  background: conic-gradient(from 0deg, transparent 0 .9turn, #e0fbff .95turn, transparent 1turn);
-  animation: bx-spin 6s linear infinite;
-}
-.card[data-fx='laseretch'] .card-title {
-  color: #cffafe;
-  text-shadow: 0 0 6px rgba(34,211,238,.6);
-}
-.card[data-fx='laseretch'] .card-desc {
-  color: #67e8f9;
-}
-.card[data-fx='projection'] .card-front {
-  background: linear-gradient(180deg, rgba(3,20,30,.48), rgba(2,14,22,.42));
-  box-shadow: inset 0 0 0 1px rgba(34,211,238,.35);
-}
-.card[data-fx='projection'] .fx-b, .card[data-fx='projection'] .fx-c {
-  z-index: -1;
-}
-.card[data-fx='projection'] .fx-b::before, .card[data-fx='projection'] .fx-b::after, .card[data-fx='projection'] .fx-c::before, .card[data-fx='projection'] .fx-c::after {
-  content: '';
-  position: absolute;
-  width: 50%;
-  height: 40%;
-  background: radial-gradient(farthest-side at 0 0, rgba(165,243,252,.55), rgba(34,211,238,.18) 35%, transparent 70%);
-  animation: bx-x-emit 3s ease-in-out infinite alternate;
-}
-.card[data-fx='projection'] .fx-b::before {
-  left: 0;
-  top: 0;
-}
-.card[data-fx='projection'] .fx-b::after {
-  right: 0;
-  top: 0;
-  transform: scaleX(-1);
-  animation-delay: -.8s;
-}
-.card[data-fx='projection'] .fx-c::before {
-  left: 0;
-  bottom: 0;
-  transform: scaleY(-1);
-  animation-delay: -1.6s;
-}
-.card[data-fx='projection'] .fx-c::after {
-  right: 0;
-  bottom: 0;
-  transform: scale(-1);
-  animation-delay: -2.4s;
-}
-@keyframes bx-x-emit { from { opacity: .7 } to { opacity: 1 } }
-.card[data-fx='projection'] .fx-a {
-  z-index: -1;
-  background: var(--wave) 0 0 / 80px 20px;
-  opacity: .35;
-}
-.card[data-fx='projection'] .fx-code {
-  z-index: -1;
-  overflow: hidden;
-  opacity: .3;
-  color: #a5f3fc;
-  font: 600 3cqw / 1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  white-space: nowrap;
-}
-.card[data-fx='projection'] .fx-code .rowl {
-  position: absolute;
-  left: 0;
-  top: var(--y);
-  display: inline-block;
-  animation: bx-x-slide var(--d) linear infinite;
-}
-.card[data-fx='projection'] .fx-code .rowl.rev {
-  animation-direction: reverse;
-}
-@keyframes bx-x-slide { to { transform: translateX(-50%) } }
-.card[data-fx='projection'] .fx-v {
-  z-index: 5;
-  overflow: hidden;
-}
-.card[data-fx='projection'] .fx-v::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -14%;
-  width: 14%;
-  background: linear-gradient(90deg, transparent, rgba(165,243,252,.22) 50%, transparent);
-  animation: bx-x-refresh 4.5s ease-in-out infinite;
-}
-@keyframes bx-x-refresh { to { transform: translateX(820%) } }
-.card[data-fx='projection'] .card-art {
-  opacity: .9;
-  animation: bx-x-holo 6s steps(1) infinite;
-  box-shadow: 0 0 0 1px rgba(34,211,238,.5), 0 0 22px -6px rgba(34,211,238,.7);
-}
-@keyframes bx-x-holo { 0% { opacity: .8 } 15% { opacity: .95 } 30% { opacity: .85 } 50% { opacity: .9 } 66% { opacity: .75 } 70% { opacity: .9 } 100% { opacity: .9 } }
-.card[data-fx='projection'] .card-art::after {
-  background: linear-gradient(180deg, rgba(34,211,238,.25), rgba(34,211,238,.08) 40%, rgba(34,211,238,.25));
-  mix-blend-mode: screen;
-}
-.card[data-fx='projection'] .card-title {
-  color: #ecfeff;
-  text-shadow: 0 0 10px rgba(34,211,238,.8);
-}
-.card[data-fx='projection'] .card-desc {
-  color: #67e8f9;
-}
-
+/* The shared clocks the designs run on. Prefixed so a treatment can never
+   collide with a tier's own keyframes. */
 @property --a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes bx-c-register { 0%, 100% { background-position: .8px .6px } 50% { background-position: 1.9px 1.4px } }
+@keyframes bx-c-smudge { 0%, 100% { transform: translate(0, 0) scale(1) } 50% { transform: translate(2.5%, -1.5%) scale(1.06) } }
+@keyframes bx-c-transfer { 0%, 100% { transform: translate(0, 0) } 50% { transform: translate(6%, -4%) } }
+@keyframes bx-c-scanbar { 0% { background-position: 0 -28% } 100% { background-position: 0 128% } }
+@keyframes bx-c-dogear { 0%, 100% { opacity: .5; transform: scale(1) } 50% { opacity: .95; transform: scale(1.12) } }
+@keyframes bx-u-damp { 0%, 100% { opacity: .34; transform: scale(1) } 50% { opacity: .62; transform: scale(1.04) } }
+@keyframes bx-u-nod { 0%, 100% { transform: translateX(-1px) } 50% { transform: translateX(1px) } }
+@keyframes bx-u-photo { 0%, 100% { opacity: .55 } 50% { opacity: 1 } }
+@keyframes bx-u-turnover { 0%, 100% { transform: translate(0, 0) scale(1) } 33% { transform: translate(4%, -3%) scale(1.06) } 66% { transform: translate(-3%, 3%) scale(1.03) } }
+@keyframes bx-u-shaft { 0% { transform: translateX(-8%) } 100% { transform: translateX(8%) } }
+@keyframes bx-u-float { 0% { transform: translate(0, 0); opacity: 0 } 12% { opacity: 1 } 50% { transform: translate(var(--sx, 6cqw), -34cqw) } 88% { opacity: 1 } 100% { transform: translate(calc(var(--sx, 6cqw) * -1), -70cqw); opacity: 0 } }
+@keyframes bx-r-facet { 0%, 100% { filter: brightness(1) } 50% { filter: brightness(1.5) } }
+@keyframes bx-r-swell { 0%, 100% { transform: translate(0, 0) scale(1) } 50% { transform: translate(2.5%, -2%) scale(1.05) } }
+@keyframes bx-r-buzz { 0%, 46%, 52%, 58%, 100% { opacity: 1 } 48%, 55% { opacity: .45 } }
+@keyframes bx-e-lens { 0%, 100% { transform: scale(1); opacity: .6 } 50% { transform: scale(1.08); opacity: 1 } }
+@keyframes bx-e-roll { 0%, 100% { transform: translate(0, 0) scale(1) } 50% { transform: translate(-3%, 2%) scale(1.08) } }
+@keyframes bx-e-flash { 0%, 84%, 100% { opacity: 0 } 85%, 87% { opacity: .9 } 86% { opacity: .2 } 89% { opacity: .45 } }
+@keyframes bx-e-bolt { 0%, 84%, 100% { opacity: 0 } 85%, 86.5% { opacity: 1 } 85.8% { opacity: .2 } }
+@keyframes bx-e-glint { 0%, 100% { filter: brightness(.9) } 50% { filter: brightness(1.6) } }
+@keyframes bx-e-drift { 0%, 100% { transform: translate(0, 0) } 50% { transform: translate(-4%, 3%) } }
+@keyframes bx-e-lanes { 0% { transform: translateX(0) } 100% { transform: translateX(-30px) } }
+@keyframes bx-e-bloom { 0%, 100% { transform: scale(1) rotate(0deg) } 50% { transform: scale(1.05) rotate(1.5deg) } }
+@keyframes bx-l-pour { 0%, 100% { transform: translate(0, 0) scale(1) } 50% { transform: translate(-3%, 2.5%) scale(1.08) } }
+@keyframes bx-m-glitch { 0%, 22%, 100% { transform: translateX(0); opacity: .5 } 24% { transform: translateX(-3%); opacity: .95 } 26% { transform: translateX(4%); opacity: .8 } 28% { transform: translateX(0); opacity: .5 } 66% { transform: translateX(2.5%); opacity: .9 } 68% { transform: translateX(0); opacity: .5 } }
+@keyframes bx-m-shift { 0%, 23%, 100% { filter: saturate(1.3) contrast(1.15) } 24%, 26% { filter: saturate(2.4) contrast(1.4) hue-rotate(-12deg) } 67% { filter: saturate(.4) contrast(1.6) } }
+@keyframes bx-m-type { 0%, 23%, 100% { text-shadow: none } 24%, 26% { text-shadow: 2px 0 rgba(255,40,60,.9), -2px 0 rgba(60,220,255,.7) } 67% { text-shadow: 1.5px 0 rgba(255,40,60,.7) } }
+@keyframes bx-m-updraft { 0%, 100% { transform: scaleY(1) translateY(0) } 50% { transform: scaleY(1.14) translateY(-3%) } }
+@keyframes bx-m-crawl { to { background-position: 22.7px 0, -22.7px 100% } }
+@keyframes bx-m-alarm { 0%, 100% { opacity: .35 } 50% { opacity: 1 } }
+@keyframes bx-m-wave { 0% { transform: scale(1); opacity: .7 } 100% { transform: scale(1.5); opacity: 0 } }
+@keyframes bx-m-mouth { 0%, 100% { transform: scaleY(.94) scaleX(1); opacity: .8 } 50% { transform: scaleY(1.12) scaleX(1.05); opacity: 1 } }
+@keyframes bx-m-haze { 0%, 100% { transform: translateY(0) skewX(0deg) } 50% { transform: translateY(-3px) skewX(1.4deg) } }
+@keyframes bx-m-thermal { 0%, 100% { transform: scale(1) translate(0, 0) } 50% { transform: scale(1.06) translate(1.5%, -1.5%) } }
+@keyframes bx-x-log { to { background-position: 0 -5.2cqw, 0 calc(2.6cqw - 5.2cqw) } }
+@keyframes bx-x-caret { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+@keyframes bx-x-run { to { background-position: 0 6px } }
+@keyframes bx-x-fall { from { transform: translateY(-50%) } to { transform: translateY(0) } }
+@keyframes bx-x-scan { 0% { background-position: 0 -34% } 100% { background-position: 0 134% } }
+@keyframes bx-x-trace { 0% { background-position: 0 0 } 100% { background-position: 27px 0 } }
+@keyframes bx-x-sweep { 0% { background-position: -14% 0 } 100% { background-position: 114% 0 } }
+@keyframes bx-p-curtain { 0%, 100% { transform: translateX(-6%) skewX(-5deg) scaleY(1) } 33% { transform: translateX(3%) skewX(4deg) scaleY(1.1) } 66% { transform: translateX(6%) skewX(-3deg) scaleY(.94) } }
+@keyframes bx-p-ripple { 0%, 100% { transform: translateX(0) skewX(-2deg) } 50% { transform: translateX(9px) skewX(3deg) } }
+@keyframes bx-p-grate { to { background-position: 42px 0 } }
+@keyframes bx-p-fan { 0%, 100% { transform: rotate(-3deg); opacity: .8 } 50% { transform: rotate(3deg); opacity: 1 } }
+@keyframes bx-p-rain { 0% { background-position: 14% -46cqw, 34% -60cqw, 58% -34cqw, 78% -52cqw, 92% -70cqw } 100% { background-position: 14% 146cqw, 34% 134cqw, 58% 152cqw, 78% 140cqw, 92% 128cqw } }
+@keyframes bx-p-nova { 0% { transform: scale(.5); opacity: 1 } 60% { transform: scale(1.35); opacity: .7 } 100% { transform: scale(1.7); opacity: .35 } }
+@keyframes bx-p-shock { 0% { transform: scale(.2); opacity: .95 } 100% { transform: scale(2.2); opacity: 0 } }
+@keyframes bx-p-flare { 0%, 100% { opacity: .35; transform: scale(1) } 22% { opacity: 1; transform: scale(1.14) } }
+@keyframes bx-spin { to { transform: rotate(1turn); } }
 @keyframes bx-turn-a { to { --a: 360deg; } }
-@keyframes bx-hue { to { filter: hue-rotate(1turn); } }
 @keyframes bx-pearl { to { background-position: 250% 0; } }
-@keyframes bx-glow-shift { 0% { text-shadow: 0 0 6px rgba(255,61,127,.85), 0 0 14px rgba(61,217,255,.5); } 33% { text-shadow: 0 0 6px rgba(255,225,77,.85), 0 0 14px rgba(217,77,255,.5); } 66% { text-shadow: 0 0 6px rgba(61,217,255,.85), 0 0 14px rgba(77,255,154,.5); } 100% { text-shadow: 0 0 6px rgba(255,61,127,.85), 0 0 14px rgba(61,217,255,.5); } }
-.card[data-fx='oilslick'], .card[data-fx='cutcrystal'], .card[data-fx='spectrumbeam'], .card[data-fx='holofoil'] {
-  --spectrum: #ff3d7f, #ff8a3d, #ffe14d, #4dff9a, #3dd9ff, #6b7dff, #d94dff, #ff3d7f;
-}
-.card[data-fx='oilslick'] .card-face, .card[data-fx='cutcrystal'] .card-face, .card[data-fx='spectrumbeam'] .card-face, .card[data-fx='holofoil'] .card-face {
-  border-color: rgba(255,255,255,.4);
-}
-.card[data-fx='oilslick'] .card-front, .card[data-fx='cutcrystal'] .card-front, .card[data-fx='spectrumbeam'] .card-front, .card[data-fx='holofoil'] .card-front {
-  color: #fdf4ff;
-}
-.card[data-fx='oilslick'] .card-extract, .card[data-fx='cutcrystal'] .card-extract, .card[data-fx='spectrumbeam'] .card-extract, .card[data-fx='holofoil'] .card-extract {
-  color: rgba(253,244,255,.76);
-}
-.card[data-fx='oilslick'] .card-views, .card[data-fx='cutcrystal'] .card-views, .card[data-fx='spectrumbeam'] .card-views, .card[data-fx='holofoil'] .card-views {
-  color: rgba(253,244,255,.62);
-}
-.card[data-fx='oilslick'] .card-price, .card[data-fx='cutcrystal'] .card-price, .card[data-fx='spectrumbeam'] .card-price, .card[data-fx='holofoil'] .card-price {
-  color: #a7f3d0;
-  text-shadow: 0 0 10px rgba(167,243,208,.45);
-}
-.card[data-fx='oilslick'] .card-desc, .card[data-fx='cutcrystal'] .card-desc, .card[data-fx='spectrumbeam'] .card-desc, .card[data-fx='holofoil'] .card-desc {
-  color: #fff;
-  animation: bx-glow-shift 6s linear infinite;
-}
-.card[data-fx='oilslick'] .fx-art, .card[data-fx='cutcrystal'] .fx-art, .card[data-fx='spectrumbeam'] .fx-art, .card[data-fx='holofoil'] .fx-art {
-  z-index: 1;
-}
-.card[data-fx='oilslick'] .fx-art::before, .card[data-fx='cutcrystal'] .fx-art::before, .card[data-fx='spectrumbeam'] .fx-art::before, .card[data-fx='holofoil'] .fx-art::before, .card[data-fx='oilslick'] .fx-art::after, .card[data-fx='cutcrystal'] .fx-art::after, .card[data-fx='spectrumbeam'] .fx-art::after, .card[data-fx='holofoil'] .fx-art::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--art) center / cover;
-  mix-blend-mode: screen;
-  opacity: .5;
-}
-.card[data-fx='oilslick'] .fx-art::before, .card[data-fx='cutcrystal'] .fx-art::before, .card[data-fx='spectrumbeam'] .fx-art::before, .card[data-fx='holofoil'] .fx-art::before {
-  filter: grayscale(1) sepia(1) saturate(12) hue-rotate(-32deg) brightness(.85);
-  transform: translate(calc(var(--lx) * -1.5cqw), calc(var(--ly) * -.4cqw));
-}
-.card[data-fx='oilslick'] .fx-art::after, .card[data-fx='cutcrystal'] .fx-art::after, .card[data-fx='spectrumbeam'] .fx-art::after, .card[data-fx='holofoil'] .fx-art::after {
-  filter: grayscale(1) sepia(1) saturate(12) hue-rotate(140deg) brightness(.85);
-  transform: translate(calc(var(--lx) * 1.5cqw), calc(var(--ly) * .4cqw));
-}
-.card[data-fx='oilslick'] .fx-b, .card[data-fx='cutcrystal'] .fx-b, .card[data-fx='spectrumbeam'] .fx-b, .card[data-fx='holofoil'] .fx-b {
-  z-index: 3;
-  overflow: hidden;
-  mix-blend-mode: screen;
-}
-.card[data-fx='oilslick'] .fx-b::before, .card[data-fx='cutcrystal'] .fx-b::before, .card[data-fx='spectrumbeam'] .fx-b::before, .card[data-fx='holofoil'] .fx-b::before, .card[data-fx='oilslick'] .fx-b::after, .card[data-fx='cutcrystal'] .fx-b::after, .card[data-fx='spectrumbeam'] .fx-b::after, .card[data-fx='holofoil'] .fx-b::after {
-  content: '';
-  position: absolute;
-}
-.card[data-fx='oilslick'] .fx-ring::before, .card[data-fx='cutcrystal'] .fx-ring::before, .card[data-fx='spectrumbeam'] .fx-ring::before, .card[data-fx='holofoil'] .fx-ring::before {
-  content: '';
-  position: absolute;
-  inset: -60%;
-  animation: bx-turn-a 16s linear infinite;
-}
-.card[data-fx='holofoil'] .card-front {
-  background: linear-gradient(180deg, #1c1c26, #111119 50%, #17171f);
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,.34);
-}
-.card[data-fx='holofoil'] .fx-a {
-  z-index: -1;
-  overflow: hidden;
-}
-.card[data-fx='holofoil'] .fx-a::before {
-  content: '';
-  position: absolute;
-  inset: -30%;
-  mix-blend-mode: color-dodge;
-  opacity: .5;
-  transform: translateX(calc(var(--lx) * 10%));
-  background: repeating-linear-gradient(112deg, #ff3d7f 0, #ff8a3d 3.5cqw, #ffe14d 7cqw, #4dff9a 10.5cqw, #3dd9ff 14cqw, #6b7dff 17.5cqw, #d94dff 21cqw, #ff3d7f 24.5cqw);
-  background-size: 100% 100%;
-  animation: bx-p2-drift 12s linear infinite;
-}
-@keyframes bx-p2-drift { to { background-position: 24.5cqw 0; } }
-.card[data-fx='holofoil'] .fx-a::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--noise) 0 0 / 120px 120px;
-  mix-blend-mode: overlay;
-  opacity: .7;
-}
-.card[data-fx='holofoil'] .card-art::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,.16), transparent 24% 70%, rgba(0,0,0,.3)), repeating-linear-gradient(112deg, rgba(255,61,127,.28) 0, rgba(255,225,77,.28) 5cqw, rgba(77,255,154,.28) 10cqw, rgba(61,217,255,.28) 15cqw, rgba(217,77,255,.28) 20cqw, rgba(255,61,127,.28) 25cqw);
-  background-position: 0 0, calc(var(--lx) * -12cqw) 0;
-}
-.card[data-fx='holofoil'] .fx-b::before {
-  inset: -20% -70%;
-  transform: translateX(calc(var(--lx) * 52%));
-  background: linear-gradient(112deg, transparent 40%, rgba(255,61,127,.4) 45%, rgba(255,225,77,.5) 47.5%, rgba(255,255,255,.55) 49.2%, rgba(255,255,255,.95) 50%, rgba(255,255,255,.55) 50.8%, rgba(61,217,255,.5) 52.5%, rgba(217,77,255,.4) 55%, transparent 60%);
-}
-.card[data-fx='holofoil'] .fx-b::after {
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,.14), transparent 28% 72%, rgba(255,255,255,.08));
-}
-.card[data-fx='holofoil'] .fx-ring {
-  padding: 4px;
-}
-.card[data-fx='holofoil'] .fx-ring::before {
-  background: repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 1px, transparent 1px 3px), conic-gradient(from var(--a), #e5e7eb, #ff3d7f 12%, #ffe14d 24%, #4dff9a 36%, #e5e7eb 48%, #3dd9ff 60%, #d94dff 72%, #e5e7eb 84%, #e5e7eb);
-  transform: rotate(calc(var(--lx) * 70deg));
-}
-.card[data-fx='holofoil'] .card-title {
-  background: linear-gradient(180deg, #fff, #cfd3dc 55%, #fff) 0 0 / 100% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 4px rgba(255,255,255,.3)) drop-shadow(calc(var(--lx) * -.45cqw) 0 rgba(255,61,127,.7)) drop-shadow(calc(var(--lx) * .45cqw) 0 rgba(61,217,255,.7));
-}
-.card[data-fx='holofoil'] .card-desc {
-  color: #e5e7eb;
-}
-.card[data-fx='holofoil'] .rarity-badge {
-  color: #111119;
-  border: 1px solid transparent;
-  background: linear-gradient(180deg, #fff, #c4c9d4) padding-box, conic-gradient(from var(--a), var(--spectrum)) border-box;
-  animation: bx-turn-a 6s linear infinite;
-}
-.card[data-fx='oilslick'] .card-front {
-  background: linear-gradient(180deg, #08070d, #0d0b16 50%, #07060c);
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,.24);
-}
-.card[data-fx='oilslick'] .fx-a {
-  z-index: -1;
-  overflow: hidden;
-}
-.card[data-fx='oilslick'] .fx-a::before {
-  content: '';
-  position: absolute;
-  inset: -35%;
-  mix-blend-mode: screen;
-  opacity: .85;
-  filter: blur(14px) saturate(1.3);
-  background: radial-gradient(40% 32% at 30% 30%, rgba(0,224,192,.8), transparent 70%), radial-gradient(36% 30% at 70% 35%, rgba(255,43,214,.75), transparent 70%), radial-gradient(38% 34% at 55% 72%, rgba(91,60,255,.8), transparent 70%), radial-gradient(26% 22% at 25% 74%, rgba(255,210,63,.75), transparent 70%), radial-gradient(24% 20% at 80% 70%, rgba(255,106,61,.65), transparent 70%);
-  animation: bx-p3-swirl 24s ease-in-out infinite alternate;
-}
-@keyframes bx-p3-swirl { 0% { transform: rotate(0deg) scale(1); } 40% { transform: rotate(-18deg) scale(1.12) translate(-3%, 4%); } 100% { transform: rotate(22deg) scale(1.04) translate(4%, -3%); } }
-.card[data-fx='oilslick'] .fx-a::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  mix-blend-mode: screen;
-  opacity: .55;
-  background: repeating-radial-gradient(circle at calc(50% + var(--lx) * 32%) calc(46% + var(--ly) * 30%), transparent 0 3cqw, rgba(0,224,192,.3) 3.6cqw, rgba(255,43,214,.3) 4.4cqw, rgba(255,210,63,.24) 5.2cqw, rgba(91,60,255,.3) 6cqw, transparent 6.6cqw 8.4cqw);
-}
-.card[data-fx='oilslick'] .fx-b::before {
-  inset: -20% -70%;
-  filter: blur(6px);
-  transform: translateX(calc(var(--lx) * 44%));
-  background: linear-gradient(100deg, transparent 30%, rgba(0,224,192,.5) 40%, rgba(255,43,214,.55) 47%, rgba(255,255,255,.7) 50%, rgba(255,210,63,.5) 53%, rgba(91,60,255,.5) 60%, transparent 70%);
-}
-.card[data-fx='oilslick'] .fx-b::after {
-  inset: 0;
-  background: linear-gradient(165deg, rgba(255,255,255,.2), transparent 32%);
-}
-.card[data-fx='oilslick'] .fx-ring {
-  padding: 3px;
-}
-.card[data-fx='oilslick'] .fx-ring::before {
-  background: conic-gradient(from var(--a), #00e0c0, #5b3cff, #ff2bd6, #ffd23f, #ff6a3d, #00e0c0);
-  transform: rotate(calc(var(--lx) * 50deg));
-}
-.card[data-fx='oilslick'] .card-title {
-  background: linear-gradient(100deg, #fff 0 20%, #ffe6fb 38%, #e0fff9 56%, #fff 74% 100%) 0 0 / 250% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: bx-pearl 6s linear infinite;
-  filter: drop-shadow(0 0 6px rgba(0,224,192,.4)) drop-shadow(0 0 2px rgba(255,43,214,.5)) drop-shadow(calc(var(--lx) * -.45cqw) 0 rgba(255,43,214,.6)) drop-shadow(calc(var(--lx) * .45cqw) 0 rgba(0,224,192,.6));
-}
-.card[data-fx='oilslick'] .card-desc {
-  animation-duration: 8s;
-}
-.card[data-fx='oilslick'] .rarity-badge {
-  color: #fff;
-  border: 1px solid transparent;
-  background: linear-gradient(180deg, #15131f, #08070d) padding-box, conic-gradient(from var(--a), #00e0c0, #5b3cff, #ff2bd6, #ffd23f, #00e0c0) border-box;
-  text-shadow: 0 0 8px rgba(0,224,192,.6);
-  animation: bx-turn-a 7s linear infinite;
-}
-.card[data-fx='cutcrystal'] .card-front {
-  background: linear-gradient(180deg, #0b0f2a, #120b2b 50%, #0a0a22);
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,.32);
-}
-.card[data-fx='cutcrystal'] .fx-a {
-  z-index: -1;
-  overflow: hidden;
-}
-.card[data-fx='cutcrystal'] .fx-a::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--facets) center / 100% 100%;
-  animation: bx-hue 18s linear infinite;
-}
-.card[data-fx='cutcrystal'] .fx-a::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 30%, rgba(11,15,42,0), rgba(11,15,42,.7) 78%);
-}
-.card[data-fx='cutcrystal'] .fx-b {
-  -webkit-mask: var(--facetmask) center / 100% 100%;
-  mask: var(--facetmask) center / 100% 100%;
-}
-.card[data-fx='cutcrystal'] .fx-b::before {
-  inset: -20% -70%;
-  transform: translateX(calc(var(--lx) * 48%));
-  background: linear-gradient(110deg, transparent 36%, rgba(255,255,255,.6) 46%, rgba(255,255,255,.95) 50%, rgba(255,255,255,.6) 54%, transparent 64%);
-}
-.card[data-fx='cutcrystal'] .fx-b::after {
-  inset: -20% -70%;
-  transform: translateX(calc(var(--lx) * 48%));
-  filter: blur(.6px);
-  opacity: .9;
-  background: linear-gradient(110deg, transparent 43%, #ff3d7f 45%, #ffe14d 46.5%, #4dff9a 48%, #3dd9ff 49.5%, #d94dff 51%, transparent 53%);
-}
-.card[data-fx='cutcrystal'] .fx-art::before {
-  transform: translate(calc(var(--lx) * -1.8cqw), calc(var(--ly) * -1.2cqw));
-}
-.card[data-fx='cutcrystal'] .fx-art::after {
-  transform: translate(calc(var(--lx) * 1.8cqw), calc(var(--ly) * 1.2cqw));
-}
-.card[data-fx='cutcrystal'] .fx-ring {
-  padding: 4px;
-}
-.card[data-fx='cutcrystal'] .fx-ring::before {
-  background: repeating-conic-gradient(rgba(255,255,255,.85) 0 1.5deg, transparent 1.5deg 12deg), conic-gradient(from var(--a), var(--spectrum));
-  transform: rotate(calc(var(--lx) * 45deg));
-}
-.card[data-fx='cutcrystal'] .card-title {
-  background: linear-gradient(100deg, #fff 0 22%, #dff4ff 38%, #fff 50%, #f2e2ff 62%, #fff 78% 100%) 0 0 / 250% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: bx-pearl 4s linear infinite;
-  filter: drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 0 7px rgba(255,255,255,.3)) drop-shadow(calc(var(--lx) * -.5cqw) 0 rgba(255,61,127,.7)) drop-shadow(calc(var(--lx) * .5cqw) 0 rgba(61,217,255,.7));
-}
-.card[data-fx='cutcrystal'] .rarity-badge {
-  color: #fff;
-  border: 1px solid transparent;
-  background: linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,.08)) padding-box, conic-gradient(from var(--a), var(--spectrum)) border-box;
-  text-shadow: 0 0 8px rgba(255,255,255,.6);
-  animation: bx-turn-a 5s linear infinite;
-}
-.card[data-fx='spectrumbeam'] .card-front {
-  background: linear-gradient(180deg, #05060c, #0a0a14 50%, #05060c);
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,.42);
-}
-.card[data-fx='spectrumbeam'] .fx-a {
-  z-index: -1;
-  overflow: hidden;
-  background: radial-gradient(60% 40% at 50% 104%, rgba(217,77,255,.5), transparent 70%), radial-gradient(50% 36% at 14% 96%, rgba(61,217,255,.35), transparent 70%), radial-gradient(50% 36% at 86% 96%, rgba(255,61,127,.35), transparent 70%);
-  animation: bx-hue 14s linear infinite;
-}
-.card[data-fx='spectrumbeam'] .fx-a::before, .card[data-fx='spectrumbeam'] .fx-a::after {
-  content: '';
-  position: absolute;
-  inset: -30%;
-  background: var(--caustic) 0 0 / 60cqw 60cqw;
-  mix-blend-mode: screen;
-  opacity: .4;
-  filter: blur(.8px);
-}
-.card[data-fx='spectrumbeam'] .fx-a::before {
-  animation: bx-p5-drift-a 26s linear infinite;
-}
-.card[data-fx='spectrumbeam'] .fx-a::after {
-  background-size: 46cqw 46cqw;
-  opacity: .28;
-  animation: bx-p5-drift-b 19s linear infinite;
-}
-@keyframes bx-p5-drift-a { to { transform: translate(-30cqw, -12cqw) rotate(6deg); } }
-@keyframes bx-p5-drift-b { to { transform: translate(18cqw, -23cqw) rotate(-8deg); } }
-.card[data-fx='spectrumbeam'] .fx-b::before {
-  inset: -20% -70%;
-  filter: blur(.5px);
-  transform: translateX(calc(var(--lx) * 50%));
-  background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.95) 46.8%, rgba(255,255,255,.95) 47.4%, rgba(255,61,127,.85) 48.6%, rgba(255,138,61,.85) 50%, rgba(255,225,77,.85) 51.4%, rgba(77,255,154,.85) 52.8%, rgba(61,217,255,.85) 54.2%, rgba(107,125,255,.85) 55.6%, rgba(217,77,255,.8) 57%, transparent 62%);
-}
-.card[data-fx='spectrumbeam'] .fx-b::after {
-  inset: 0;
-  background: radial-gradient(circle at calc(50% + var(--lx) * 40%) calc(30% + var(--ly) * 30%), rgba(255,255,255,.14), transparent 40%);
-}
-.card[data-fx='spectrumbeam'] .fx-art::before {
-  opacity: .6;
-  transform: translate(calc(var(--lx) * -2.4cqw), calc(var(--ly) * -.6cqw));
-}
-.card[data-fx='spectrumbeam'] .fx-art::after {
-  opacity: .6;
-  transform: translate(calc(var(--lx) * 2.4cqw), calc(var(--ly) * .6cqw));
-}
-.card[data-fx='spectrumbeam'] .fx-ring {
-  padding: 3.5px;
-}
-.card[data-fx='spectrumbeam'] .fx-ring::before {
-  background: conic-gradient(from var(--a), #e5e7eb 0 52%, #ff3d7f 58%, #ffe14d 64%, #4dff9a 70%, #3dd9ff 76%, #d94dff 82%, #e5e7eb 90%);
-  transform: rotate(calc(var(--lx) * 90deg));
-  animation-duration: 8s;
-}
-.card[data-fx='spectrumbeam'] .card-title {
-  color: #fff;
-  text-shadow: calc(var(--lx) * -.8cqw) 0 rgba(255,61,127,.8), calc(var(--lx) * .8cqw) 0 rgba(61,217,255,.8), 0 0 1px #fff, 0 0 12px rgba(255,255,255,.35);
-}
-.card[data-fx='spectrumbeam'] .card-desc {
-  text-shadow: calc(var(--lx) * -.4cqw) 0 rgba(255,61,127,.9), calc(var(--lx) * .4cqw) 0 rgba(61,217,255,.9), 0 0 8px rgba(255,255,255,.4);
-  animation: none;
-}
-.card[data-fx='spectrumbeam'] .card-price {
-  text-shadow: calc(var(--lx) * -.4cqw) 0 rgba(255,61,127,.7), calc(var(--lx) * .4cqw) 0 rgba(61,217,255,.7);
-}
-.card[data-fx='spectrumbeam'] .rarity-badge {
-  color: #fff;
-  border-color: rgba(255,255,255,.85);
-  background: rgba(255,255,255,.06);
-  text-shadow: 0 0 8px rgba(255,255,255,.5);
-  box-shadow: calc(var(--lx) * -.6cqw) 0 0 0 rgba(255,61,127,.75), calc(var(--lx) * .6cqw) 0 0 0 rgba(61,217,255,.75);
-  animation: bx-hue 9s linear infinite;
-}
+@keyframes bx-breathe { 0%, 100% { opacity: .35 } 50% { opacity: .95 } }
+@keyframes bx-sweepx { from { transform: translateX(-45%) } to { transform: translateX(45%) } }
+@keyframes bx-scrolly { to { transform: translateY(-50%) } }
 
-/* Two of the twenty-one want the sparks the tier already builds: the gold
-   ones a Legendary card carries. Everywhere else they stay hidden. */
-.card[data-fx='classicfoil'] .fx-p i,
-.card[data-fx='ornate'] .fx-p i { display: block; }
+/* The article's picture is never painted over. A treatment restyles the plate,
+   the frame, the ring and the writing; the photograph sits above all of it, so
+   nothing a design draws can land on the image itself. */
+.card[data-fx]:not([data-fx='classic']) .card-art { z-index: 6; }
 
-/* The exotic wikitext is written into .fx-code as columns; Projection wants
-   them lying down, so it turns the columns into rows rather than asking the
-   card to be built differently. */
-.card[data-fx='projection'] .fx-code .col {
-  left: 0;
-  top: var(--x);
-  width: 200%;
-  white-space: nowrap;
-  animation-name: bx-x-slide;
-}
+/* --- COMMON: paper, and the machines that printed on it ---------------- */
+
+/* Newsprint: coarse halftone, colour slightly off register, paper gone yellow */
+.card[data-fx='newsprint'] .card-art::after { background: linear-gradient(180deg, rgba(0,0,0,.1), transparent 30% 70%, rgba(0,0,0,.22)); }
+/* 1 Newsprint: coarse halftone, colour slightly off register, paper gone yellow */
+.card[data-fx='newsprint'] .card-front { background: #cfc9b8; box-shadow: inset 0 0 0 2px rgba(90,84,70,.5); }
+.card[data-fx='newsprint'] { --ink: #23211c; --ink-dim: #555044; --ink-faint: #7d776a; --positive: #2f5d3a; }
+.card[data-fx='newsprint'] .fx-a { z-index: 0; background: radial-gradient(circle, rgba(30,28,24,.5) .8px, transparent 1.1px) 0 0 / 3px 3px; mix-blend-mode: multiply; opacity: .5; }
+.card[data-fx='newsprint'] .fx-b { z-index: 0; mix-blend-mode: multiply; opacity: .28; background: radial-gradient(circle, rgba(190,40,40,.9) .7px, transparent 1px) .8px .6px / 3px 3px; }
+.card[data-fx='newsprint'] .card-art img { filter: grayscale(1) contrast(1.25) sepia(.35); }
+.card[data-fx='newsprint'] .card-art { border-radius: 2px; box-shadow: 0 0 0 1px rgba(60,55,45,.5); }
+.card[data-fx='newsprint'] .card-title { font-family: 'Times New Roman', Georgia, serif; letter-spacing: -0.02em; }
+.card[data-fx='newsprint'] .rarity-badge { border-radius: 2px; background: #23211c; color: #cfc9b8; border-color: #23211c; }
+/* ---- Common still has to be alive, just barely. One restrained move each, taken from the material itself rather than added on top of it. ---- */
+.card[data-fx='newsprint'] .fx-b { animation: bx-c-register 9s ease-in-out infinite; }
+
+/* Graph Paper: pale squares, a pencil tick every fifth, soft graphite smudge */
+.card[data-fx='graphpaper'] .card-art::after { background: linear-gradient(180deg, rgba(0,0,0,.1), transparent 30% 70%, rgba(0,0,0,.22)); }
+/* 3 Graph Paper: pale squares, a pencil tick every fifth, soft graphite smudge */
+.card[data-fx='graphpaper'] .card-front { background: #f3f4ef; box-shadow: inset 0 0 0 2px rgba(120,125,115,.4); }
+.card[data-fx='graphpaper'] { --ink: #2c2f2a; --ink-dim: #5d6159; --ink-faint: #8a8e84; --positive: #2f6b4f; }
+.card[data-fx='graphpaper'] .fx-a { z-index: 0; background: repeating-linear-gradient(0deg, rgba(90,130,160,.28) 0 1px, transparent 1px 8px), repeating-linear-gradient(90deg, rgba(90,130,160,.28) 0 1px, transparent 1px 8px); }
+.card[data-fx='graphpaper'] .fx-b { z-index: 0; background: repeating-linear-gradient(0deg, rgba(70,110,145,.45) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(70,110,145,.45) 0 1px, transparent 1px 40px); }
+.card[data-fx='graphpaper'] .fx-c { z-index: 0; mix-blend-mode: multiply; opacity: .5; background: radial-gradient(ellipse 60% 30% at 22% 78%, rgba(60,60,60,.32), transparent 70%), radial-gradient(ellipse 40% 22% at 76% 34%, rgba(60,60,60,.22), transparent 70%); }
+.card[data-fx='graphpaper'] .card-art { border-radius: 2px; box-shadow: 0 0 0 1px rgba(70,110,145,.5); }
+.card[data-fx='graphpaper'] .card-art img { filter: contrast(.92) saturate(.7); }
+.card[data-fx='graphpaper'] .rarity-badge { border-radius: 2px; background: transparent; color: #3c6383; border-color: #7ea2bd; }
+.card[data-fx='graphpaper'] .fx-c { animation: bx-c-smudge 13s ease-in-out infinite; }
+
+/* Carbon Copy: the second sheet, everything in smudged violet transfer */
+.card[data-fx='carboncopy'] .card-art::after { background: linear-gradient(180deg, rgba(0,0,0,.1), transparent 30% 70%, rgba(0,0,0,.22)); }
+/* 6 Carbon Copy: the second sheet, everything in smudged violet transfer */
+.card[data-fx='carboncopy'] .card-front { background: #e4e1e6; box-shadow: inset 0 0 0 2px rgba(78,66,90,.4); }
+.card[data-fx='carboncopy'] { --ink: #3b3147; --ink-dim: #695d78; --ink-faint: #948aa0; --positive: #3f5f52; }
+.card[data-fx='carboncopy'] .fx-a { z-index: 0; opacity: .38; mix-blend-mode: multiply; background: repeating-linear-gradient(0deg, rgba(80,66,96,.35) 0 1px, transparent 1px 3px); }
+.card[data-fx='carboncopy'] .fx-b { z-index: 0; mix-blend-mode: multiply; opacity: .55; background: radial-gradient(ellipse 70% 40% at 30% 20%, rgba(88,72,104,.4), transparent 70%), radial-gradient(ellipse 55% 35% at 74% 82%, rgba(88,72,104,.32), transparent 70%); }
+.card[data-fx='carboncopy'] .card-title { color: #4a3d59; text-shadow: .6px .4px rgba(74,61,89,.4); }
+.card[data-fx='carboncopy'] .card-art { border-radius: 2px; box-shadow: 0 0 0 1px rgba(78,66,90,.5); }
+.card[data-fx='carboncopy'] .card-art img { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(.7) contrast(.9) brightness(1.05); }
+.card[data-fx='carboncopy'] .rarity-badge { border-radius: 2px; background: transparent; color: #5a4a6b; border-color: #8d7d9d; }
+.card[data-fx='carboncopy'] .fx-c { z-index: 0; mix-blend-mode: multiply; opacity: .45; background: radial-gradient(ellipse 60% 40% at 34% 60%, rgba(80,66,96,.5), transparent 72%); animation: bx-c-transfer 14s ease-in-out infinite; }
+
+/* Photocopy: run through the machine one time too many */
+.card[data-fx='photocopy'] .card-art::after { background: linear-gradient(180deg, rgba(0,0,0,.1), transparent 30% 70%, rgba(0,0,0,.22)); }
+/* 9 Photocopy: run through the machine one time too many */
+.card[data-fx='photocopy'] .card-front { background: #dedede; box-shadow: inset 0 0 0 2px rgba(40,40,40,.5); }
+.card[data-fx='photocopy'] { --ink: #131313; --ink-dim: #454545; --ink-faint: #6e6e6e; --positive: #2c2c2c; }
+.card[data-fx='photocopy'] .fx-a { z-index: 0; opacity: .5; mix-blend-mode: multiply; background: radial-gradient(circle, rgba(0,0,0,.5) .5px, transparent .9px) 0 0 / 4px 6px, radial-gradient(circle, rgba(0,0,0,.35) .4px, transparent .7px) 3px 2px / 7px 5px; }
+.card[data-fx='photocopy'] .fx-b { z-index: 0; background: linear-gradient(90deg, rgba(0,0,0,.55), transparent 9%), linear-gradient(180deg, rgba(0,0,0,.3), transparent 7%); }
+.card[data-fx='photocopy'] .card-art img { filter: grayscale(1) contrast(2.6) brightness(1.1); }
+.card[data-fx='photocopy'] .card-art { border-radius: 0; box-shadow: 0 0 0 1px rgba(0,0,0,.6); }
+.card[data-fx='photocopy'] .card-title { text-shadow: .5px .5px 0 rgba(0,0,0,.28); }
+.card[data-fx='photocopy'] .rarity-badge { border-radius: 0; background: #131313; color: #dedede; border-color: #131313; }
+.card[data-fx='photocopy'] .fx-c { z-index: 2; mix-blend-mode: multiply; background: linear-gradient(180deg, transparent, rgba(0,0,0,.3) 46% 54%, transparent); background-size: 100% 24%; background-repeat: no-repeat; animation: bx-c-scanbar 5.5s linear infinite; }
+
+/* Index Card: white stock, a red header rule, one dog-eared corner */
+.card[data-fx='indexcard'] .card-art::after { background: linear-gradient(180deg, rgba(0,0,0,.1), transparent 30% 70%, rgba(0,0,0,.22)); }
+/* 10 Index Card: white stock, a red header rule, one dog-eared corner */
+.card[data-fx='indexcard'] .card-front { background: #fbfaf6; box-shadow: inset 0 0 0 2px rgba(120,120,115,.4); }
+.card[data-fx='indexcard'] { --ink: #1f1f1d; --ink-dim: #545450; --ink-faint: #86867f; --positive: #2f6b4f; }
+.card[data-fx='indexcard'] .fx-a { z-index: 0; background: repeating-linear-gradient(0deg, transparent 0 11px, rgba(120,150,175,.32) 11px 12px); -webkit-mask: linear-gradient(180deg, transparent 0 52%, #000 52%); mask: linear-gradient(180deg, transparent 0 52%, #000 52%); }
+.card[data-fx='indexcard'] .fx-b { z-index: 0; background: linear-gradient(180deg, transparent 0 51.4%, rgba(200,70,60,.75) 51.4% calc(51.4% + 1.5px), transparent calc(51.4% + 1.5px)); }
+.card[data-fx='indexcard'] .fx-c { z-index: 5; }
+.card[data-fx='indexcard'] .fx-c::before { content: ''; position: absolute; right: -1px; bottom: -1px; width: 11cqw; height: 11cqw; background: linear-gradient(315deg, var(--panel) 0 49.6%, rgba(0,0,0,.25) 50%, #e9e5db 50.4%); border-radius: 0 0 calc(var(--card-radius) - 2px) 0; }
+.card[data-fx='indexcard'] .card-art { border-radius: 1px; box-shadow: 0 0 0 1px rgba(120,120,115,.5); }
+.card[data-fx='indexcard'] .card-art img { filter: contrast(.96) saturate(.85); }
+.card[data-fx='indexcard'] .rarity-badge { border-radius: 1px; background: transparent; color: #a8453c; border-color: #d09a94; }
+.card[data-fx='indexcard'] .fx-v { z-index: 4; background: radial-gradient(ellipse 14cqw 12cqw at 100% 100%, rgba(0,0,0,.3), transparent 70%); animation: bx-c-dogear 10s ease-in-out infinite; }
+
+/* --- UNCOMMON: alive, on long slow cycles ------------------------------ */
+
+/* Moss: velvet clumps with a fuzzy silhouette, damp and slowly brightening */
+.card[data-fx='moss'] .card-front { --rarity: #4ade80; }
+/* 2 Moss: velvet clumps with a fuzzy silhouette, damp and slowly brightening */
+.card[data-fx='moss'] .card-front { background: radial-gradient(ellipse 120% 80% at 50% 0%, #1b3a22, #0c1f13 70%); box-shadow: inset 0 0 0 2px rgba(110,200,130,.35); }
+.card[data-fx='moss'] { --ink: #eaf6ea; --ink-dim: #a7c9ad; --ink-faint: #7a9b81; }
+.card[data-fx='moss'] .fx-a { z-index: 0; filter: blur(.4px); background: radial-gradient(circle at 50% 50%, rgba(96,190,110,.5) 0 1.1px, transparent 1.6px) 0 0 / 5px 5px, radial-gradient(circle at 50% 50%, rgba(140,220,150,.4) 0 .9px, transparent 1.4px) 2.5px 3px / 7px 6px, radial-gradient(circle at 50% 50%, rgba(60,140,80,.55) 0 1.3px, transparent 1.8px) 1px 4px / 9px 9px; }
+.card[data-fx='moss'] .fx-b { z-index: 1; mix-blend-mode: screen; opacity: .5; background: radial-gradient(ellipse 44% 30% at 22% 26%, rgba(160,255,180,.5), transparent 70%), radial-gradient(ellipse 38% 26% at 74% 64%, rgba(120,230,150,.45), transparent 70%), radial-gradient(ellipse 30% 20% at 46% 88%, rgba(180,255,200,.4), transparent 70%); animation: bx-u-damp 7.5s ease-in-out infinite; }
+.card[data-fx='moss'] .fx-c { z-index: 4; background: radial-gradient(circle at calc(50% + var(--lx) * 30%) calc(38% + var(--ly) * 22%), rgba(210,255,220,.16), transparent 52%); mix-blend-mode: screen; }
+.card[data-fx='moss'] .card-art img { filter: saturate(1.15) hue-rotate(-8deg); }
+.card[data-fx='moss'] .card-art { border-radius: 40% 12% 34% 14% / 22% 30% 18% 28%; }
+
+/* Ivy Border: a vine that has taken the frame, leaves nodding in the draught */
+.card[data-fx='ivyborder'] .card-front { --rarity: #4ade80; }
+/* 4 Ivy Border: a vine that has taken the frame, leaves nodding in the draught */
+.card[data-fx='ivyborder'] .card-front { background: linear-gradient(180deg, #0f2318, #16311f 50%, #0d1e14); box-shadow: inset 0 0 0 2px rgba(74,222,128,.34); }
+.card[data-fx='ivyborder'] { --ink: #eaf7ee; --ink-dim: #a4ceb2; --ink-faint: #78a186; }
+.card[data-fx='ivyborder'] .fx-a { z-index: 4; background: repeating-linear-gradient(90deg, transparent 0 9px, rgba(64,180,96,.75) 9px 12px, transparent 12px 21px) 0 0 / 100% 5cqw no-repeat, repeating-linear-gradient(90deg, transparent 0 9px, rgba(64,180,96,.75) 9px 12px, transparent 12px 21px) 0 100% / 100% 5cqw no-repeat, repeating-linear-gradient(0deg, transparent 0 9px, rgba(64,180,96,.7) 9px 12px, transparent 12px 21px) 0 0 / 5cqw 100% no-repeat, repeating-linear-gradient(0deg, transparent 0 9px, rgba(64,180,96,.7) 9px 12px, transparent 12px 21px) 100% 0 / 5cqw 100% no-repeat; -webkit-mask: radial-gradient(circle, #000 44%, transparent 60%) 0 0 / 7px 7px; mask: radial-gradient(circle, #000 44%, transparent 60%) 0 0 / 7px 7px; animation: bx-u-nod 6s ease-in-out infinite; }
+.card[data-fx='ivyborder'] .fx-b { z-index: 4; opacity: .85; background: repeating-linear-gradient(90deg, transparent 0 15px, rgba(134,239,172,.6) 15px 16.4px, transparent 16.4px 30px); -webkit-mask: linear-gradient(#000 0 0) 0 0 / 100% 2.2cqw no-repeat, linear-gradient(#000 0 0) 0 100% / 100% 2.2cqw no-repeat; mask: linear-gradient(#000 0 0) 0 0 / 100% 2.2cqw no-repeat, linear-gradient(#000 0 0) 0 100% / 100% 2.2cqw no-repeat; }
+.card[data-fx='ivyborder'] .fx-ring::before { background: conic-gradient(from 90deg, #14532d, #4ade80 20%, #14532d 40%, #86efac 60%, #14532d 80%, #4ade80); animation: bx-spin 22s linear infinite; }
+.card[data-fx='ivyborder'] .card-art { box-shadow: 0 0 0 1px rgba(74,222,128,.55); }
+
+/* Chlorophyll: leaf tissue on a lightbox, cell walls glowing where the sun gets through */
+.card[data-fx='chlorophyll'] .card-front { --rarity: #4ade80; }
+/* 5 Chlorophyll: leaf tissue on a lightbox, cell walls glowing where the sun gets through */
+.card[data-fx='chlorophyll'] .card-front { background: linear-gradient(180deg, #123d1d, #1c5c2c 48%, #0f3418); box-shadow: inset 0 0 0 2px rgba(163,255,163,.4); }
+.card[data-fx='chlorophyll'] { --ink: #f0ffef; --ink-dim: #b5e6b8; --ink-faint: #85b98c; }
+.card[data-fx='chlorophyll'] .fx-a { z-index: 0; opacity: .7; background: repeating-conic-gradient(from 30deg at 50% 50%, rgba(190,255,190,.16) 0 60deg, transparent 60deg 120deg) 0 0 / 16px 28px, repeating-conic-gradient(from 30deg at 50% 50%, rgba(120,220,130,.12) 0 60deg, transparent 60deg 120deg) 8px 14px / 16px 28px; }
+.card[data-fx='chlorophyll'] .fx-b { z-index: 1; mix-blend-mode: screen; background: radial-gradient(ellipse 55% 60% at calc(50% + var(--lx) * 34%) calc(46% + var(--ly) * 26%), rgba(200,255,180,.45), rgba(90,220,120,.16) 40%, transparent 74%); animation: bx-u-photo 6.5s ease-in-out infinite; }
+.card[data-fx='chlorophyll'] .fx-c { z-index: 1; opacity: .5; background: linear-gradient(102deg, transparent 42%, rgba(220,255,210,.5) 50%, transparent 58%); animation: bx-sweepx 5.5s ease-in-out infinite alternate; }
+.card[data-fx='chlorophyll'] .card-art img { filter: saturate(1.3) brightness(1.06); }
+.card[data-fx='chlorophyll'] .card-art { box-shadow: 0 0 0 1px rgba(163,255,163,.6), 0 0 26px -8px rgba(120,255,140,.8); }
+
+/* Algae Bloom: green clouds turning in still water, bubbles finding the surface */
+.card[data-fx='algaebloom'] .card-front { --rarity: #4ade80; }
+/* 6 Algae Bloom: green clouds turning in still water, bubbles finding the surface */
+.card[data-fx='algaebloom'] .card-front { background: linear-gradient(180deg, #06231f, #0a3830 55%, #041a17); box-shadow: inset 0 0 0 2px rgba(52,211,153,.4); }
+.card[data-fx='algaebloom'] { --ink: #e6fff6; --ink-dim: #93d6c1; --ink-faint: #6ba795; }
+.card[data-fx='algaebloom'] .fx-a { z-index: 0; filter: blur(6px); opacity: .75; background: radial-gradient(ellipse 50% 34% at 24% 30%, rgba(52,211,153,.7), transparent 70%), radial-gradient(ellipse 44% 30% at 76% 58%, rgba(110,231,183,.6), transparent 70%), radial-gradient(ellipse 56% 26% at 44% 84%, rgba(16,185,129,.6), transparent 70%); animation: bx-u-turnover 17s ease-in-out infinite; }
+.card[data-fx='algaebloom'] .fx-b { z-index: 1; opacity: .35; background: repeating-linear-gradient(0deg, transparent 0 6px, rgba(180,255,230,.2) 6px 7px); animation: bx-scrolly 9s linear infinite; background-size: 100% 200%; }
+.card[data-fx='algaebloom'] .card-art img { filter: saturate(1.2) hue-rotate(-12deg) brightness(.96); }
+.card[data-fx='algaebloom'] .card-art { box-shadow: 0 0 0 1px rgba(52,211,153,.5), inset 0 0 30px rgba(4,60,50,.6); }
+
+/* Pollen: motes caught in one shaft of afternoon light, going nowhere in particular */
+.card[data-fx='pollen'] .card-front { --rarity: #4ade80; }
+/* 9 Pollen: motes caught in one shaft of afternoon light, going nowhere in particular */
+.card[data-fx='pollen'] .card-front { background: linear-gradient(180deg, #1a2a15, #24371b 55%, #16240f); box-shadow: inset 0 0 0 2px rgba(190,242,100,.38); }
+.card[data-fx='pollen'] { --ink: #f7ffe8; --ink-dim: #c4dc9e; --ink-faint: #96ac76; }
+.card[data-fx='pollen'] .fx-a { z-index: 1; mix-blend-mode: screen; opacity: .5; background: linear-gradient(104deg, transparent 24%, rgba(240,255,190,.34) 38%, rgba(240,255,190,.1) 50%, transparent 62%); animation: bx-u-shaft 11s ease-in-out infinite alternate; }
+.card[data-fx='pollen'] .fx-b { z-index: 0; background: radial-gradient(ellipse 80% 60% at calc(38% + var(--lx) * 18%) 22%, rgba(200,240,120,.22), transparent 70%); }
+.card[data-fx='pollen'] .card-art img { filter: saturate(1.05) brightness(1.04) sepia(.1); }
+.card[data-fx='pollen'] .card-art { box-shadow: 0 0 0 1px rgba(190,242,100,.5), 0 0 24px -10px rgba(220,255,140,.7); }
+
+/* --- RARE: blue as a material, cut, frozen, conducting, under water ---- */
+
+/* Sapphire Cut: a gem's facets, each one catching the light at its own moment */
+.card[data-fx='sapphirecut'] .card-front { --rarity: #3b82f6; }
+/* 1 Sapphire Cut: a gem's facets, each one catching the light at its own moment */
+.card[data-fx='sapphirecut'] .card-front { background: linear-gradient(180deg, #0a1633, #10245a 46%, #081128); box-shadow: inset 0 0 0 2px rgba(96,165,250,.5); }
+.card[data-fx='sapphirecut'] { --ink: #eaf1ff; --ink-dim: #a5bee8; --ink-faint: #7994c0; }
+.card[data-fx='sapphirecut'] .fx-a { z-index: 0; opacity: .8; background: repeating-conic-gradient(from 0deg at 30% 24%, rgba(147,197,253,.22) 0 24deg, transparent 24deg 48deg), repeating-conic-gradient(from 12deg at 74% 66%, rgba(59,130,246,.24) 0 30deg, transparent 30deg 60deg), repeating-conic-gradient(from 40deg at 46% 96%, rgba(191,219,254,.18) 0 20deg, transparent 20deg 40deg); }
+.card[data-fx='sapphirecut'] .fx-b { z-index: 1; mix-blend-mode: screen; background: conic-gradient(from calc(var(--lx) * 60deg) at calc(50% + var(--lx) * 20%) calc(44% + var(--ly) * 16%), rgba(255,255,255,.5), transparent 14%, rgba(147,197,253,.42) 26%, transparent 40%, rgba(255,255,255,.36) 56%, transparent 70%, rgba(96,165,250,.4) 86%, rgba(255,255,255,.44)); animation: bx-r-facet 7s ease-in-out infinite; }
+.card[data-fx='sapphirecut'] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .5; background: linear-gradient(112deg, transparent 40%, rgba(255,255,255,.85) 49%, transparent 58%); animation: bx-sweepx 4.5s ease-in-out infinite alternate; }
+.card[data-fx='sapphirecut'] .fx-v { z-index: 1; background: linear-gradient(180deg, transparent 44%, rgba(5,10,26,.6)); }
+.card[data-fx='sapphirecut'] .fx-ring::before { background: conic-gradient(from var(--a), #1e3a8a, #93c5fd, #1d4ed8, #dbeafe, #1e3a8a); animation: bx-turn-a 6s linear infinite; }
+.card[data-fx='sapphirecut'] .card-art { box-shadow: 0 0 0 1px rgba(147,197,253,.7), 0 0 30px -10px rgba(96,165,250,.9); }
+
+/* Deep Current: caustics on the floor of somewhere very far down */
+.card[data-fx='deepcurrent'] .card-front { --rarity: #3b82f6; }
+/* 3 Deep Current: caustics on the floor of somewhere very far down */
+.card[data-fx='deepcurrent'] .card-front { background: linear-gradient(180deg, #041228, #072044 50%, #030c1c); box-shadow: inset 0 0 0 2px rgba(56,189,248,.45); }
+.card[data-fx='deepcurrent'] { --ink: #e6f4ff; --ink-dim: #97c2e2; --ink-faint: #6d95b6; }
+.card[data-fx='deepcurrent'] .fx-a { z-index: 0; opacity: .6; filter: blur(1.4px); background: repeating-radial-gradient(ellipse 32% 20% at 24% 30%, rgba(125,211,252,.5) 0 2px, transparent 2px 13px), repeating-radial-gradient(ellipse 28% 24% at 74% 62%, rgba(56,189,248,.42) 0 2px, transparent 2px 15px); animation: bx-r-swell 13s ease-in-out infinite; }
+.card[data-fx='deepcurrent'] .fx-b { z-index: 1; mix-blend-mode: screen; opacity: .45; background: linear-gradient(178deg, rgba(186,230,253,.5) 0 1px, transparent 1px 22px); background-size: 100% 200%; animation: bx-scrolly 12s linear infinite; }
+.card[data-fx='deepcurrent'] .fx-c { z-index: 1; background: linear-gradient(180deg, rgba(2,10,24,.6), transparent 34%, transparent 70%, rgba(2,10,24,.7)); }
+.card[data-fx='deepcurrent'] .card-art img { filter: hue-rotate(-8deg) saturate(1.1) brightness(.94); }
+.card[data-fx='deepcurrent'] .card-art { box-shadow: 0 0 0 1px rgba(56,189,248,.55), inset 0 0 34px rgba(3,20,44,.7); }
+
+/* Neon Sign: bent tube, cold cathode buzz, one bad contact in the corner */
+.card[data-fx='neonsign'] .card-front { --rarity: #3b82f6; }
+/* 7 Neon Sign: bent tube, cold cathode buzz, one bad contact in the corner */
+.card[data-fx='neonsign'] .card-front { background: linear-gradient(180deg, #060b1c, #0a1230 60%, #040814); box-shadow: inset 0 0 0 2px rgba(59,130,246,.6); }
+.card[data-fx='neonsign'] { --ink: #e8f0ff; --ink-dim: #96b3e0; --ink-faint: #6c86b4; }
+.card[data-fx='neonsign'] .fx-a { z-index: 1; border-radius: var(--card-radius); box-shadow: inset 0 0 0 3px rgba(96,165,250,.9), inset 0 0 14px 3px rgba(59,130,246,.55), 0 0 22px rgba(59,130,246,.35); animation: bx-r-buzz 6s steps(1, end) infinite; }
+.card[data-fx='neonsign'] .fx-b { z-index: 1; margin: 6cqw; border-radius: calc(var(--card-radius) * .6); box-shadow: inset 0 0 0 1.5px rgba(191,219,254,.7), inset 0 0 9px rgba(147,197,253,.5); opacity: .85; }
+.card[data-fx='neonsign'] .fx-c { z-index: 0; background: radial-gradient(ellipse 90% 70% at 50% 46%, rgba(59,130,246,.28), transparent 72%); animation: bx-breathe 4s ease-in-out infinite; }
+.card[data-fx='neonsign'] .fx-v { z-index: 3; mix-blend-mode: screen; opacity: .3; background: repeating-linear-gradient(0deg, rgba(255,255,255,.14) 0 1px, transparent 1px 3px); }
+.card[data-fx='neonsign'] .card-title { text-shadow: 0 0 8px rgba(96,165,250,.9), 0 0 22px rgba(59,130,246,.5); }
+.card[data-fx='neonsign'] .card-art { box-shadow: 0 0 0 1.5px rgba(96,165,250,.85), 0 0 24px -6px rgba(59,130,246,.9); }
+
+/* Cobalt Silk: a woven sheen that changes its mind as the card turns */
+.card[data-fx='cobaltsilk'] .card-front { --rarity: #3b82f6; }
+/* 8 Cobalt Silk: a woven sheen that changes its mind as the card turns */
+.card[data-fx='cobaltsilk'] .card-front { background: linear-gradient(180deg, #101c3d, #172a5c 48%, #0c1631); box-shadow: inset 0 0 0 2px rgba(125,152,255,.45); }
+.card[data-fx='cobaltsilk'] { --ink: #eef1ff; --ink-dim: #cdd5ff; --ink-faint: #97a3d4; }
+.card[data-fx='cobaltsilk'] .fx-a { z-index: 0; opacity: .55; background: repeating-linear-gradient(90deg, rgba(255,255,255,.1) 0 1px, transparent 1px 3px), repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px); }
+.card[data-fx='cobaltsilk'] .fx-b { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(100deg + var(--lx) * 26deg), transparent 18%, rgba(147,197,253,.4) 34%, rgba(255,255,255,.5) 44%, rgba(129,140,248,.4) 56%, transparent 74%); background-size: 250% 100%; animation: bx-pearl 8s linear infinite; }
+.card[data-fx='cobaltsilk'] .fx-c { z-index: 2; mix-blend-mode: overlay; opacity: .5; background: repeating-linear-gradient(58deg, rgba(255,255,255,.16) 0 2px, transparent 2px 7px); }
+.card[data-fx='cobaltsilk'] .card-art img { filter: saturate(1.08) brightness(1.02); }
+.card[data-fx='cobaltsilk'] .card-art { box-shadow: 0 0 0 1px rgba(125,152,255,.6), inset 0 0 20px rgba(129,140,248,.24); }
+.card[data-fx='cobaltsilk'] .fx-v { z-index: 1; background: linear-gradient(180deg, transparent 44%, rgba(8,14,36,.55)); }
+.card[data-fx='cobaltsilk'] .rarity-badge { border-radius: 3px; }
+
+/* --- EPIC: violet, and almost all of it very far away ------------------ */
+
+/* Event Horizon: the disc, the lensing ring, and the part where nothing comes back */
+.card[data-fx='eventhorizon'] .card-front { --rarity: #c084fc; }
+/* 1 Event Horizon: the disc, the lensing ring, and the part where nothing comes back */
+.card[data-fx='eventhorizon'] .card-front { background: radial-gradient(ellipse 90% 66% at 50% 42%, #1a0733, #0a0318 74%); box-shadow: inset 0 0 0 2px rgba(192,132,252,.5); }
+.card[data-fx='eventhorizon'] { --ink: #f5ecff; --ink-dim: #c1a3e0; --ink-faint: #9377b4; }
+.card[data-fx='eventhorizon'] .fx-a { z-index: 0; background: radial-gradient(circle at 50% 42%, #000 0 12.5%, transparent 13.5%), radial-gradient(circle at 50% 42%, rgba(216,180,254,.85) 13%, rgba(192,132,252,.35) 15.5%, transparent 19%); }
+.card[data-fx='eventhorizon'] .fx-b { z-index: 0; mix-blend-mode: screen; background: conic-gradient(from var(--a) at 50% 42%, transparent 0 12%, rgba(233,213,255,.75) 26%, rgba(147,51,234,.5) 44%, transparent 60%, rgba(216,180,254,.6) 82%, transparent); -webkit-mask: radial-gradient(ellipse 44% 15% at 50% 42%, transparent 0 44%, #000 52% 96%, transparent); mask: radial-gradient(ellipse 44% 15% at 50% 42%, transparent 0 44%, #000 52% 96%, transparent); animation: bx-turn-a 5.5s linear infinite; }
+.card[data-fx='eventhorizon'] .fx-c { z-index: 1; background: radial-gradient(circle at 50% 42%, transparent 0 16%, rgba(233,213,255,.22) 17%, transparent 24%); animation: bx-e-lens 8s ease-in-out infinite; }
+.card[data-fx='eventhorizon'] .fx-v { z-index: 0; background: radial-gradient(circle, rgba(255,255,255,.8) 0 .6px, transparent 1.1px) 0 0 / 34px 41px, radial-gradient(circle, rgba(216,180,254,.6) 0 .5px, transparent .9px) 17px 23px / 53px 29px; animation: bx-breathe 6s ease-in-out infinite; }
+.card[data-fx='eventhorizon'] .card-art { box-shadow: 0 0 0 1px rgba(192,132,252,.7), 0 0 34px -8px rgba(147,51,234,.9); }
+
+/* Violet Storm: thunderheads stacked to the top of the card, lit from inside */
+.card[data-fx='violetstorm'] .card-front { --rarity: #c084fc; }
+/* 3 Violet Storm: thunderheads stacked to the top of the card, lit from inside */
+.card[data-fx='violetstorm'] .card-front { background: linear-gradient(180deg, #1d1036, #2a1550 46%, #120a24); box-shadow: inset 0 0 0 2px rgba(196,150,255,.5); }
+.card[data-fx='violetstorm'] { --ink: #f3ecff; --ink-dim: #bda8e0; --ink-faint: #8e7cae; }
+.card[data-fx='violetstorm'] .fx-a { z-index: 0; filter: blur(7px); opacity: .8; background: radial-gradient(ellipse 54% 34% at 26% 24%, rgba(120,60,190,.8), transparent 70%), radial-gradient(ellipse 46% 30% at 74% 46%, rgba(80,36,140,.85), transparent 70%), radial-gradient(ellipse 60% 30% at 46% 78%, rgba(140,80,220,.6), transparent 72%); animation: bx-e-roll 19s ease-in-out infinite; }
+.card[data-fx='violetstorm'] .fx-b { z-index: 1; mix-blend-mode: screen; background: radial-gradient(ellipse 40% 26% at 34% 32%, rgba(240,225,255,.9), transparent 66%); animation: bx-e-flash 5.4s steps(1, end) infinite; }
+.card[data-fx='violetstorm'] .fx-c { z-index: 2; background: linear-gradient(196deg, transparent 46.5%, rgba(245,235,255,.95) 47%, transparent 47.6%) 0 0 / 100% 60% no-repeat, linear-gradient(166deg, transparent 52%, rgba(230,215,255,.75) 52.5%, transparent 53.2%) 0 34% / 100% 46% no-repeat; filter: drop-shadow(0 0 6px rgba(216,180,254,.9)); animation: bx-e-bolt 5.4s steps(1, end) infinite; }
+.card[data-fx='violetstorm'] .card-art img { filter: saturate(1.15) contrast(1.08) brightness(.94); }
+.card[data-fx='violetstorm'] .card-art { box-shadow: 0 0 0 1px rgba(196,150,255,.65), inset 0 0 26px rgba(20,8,40,.7); }
+
+/* Amethyst Geode: the inside of a rock that turned out to be worth opening */
+.card[data-fx='geode'] .card-front { --rarity: #c084fc; }
+/* 5 Amethyst Geode: the inside of a rock that turned out to be worth opening */
+.card[data-fx='geode'] .card-front { background: linear-gradient(180deg, #2a1442, #3d1c60 44%, #1a0c2c); box-shadow: inset 0 0 0 2px rgba(216,180,254,.55); }
+.card[data-fx='geode'] { --ink: #f8f1ff; --ink-dim: #ddc9f5; --ink-faint: #ab93cb; }
+.card[data-fx='geode'] .fx-a { z-index: 0; background: repeating-conic-gradient(from 8deg at 22% 20%, rgba(233,213,255,.22) 0 18deg, rgba(126,34,206,.16) 18deg 36deg), repeating-conic-gradient(from 22deg at 78% 40%, rgba(216,180,254,.18) 0 14deg, rgba(88,28,135,.2) 14deg 28deg), repeating-conic-gradient(from 44deg at 44% 88%, rgba(233,213,255,.2) 0 22deg, rgba(107,33,168,.18) 22deg 44deg); }
+.card[data-fx='geode'] .fx-b { z-index: 1; mix-blend-mode: screen; background: conic-gradient(from calc(var(--lx) * 90deg) at calc(48% + var(--lx) * 22%) calc(42% + var(--ly) * 18%), rgba(255,255,255,.5), transparent 16%, rgba(216,180,254,.4) 30%, transparent 46%, rgba(255,255,255,.4) 64%, transparent 80%, rgba(192,132,252,.45)); animation: bx-e-glint 6.5s ease-in-out infinite; }
+.card[data-fx='geode'] .fx-c { z-index: 1; background: radial-gradient(ellipse 120% 90% at 50% 34%, transparent 34%, rgba(14,6,26,.55) 74%), linear-gradient(180deg, transparent 46%, rgba(14,6,26,.72)); }
+.card[data-fx='geode'] .fx-ring::before { background: conic-gradient(from var(--a), #4c1d95, #d8b4fe, #6b21a8, #f3e8ff, #4c1d95); animation: bx-turn-a 9s linear infinite; }
+.card[data-fx='geode'] .card-art { border-radius: 26% 8% 22% 10% / 14% 24% 12% 22%; box-shadow: 0 0 0 1px rgba(216,180,254,.7), inset 0 0 24px rgba(107,33,168,.5); }
+
+/* Starless: no stars at all, only dust lanes and one thing burning behind them */
+.card[data-fx='starless'] .card-front { --rarity: #c084fc; }
+/* 6 Starless: no stars at all, only dust lanes and one thing burning behind them */
+.card[data-fx='starless'] .card-front { background: linear-gradient(180deg, #0a0616, #0f081f 55%, #060310); box-shadow: inset 0 0 0 2px rgba(147,51,234,.45); }
+.card[data-fx='starless'] { --ink: #ece4f8; --ink-dim: #a894c4; --ink-faint: #7a6a95; }
+.card[data-fx='starless'] .fx-a { z-index: 0; filter: blur(9px); opacity: .8; background: radial-gradient(ellipse 34% 60% at 62% 40%, rgba(147,51,234,.55), transparent 72%), radial-gradient(ellipse 50% 24% at 30% 66%, rgba(76,29,149,.6), transparent 74%); animation: bx-e-drift 22s ease-in-out infinite; }
+.card[data-fx='starless'] .fx-b { z-index: 1; opacity: .85; background: repeating-linear-gradient(-24deg, transparent 0 11px, rgba(6,3,14,.75) 11px 15px, transparent 15px 30px), repeating-linear-gradient(-24deg, transparent 0 26px, rgba(10,5,22,.6) 26px 34px, transparent 34px 62px); filter: blur(1.6px); animation: bx-e-lanes 26s linear infinite; }
+.card[data-fx='starless'] .fx-c { z-index: 2; mix-blend-mode: screen; background: radial-gradient(ellipse 26% 20% at calc(60% + var(--lx) * 12%) calc(40% + var(--ly) * 10%), rgba(233,213,255,.45), transparent 70%); animation: bx-breathe 7s ease-in-out infinite; }
+.card[data-fx='starless'] .card-art img { filter: contrast(1.12) saturate(.85) brightness(.86); }
+.card[data-fx='starless'] .card-art { box-shadow: 0 0 0 1px rgba(147,51,234,.55), inset 0 0 34px rgba(4,2,10,.85); }
+
+/* Orchid: velvet petals, a throat of deeper purple, and pollen dust on the air */
+.card[data-fx='orchid'] .card-front { --rarity: #c084fc; }
+/* 8 Orchid: velvet petals, a throat of deeper purple, and pollen dust on the air */
+.card[data-fx='orchid'] .card-front { background: linear-gradient(180deg, #2b1140, #3b1758 48%, #1c0a2c); box-shadow: inset 0 0 0 2px rgba(232,121,249,.45); }
+.card[data-fx='orchid'] { --ink: #fdeeff; --ink-dim: #d2a8dd; --ink-faint: #a17cb0; }
+.card[data-fx='orchid'] .fx-a { z-index: 0; opacity: .8; background: radial-gradient(ellipse 30% 44% at 30% 34%, rgba(232,121,249,.5), transparent 68%), radial-gradient(ellipse 26% 40% at 70% 38%, rgba(192,132,252,.45), transparent 68%), radial-gradient(ellipse 34% 30% at 50% 74%, rgba(217,70,239,.4), transparent 70%); filter: blur(3px); animation: bx-e-bloom 10s ease-in-out infinite; }
+.card[data-fx='orchid'] .fx-b { z-index: 1; opacity: .5; background: repeating-conic-gradient(from 0deg at 50% 46%, rgba(255,255,255,.14) 0 2deg, transparent 2deg 9deg); -webkit-mask: radial-gradient(ellipse 60% 54% at 50% 46%, #000 20%, transparent 76%); mask: radial-gradient(ellipse 60% 54% at 50% 46%, #000 20%, transparent 76%); }
+.card[data-fx='orchid'] .fx-c { z-index: 2; mix-blend-mode: screen; background: radial-gradient(ellipse 30% 22% at calc(50% + var(--lx) * 24%) calc(42% + var(--ly) * 18%), rgba(255,240,255,.35), transparent 70%); }
+.card[data-fx='orchid'] .card-art img { filter: saturate(1.2) hue-rotate(6deg); }
+.card[data-fx='orchid'] .card-art { box-shadow: 0 0 0 1px rgba(232,121,249,.6), 0 0 24px -10px rgba(217,70,239,.8); }
+
+/* --- LEGENDARY: five of the things people do with gold ----------------- */
+
+/* Filigree: wire scrollwork, soldered corner to corner, catching a slow light */
+.card[data-fx='filigree'] .card-front { --rarity: #fbbf24; }
+/* 2 Filigree: wire scrollwork, soldered corner to corner, catching a slow light */
+.card[data-fx='filigree'] .card-front { background: linear-gradient(180deg, #241a06, #33260c 50%, #1a1204); box-shadow: inset 0 0 0 2px rgba(253,224,71,.55); }
+.card[data-fx='filigree'] { --ink: #fdf6e3; --ink-dim: #d5bd85; --ink-faint: #a48f5f; }
+.card[data-fx='filigree'] .fx-a { z-index: 3; opacity: .85; background: repeating-radial-gradient(circle at 50% 50%, transparent 0 4.2px, rgba(253,224,71,.55) 4.2px 5px, transparent 5px 9px) 0 0 / 14px 14px, repeating-radial-gradient(circle at 0% 0%, transparent 0 3px, rgba(217,164,42,.45) 3px 3.7px, transparent 3.7px 7px) 7px 7px / 14px 14px; -webkit-mask: linear-gradient(#000 0 0) 0 0 / 100% 7cqw no-repeat, linear-gradient(#000 0 0) 0 100% / 100% 7cqw no-repeat, linear-gradient(#000 0 0) 0 0 / 7cqw 100% no-repeat, linear-gradient(#000 0 0) 100% 0 / 7cqw 100% no-repeat; mask: linear-gradient(#000 0 0) 0 0 / 100% 7cqw no-repeat, linear-gradient(#000 0 0) 0 100% / 100% 7cqw no-repeat, linear-gradient(#000 0 0) 0 0 / 7cqw 100% no-repeat, linear-gradient(#000 0 0) 100% 0 / 7cqw 100% no-repeat; }
+.card[data-fx='filigree'] .fx-b { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(112deg + var(--lx) * 24deg), transparent 40%, rgba(255,250,220,.85) 50%, transparent 60%); animation: bx-sweepx 5s ease-in-out infinite alternate; }
+.card[data-fx='filigree'] .fx-c { z-index: 0; opacity: .5; background: repeating-conic-gradient(from 24deg at 50% 50%, rgba(180,120,30,.16) 0 6deg, transparent 6deg 20deg); }
+.card[data-fx='filigree'] .card-art { box-shadow: 0 0 0 1px rgba(253,224,71,.7), 0 0 0 4px rgba(120,80,16,.6), 0 0 0 5px rgba(253,224,71,.5); }
+.card[data-fx='filigree'] .rarity-badge { border-radius: 3px; }
+
+/* Molten Gold: not yet set. It is still moving, and it is still hot. */
+.card[data-fx='moltengold'] .card-front { --rarity: #fbbf24; }
+/* 3 Molten Gold: not yet set. It is still moving, and it is still hot. */
+.card[data-fx='moltengold'] .card-front { background: linear-gradient(180deg, #2b1502, #4a2604 46%, #1c0e01); box-shadow: inset 0 0 0 2px rgba(251,146,60,.6); }
+.card[data-fx='moltengold'] { --ink: #fff4e0; --ink-dim: #f3d5b2; --ink-faint: #c4a37a; }
+.card[data-fx='moltengold'] .fx-a { z-index: 0; filter: blur(4px); background: radial-gradient(ellipse 50% 26% at 26% 28%, rgba(253,186,116,.85), transparent 70%), radial-gradient(ellipse 44% 22% at 74% 54%, rgba(251,191,36,.8), transparent 70%), radial-gradient(ellipse 56% 24% at 46% 84%, rgba(234,88,12,.7), transparent 72%); animation: bx-l-pour 12s ease-in-out infinite; }
+.card[data-fx='moltengold'] .fx-b { z-index: 1; mix-blend-mode: screen; background: linear-gradient(96deg, transparent 12%, rgba(255,236,180,.7) 26%, transparent 36%, rgba(255,214,120,.6) 54%, transparent 66%, rgba(255,246,214,.7) 84%, transparent 94%); background-size: 250% 100%; animation: bx-pearl 6s linear infinite; }
+.card[data-fx='moltengold'] .fx-c { z-index: 2; mix-blend-mode: screen; opacity: .35; background: repeating-linear-gradient(0deg, rgba(255,220,150,.35) 0 1px, transparent 1px 7px); background-size: 100% 200%; animation: bx-scrolly 7s linear infinite; }
+.card[data-fx='moltengold'] .fx-v { z-index: 1; background: linear-gradient(180deg, transparent 40%, rgba(22,10,1,.74)); }
+.card[data-fx='moltengold'] .card-art img { filter: sepia(.4) saturate(1.5) contrast(1.06) brightness(1.02); }
+.card[data-fx='moltengold'] .card-art { box-shadow: 0 0 0 1px rgba(253,186,116,.8), 0 0 34px -8px rgba(251,146,60,.95); }
+
+/* Hammered: planished by hand, every dent holding its own small piece of the sun */
+.card[data-fx='hammered'] .card-front { --rarity: #fbbf24; }
+/* 7 Hammered: planished by hand, every dent holding its own small piece of the sun */
+.card[data-fx='hammered'] .card-front { background: linear-gradient(180deg, #3d2d0c, #5a4413 48%, #2c2008); box-shadow: inset 0 0 0 2px rgba(217,164,42,.6); }
+.card[data-fx='hammered'] { --ink: #fff9e8; --ink-dim: #d9c28c; --ink-faint: #a89468; }
+.card[data-fx='hammered'] .fx-a { z-index: 0; background: radial-gradient(circle at 34% 30%, rgba(255,244,200,.4) 0 22%, rgba(90,60,10,.3) 46%, transparent 60%) 0 0 / 18px 18px, radial-gradient(circle at 66% 70%, rgba(255,238,180,.32) 0 20%, rgba(70,48,8,.3) 44%, transparent 58%) 9px 9px / 18px 18px; }
+.card[data-fx='hammered'] .fx-b { z-index: 1; mix-blend-mode: screen; background: radial-gradient(circle at 34% 30%, rgba(255,255,255,.55) 0 12%, transparent 30%) 0 0 / 18px 18px, radial-gradient(circle at 66% 70%, rgba(255,255,255,.4) 0 10%, transparent 28%) 9px 9px / 18px 18px; -webkit-mask: radial-gradient(ellipse 60% 50% at calc(50% + var(--lx) * 34%) calc(44% + var(--ly) * 28%), #000, transparent 78%); mask: radial-gradient(ellipse 60% 50% at calc(50% + var(--lx) * 34%) calc(44% + var(--ly) * 28%), #000, transparent 78%); animation: bx-breathe 5s ease-in-out infinite; }
+.card[data-fx='hammered'] .fx-c { z-index: 1; mix-blend-mode: overlay; opacity: .4; background: repeating-linear-gradient(24deg, rgba(255,255,255,.16) 0 1px, transparent 1px 6px); }
+.card[data-fx='hammered'] .fx-v { z-index: 1; background: linear-gradient(180deg, transparent 42%, rgba(30,20,2,.62)); }
+.card[data-fx='hammered'] .card-art { box-shadow: 0 0 0 2px rgba(217,164,42,.8), inset 0 0 20px rgba(60,40,6,.5); }
+
+/* Coronation: ermine ground, heraldic diaper, one gold band across the plate */
+.card[data-fx='coronation'] .card-front { --rarity: #fbbf24; }
+/* 9 Coronation: ermine ground, heraldic diaper, one gold band across the plate */
+.card[data-fx='coronation'] .card-front { background: linear-gradient(180deg, #4a0f1a, #63161f 46%, #370a12); box-shadow: inset 0 0 0 2px rgba(251,191,36,.65); }
+.card[data-fx='coronation'] { --ink: #fff6e6; --ink-dim: #e0bd94; --ink-faint: #b0926d; }
+.card[data-fx='coronation'] .fx-a { z-index: 0; opacity: .5; background: repeating-linear-gradient(45deg, rgba(251,191,36,.22) 0 1px, transparent 1px 13px), repeating-linear-gradient(-45deg, rgba(251,191,36,.22) 0 1px, transparent 1px 13px); }
+.card[data-fx='coronation'] .fx-b { z-index: 1; background: radial-gradient(ellipse .9cqw 1.6cqw at 50% 34%, rgba(20,10,12,.85), transparent 70%) 0 0 / 13cqw 15cqw, radial-gradient(circle at 42% 62%, rgba(20,10,12,.7) 0 .5cqw, transparent .8cqw) 0 0 / 13cqw 15cqw, radial-gradient(circle at 58% 62%, rgba(20,10,12,.7) 0 .5cqw, transparent .8cqw) 0 0 / 13cqw 15cqw; -webkit-mask: linear-gradient(180deg, transparent 0 58%, #000 68%); mask: linear-gradient(180deg, transparent 0 58%, #000 68%); opacity: .8; }
+.card[data-fx='coronation'] .fx-c { z-index: 3; background: linear-gradient(180deg, transparent 0 50%, rgba(251,191,36,.9) 50% 51.4%, rgba(120,53,15,.8) 51.4% 53%, rgba(253,224,71,.7) 53% 54%, transparent 54%); }
+.card[data-fx='coronation'] .fx-v { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(104deg + var(--lx) * 22deg), transparent 44%, rgba(255,245,210,.55) 51%, transparent 58%); animation: bx-sweepx 8s ease-in-out infinite alternate; }
+.card[data-fx='coronation'] .card-art { box-shadow: 0 0 0 2px rgba(251,191,36,.8), 0 0 0 4px rgba(55,10,18,.9); }
+.card[data-fx='coronation'] .rarity-badge { background: #fbbf24; color: #3a0b12; border-color: #fde68a; }
+
+/* Ingot: no ornament. Weight, a stamped face, and a bevel that says nothing bends here. */
+.card[data-fx='ingot'] .card-front { --rarity: #fbbf24; }
+/* 10 Ingot: no ornament. Weight, a stamped face, and a bevel that says nothing bends here. */
+.card[data-fx='ingot'] .card-front { background: linear-gradient(168deg, #a17a1a, #d4a72c 26%, #8a6512 52%, #e2ba46 68%, #7d5b10); box-shadow: inset 0 0 0 2px rgba(120,80,10,.7); }
+.card[data-fx='ingot'] { --ink: #2b1e04; --ink-dim: #5a4310; --ink-faint: #7d6220; --positive: #1f4a2c; }
+.card[data-fx='ingot'] .fx-a { z-index: 3; background: linear-gradient(180deg, rgba(255,244,190,.6) 0 2.2cqw, transparent 2.2cqw), linear-gradient(0deg, rgba(60,38,2,.55) 0 2.2cqw, transparent 2.2cqw), linear-gradient(90deg, rgba(255,244,190,.45) 0 2.2cqw, transparent 2.2cqw), linear-gradient(270deg, rgba(60,38,2,.45) 0 2.2cqw, transparent 2.2cqw); }
+.card[data-fx='ingot'] .fx-b { z-index: 1; mix-blend-mode: overlay; opacity: .5; background: repeating-linear-gradient(78deg, rgba(255,255,255,.2) 0 1px, transparent 1px 5px), repeating-linear-gradient(102deg, rgba(0,0,0,.14) 0 1px, transparent 1px 8px); }
+.card[data-fx='ingot'] .fx-c { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(96deg + var(--lx) * 34deg), transparent 36%, rgba(255,255,235,.7) 48%, transparent 60%); animation: bx-sweepx 5s ease-in-out infinite alternate; }
+.card[data-fx='ingot'] .fx-v { z-index: 3; opacity: .35; background: radial-gradient(ellipse 22cqw 8cqw at 50% 88%, transparent 0 62%, rgba(60,38,2,.7) 66%, transparent 70%); }
+.card[data-fx='ingot'] .card-art { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(60,38,2,.7), 0 2cqw 4cqw -2cqw rgba(50,32,2,.8); }
+.card[data-fx='ingot'] .card-art img { filter: sepia(.45) saturate(1.2) contrast(1.05); }
+.card[data-fx='ingot'] .rarity-badge { border-radius: 2px; background: #2b1e04; color: #e2ba46; border-color: #2b1e04; }
+
+/* --- MYTHIC: red, and something has gone wrong with it ----------------- */
+
+/* Corrupted: the file is damaged. Blocks of it are being read from the wrong place. */
+.card[data-fx='corrupted'] .card-front { --rarity: #e02134; }
+/* 1 Corrupted: the file is damaged. Blocks of it are being read from the wrong place. */
+.card[data-fx='corrupted'] .card-front { background: linear-gradient(180deg, #1a0508, #2a070c 48%, #120306); box-shadow: inset 0 0 0 2px rgba(224,33,52,.6); }
+.card[data-fx='corrupted'] { --ink: #ffeaec; --ink-dim: #d99aa2; --ink-faint: #a8737a; }
+.card[data-fx='corrupted'] .fx-a { z-index: 0; opacity: .5; background: repeating-linear-gradient(0deg, rgba(224,33,52,.35) 0 2px, transparent 2px 5px, rgba(20,4,7,.7) 5px 8px, transparent 8px 14px); }
+.card[data-fx='corrupted'] .fx-b { z-index: 2; mix-blend-mode: screen; background: linear-gradient(90deg, rgba(255,60,80,.7) 0 26%, transparent 26% 42%, rgba(60,220,255,.4) 42% 55%, transparent 55%) 0 22% / 100% 2.6cqw no-repeat, linear-gradient(90deg, transparent 0 18%, rgba(255,80,90,.6) 18% 48%, transparent 48%) 0 56% / 100% 1.8cqw no-repeat, linear-gradient(90deg, rgba(80,240,255,.35) 0 12%, transparent 12% 64%, rgba(255,60,80,.55) 64% 88%, transparent 88%) 0 78% / 100% 2.2cqw no-repeat; animation: bx-m-glitch 3.4s steps(1, end) infinite; }
+.card[data-fx='corrupted'] .fx-c { z-index: 3; mix-blend-mode: screen; opacity: .3; background: repeating-linear-gradient(0deg, rgba(255,255,255,.2) 0 1px, transparent 1px 3px); }
+.card[data-fx='corrupted'] .card-art img { filter: saturate(1.3) contrast(1.15); animation: bx-m-shift 3.4s steps(1, end) infinite; }
+.card[data-fx='corrupted'] .card-title { animation: bx-m-type 3.4s steps(1, end) infinite; }
+.card[data-fx='corrupted'] .card-art { box-shadow: 0 0 0 1px rgba(224,33,52,.7); }
+
+/* Ember Storm: the fire is out, and it is still throwing pieces of itself upward */
+.card[data-fx='emberstorm'] .card-front { --rarity: #e02134; }
+/* 2 Ember Storm: the fire is out, and it is still throwing pieces of itself upward */
+.card[data-fx='emberstorm'] .card-front { background: linear-gradient(180deg, #170403, #300806 46%, #0d0202); box-shadow: inset 0 0 0 2px rgba(239,68,68,.55); }
+.card[data-fx='emberstorm'] { --ink: #ffeee9; --ink-dim: #d9a196; --ink-faint: #a87a71; }
+.card[data-fx='emberstorm'] .fx-a { z-index: 0; filter: blur(6px); background: radial-gradient(ellipse 60% 30% at 50% 104%, rgba(239,68,68,.8), transparent 72%), radial-gradient(ellipse 36% 22% at 24% 92%, rgba(251,146,60,.6), transparent 72%), radial-gradient(ellipse 32% 20% at 78% 96%, rgba(220,38,38,.6), transparent 72%); animation: bx-m-updraft 6s ease-in-out infinite; }
+.card[data-fx='emberstorm'] .fx-b { z-index: 1; opacity: .35; background: repeating-linear-gradient(0deg, transparent 0 12px, rgba(120,60,40,.4) 12px 14px); background-size: 100% 200%; animation: bx-scrolly 6s linear infinite; filter: blur(1.4px); }
+.card[data-fx='emberstorm'] .fx-c { z-index: 3; mix-blend-mode: screen; background: radial-gradient(ellipse 90% 40% at 50% 100%, rgba(255,150,80,.28), transparent 70%); animation: bx-breathe 3.2s ease-in-out infinite; }
+.card[data-fx='emberstorm'] .card-art img { filter: saturate(1.25) contrast(1.1) brightness(.96); }
+.card[data-fx='emberstorm'] .card-art { box-shadow: 0 0 0 1px rgba(239,68,68,.7), 0 0 30px -10px rgba(251,146,60,.9); }
+
+/* Meltdown: hazard stripes, a warning that nobody is left to read, an alarm still lit */
+.card[data-fx='meltdown'] .card-front { --rarity: #e02134; }
+/* 6 Meltdown: hazard stripes, a warning that nobody is left to read, an alarm still lit */
+.card[data-fx='meltdown'] .card-front { background: linear-gradient(180deg, #1d0d02, #2e1503 46%, #140902); box-shadow: inset 0 0 0 2px rgba(234,88,12,.65); }
+.card[data-fx='meltdown'] { --ink: #fff0e0; --ink-dim: #d9ab86; --ink-faint: #a88265; }
+.card[data-fx='meltdown'] .fx-a { z-index: 3; opacity: .85; background: repeating-linear-gradient(-45deg, rgba(234,88,12,.85) 0 8px, rgba(24,10,2,.9) 8px 16px) 0 0 / 100% 3.6cqw no-repeat, repeating-linear-gradient(-45deg, rgba(234,88,12,.85) 0 8px, rgba(24,10,2,.9) 8px 16px) 0 100% / 100% 3.6cqw no-repeat; animation: bx-m-crawl 3s linear infinite; }
+.card[data-fx='meltdown'] .fx-b { z-index: 0; background: radial-gradient(ellipse 76% 56% at 50% 46%, rgba(220,38,38,.5), transparent 74%); animation: bx-m-alarm 1.8s ease-in-out infinite; }
+.card[data-fx='meltdown'] .fx-c { z-index: 1; opacity: .5; background: repeating-radial-gradient(circle at 50% 46%, transparent 0 11px, rgba(251,146,60,.32) 11px 12.4px); animation: bx-m-wave 3.4s linear infinite; }
+.card[data-fx='meltdown'] .fx-v { z-index: 4; mix-blend-mode: screen; opacity: .3; background: repeating-linear-gradient(0deg, rgba(255,255,255,.18) 0 1px, transparent 1px 4px); }
+.card[data-fx='meltdown'] .card-art img { filter: saturate(1.3) contrast(1.12) sepia(.14); }
+.card[data-fx='meltdown'] .card-art { box-shadow: 0 0 0 2px rgba(234,88,12,.8), 0 0 28px -10px rgba(220,38,38,.9); }
+.card[data-fx='meltdown'] .rarity-badge { border-radius: 2px; background: #ea580c; color: #140902; border-color: #ea580c; }
+
+/* Furnace Gate: something is open that should be shut, and the air above it is bending */
+.card[data-fx='furnacegate'] .card-front { --rarity: #e02134; }
+/* 7 Furnace Gate: something is open that should be shut, and the air above it is bending */
+.card[data-fx='furnacegate'] .card-front { background: radial-gradient(ellipse 74% 60% at 50% 68%, #61140a, #150302 76%); box-shadow: inset 0 0 0 2px rgba(220,38,38,.6); }
+.card[data-fx='furnacegate'] { --ink: #ffece6; --ink-dim: #f0c4b6; --ink-faint: #b98d80; }
+.card[data-fx='furnacegate'] .fx-a { z-index: 0; background: radial-gradient(ellipse 26% 30% at 50% 86%, rgba(255,214,140,.9), rgba(239,68,68,.6) 46%, transparent 76%); animation: bx-m-mouth 5.6s ease-in-out infinite; }
+.card[data-fx='furnacegate'] .fx-b { z-index: 1; opacity: .55; background: repeating-linear-gradient(0deg, transparent 0 4px, rgba(255,180,120,.24) 4px 5px); -webkit-mask: radial-gradient(ellipse 60% 56% at 50% 86%, #000, transparent 84%); mask: radial-gradient(ellipse 60% 56% at 50% 86%, #000, transparent 84%); animation: bx-m-haze 4.2s ease-in-out infinite; }
+.card[data-fx='furnacegate'] .fx-c { z-index: 2; mix-blend-mode: screen; background: radial-gradient(ellipse 44% 22% at 50% 86%, rgba(255,244,214,.5), transparent 74%); animation: bx-breathe 2.6s ease-in-out infinite; }
+.card[data-fx='furnacegate'] .card-art img { filter: saturate(1.3) contrast(1.14) brightness(.92); }
+.card[data-fx='furnacegate'] .card-art { box-shadow: 0 0 0 1px rgba(220,38,38,.75), 0 0 34px -8px rgba(255,140,60,.95); }
+
+/* Predator: seen in heat, where the cold parts of the world stop existing */
+.card[data-fx='predator'] .card-front { --rarity: #e02134; }
+/* 9 Predator: seen in heat, where the cold parts of the world stop existing */
+.card[data-fx='predator'] .card-front { background: linear-gradient(180deg, #0b0217, #14031f 52%, #06010e); box-shadow: inset 0 0 0 2px rgba(224,33,52,.5); }
+.card[data-fx='predator'] { --ink: #ffeef0; --ink-dim: #c793a0; --ink-faint: #96707c; }
+.card[data-fx='predator'] .fx-a { z-index: 1; mix-blend-mode: screen; opacity: .7; background: radial-gradient(ellipse 40% 30% at 34% 34%, rgba(255,240,180,.6), rgba(239,68,68,.4) 46%, rgba(88,28,135,.3) 70%, transparent 84%), radial-gradient(ellipse 34% 26% at 70% 62%, rgba(251,146,60,.5), rgba(190,18,60,.35) 50%, transparent 80%); animation: bx-m-thermal 8s ease-in-out infinite; }
+.card[data-fx='predator'] .fx-b { z-index: 2; opacity: .55; background: repeating-radial-gradient(ellipse 40% 30% at 34% 34%, transparent 0 5px, rgba(255,190,120,.28) 5px 6px), repeating-radial-gradient(ellipse 34% 26% at 70% 62%, transparent 0 6px, rgba(255,150,120,.22) 6px 7px); }
+.card[data-fx='predator'] .fx-c { z-index: 3; opacity: .28; background: repeating-linear-gradient(0deg, rgba(255,255,255,.18) 0 1px, transparent 1px 4px); }
+.card[data-fx='predator'] .fx-v { z-index: 4; background: linear-gradient(90deg, rgba(224,33,52,.9) 0 1.4px, transparent 1.4px) 6cqw 0 / 100% 100% no-repeat, linear-gradient(0deg, rgba(224,33,52,.9) 0 1.4px, transparent 1.4px) 0 32cqw / 100% 100% no-repeat; -webkit-mask: radial-gradient(circle at calc(30% + var(--lx) * 20%) calc(34% + var(--ly) * 16%), #000 0 18%, transparent 34%); mask: radial-gradient(circle at calc(30% + var(--lx) * 20%) calc(34% + var(--ly) * 16%), #000 0 18%, transparent 34%); }
+.card[data-fx='predator'] .card-art img { filter: grayscale(1) contrast(1.3) sepia(1) hue-rotate(-42deg) saturate(4) brightness(.95); }
+.card[data-fx='predator'] .card-art { box-shadow: 0 0 0 1px rgba(224,33,52,.6), inset 0 0 24px rgba(10,2,20,.7); }
+
+/* --- EXOTIC: instruments rather than ornament -------------------------- */
+
+/* Terminal: a session that has been open a long time, still printing */
+.card[data-fx='terminal'] .card-front { --rarity: #22d3ee; }
+/* 2 Terminal: a session that has been open a long time, still printing */
+.card[data-fx='terminal'] .card-front { background: #030b0d; box-shadow: inset 0 0 0 2px rgba(34,211,238,.5); }
+.card[data-fx='terminal'] { --ink: #b8f5ff; --ink-dim: #63c0cf; --ink-faint: #47929f; }
+.card[data-fx='terminal'] .fx-a { z-index: 0; opacity: .3; background: repeating-linear-gradient(0deg, rgba(34,211,238,.28) 0 1px, transparent 1px 3px); }
+.card[data-fx='terminal'] .fx-b { z-index: 1; opacity: .5; background: linear-gradient(90deg, rgba(34,211,238,.6) 0 8cqw, transparent 8cqw 9cqw, rgba(34,211,238,.35) 9cqw 26cqw, transparent 26cqw) 0 0 / 100% 2.6cqw, linear-gradient(90deg, rgba(34,211,238,.45) 0 6cqw, transparent 6cqw 7cqw, rgba(34,211,238,.28) 7cqw 38cqw, transparent 38cqw) 0 2.6cqw / 100% 2.6cqw; background-size: 100% 5.2cqw; background-repeat: repeat-y; animation: bx-x-log 9s linear infinite; }
+.card[data-fx='terminal'] .fx-c { z-index: 3; background: linear-gradient(90deg, rgba(165,243,252,.9) 0 1.6cqw, transparent 1.6cqw) 5cqw calc(100% - 8cqw) / 100% 2.4cqw no-repeat; animation: bx-x-caret 1.05s steps(1, end) infinite; }
+.card[data-fx='terminal'] .fx-v { z-index: 1; background: radial-gradient(ellipse 110% 90% at 50% 50%, transparent 46%, rgba(0,0,0,.75) 98%); }
+.card[data-fx='terminal'] .card-title { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 5.1cqw; font-weight: 600; text-shadow: 0 0 8px rgba(34,211,238,.7); }
+.card[data-fx='terminal'] .card-desc, .card[data-fx='terminal'] .card-extract { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.card[data-fx='terminal'] .card-art img { filter: grayscale(1) sepia(1) hue-rotate(140deg) saturate(3.2) contrast(1.2) brightness(.9); }
+.card[data-fx='terminal'] .card-art { border-radius: 0; box-shadow: 0 0 0 1px rgba(34,211,238,.6); }
+.card[data-fx='terminal'] .rarity-badge { border-radius: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+/* Grid Runner: a floor that goes on forever and is coming toward you at speed */
+.card[data-fx='gridrunner'] .card-front { --rarity: #22d3ee; }
+/* 3 Grid Runner: a floor that goes on forever and is coming toward you at speed */
+.card[data-fx='gridrunner'] .card-front { background: linear-gradient(180deg, #06091f, #0a1436 46%, #030616); box-shadow: inset 0 0 0 2px rgba(34,211,238,.55); }
+.card[data-fx='gridrunner'] { --ink: #e4faff; --ink-dim: #8cc3d6; --ink-faint: #6493a4; }
+.card[data-fx='gridrunner'] .fx-a { z-index: 0; background: repeating-linear-gradient(0deg, transparent 0 5px, rgba(34,211,238,.45) 5px 6px); -webkit-mask: linear-gradient(180deg, transparent 0 52%, #000 62%); mask: linear-gradient(180deg, transparent 0 52%, #000 62%); transform-origin: 50% 100%; transform: perspective(180px) rotateX(62deg); animation: bx-x-run 2.4s linear infinite; }
+.card[data-fx='gridrunner'] .fx-b { z-index: 0; background: repeating-linear-gradient(90deg, transparent 0 9px, rgba(34,211,238,.4) 9px 10px); -webkit-mask: linear-gradient(180deg, transparent 0 52%, #000 62%); mask: linear-gradient(180deg, transparent 0 52%, #000 62%); transform-origin: 50% 100%; transform: perspective(180px) rotateX(62deg); }
+.card[data-fx='gridrunner'] .fx-c { z-index: 1; background: linear-gradient(180deg, transparent 46%, rgba(103,232,249,.55) 51.4% 52.4%, transparent 56%); filter: drop-shadow(0 0 7px rgba(34,211,238,.9)); }
+.card[data-fx='gridrunner'] .fx-v { z-index: 0; background: radial-gradient(ellipse 70% 26% at 50% 52%, rgba(34,211,238,.35), transparent 74%); animation: bx-breathe 5s ease-in-out infinite; }
+.card[data-fx='gridrunner'] .card-art { box-shadow: 0 0 0 1px rgba(34,211,238,.7), 0 0 28px -10px rgba(34,211,238,.95); }
+
+/* Schematic: dimensioned, tolerance noted, drawn by somebody who checks twice */
+.card[data-fx='schematic'] .card-front { --rarity: #22d3ee; }
+/* 5 Schematic: dimensioned, tolerance noted, drawn by somebody who checks twice */
+.card[data-fx='schematic'] .card-front { background: #071720; box-shadow: inset 0 0 0 2px rgba(34,211,238,.55); }
+.card[data-fx='schematic'] { --ink: #dff7ff; --ink-dim: #86bccb; --ink-faint: #628f9d; }
+.card[data-fx='schematic'] .fx-a { z-index: 0; opacity: .5; background: repeating-linear-gradient(0deg, rgba(34,211,238,.16) 0 1px, transparent 1px 9px), repeating-linear-gradient(90deg, rgba(34,211,238,.16) 0 1px, transparent 1px 9px); }
+.card[data-fx='schematic'] .fx-b { z-index: 3; background: linear-gradient(90deg, rgba(103,232,249,.7) 0 1px, transparent 1px) 4cqw 0 / 100% 100% no-repeat, linear-gradient(90deg, rgba(103,232,249,.7) 0 1px, transparent 1px) calc(100% - 4cqw) 0 / 100% 100% no-repeat, linear-gradient(0deg, rgba(103,232,249,.5) 0 1px, transparent 1px) 0 4cqw / 100% 100% no-repeat, repeating-linear-gradient(90deg, rgba(103,232,249,.55) 0 1px, transparent 1px 9cqw) 0 3cqw / 100% 2px no-repeat; }
+.card[data-fx='schematic'] .fx-c { z-index: 3; background: radial-gradient(circle at 12cqw 34cqw, transparent 0 2.4cqw, rgba(34,211,238,.6) 2.4cqw 2.7cqw, transparent 2.7cqw), radial-gradient(circle at 84cqw 62cqw, transparent 0 1.8cqw, rgba(34,211,238,.5) 1.8cqw 2.1cqw, transparent 2.1cqw), linear-gradient(90deg, rgba(34,211,238,.45) 0 6cqw, transparent 6cqw) 12cqw 34cqw / 100% 1px no-repeat; animation: bx-breathe 6s ease-in-out infinite; }
+.card[data-fx='schematic'] .fx-v { z-index: 2; mix-blend-mode: screen; background: linear-gradient(112deg, transparent 44%, rgba(180,240,255,.35) 50%, transparent 56%); animation: bx-sweepx 7s ease-in-out infinite alternate; }
+.card[data-fx='schematic'] .card-title { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 5cqw; letter-spacing: .02em; }
+.card[data-fx='schematic'] .card-art img { filter: grayscale(.85) sepia(1) hue-rotate(150deg) saturate(2.4) contrast(1.1); }
+.card[data-fx='schematic'] .card-art { border-radius: 0; box-shadow: 0 0 0 1px rgba(34,211,238,.65); }
+.card[data-fx='schematic'] .rarity-badge { border-radius: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+/* Datastream: columns of it, falling faster than anyone is reading */
+.card[data-fx='datastream'] .card-front { --rarity: #22d3ee; }
+/* 7 Datastream: columns of it, falling faster than anyone is reading */
+.card[data-fx='datastream'] .card-front { background: #02090c; box-shadow: inset 0 0 0 2px rgba(34,211,238,.5); }
+.card[data-fx='datastream'] { --ink: #d8f9ff; --ink-dim: #6fbccb; --ink-faint: #4f8e9c; }
+.card[data-fx='datastream'] .fx-code { z-index: 0; opacity: 1; display: flex; justify-content: space-between; overflow: hidden; padding: 0 1px; }
+.card[data-fx='datastream'] .fx-a { z-index: 1; opacity: .3; background: repeating-linear-gradient(0deg, rgba(0,0,0,.5) 0 1px, transparent 1px 3px); }
+.card[data-fx='datastream'] .fx-b { z-index: 1; background: radial-gradient(ellipse 110% 88% at 50% 50%, transparent 40%, rgba(0,3,6,.9) 96%); }
+.card[data-fx='datastream'] .fx-c { z-index: 3; mix-blend-mode: screen; background: linear-gradient(180deg, transparent, rgba(165,243,252,.35) 48% 52%, transparent); background-size: 100% 30%; background-repeat: no-repeat; animation: bx-x-scan 6s linear infinite; }
+.card[data-fx='datastream'] .card-title { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 5.1cqw; font-weight: 600; text-shadow: 0 0 9px rgba(34,211,238,.8); }
+.card[data-fx='datastream'] .card-art img { filter: grayscale(1) sepia(1) hue-rotate(140deg) saturate(3.6) contrast(1.25) brightness(.86); }
+.card[data-fx='datastream'] .card-art { border-radius: 0; box-shadow: 0 0 0 1px rgba(34,211,238,.6); }
+.card[data-fx='datastream'] .rarity-badge { border-radius: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+/* Oscilloscope: one channel, one trace, and a graticule to argue with */
+.card[data-fx='oscilloscope'] .card-front { --rarity: #22d3ee; }
+/* 8 Oscilloscope: one channel, one trace, and a graticule to argue with */
+.card[data-fx='oscilloscope'] .card-front { background: radial-gradient(ellipse 90% 70% at 50% 46%, #05201f, #010c0c 78%); box-shadow: inset 0 0 0 2px rgba(45,212,191,.5); }
+.card[data-fx='oscilloscope'] { --ink: #ddfdf7; --ink-dim: #7ec7bb; --ink-faint: #5c9990; }
+.card[data-fx='oscilloscope'] .fx-a { z-index: 0; opacity: .5; background: repeating-linear-gradient(0deg, rgba(45,212,191,.24) 0 1px, transparent 1px 11px), repeating-linear-gradient(90deg, rgba(45,212,191,.24) 0 1px, transparent 1px 11px); }
+.card[data-fx='oscilloscope'] .fx-b { z-index: 1; background: repeating-radial-gradient(ellipse 9px 12cqw at 50% 46%, transparent 0 8.4px, rgba(94,234,212,.8) 8.4px 9.4px, transparent 9.4px); -webkit-mask: linear-gradient(180deg, transparent 30%, #000 44% 56%, transparent 70%); mask: linear-gradient(180deg, transparent 30%, #000 44% 56%, transparent 70%); filter: drop-shadow(0 0 6px rgba(45,212,191,.9)); animation: bx-x-trace 3.2s linear infinite; }
+.card[data-fx='oscilloscope'] .fx-c { z-index: 1; mix-blend-mode: screen; background: linear-gradient(90deg, transparent, rgba(190,255,244,.7) 50%, transparent); background-size: 12% 100%; background-repeat: no-repeat; filter: blur(2px); animation: bx-x-sweep 3.2s linear infinite; }
+.card[data-fx='oscilloscope'] .fx-v { z-index: 1; background: radial-gradient(ellipse 110% 90% at 50% 46%, transparent 44%, rgba(0,8,8,.85) 98%); }
+.card[data-fx='oscilloscope'] .card-title { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 5.1cqw; text-shadow: 0 0 8px rgba(45,212,191,.7); }
+.card[data-fx='oscilloscope'] .card-art img { filter: grayscale(1) sepia(1) hue-rotate(112deg) saturate(2.8) contrast(1.2) brightness(.9); }
+.card[data-fx='oscilloscope'] .card-art { border-radius: 2px; box-shadow: 0 0 0 1px rgba(45,212,191,.6); }
+
+/* --- PRISMATIC: five ways of splitting the spectrum -------------------- */
+
+/* Aurora Veil: curtains hanging off the magnetic field, folding and refolding all night */
+.card[data-fx='auroraveil'] .card-front { --rarity: #f472b6; }
+/* 1 Aurora Veil: curtains hanging off the magnetic field, folding and refolding all night */
+.card[data-fx='auroraveil'] .card-front { background: linear-gradient(180deg, #050818, #080e26 48%, #03050f); box-shadow: inset 0 0 0 2px rgba(244,114,182,.5); }
+.card[data-fx='auroraveil'] { --ink: #f6f2ff; --ink-dim: #b7aede; --ink-faint: #8880ac; }
+.card[data-fx='auroraveil'] .fx-a { z-index: 0; mix-blend-mode: screen; filter: blur(5px); background: linear-gradient(96deg, transparent 4%, rgba(52,211,153,.55) 18%, rgba(34,211,238,.5) 32%, transparent 44%), linear-gradient(84deg, transparent 40%, rgba(192,132,252,.5) 56%, rgba(244,114,182,.45) 70%, transparent 84%); -webkit-mask: linear-gradient(180deg, #000 0 66%, transparent 96%); mask: linear-gradient(180deg, #000 0 66%, transparent 96%); animation: bx-p-curtain 11s ease-in-out infinite; }
+.card[data-fx='auroraveil'] .fx-b { z-index: 0; mix-blend-mode: screen; opacity: .7; background: repeating-linear-gradient(94deg, transparent 0 5px, rgba(190,255,220,.4) 5px 6.4px, transparent 6.4px 13px); -webkit-mask: linear-gradient(180deg, #000 0 54%, transparent 88%); mask: linear-gradient(180deg, #000 0 54%, transparent 88%); animation: bx-p-ripple 7s ease-in-out infinite; }
+.card[data-fx='auroraveil'] .fx-c { z-index: 1; mix-blend-mode: screen; filter: blur(9px); opacity: .6; background: linear-gradient(88deg, transparent 20%, rgba(129,140,248,.6) 40%, rgba(52,211,153,.5) 62%, transparent 80%); animation: bx-p-curtain 11s ease-in-out infinite reverse; }
+.card[data-fx='auroraveil'] .fx-v { z-index: 0; background: radial-gradient(circle, rgba(255,255,255,.8) 0 .6px, transparent 1.1px) 0 0 / 33px 41px, radial-gradient(circle, rgba(220,235,255,.6) 0 .45px, transparent .9px) 17px 23px / 51px 29px; }
+.card[data-fx='auroraveil'] .fx-ring::before { background: conic-gradient(from var(--a), #34d399, #22d3ee, #818cf8, #f472b6, #34d399); animation: bx-turn-a 9s linear infinite; }
+.card[data-fx='auroraveil'] .card-art { box-shadow: 0 0 0 1px rgba(244,114,182,.6), 0 0 32px -10px rgba(129,140,248,.9); }
+
+/* Diffraction: one ruled grating, and white light doing what it always wanted to */
+.card[data-fx='diffraction'] .card-front { --rarity: #f472b6; }
+/* 2 Diffraction: one ruled grating, and white light doing what it always wanted to */
+.card[data-fx='diffraction'] .card-front { background: linear-gradient(180deg, #0a0714, #110b22 48%, #060410); box-shadow: inset 0 0 0 2px rgba(244,114,182,.55); }
+.card[data-fx='diffraction'] { --ink: #fbf3ff; --ink-dim: #c3aada; --ink-faint: #927fa6; }
+.card[data-fx='diffraction'] .fx-a { z-index: 0; opacity: .55; background: repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 1px, transparent 1px 3px); }
+.card[data-fx='diffraction'] .fx-b { z-index: 1; mix-blend-mode: screen; background: repeating-linear-gradient(calc(96deg + var(--lx) * 22deg), rgba(255,0,80,.42) 0 6px, rgba(255,170,0,.42) 6px 12px, rgba(180,255,0,.4) 12px 18px, rgba(0,230,180,.42) 18px 24px, rgba(0,160,255,.42) 24px 30px, rgba(150,90,255,.42) 30px 36px, rgba(255,0,80,.42) 36px 42px); -webkit-mask: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 3px); mask: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 3px); animation: bx-p-grate 6s linear infinite; }
+.card[data-fx='diffraction'] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .8; background: linear-gradient(calc(96deg + var(--lx) * 22deg), transparent 36%, rgba(255,255,255,.9) 48%, transparent 60%); filter: blur(1px); animation: bx-sweepx 4.5s ease-in-out infinite alternate; }
+.card[data-fx='diffraction'] .fx-v { z-index: 0; background: radial-gradient(ellipse 90% 70% at calc(50% + var(--lx) * 22%) calc(44% + var(--ly) * 18%), rgba(255,255,255,.14), transparent 74%); }
+.card[data-fx='diffraction'] .fx-ring::before { background: conic-gradient(from var(--a), #ff0050, #ffaa00, #b4ff00, #00e6b4, #00a0ff, #965aff, #ff0050); animation: bx-turn-a 5s linear infinite; }
+.card[data-fx='diffraction'] .card-art { box-shadow: 0 0 0 1px rgba(255,255,255,.5), 0 0 30px -10px rgba(244,114,182,.9); }
+
+/* Refraction: one beam in at the top, seven colours out at the bottom, no negotiation */
+.card[data-fx='refraction'] .card-front { --rarity: #f472b6; }
+/* 5 Refraction: one beam in at the top, seven colours out at the bottom, no negotiation */
+.card[data-fx='refraction'] .card-front { background: linear-gradient(180deg, #070610, #0d0b1c 48%, #050409); box-shadow: inset 0 0 0 2px rgba(244,114,182,.5); }
+.card[data-fx='refraction'] { --ink: #f7f2ff; --ink-dim: #b6a8d4; --ink-faint: #877ca1; }
+.card[data-fx='refraction'] .fx-a { z-index: 1; mix-blend-mode: screen; background: linear-gradient(196deg, transparent 28%, rgba(255,255,255,.85) 30.6% 32%, transparent 34%); -webkit-mask: linear-gradient(180deg, #000 0 42%, transparent 52%); mask: linear-gradient(180deg, #000 0 42%, transparent 52%); filter: blur(.6px); }
+.card[data-fx='refraction'] .fx-b { z-index: 1; mix-blend-mode: screen; background: conic-gradient(from 152deg at 46% 46%, transparent 0 3%, rgba(255,40,90,.6) 4%, rgba(255,170,40,.6) 6%, rgba(230,255,60,.55) 8%, rgba(60,255,150,.55) 10%, rgba(60,190,255,.6) 12%, rgba(150,90,255,.6) 14%, transparent 16%); filter: blur(1.4px); animation: bx-p-fan 8s ease-in-out infinite; }
+.card[data-fx='refraction'] .fx-c { z-index: 1; background: linear-gradient(152deg, transparent 41%, rgba(255,255,255,.16) 43% 55%, transparent 57%); -webkit-mask: polygon(46% 30%, 74% 62%, 18% 62%); mask: polygon(46% 30%, 74% 62%, 18% 62%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+.card[data-fx='refraction'] .fx-v { z-index: 1; background: linear-gradient(0deg, rgba(255,255,255,.7) 0 1px, transparent 1px) 0 0 / 100% 100% no-repeat; -webkit-mask: polygon(46% 30%, 74% 62%, 18% 62%); mask: polygon(46% 30%, 74% 62%, 18% 62%); }
+.card[data-fx='refraction'] .fx-ring::before { background: conic-gradient(from var(--a), #ff285a, #ffaa28, #e6ff3c, #3cff96, #3cbeff, #965aff, #ff285a); animation: bx-turn-a 7s linear infinite; }
+.card[data-fx='refraction'] .card-art { box-shadow: 0 0 0 1px rgba(255,255,255,.45), 0 0 30px -12px rgba(244,114,182,.9); }
+
+/* Spectral Rain: it falls in colour, and each streak leaves the next one behind */
+.card[data-fx='spectralrain'] .card-front { --rarity: #f472b6; }
+/* 7 Spectral Rain: it falls in colour, and each streak leaves the next one behind */
+.card[data-fx='spectralrain'] .card-front { background: linear-gradient(180deg, #08061a, #0e0a2b 50%, #050410); box-shadow: inset 0 0 0 2px rgba(244,114,182,.5); }
+.card[data-fx='spectralrain'] { --ink: #f7f1ff; --ink-dim: #b6a6dc; --ink-faint: #8a7ba8; }
+.card[data-fx='spectralrain'] .fx-a { z-index: 0; mix-blend-mode: screen; background: linear-gradient(180deg, transparent, rgba(255,60,140,.75) 40%, transparent) 14% 0 / 1.6px 42cqw no-repeat, linear-gradient(180deg, transparent, rgba(80,220,255,.75) 40%, transparent) 34% 0 / 1.4px 34cqw no-repeat, linear-gradient(180deg, transparent, rgba(180,255,120,.7) 40%, transparent) 58% 0 / 1.5px 48cqw no-repeat, linear-gradient(180deg, transparent, rgba(190,120,255,.75) 40%, transparent) 78% 0 / 1.6px 38cqw no-repeat, linear-gradient(180deg, transparent, rgba(255,200,70,.7) 40%, transparent) 92% 0 / 1.3px 30cqw no-repeat; filter: drop-shadow(0 0 3px rgba(255,255,255,.4)); animation: bx-p-rain 3.4s linear infinite; }
+.card[data-fx='spectralrain'] .fx-b { z-index: 0; mix-blend-mode: screen; opacity: .7; background: linear-gradient(180deg, transparent, rgba(255,160,60,.6) 40%, transparent) 24% 0 / 1.2px 36cqw no-repeat, linear-gradient(180deg, transparent, rgba(120,255,200,.6) 40%, transparent) 46% 0 / 1.3px 44cqw no-repeat, linear-gradient(180deg, transparent, rgba(140,160,255,.6) 40%, transparent) 68% 0 / 1.2px 32cqw no-repeat; animation: bx-p-rain 4.6s linear infinite; animation-delay: -1.8s; }
+.card[data-fx='spectralrain'] .fx-c { z-index: 1; mix-blend-mode: screen; filter: blur(8px); opacity: .5; background: linear-gradient(96deg, rgba(255,60,140,.4), rgba(80,220,255,.4) 40%, rgba(190,120,255,.4) 76%, transparent); animation: bx-pearl 8s linear infinite; background-size: 250% 100%; }
+.card[data-fx='spectralrain'] .fx-v { z-index: 2; mix-blend-mode: screen; background: radial-gradient(ellipse 90% 24% at 50% 100%, rgba(244,114,182,.3), transparent 74%); animation: bx-breathe 3.6s ease-in-out infinite; }
+.card[data-fx='spectralrain'] .card-art { box-shadow: 0 0 0 1px rgba(244,114,182,.6), 0 0 28px -12px rgba(140,160,255,.95); }
+
+/* Supernova: everything the star had, released across the whole spectrum at once */
+.card[data-fx='supernova'] .card-front { --rarity: #f472b6; }
+/* 10 Supernova: everything the star had, released across the whole spectrum at once */
+.card[data-fx='supernova'] .card-front { background: radial-gradient(ellipse 90% 70% at 50% 44%, #2b0a2e, #060209 80%); box-shadow: inset 0 0 0 2px rgba(244,114,182,.6); }
+.card[data-fx='supernova'] { --ink: #fff2fb; --ink-dim: #d1a9c8; --ink-faint: #a17f9b; }
+.card[data-fx='supernova'] .fx-a { z-index: 0; mix-blend-mode: screen; background: conic-gradient(from var(--a) at 50% 44%, #ff2d6f, #ff9f2d, #f2ff2d, #35ff88, #2dc7ff, #7a5cff, #ff2d6f); -webkit-mask: repeating-conic-gradient(from 0deg at 50% 44%, #000 0 .8deg, transparent .8deg 6deg); mask: repeating-conic-gradient(from 0deg at 50% 44%, #000 0 .8deg, transparent .8deg 6deg); animation: bx-turn-a 7s linear infinite; }
+.card[data-fx='supernova'] .fx-b { z-index: 0; mix-blend-mode: screen; background: radial-gradient(circle at 50% 44%, rgba(255,255,255,.95) 0 3%, rgba(255,190,230,.6) 8%, rgba(122,92,255,.3) 18%, transparent 34%); animation: bx-p-nova 4.4s ease-out infinite; }
+.card[data-fx='supernova'] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .8; background: repeating-radial-gradient(circle at 50% 44%, transparent 0 10px, rgba(255,255,255,.24) 10px 11.4px); animation: bx-p-shock 4.4s cubic-bezier(.15,.75,.25,1) infinite; }
+.card[data-fx='supernova'] .fx-v { z-index: 1; mix-blend-mode: screen; background: linear-gradient(0deg, transparent 46%, rgba(255,255,255,.7) 50%, transparent 54%), linear-gradient(90deg, transparent 46%, rgba(255,255,255,.55) 50%, transparent 54%); -webkit-mask: radial-gradient(circle at 50% 44%, #000, transparent 62%); mask: radial-gradient(circle at 50% 44%, #000, transparent 62%); filter: blur(1.4px); animation: bx-p-flare 4.4s ease-out infinite; }
+.card[data-fx='supernova'] .fx-ring::before { background: conic-gradient(from var(--a), #ff2d6f, #ff9f2d, #f2ff2d, #35ff88, #2dc7ff, #7a5cff, #ff2d6f); animation: bx-turn-a 3.4s linear infinite; }
+.card[data-fx='supernova'] .card-art img { filter: saturate(1.35) contrast(1.08) brightness(1.02); }
+.card[data-fx='supernova'] .card-art { box-shadow: 0 0 0 1.5px rgba(255,255,255,.6), 0 0 40px -6px rgba(244,114,182,1); }
+
+/* The sparks and the wikitext are built by the app, so a treatment that wants
+   them has to say so here, at the weight the blanket hide above is written at. */
+.card[data-fx='algaebloom'] .fx-p i { display: block; left: var(--x); bottom: -4px; width: 3px; height: 3px; background: radial-gradient(circle at 34% 32%, rgba(255,255,255,.9), rgba(190,255,230,.28) 46%, transparent 70%); box-shadow: 0 0 4px rgba(190,255,230,.5); }
+.card[data-fx='algaebloom'].is-lit .fx-p i { animation: bx-rise var(--d) linear infinite; animation-delay: var(--delay); }
+.card[data-fx='pollen'] .fx-p i { display: block; left: var(--x); bottom: -4px; width: 3px; height: 3px; background: radial-gradient(circle, rgba(255,255,220,.95), rgba(220,255,150,.4) 40%, transparent 68%); box-shadow: 0 0 5px rgba(230,255,160,.8); }
+.card[data-fx='pollen'].is-lit .fx-p i { animation: bx-u-float var(--d) linear infinite; animation-delay: var(--delay); }
+.card[data-fx='deepcurrent'] .fx-p i { display: block; left: var(--x); bottom: -4px; width: 2.5px; height: 2.5px; background: radial-gradient(circle, rgba(220,245,255,.8), transparent 68%); }
+.card[data-fx='deepcurrent'].is-lit .fx-p i { animation: bx-rise var(--d) linear infinite; animation-delay: var(--delay); }
+.card[data-fx='orchid'] .fx-p i { display: block; left: var(--x); bottom: -4px; width: 3px; height: 3px; background: radial-gradient(circle, rgba(255,244,255,.9), rgba(232,121,249,.3) 44%, transparent 70%); }
+.card[data-fx='orchid'].is-lit .fx-p i { animation: bx-rise var(--d) linear infinite; animation-delay: var(--delay); }
+.card[data-fx='emberstorm'] .fx-p i { display: block; left: var(--x); bottom: -4px; width: 3px; height: 3px; background: radial-gradient(circle, rgba(255,236,180,.98), rgba(251,113,60,.6) 40%, transparent 70%); box-shadow: 0 0 6px rgba(251,113,60,.9); }
+.card[data-fx='emberstorm'].is-lit .fx-p i { animation: bx-rise var(--d) linear infinite; animation-delay: var(--delay); }
+.card[data-fx='furnacegate'] .fx-p i { display: block; left: var(--x); bottom: -4px; width: 3.5px; height: 3.5px; background: radial-gradient(circle, rgba(255,230,170,.95), rgba(239,68,68,.5) 42%, transparent 72%); box-shadow: 0 0 5px rgba(255,140,80,.9); }
+.card[data-fx='furnacegate'].is-lit .fx-p i { animation: bx-rise var(--d) linear infinite; animation-delay: var(--delay); }
+.card[data-fx='supernova'] .fx-p i { display: block; left: var(--x); bottom: -4px; width: 3px; height: 3px; background: radial-gradient(circle, rgba(255,255,255,.98), rgba(244,114,182,.4) 42%, transparent 72%); box-shadow: 0 0 6px rgba(255,180,230,.9); }
+.card[data-fx='supernova'].is-lit .fx-p i { animation: bx-rise var(--d) linear infinite; animation-delay: var(--delay); }
+.card[data-fx='datastream'] .fx-code .col { left: var(--x); display: flex; flex-direction: column; font: 600 3.1cqw/1.16 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: rgba(103,232,249,.65); text-shadow: 0 0 6px rgba(34,211,238,.7); white-space: pre; }
+.card[data-fx='datastream'].is-lit .fx-code .col { animation: bx-x-fall var(--d) linear infinite; }
 
 /* Battery saver holds every treatment still, as it does the tiers' own. */
 html[data-lowpower='1'] .card[data-fx] .fx-a,
