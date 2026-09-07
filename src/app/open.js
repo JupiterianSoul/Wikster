@@ -770,6 +770,8 @@ export const CARD_FRONT_MARKUP = `
   <div class="card-footer"><span class="rarity-badge"></span></div>
   <div class="fx-p" aria-hidden="true"></div>
   <div class="fx fx-b" aria-hidden="true"></div>
+  <div class="fx fx-c" aria-hidden="true"></div>
+  <div class="fx fx-v" aria-hidden="true"></div>
   <div class="fx-ring" aria-hidden="true"></div>`;
 /**
  * A face-down card. The back takes the booster's colour and icon so a card

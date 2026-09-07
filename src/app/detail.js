@@ -182,6 +182,8 @@ export function openCardDetail(entryKey, data, rarity) {
           </div>
           <div class="fx-p" aria-hidden="true"></div>
           <div class="fx fx-b" aria-hidden="true"></div>
+          <div class="fx fx-c" aria-hidden="true"></div>
+          <div class="fx fx-v" aria-hidden="true"></div>
           <div class="fx-ring" aria-hidden="true"></div>
         </div>
       </div>`;

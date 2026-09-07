@@ -1599,994 +1599,1425 @@ html[data-lowpower='1'] [data-rarity="special"] .fx-a::after { animation: none !
 /* ============================================================================
    CHOSEN CARD EFFECTS
    ----------------------------------------------------------------------------
-   An alternate treatment bought in the Atelier and put on one rarity.
-   `classic` is the absence of these rules, so the bespoke per-tier drawing
-   above stands untouched.
+   The twenty-one treatments sold in the Atelier, and where they come from.
 
-   Three rules hold for all forty, and they are what makes them wearable:
+   Two boards were built and shown, three executions for each of the eight
+   tiers and five more for Prismatic. One per tier was picked and became that
+   tier's own drawing, which is what `classic` means and what these sit beside.
+   The rest were never used. They are the twenty-one here: not one is invented,
+   every one was drawn for the tier it belongs to and looked at on a real card
+   before it was passed over.
 
-   1. THE WORDS COME FIRST. The plate an effect paints on is pushed under the
-      title, the description, the readership, the price and the tier's tag,
-      and under the frame. Nothing here can cover a card's own writing.
+   That is why a treatment here is not an overlay. It restyles the whole face
+   the way the tier drawings do: the plate, the frame, the ring, the artwork's
+   own mount, the title's colour and the tag. A card wearing one is a card
+   built a different way, not a card with something laid on top.
 
-   2. NOTHING SETTLES ON THE PICTURE. An effect made of moving pieces (motes,
-      sparks, drops, stars) wears --fx-off-art, a mask that opens above and
-      below the artwork and closes over it. The photograph stays a
-      photograph; the effect happens around it.
-
-   3. ONE COLOUR, MANY TONES. Every effect paints in the tier's own colour,
-      taken pale, light, core, deep or dark. A Rare treatment is five blues,
-      a Legendary five golds. None of them borrows another tier's hue, so
-      wearing one never costs the ladder its legibility.
-
-   Only transform, opacity and filter animate, which is what keeps a shelf of
-   these affordable on a phone.
+   Because of that the layers are wiped first. Six of the eight tiers draw a
+   travelling layer of their own, and a treatment that stands in for the tier's
+   whole dressing cannot have the tier's dressing showing through it. The wipe
+   is written through :where(), which carries no weight at all, so every rule
+   below outranks it without a specificity war over one inset.
    ============================================================================ */
 
+/* The drawings the boards generated, baked in: the same marble, parchment,
+   ivory, circuit lattice, mandala, corners, facets and caustics the designs
+   were picked against, so what shipped is what was chosen. */
 .card[data-fx]:not([data-fx='classic']) {
-  /* The tier's colour, in five tones. */
-  --fx-pale: color-mix(in srgb, var(--rarity) 20%, #fff);
-  --fx-lite: color-mix(in srgb, var(--rarity) 55%, #fff);
-  --fx-core: var(--rarity);
-  --fx-deep: color-mix(in srgb, var(--rarity) 60%, #000);
-  --fx-dark: color-mix(in srgb, var(--rarity) 28%, #000);
-  /* Where the artwork sits on the face, measured in the card's own width so
-     one mask serves both shapes: .card-art carries a 3.2% margin (3.2cqw) and
-     is 46% of a 5-by-7 face, which is 64.4cqw, so the picture runs 3.2cqw to
-     67.6cqw down. A layer wearing this mask paints above and below it and
-     nowhere on it, the short fades falling clear of the picture's own edge. */
-  --fx-off-art: linear-gradient(to bottom,
-    #000 0 1.4cqw, rgba(0, 0, 0, 0) 3.4cqw 67.4cqw, #000 69.4cqw);
-  /* The same geometry, held at a third rather than shut off: what light does
-     to a photograph. The upper tiers use this, so a Prismatic treatment can
-     cross the picture the way its own tier's ribbon does, and the picture
-     still reads as a picture underneath. */
-  --fx-soft-art: linear-gradient(to bottom,
-    #000 0 1.4cqw, rgba(0, 0, 0, 0.32) 3.4cqw 67.4cqw, #000 69.4cqw);
-}
-/* The blown-up card is free-height with a 16-by-10 picture, so its artwork
-   ends higher: 3.2cqw plus 93.6cqw of width at ten sixteenths, or 61.7cqw. */
-.giant-card[data-fx]:not([data-fx='classic']) {
-  --fx-off-art: linear-gradient(to bottom,
-    #000 0 1.4cqw, rgba(0, 0, 0, 0) 3.4cqw 61.5cqw, #000 63.5cqw);
-  --fx-soft-art: linear-gradient(to bottom,
-    #000 0 1.4cqw, rgba(0, 0, 0, 0.32) 3.4cqw 61.5cqw, #000 63.5cqw);
+  --noise: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.8%22%20numOctaves%3D%223%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%201%200%200%200%200%201%200%200%200%200%201%20.6%200%200%200%200%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20filter%3D%22url(%23n)%22%2F%3E%3C%2Fsvg%3E");
+  --marble: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22560%22%3E%3Cfilter%20id%3D%22m%22%20x%3D%220%22%20y%3D%220%22%20width%3D%221%22%20height%3D%221%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.006%22%20numOctaves%3D%222%22%20seed%3D%223%22%20result%3D%22cn%22%2F%3E%3CfeColorMatrix%20in%3D%22cn%22%20values%3D%220%200%200%200%20.74%200%200%200%200%20.7%200%200%200%200%20.64%20.3%200%200%200%200%22%20result%3D%22c%22%2F%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.012%22%20numOctaves%3D%224%22%20seed%3D%227%22%20result%3D%22v1n%22%2F%3E%3CfeColorMatrix%20in%3D%22v1n%22%20values%3D%220%200%200%200%20.6%200%200%200%200%20.58%200%200%200%200%20.54%201%200%200%200%200%22%20result%3D%22v1a%22%2F%3E%3CfeComponentTransfer%20in%3D%22v1a%22%20result%3D%22v1b%22%3E%3CfeFuncA%20type%3D%22table%22%20tableValues%3D%220%200%200%200%200%200%200%200%20.15%201%20.15%200%200%200%200%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeGaussianBlur%20in%3D%22v1b%22%20stdDeviation%3D%22.6%22%20result%3D%22v1%22%2F%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.014%22%20numOctaves%3D%224%22%20seed%3D%2211%22%20result%3D%22v2n%22%2F%3E%3CfeColorMatrix%20in%3D%22v2n%22%20values%3D%220%200%200%200%20.78%200%200%200%200%20.69%200%200%200%200%20.47%201%200%200%200%200%22%20result%3D%22v2a%22%2F%3E%3CfeComponentTransfer%20in%3D%22v2a%22%20result%3D%22v2b%22%3E%3CfeFuncA%20type%3D%22table%22%20tableValues%3D%220%200%200%20.1%201%20.1%200%200%200%200%200%200%200%200%200%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeGaussianBlur%20in%3D%22v2b%22%20stdDeviation%3D%22.5%22%20result%3D%22v2%22%2F%3E%3CfeMerge%3E%3CfeMergeNode%20in%3D%22c%22%2F%3E%3CfeMergeNode%20in%3D%22v1%22%2F%3E%3CfeMergeNode%20in%3D%22v2%22%2F%3E%3C%2FfeMerge%3E%3C%2Ffilter%3E%3Crect%20width%3D%22400%22%20height%3D%22560%22%20fill%3D%22%23f2eee6%22%2F%3E%3Crect%20width%3D%22400%22%20height%3D%22560%22%20filter%3D%22url(%23m)%22%2F%3E%3C%2Fsvg%3E");
+  --parchment: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22560%22%3E%3Cfilter%20id%3D%22p%22%20x%3D%220%22%20y%3D%220%22%20width%3D%221%22%20height%3D%221%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.008%22%20numOctaves%3D%222%22%20seed%3D%225%22%20result%3D%22sn%22%2F%3E%3CfeColorMatrix%20in%3D%22sn%22%20values%3D%220%200%200%200%20.54%200%200%200%200%20.42%200%200%200%200%20.23%20.28%200%200%200%200%22%20result%3D%22s%22%2F%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.9%20.03%22%20numOctaves%3D%222%22%20seed%3D%222%22%20result%3D%22fn%22%2F%3E%3CfeColorMatrix%20in%3D%22fn%22%20values%3D%220%200%200%200%20.42%200%200%200%200%20.32%200%200%200%200%20.19%20.2%200%200%200%200%22%20result%3D%22f%22%2F%3E%3CfeMerge%3E%3CfeMergeNode%20in%3D%22s%22%2F%3E%3CfeMergeNode%20in%3D%22f%22%2F%3E%3C%2FfeMerge%3E%3C%2Ffilter%3E%3Crect%20width%3D%22400%22%20height%3D%22560%22%20fill%3D%22%23e6d5ae%22%2F%3E%3Crect%20width%3D%22400%22%20height%3D%22560%22%20filter%3D%22url(%23p)%22%2F%3E%3C%2Fsvg%3E");
+  --ivory: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22560%22%3E%3Cfilter%20id%3D%22i%22%20x%3D%220%22%20y%3D%220%22%20width%3D%221%22%20height%3D%221%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.005%22%20numOctaves%3D%222%22%20seed%3D%224%22%20result%3D%22cn%22%2F%3E%3CfeColorMatrix%20in%3D%22cn%22%20values%3D%220%200%200%200%20.86%200%200%200%200%20.82%200%200%200%200%20.72%20.25%200%200%200%200%22%20result%3D%22c%22%2F%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.01%22%20numOctaves%3D%224%22%20seed%3D%229%22%20result%3D%22vn%22%2F%3E%3CfeColorMatrix%20in%3D%22vn%22%20values%3D%220%200%200%200%20.8%200%200%200%200%20.75%200%200%200%200%20.61%201%200%200%200%200%22%20result%3D%22va%22%2F%3E%3CfeComponentTransfer%20in%3D%22va%22%20result%3D%22vb%22%3E%3CfeFuncA%20type%3D%22table%22%20tableValues%3D%220%200%200%200%200%200%200%20.1%201%20.1%200%200%200%200%200%22%2F%3E%3C%2FfeComponentTransfer%3E%3CfeGaussianBlur%20in%3D%22vb%22%20stdDeviation%3D%22.8%22%20result%3D%22v%22%2F%3E%3CfeMerge%3E%3CfeMergeNode%20in%3D%22c%22%2F%3E%3CfeMergeNode%20in%3D%22v%22%2F%3E%3C%2FfeMerge%3E%3C%2Ffilter%3E%3Crect%20width%3D%22400%22%20height%3D%22560%22%20fill%3D%22%23efe9da%22%2F%3E%3Crect%20width%3D%22400%22%20height%3D%22560%22%20filter%3D%22url(%23i)%22%2F%3E%3C%2Fsvg%3E");
+  --gold-circuit: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Cpath%20d%3D%22M0%2020%20H30%20L45%2035%20H80%20L95%2020%20H120%20M20%200%20V25%20L35%2040%20V70%20L20%2085%20V120%20M60%2040%20V80%20L80%20100%20H120%20M0%20100%20H40%20L55%2085%20H100%20V120%20M100%200%20V40%20L85%2055%20V70%20M45%2035%20V60%20M0%2060%20H15%20M105%2060%20H120%22%20fill%3D%22none%22%20stroke%3D%22%23d4a83a%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M60%2048%20L72%2055%20L72%2069%20L60%2076%20L48%2069%20L48%2055%20Z%22%20fill%3D%22none%22%20stroke%3D%22%23d4a83a%22%20stroke-width%3D%221.2%22%2F%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2220%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2245%22%20cy%3D%2235%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2235%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2295%22%20cy%3D%2220%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2235%22%20cy%3D%2240%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2235%22%20cy%3D%2270%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2285%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2240%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2280%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%22100%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22100%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2255%22%20cy%3D%2285%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%2285%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%2240%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2285%22%20cy%3D%2255%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2285%22%20cy%3D%2270%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2260%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%22105%22%20cy%3D%2260%22%20r%3D%222.4%22%20fill%3D%22%23f5d67a%22%2F%3E%3C%2Fsvg%3E");
+  --trace: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Cpath%20d%3D%22M0%2020%20H30%20L45%2035%20H80%20L95%2020%20H120%20M20%200%20V25%20L35%2040%20V70%20L20%2085%20V120%20M60%2040%20V80%20L80%20100%20H120%20M0%20100%20H40%20L55%2085%20H100%20V120%20M100%200%20V40%20L85%2055%20V70%20M45%2035%20V60%20M0%2060%20H15%20M105%2060%20H120%22%20fill%3D%22none%22%20stroke%3D%22%2322d3ee%22%20stroke-width%3D%221%22%20opacity%3D%22.5%22%2F%3E%3Cpath%20d%3D%22M60%2048%20L72%2055%20L72%2069%20L60%2076%20L48%2069%20L48%2055%20Z%22%20fill%3D%22none%22%20stroke%3D%22%2322d3ee%22%20stroke-width%3D%221%22%20opacity%3D%22.5%22%2F%3E%3C%2Fsvg%3E");
+  --trace-nodes: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2220%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2245%22%20cy%3D%2235%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2235%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2295%22%20cy%3D%2220%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2235%22%20cy%3D%2240%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2235%22%20cy%3D%2270%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2285%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2240%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2280%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%22100%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%22100%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2255%22%20cy%3D%2285%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%2285%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%2240%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2285%22%20cy%3D%2255%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2285%22%20cy%3D%2270%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2260%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3Ccircle%20cx%3D%22105%22%20cy%3D%2260%22%20r%3D%222.5%22%20fill%3D%22%23a5f3fc%22%2F%3E%3C%2Fsvg%3E");
+  --wave: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2280%22%20height%3D%2220%22%3E%3Cpath%20d%3D%22M0%2010%20Q20%200%2040%2010%20T80%2010%22%20fill%3D%22none%22%20stroke%3D%22%2322d3ee%22%20stroke-opacity%3D%22.5%22%2F%3E%3C%2Fsvg%3E");
+  --mandala: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22400%22%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22200%22%20r%3D%2260%22%20fill%3D%22none%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22200%22%20r%3D%22100%22%20fill%3D%22none%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22200%22%20r%3D%22140%22%20fill%3D%22none%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22200%22%20r%3D%22180%22%20fill%3D%22none%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M200%2080%20L304%20140%20L304%20260%20L200%20320%20L96%20260%20L96%20140%20Z%22%20fill%3D%22none%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22372.0%22%20y1%3D%22200.0%22%20x2%3D%22388.0%22%20y2%3D%22200.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22369.4%22%20y1%3D%22229.9%22%20x2%3D%22385.1%22%20y2%3D%22232.6%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22361.6%22%20y1%3D%22258.8%22%20x2%3D%22376.7%22%20y2%3D%22264.3%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22349.0%22%20y1%3D%22286.0%22%20x2%3D%22362.8%22%20y2%3D%22294.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22331.8%22%20y1%3D%22310.6%22%20x2%3D%22344.0%22%20y2%3D%22320.8%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22310.6%22%20y1%3D%22331.8%22%20x2%3D%22320.8%22%20y2%3D%22344.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22286.0%22%20y1%3D%22349.0%22%20x2%3D%22294.0%22%20y2%3D%22362.8%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22258.8%22%20y1%3D%22361.6%22%20x2%3D%22264.3%22%20y2%3D%22376.7%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22229.9%22%20y1%3D%22369.4%22%20x2%3D%22232.6%22%20y2%3D%22385.1%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22200.0%22%20y1%3D%22372.0%22%20x2%3D%22200.0%22%20y2%3D%22388.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22170.1%22%20y1%3D%22369.4%22%20x2%3D%22167.4%22%20y2%3D%22385.1%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22141.2%22%20y1%3D%22361.6%22%20x2%3D%22135.7%22%20y2%3D%22376.7%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22114.0%22%20y1%3D%22349.0%22%20x2%3D%22106.0%22%20y2%3D%22362.8%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2289.4%22%20y1%3D%22331.8%22%20x2%3D%2279.2%22%20y2%3D%22344.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2268.2%22%20y1%3D%22310.6%22%20x2%3D%2256.0%22%20y2%3D%22320.8%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2251.0%22%20y1%3D%22286.0%22%20x2%3D%2237.2%22%20y2%3D%22294.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2238.4%22%20y1%3D%22258.8%22%20x2%3D%2223.3%22%20y2%3D%22264.3%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2230.6%22%20y1%3D%22229.9%22%20x2%3D%2214.9%22%20y2%3D%22232.6%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2228.0%22%20y1%3D%22200.0%22%20x2%3D%2212.0%22%20y2%3D%22200.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2230.6%22%20y1%3D%22170.1%22%20x2%3D%2214.9%22%20y2%3D%22167.4%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2238.4%22%20y1%3D%22141.2%22%20x2%3D%2223.3%22%20y2%3D%22135.7%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2251.0%22%20y1%3D%22114.0%22%20x2%3D%2237.2%22%20y2%3D%22106.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2268.2%22%20y1%3D%2289.4%22%20x2%3D%2256.0%22%20y2%3D%2279.2%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%2289.4%22%20y1%3D%2268.2%22%20x2%3D%2279.2%22%20y2%3D%2256.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22114.0%22%20y1%3D%2251.0%22%20x2%3D%22106.0%22%20y2%3D%2237.2%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22141.2%22%20y1%3D%2238.4%22%20x2%3D%22135.7%22%20y2%3D%2223.3%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22170.1%22%20y1%3D%2230.6%22%20x2%3D%22167.4%22%20y2%3D%2214.9%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22200.0%22%20y1%3D%2228.0%22%20x2%3D%22200.0%22%20y2%3D%2212.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22229.9%22%20y1%3D%2230.6%22%20x2%3D%22232.6%22%20y2%3D%2214.9%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22258.8%22%20y1%3D%2238.4%22%20x2%3D%22264.3%22%20y2%3D%2223.3%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22286.0%22%20y1%3D%2251.0%22%20x2%3D%22294.0%22%20y2%3D%2237.2%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22310.6%22%20y1%3D%2268.2%22%20x2%3D%22320.8%22%20y2%3D%2256.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22331.8%22%20y1%3D%2289.4%22%20x2%3D%22344.0%22%20y2%3D%2279.2%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22349.0%22%20y1%3D%22114.0%22%20x2%3D%22362.8%22%20y2%3D%22106.0%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22361.6%22%20y1%3D%22141.2%22%20x2%3D%22376.7%22%20y2%3D%22135.7%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Cline%20x1%3D%22369.4%22%20y1%3D%22170.1%22%20x2%3D%22385.1%22%20y2%3D%22167.4%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22320.0%22%20cy%3D%22200.0%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22303.9%22%20cy%3D%22260.0%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22260.0%22%20cy%3D%22303.9%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22200.0%22%20cy%3D%22320.0%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22140.0%22%20cy%3D%22303.9%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%2296.1%22%20cy%3D%22260.0%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%2280.0%22%20cy%3D%22200.0%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%2296.1%22%20cy%3D%22140.0%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22140.0%22%20cy%3D%2296.1%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22200.0%22%20cy%3D%2280.0%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22260.0%22%20cy%3D%2296.1%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3Ccircle%20cx%3D%22303.9%22%20cy%3D%22140.0%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23f5d67a%22%20stroke-width%3D%221%22%2F%3E%3C%2Fsvg%3E");
+  --corner: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%22%20height%3D%22100%22%3E%3Cpath%20d%3D%22M4%2096%20V30%20Q4%204%2030%204%20H96%22%20fill%3D%22none%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%222.5%22%2F%3E%3Cpath%20d%3D%22M14%2096%20V36%20Q14%2014%2036%2014%20H96%22%20fill%3D%22none%22%20stroke%3D%22%23e8c765%22%20stroke-width%3D%221.2%22%20opacity%3D%22.7%22%2F%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%225%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%228%22%20cy%3D%2260%22%20r%3D%222.5%22%20fill%3D%22%23f5d67a%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%228%22%20r%3D%222.5%22%20fill%3D%22%23f5d67a%22%2F%3E%3Cpath%20d%3D%22M30%2020%20L36%2030%20L30%2040%20L24%2030%20Z%22%20fill%3D%22%23fff1bf%22%2F%3E%3C%2Fsvg%3E");
+  --glint: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2240%22%20height%3D%2240%22%3E%3Cpath%20d%3D%22M20%200%20L23%2017%20L40%2020%20L23%2023%20L20%2040%20L17%2023%20L0%2020%20L17%2017%20Z%22%20fill%3D%22%23fff6d0%22%2F%3E%3C%2Fsvg%3E");
+  --runes: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%229%22%20height%3D%229%22%3E%3Cpath%20d%3D%22M4.5%201.5%20L7.5%204.5%20L4.5%207.5%20L1.5%204.5%20Z%22%20fill%3D%22%23fff3c4%22%20opacity%3D%22.9%22%2F%3E%3C%2Fsvg%3E");
+  --facets: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20560%22%20width%3D%22400%22%20height%3D%22560%22%3E%3Cpath%20d%3D%22M0.0%200.0%20L73.7%200.0%20L0.0%2069.5%20Z%22%20fill%3D%22hsl(163%2095%25%2062%25)%22%20fill-opacity%3D%220.33%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M73.7%200.0%20L80.9%2070.4%20L0.0%2069.5%20Z%22%20fill%3D%22hsl(31%2095%25%2062%25)%22%20fill-opacity%3D%220.33%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M73.7%200.0%20L127.9%200.0%20L114.0%2066.8%20Z%22%20fill%3D%22hsl(97%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M73.7%200.0%20L114.0%2066.8%20L80.9%2070.4%20Z%22%20fill%3D%22hsl(312%2095%25%2062%25)%22%20fill-opacity%3D%220.22%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M127.9%200.0%20L215.3%200.0%20L114.0%2066.8%20Z%22%20fill%3D%22hsl(173%2095%25%2062%25)%22%20fill-opacity%3D%220.23%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M215.3%200.0%20L214.3%2056.0%20L114.0%2066.8%20Z%22%20fill%3D%22hsl(181%2095%25%2062%25)%22%20fill-opacity%3D%220.28%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M215.3%200.0%20L258.4%200.0%20L214.3%2056.0%20Z%22%20fill%3D%22hsl(238%2095%25%2062%25)%22%20fill-opacity%3D%220.28%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M258.4%200.0%20L281.1%2045.9%20L214.3%2056.0%20Z%22%20fill%3D%22hsl(152%2095%25%2062%25)%22%20fill-opacity%3D%220.39%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M258.4%200.0%20L328.2%200.0%20L344.7%2067.7%20Z%22%20fill%3D%22hsl(189%2095%25%2062%25)%22%20fill-opacity%3D%220.30%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M258.4%200.0%20L344.7%2067.7%20L281.1%2045.9%20Z%22%20fill%3D%22hsl(124%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M328.2%200.0%20L400.0%200.0%20L400.0%2042.8%20Z%22%20fill%3D%22hsl(23%2095%25%2062%25)%22%20fill-opacity%3D%220.22%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M328.2%200.0%20L400.0%2042.8%20L344.7%2067.7%20Z%22%20fill%3D%22hsl(314%2095%25%2062%25)%22%20fill-opacity%3D%220.25%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%2069.5%20L80.9%2070.4%20L63.9%20140.8%20Z%22%20fill%3D%22hsl(292%2095%25%2062%25)%22%20fill-opacity%3D%220.19%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%2069.5%20L63.9%20140.8%20L0.0%20142.4%20Z%22%20fill%3D%22hsl(355%2095%25%2062%25)%22%20fill-opacity%3D%220.21%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M80.9%2070.4%20L114.0%2066.8%20L63.9%20140.8%20Z%22%20fill%3D%22hsl(102%2095%25%2062%25)%22%20fill-opacity%3D%220.29%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M114.0%2066.8%20L146.4%20127.5%20L63.9%20140.8%20Z%22%20fill%3D%22hsl(246%2095%25%2062%25)%22%20fill-opacity%3D%220.33%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M114.0%2066.8%20L214.3%2056.0%20L190.2%20127.7%20Z%22%20fill%3D%22hsl(198%2095%25%2062%25)%22%20fill-opacity%3D%220.37%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M114.0%2066.8%20L190.2%20127.7%20L146.4%20127.5%20Z%22%20fill%3D%22hsl(138%2095%25%2062%25)%22%20fill-opacity%3D%220.23%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M214.3%2056.0%20L281.1%2045.9%20L190.2%20127.7%20Z%22%20fill%3D%22hsl(187%2095%25%2062%25)%22%20fill-opacity%3D%220.24%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M281.1%2045.9%20L272.3%20126.2%20L190.2%20127.7%20Z%22%20fill%3D%22hsl(223%2095%25%2062%25)%22%20fill-opacity%3D%220.22%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M281.1%2045.9%20L344.7%2067.7%20L334.6%20116.2%20Z%22%20fill%3D%22hsl(24%2095%25%2062%25)%22%20fill-opacity%3D%220.24%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M281.1%2045.9%20L334.6%20116.2%20L272.3%20126.2%20Z%22%20fill%3D%22hsl(69%2095%25%2062%25)%22%20fill-opacity%3D%220.26%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M344.7%2067.7%20L400.0%2042.8%20L400.0%20112.6%20Z%22%20fill%3D%22hsl(25%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M344.7%2067.7%20L400.0%20112.6%20L334.6%20116.2%20Z%22%20fill%3D%22hsl(346%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20142.4%20L63.9%20140.8%20L64.7%20173.4%20Z%22%20fill%3D%22hsl(292%2095%25%2062%25)%22%20fill-opacity%3D%220.37%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20142.4%20L64.7%20173.4%20L0.0%20196.8%20Z%22%20fill%3D%22hsl(34%2095%25%2062%25)%22%20fill-opacity%3D%220.22%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M63.9%20140.8%20L146.4%20127.5%20L111.1%20173.1%20Z%22%20fill%3D%22hsl(246%2095%25%2062%25)%22%20fill-opacity%3D%220.21%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M63.9%20140.8%20L111.1%20173.1%20L64.7%20173.4%20Z%22%20fill%3D%22hsl(357%2095%25%2062%25)%22%20fill-opacity%3D%220.24%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M146.4%20127.5%20L190.2%20127.7%20L111.1%20173.1%20Z%22%20fill%3D%22hsl(72%2095%25%2062%25)%22%20fill-opacity%3D%220.30%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M190.2%20127.7%20L216.8%20200.6%20L111.1%20173.1%20Z%22%20fill%3D%22hsl(59%2095%25%2062%25)%22%20fill-opacity%3D%220.29%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M190.2%20127.7%20L272.3%20126.2%20L216.8%20200.6%20Z%22%20fill%3D%22hsl(49%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M272.3%20126.2%20L255.7%20169.8%20L216.8%20200.6%20Z%22%20fill%3D%22hsl(141%2095%25%2062%25)%22%20fill-opacity%3D%220.37%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M272.3%20126.2%20L334.6%20116.2%20L255.7%20169.8%20Z%22%20fill%3D%22hsl(125%2095%25%2062%25)%22%20fill-opacity%3D%220.22%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M334.6%20116.2%20L311.1%20195.3%20L255.7%20169.8%20Z%22%20fill%3D%22hsl(204%2095%25%2062%25)%22%20fill-opacity%3D%220.19%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M334.6%20116.2%20L400.0%20112.6%20L311.1%20195.3%20Z%22%20fill%3D%22hsl(318%2095%25%2062%25)%22%20fill-opacity%3D%220.19%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M400.0%20112.6%20L400.0%20186.9%20L311.1%20195.3%20Z%22%20fill%3D%22hsl(296%2095%25%2062%25)%22%20fill-opacity%3D%220.23%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20196.8%20L64.7%20173.4%20L56.6%20231.1%20Z%22%20fill%3D%22hsl(20%2095%25%2062%25)%22%20fill-opacity%3D%220.23%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20196.8%20L56.6%20231.1%20L0.0%20239.9%20Z%22%20fill%3D%22hsl(184%2095%25%2062%25)%22%20fill-opacity%3D%220.26%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M64.7%20173.4%20L111.1%20173.1%20L56.6%20231.1%20Z%22%20fill%3D%22hsl(352%2095%25%2062%25)%22%20fill-opacity%3D%220.23%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M111.1%20173.1%20L130.1%20241.4%20L56.6%20231.1%20Z%22%20fill%3D%22hsl(53%2095%25%2062%25)%22%20fill-opacity%3D%220.25%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M111.1%20173.1%20L216.8%20200.6%20L180.2%20235.4%20Z%22%20fill%3D%22hsl(221%2095%25%2062%25)%22%20fill-opacity%3D%220.21%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M111.1%20173.1%20L180.2%20235.4%20L130.1%20241.4%20Z%22%20fill%3D%22hsl(148%2095%25%2062%25)%22%20fill-opacity%3D%220.37%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M216.8%20200.6%20L255.7%20169.8%20L271.5%20241.8%20Z%22%20fill%3D%22hsl(64%2095%25%2062%25)%22%20fill-opacity%3D%220.38%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M216.8%20200.6%20L271.5%20241.8%20L180.2%20235.4%20Z%22%20fill%3D%22hsl(274%2095%25%2062%25)%22%20fill-opacity%3D%220.21%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M255.7%20169.8%20L311.1%20195.3%20L351.9%20256.6%20Z%22%20fill%3D%22hsl(338%2095%25%2062%25)%22%20fill-opacity%3D%220.22%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M255.7%20169.8%20L351.9%20256.6%20L271.5%20241.8%20Z%22%20fill%3D%22hsl(309%2095%25%2062%25)%22%20fill-opacity%3D%220.26%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M311.1%20195.3%20L400.0%20186.9%20L351.9%20256.6%20Z%22%20fill%3D%22hsl(98%2095%25%2062%25)%22%20fill-opacity%3D%220.20%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M400.0%20186.9%20L400.0%20263.2%20L351.9%20256.6%20Z%22%20fill%3D%22hsl(339%2095%25%2062%25)%22%20fill-opacity%3D%220.32%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20239.9%20L56.6%20231.1%20L67.3%20292.2%20Z%22%20fill%3D%22hsl(197%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20239.9%20L67.3%20292.2%20L0.0%20327.3%20Z%22%20fill%3D%22hsl(2%2095%25%2062%25)%22%20fill-opacity%3D%220.23%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M56.6%20231.1%20L130.1%20241.4%20L67.3%20292.2%20Z%22%20fill%3D%22hsl(56%2095%25%2062%25)%22%20fill-opacity%3D%220.32%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M130.1%20241.4%20L123.4%20295.0%20L67.3%20292.2%20Z%22%20fill%3D%22hsl(237%2095%25%2062%25)%22%20fill-opacity%3D%220.22%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M130.1%20241.4%20L180.2%20235.4%20L182.4%20293.0%20Z%22%20fill%3D%22hsl(151%2095%25%2062%25)%22%20fill-opacity%3D%220.19%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M130.1%20241.4%20L182.4%20293.0%20L123.4%20295.0%20Z%22%20fill%3D%22hsl(146%2095%25%2062%25)%22%20fill-opacity%3D%220.28%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M180.2%20235.4%20L271.5%20241.8%20L261.5%20295.8%20Z%22%20fill%3D%22hsl(57%2095%25%2062%25)%22%20fill-opacity%3D%220.38%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M180.2%20235.4%20L261.5%20295.8%20L182.4%20293.0%20Z%22%20fill%3D%22hsl(315%2095%25%2062%25)%22%20fill-opacity%3D%220.29%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M271.5%20241.8%20L351.9%20256.6%20L351.6%20306.5%20Z%22%20fill%3D%22hsl(302%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M271.5%20241.8%20L351.6%20306.5%20L261.5%20295.8%20Z%22%20fill%3D%22hsl(198%2095%25%2062%25)%22%20fill-opacity%3D%220.32%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M351.9%20256.6%20L400.0%20263.2%20L400.0%20311.3%20Z%22%20fill%3D%22hsl(159%2095%25%2062%25)%22%20fill-opacity%3D%220.38%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M351.9%20256.6%20L400.0%20311.3%20L351.6%20306.5%20Z%22%20fill%3D%22hsl(307%2095%25%2062%25)%22%20fill-opacity%3D%220.34%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20327.3%20L67.3%20292.2%20L0.0%20378.4%20Z%22%20fill%3D%22hsl(188%2095%25%2062%25)%22%20fill-opacity%3D%220.38%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M67.3%20292.2%20L59.0%20353.7%20L0.0%20378.4%20Z%22%20fill%3D%22hsl(262%2095%25%2062%25)%22%20fill-opacity%3D%220.24%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M67.3%20292.2%20L123.4%20295.0%20L111.8%20373.5%20Z%22%20fill%3D%22hsl(8%2095%25%2062%25)%22%20fill-opacity%3D%220.28%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M67.3%20292.2%20L111.8%20373.5%20L59.0%20353.7%20Z%22%20fill%3D%22hsl(268%2095%25%2062%25)%22%20fill-opacity%3D%220.25%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M123.4%20295.0%20L182.4%20293.0%20L111.8%20373.5%20Z%22%20fill%3D%22hsl(159%2095%25%2062%25)%22%20fill-opacity%3D%220.37%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M182.4%20293.0%20L183.5%20380.1%20L111.8%20373.5%20Z%22%20fill%3D%22hsl(44%2095%25%2062%25)%22%20fill-opacity%3D%220.23%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M182.4%20293.0%20L261.5%20295.8%20L245.5%20389.4%20Z%22%20fill%3D%22hsl(326%2095%25%2062%25)%22%20fill-opacity%3D%220.35%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M182.4%20293.0%20L245.5%20389.4%20L183.5%20380.1%20Z%22%20fill%3D%22hsl(157%2095%25%2062%25)%22%20fill-opacity%3D%220.32%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M261.5%20295.8%20L351.6%20306.5%20L325.0%20365.9%20Z%22%20fill%3D%22hsl(294%2095%25%2062%25)%22%20fill-opacity%3D%220.40%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M261.5%20295.8%20L325.0%20365.9%20L245.5%20389.4%20Z%22%20fill%3D%22hsl(320%2095%25%2062%25)%22%20fill-opacity%3D%220.24%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M351.6%20306.5%20L400.0%20311.3%20L400.0%20378.0%20Z%22%20fill%3D%22hsl(267%2095%25%2062%25)%22%20fill-opacity%3D%220.24%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M351.6%20306.5%20L400.0%20378.0%20L325.0%20365.9%20Z%22%20fill%3D%22hsl(264%2095%25%2062%25)%22%20fill-opacity%3D%220.30%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20378.4%20L59.0%20353.7%20L0.0%20452.4%20Z%22%20fill%3D%22hsl(300%2095%25%2062%25)%22%20fill-opacity%3D%220.38%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M59.0%20353.7%20L58.0%20449.3%20L0.0%20452.4%20Z%22%20fill%3D%22hsl(15%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M59.0%20353.7%20L111.8%20373.5%20L58.0%20449.3%20Z%22%20fill%3D%22hsl(132%2095%25%2062%25)%22%20fill-opacity%3D%220.38%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M111.8%20373.5%20L155.7%20445.0%20L58.0%20449.3%20Z%22%20fill%3D%22hsl(255%2095%25%2062%25)%22%20fill-opacity%3D%220.27%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M111.8%20373.5%20L183.5%20380.1%20L155.7%20445.0%20Z%22%20fill%3D%22hsl(259%2095%25%2062%25)%22%20fill-opacity%3D%220.32%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M183.5%20380.1%20L221.1%20427.4%20L155.7%20445.0%20Z%22%20fill%3D%22hsl(273%2095%25%2062%25)%22%20fill-opacity%3D%220.38%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M183.5%20380.1%20L245.5%20389.4%20L274.0%20421.7%20Z%22%20fill%3D%22hsl(56%2095%25%2062%25)%22%20fill-opacity%3D%220.26%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M183.5%20380.1%20L274.0%20421.7%20L221.1%20427.4%20Z%22%20fill%3D%22hsl(16%2095%25%2062%25)%22%20fill-opacity%3D%220.28%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M245.5%20389.4%20L325.0%20365.9%20L356.2%20440.0%20Z%22%20fill%3D%22hsl(168%2095%25%2062%25)%22%20fill-opacity%3D%220.28%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M245.5%20389.4%20L356.2%20440.0%20L274.0%20421.7%20Z%22%20fill%3D%22hsl(80%2095%25%2062%25)%22%20fill-opacity%3D%220.27%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M325.0%20365.9%20L400.0%20378.0%20L356.2%20440.0%20Z%22%20fill%3D%22hsl(295%2095%25%2062%25)%22%20fill-opacity%3D%220.25%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M400.0%20378.0%20L400.0%20444.6%20L356.2%20440.0%20Z%22%20fill%3D%22hsl(3%2095%25%2062%25)%22%20fill-opacity%3D%220.29%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20452.4%20L58.0%20449.3%20L74.0%20508.6%20Z%22%20fill%3D%22hsl(26%2095%25%2062%25)%22%20fill-opacity%3D%220.19%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20452.4%20L74.0%20508.6%20L0.0%20489.7%20Z%22%20fill%3D%22hsl(43%2095%25%2062%25)%22%20fill-opacity%3D%220.29%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M58.0%20449.3%20L155.7%20445.0%20L74.0%20508.6%20Z%22%20fill%3D%22hsl(345%2095%25%2062%25)%22%20fill-opacity%3D%220.37%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M155.7%20445.0%20L132.4%20503.3%20L74.0%20508.6%20Z%22%20fill%3D%22hsl(38%2095%25%2062%25)%22%20fill-opacity%3D%220.29%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M155.7%20445.0%20L221.1%20427.4%20L208.1%20486.4%20Z%22%20fill%3D%22hsl(124%2095%25%2062%25)%22%20fill-opacity%3D%220.31%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M155.7%20445.0%20L208.1%20486.4%20L132.4%20503.3%20Z%22%20fill%3D%22hsl(89%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M221.1%20427.4%20L274.0%20421.7%20L283.5%20517.0%20Z%22%20fill%3D%22hsl(97%2095%25%2062%25)%22%20fill-opacity%3D%220.19%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M221.1%20427.4%20L283.5%20517.0%20L208.1%20486.4%20Z%22%20fill%3D%22hsl(54%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M274.0%20421.7%20L356.2%20440.0%20L283.5%20517.0%20Z%22%20fill%3D%22hsl(206%2095%25%2062%25)%22%20fill-opacity%3D%220.36%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M356.2%20440.0%20L348.9%20478.4%20L283.5%20517.0%20Z%22%20fill%3D%22hsl(354%2095%25%2062%25)%22%20fill-opacity%3D%220.22%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M356.2%20440.0%20L400.0%20444.6%20L348.9%20478.4%20Z%22%20fill%3D%22hsl(89%2095%25%2062%25)%22%20fill-opacity%3D%220.33%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M400.0%20444.6%20L400.0%20494.8%20L348.9%20478.4%20Z%22%20fill%3D%22hsl(337%2095%25%2062%25)%22%20fill-opacity%3D%220.33%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M0.0%20489.7%20L74.0%20508.6%20L0.0%20560.0%20Z%22%20fill%3D%22hsl(321%2095%25%2062%25)%22%20fill-opacity%3D%220.31%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M74.0%20508.6%20L60.5%20560.0%20L0.0%20560.0%20Z%22%20fill%3D%22hsl(287%2095%25%2062%25)%22%20fill-opacity%3D%220.33%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M74.0%20508.6%20L132.4%20503.3%20L60.5%20560.0%20Z%22%20fill%3D%22hsl(220%2095%25%2062%25)%22%20fill-opacity%3D%220.20%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M132.4%20503.3%20L149.3%20560.0%20L60.5%20560.0%20Z%22%20fill%3D%22hsl(327%2095%25%2062%25)%22%20fill-opacity%3D%220.30%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M132.4%20503.3%20L208.1%20486.4%20L149.3%20560.0%20Z%22%20fill%3D%22hsl(117%2095%25%2062%25)%22%20fill-opacity%3D%220.34%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M208.1%20486.4%20L189.4%20560.0%20L149.3%20560.0%20Z%22%20fill%3D%22hsl(245%2095%25%2062%25)%22%20fill-opacity%3D%220.30%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M208.1%20486.4%20L283.5%20517.0%20L266.1%20560.0%20Z%22%20fill%3D%22hsl(66%2095%25%2062%25)%22%20fill-opacity%3D%220.32%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M208.1%20486.4%20L266.1%20560.0%20L189.4%20560.0%20Z%22%20fill%3D%22hsl(30%2095%25%2062%25)%22%20fill-opacity%3D%220.30%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M283.5%20517.0%20L348.9%20478.4%20L336.6%20560.0%20Z%22%20fill%3D%22hsl(199%2095%25%2062%25)%22%20fill-opacity%3D%220.21%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M283.5%20517.0%20L336.6%20560.0%20L266.1%20560.0%20Z%22%20fill%3D%22hsl(190%2095%25%2062%25)%22%20fill-opacity%3D%220.26%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M348.9%20478.4%20L400.0%20494.8%20L400.0%20560.0%20Z%22%20fill%3D%22hsl(171%2095%25%2062%25)%22%20fill-opacity%3D%220.28%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3Cpath%20d%3D%22M348.9%20478.4%20L400.0%20560.0%20L336.6%20560.0%20Z%22%20fill%3D%22hsl(245%2095%25%2062%25)%22%20fill-opacity%3D%220.40%22%20stroke%3D%22rgba(255%2C255%2C255%2C.3)%22%20stroke-width%3D%22.9%22%2F%3E%3C%2Fsvg%3E");
+  --facetmask: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20560%22%20width%3D%22400%22%20height%3D%22560%22%3E%3Cpath%20d%3D%22M0.0%200.0%20L73.7%200.0%20L0.0%2069.5%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.91%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M73.7%200.0%20L80.9%2070.4%20L0.0%2069.5%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.72%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M73.7%200.0%20L127.9%200.0%20L114.0%2066.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.36%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M73.7%200.0%20L114.0%2066.8%20L80.9%2070.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.65%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M127.9%200.0%20L215.3%200.0%20L114.0%2066.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.44%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M215.3%200.0%20L214.3%2056.0%20L114.0%2066.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.61%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M215.3%200.0%20L258.4%200.0%20L214.3%2056.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.50%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M258.4%200.0%20L281.1%2045.9%20L214.3%2056.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.47%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M258.4%200.0%20L328.2%200.0%20L344.7%2067.7%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.80%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M258.4%200.0%20L344.7%2067.7%20L281.1%2045.9%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.69%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M328.2%200.0%20L400.0%200.0%20L400.0%2042.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.60%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M328.2%200.0%20L400.0%2042.8%20L344.7%2067.7%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.77%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%2069.5%20L80.9%2070.4%20L63.9%20140.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.51%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%2069.5%20L63.9%20140.8%20L0.0%20142.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.61%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M80.9%2070.4%20L114.0%2066.8%20L63.9%20140.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.94%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M114.0%2066.8%20L146.4%20127.5%20L63.9%20140.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.91%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M114.0%2066.8%20L214.3%2056.0%20L190.2%20127.7%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.43%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M114.0%2066.8%20L190.2%20127.7%20L146.4%20127.5%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.66%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M214.3%2056.0%20L281.1%2045.9%20L190.2%20127.7%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.69%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M281.1%2045.9%20L272.3%20126.2%20L190.2%20127.7%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.78%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M281.1%2045.9%20L344.7%2067.7%20L334.6%20116.2%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.50%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M281.1%2045.9%20L334.6%20116.2%20L272.3%20126.2%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.88%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M344.7%2067.7%20L400.0%2042.8%20L400.0%20112.6%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.57%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M344.7%2067.7%20L400.0%20112.6%20L334.6%20116.2%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.60%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20142.4%20L63.9%20140.8%20L64.7%20173.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.73%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20142.4%20L64.7%20173.4%20L0.0%20196.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.76%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M63.9%20140.8%20L146.4%20127.5%20L111.1%20173.1%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.59%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M63.9%20140.8%20L111.1%20173.1%20L64.7%20173.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.81%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M146.4%20127.5%20L190.2%20127.7%20L111.1%20173.1%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.54%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M190.2%20127.7%20L216.8%20200.6%20L111.1%20173.1%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.72%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M190.2%20127.7%20L272.3%20126.2%20L216.8%20200.6%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.97%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M272.3%20126.2%20L255.7%20169.8%20L216.8%20200.6%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.36%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M272.3%20126.2%20L334.6%20116.2%20L255.7%20169.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.85%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M334.6%20116.2%20L311.1%20195.3%20L255.7%20169.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.84%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M334.6%20116.2%20L400.0%20112.6%20L311.1%20195.3%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.93%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M400.0%20112.6%20L400.0%20186.9%20L311.1%20195.3%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.73%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20196.8%20L64.7%20173.4%20L56.6%20231.1%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.87%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20196.8%20L56.6%20231.1%20L0.0%20239.9%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.96%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M64.7%20173.4%20L111.1%20173.1%20L56.6%20231.1%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.61%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M111.1%20173.1%20L130.1%20241.4%20L56.6%20231.1%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.76%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M111.1%20173.1%20L216.8%20200.6%20L180.2%20235.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.75%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M111.1%20173.1%20L180.2%20235.4%20L130.1%20241.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.99%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M216.8%20200.6%20L255.7%20169.8%20L271.5%20241.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.95%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M216.8%20200.6%20L271.5%20241.8%20L180.2%20235.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.89%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M255.7%20169.8%20L311.1%20195.3%20L351.9%20256.6%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.54%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M255.7%20169.8%20L351.9%20256.6%20L271.5%20241.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.40%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M311.1%20195.3%20L400.0%20186.9%20L351.9%20256.6%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.97%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M400.0%20186.9%20L400.0%20263.2%20L351.9%20256.6%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.78%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20239.9%20L56.6%20231.1%20L67.3%20292.2%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.66%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20239.9%20L67.3%20292.2%20L0.0%20327.3%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.94%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M56.6%20231.1%20L130.1%20241.4%20L67.3%20292.2%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.97%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M130.1%20241.4%20L123.4%20295.0%20L67.3%20292.2%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.83%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M130.1%20241.4%20L180.2%20235.4%20L182.4%20293.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.93%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M130.1%20241.4%20L182.4%20293.0%20L123.4%20295.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.91%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M180.2%20235.4%20L271.5%20241.8%20L261.5%20295.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.66%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M180.2%20235.4%20L261.5%20295.8%20L182.4%20293.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.70%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M271.5%20241.8%20L351.9%20256.6%20L351.6%20306.5%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.41%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M271.5%20241.8%20L351.6%20306.5%20L261.5%20295.8%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.39%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M351.9%20256.6%20L400.0%20263.2%20L400.0%20311.3%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.64%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M351.9%20256.6%20L400.0%20311.3%20L351.6%20306.5%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.68%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20327.3%20L67.3%20292.2%20L0.0%20378.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.98%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M67.3%20292.2%20L59.0%20353.7%20L0.0%20378.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.88%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M67.3%20292.2%20L123.4%20295.0%20L111.8%20373.5%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.78%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M67.3%20292.2%20L111.8%20373.5%20L59.0%20353.7%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.96%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M123.4%20295.0%20L182.4%20293.0%20L111.8%20373.5%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.44%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M182.4%20293.0%20L183.5%20380.1%20L111.8%20373.5%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.93%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M182.4%20293.0%20L261.5%20295.8%20L245.5%20389.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.46%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M182.4%20293.0%20L245.5%20389.4%20L183.5%20380.1%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%221.00%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M261.5%20295.8%20L351.6%20306.5%20L325.0%20365.9%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.73%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M261.5%20295.8%20L325.0%20365.9%20L245.5%20389.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.83%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M351.6%20306.5%20L400.0%20311.3%20L400.0%20378.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.36%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M351.6%20306.5%20L400.0%20378.0%20L325.0%20365.9%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.61%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20378.4%20L59.0%20353.7%20L0.0%20452.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.63%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M59.0%20353.7%20L58.0%20449.3%20L0.0%20452.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.82%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M59.0%20353.7%20L111.8%20373.5%20L58.0%20449.3%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.56%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M111.8%20373.5%20L155.7%20445.0%20L58.0%20449.3%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.82%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M111.8%20373.5%20L183.5%20380.1%20L155.7%20445.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.79%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M183.5%20380.1%20L221.1%20427.4%20L155.7%20445.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.50%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M183.5%20380.1%20L245.5%20389.4%20L274.0%20421.7%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.52%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M183.5%20380.1%20L274.0%20421.7%20L221.1%20427.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.80%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M245.5%20389.4%20L325.0%20365.9%20L356.2%20440.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.43%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M245.5%20389.4%20L356.2%20440.0%20L274.0%20421.7%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.37%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M325.0%20365.9%20L400.0%20378.0%20L356.2%20440.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.46%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M400.0%20378.0%20L400.0%20444.6%20L356.2%20440.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.72%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20452.4%20L58.0%20449.3%20L74.0%20508.6%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.55%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20452.4%20L74.0%20508.6%20L0.0%20489.7%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.50%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M58.0%20449.3%20L155.7%20445.0%20L74.0%20508.6%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.73%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M155.7%20445.0%20L132.4%20503.3%20L74.0%20508.6%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.39%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M155.7%20445.0%20L221.1%20427.4%20L208.1%20486.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.75%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M155.7%20445.0%20L208.1%20486.4%20L132.4%20503.3%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.39%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M221.1%20427.4%20L274.0%20421.7%20L283.5%20517.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.59%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M221.1%20427.4%20L283.5%20517.0%20L208.1%20486.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.56%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M274.0%20421.7%20L356.2%20440.0%20L283.5%20517.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.40%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M356.2%20440.0%20L348.9%20478.4%20L283.5%20517.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.37%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M356.2%20440.0%20L400.0%20444.6%20L348.9%20478.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.92%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M400.0%20444.6%20L400.0%20494.8%20L348.9%20478.4%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.55%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M0.0%20489.7%20L74.0%20508.6%20L0.0%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.71%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M74.0%20508.6%20L60.5%20560.0%20L0.0%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.94%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M74.0%20508.6%20L132.4%20503.3%20L60.5%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.96%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M132.4%20503.3%20L149.3%20560.0%20L60.5%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.87%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M132.4%20503.3%20L208.1%20486.4%20L149.3%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.53%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M208.1%20486.4%20L189.4%20560.0%20L149.3%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.43%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M208.1%20486.4%20L283.5%20517.0%20L266.1%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.92%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M208.1%20486.4%20L266.1%20560.0%20L189.4%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.90%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M283.5%20517.0%20L348.9%20478.4%20L336.6%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.70%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M283.5%20517.0%20L336.6%20560.0%20L266.1%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.80%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M348.9%20478.4%20L400.0%20494.8%20L400.0%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.86%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3Cpath%20d%3D%22M348.9%20478.4%20L400.0%20560.0%20L336.6%20560.0%20Z%22%20fill%3D%22%23fff%22%20fill-opacity%3D%220.39%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221%22%2F%3E%3C%2Fsvg%3E");
+  --caustic: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22300%22%20height%3D%22300%22%3E%3Cfilter%20id%3D%22c%22%20x%3D%220%22%20y%3D%220%22%20width%3D%221%22%20height%3D%221%22%3E%3CfeTurbulence%20type%3D%22turbulence%22%20baseFrequency%3D%22.014%22%20numOctaves%3D%221%22%20seed%3D%227%22%20stitchTiles%3D%22stitch%22%20result%3D%22t%22%2F%3E%3CfeColorMatrix%20in%3D%22t%22%20values%3D%220%200%200%200%201%200%200%200%200%201%200%200%200%200%201%202.4%200%200%200%20-.55%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20filter%3D%22url(%23c)%22%2F%3E%3C%2Fsvg%3E");
 }
 
-/* The plate sits over the artwork, under the frame, under every word. The
-   reset is written through :where(), which carries no weight at all, so every
-   effect below outranks it without a specificity war over one inset. */
-.card:where([data-fx]:not([data-fx='classic'])) .fx-p { z-index: 3; overflow: hidden; }
-.card:where([data-fx]:not([data-fx='classic'])) .fx-p::before,
-.card:where([data-fx]:not([data-fx='classic'])) .fx-p::after {
+/* --- the wipe: a blank card, at zero weight ------------------------------- */
+.card:where([data-fx]:not([data-fx='classic'])) .fx-a,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-b,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-c,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-v,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-p {
+  display: block;
+  inset: 0;
+  z-index: 1;
+  padding: 0;
+  opacity: 1;
+  background: none;
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+  mix-blend-mode: normal;
+  filter: none;
+  transform: none;
+  animation: none;
+  overflow: hidden;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+/* The wikitext layer is off until a treatment writes into it, and only the two
+   exotic ones do. It keeps its own clip and its place behind the plate. */
+.card:where([data-fx]:not([data-fx='classic'])) .fx-code {
+  opacity: 0;
+  background: none;
+  animation: none;
+  overflow: hidden;
+}
+
+/* The ring and the art layer keep their geometry. The ring is a border only
+   because a mask carves its middle out, and the art layer is a window over the
+   picture because of its inset: wipe either and the ring floods the face and
+   the window covers it. Only their paint is cleared. */
+.card:where([data-fx]:not([data-fx='classic'])) .fx-ring,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-art {
+  display: block;
+  opacity: 1;
+  background: none;
+  box-shadow: none;
+  border: 0;
+  mix-blend-mode: normal;
+  filter: none;
+  transform: none;
+  animation: none;
+}
+/* Every layer keeps its two pseudo-elements, blanked rather than removed: a
+   design below asks for one by painting it, and a design that does not want
+   one leaves it transparent. Taking the content away instead would mean each
+   of the twenty-one had to put it back. */
+.card:where([data-fx]:not([data-fx='classic'])) .fx-a::before,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-a::after,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-b::before,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-b::after,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-c::before,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-c::after,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-v::before,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-v::after,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-art::before,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-art::after,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-ring::before,
+.card:where([data-fx]:not([data-fx='classic'])) .fx-ring::after,
+.card:where([data-fx]:not([data-fx='classic'])) .card-art::before,
+.card:where([data-fx]:not([data-fx='classic'])) .card-art::after {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
+  background: none;
+  box-shadow: none;
+  border: 0;
+  opacity: 1;
+  mix-blend-mode: normal;
+  filter: none;
+  transform: none;
+  animation: none;
+  clip-path: none;
+  mask-image: none;
+  -webkit-mask-image: none;
 }
-/* Six of the eight tiers travel a second layer across the face on .fx-b: the
-   prismatic ribbon, the rare sheen, the exotic sweep. A chosen effect stands
-   in for the tier's whole dressing, so that layer goes dark and every effect
-   below draws on .fx-p alone. Without this a dressed prismatic card wears its
-   rainbow AND its treatment, which is what two effects at once looks like. */
-.card[data-fx]:not([data-fx='classic']) .fx-b { display: none; }
-/* The writing and the tier's tag ride above the treatment, always. */
-.card[data-fx]:not([data-fx='classic']) .card-body,
-.card[data-fx]:not([data-fx='classic']) .card-stats,
-.card[data-fx]:not([data-fx='classic']) .card-footer { z-index: 6; }
-/* The tier's own dressing steps aside for the one that was chosen. */
+/* The tiers' own animations sit at a weight the wipe cannot reach, so they are
+   stopped here instead, at exactly the weight the lit rules below match and
+   beat by coming later. */
 .card[data-fx]:not([data-fx='classic']) .fx-a,
-.card[data-fx]:not([data-fx='classic']) .fx-art,
-.card[data-fx]:not([data-fx='classic']) .fx-code,
-.card[data-fx]:not([data-fx='classic']) .fx-p i,
-.card[data-fx]:not([data-fx='classic']) .fx-ring::before,
-.card[data-fx]:not([data-fx='classic']) .fx-ring::after { display: none; }
-.card[data-fx]:not([data-fx='classic']) .card-art::before,
-.card[data-fx]:not([data-fx='classic']) .card-art::after { opacity: 0; animation: none !important; }
+.card[data-fx]:not([data-fx='classic']) .fx-b,
+.card[data-fx]:not([data-fx='classic']) .fx-c,
+.card[data-fx]:not([data-fx='classic']) .fx-v,
+.card[data-fx]:not([data-fx='classic']) .fx-p,
+.card[data-fx]:not([data-fx='classic']) .fx-ring,
+.card[data-fx]:not([data-fx='classic']) .card-art,
 .card[data-fx]:not([data-fx='classic']) .card-title,
 .card[data-fx]:not([data-fx='classic']) .card-desc,
-.card[data-fx]:not([data-fx='classic']) .rarity-badge { animation: none !important; }
-/* A quiet frame in the tier's own colour, so a dressed card still has an edge. */
-.card[data-fx]:not([data-fx='classic']) .fx-ring {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fx-lite) 55%, transparent);
+.card[data-fx]:not([data-fx='classic']) .rarity-badge { animation-name: none; }
+/* The tier's sparks are its own; a treatment that wants them says so. */
+.card[data-fx]:not([data-fx='classic']) .fx-p i { display: none; }
+/* The plate, the mount and the writing, back to the card's plain state for the
+   treatment to build on. At zero weight again: a design that wants a warm gold
+   plate or a dark title says so below, and would otherwise be overruled here. */
+.card:where([data-fx]:not([data-fx='classic'])) .card-front {
+  background: var(--surface-solid);
+  box-shadow: none;
+  color: var(--ink);
 }
+.card:where([data-fx]:not([data-fx='classic'])) .card-art { box-shadow: none; }
+.card:where([data-fx]:not([data-fx='classic'])) .card-art img { filter: none; transform: none; }
+.card:where([data-fx]:not([data-fx='classic'])) .card-title {
+  color: inherit;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  text-shadow: none;
+  text-decoration: none;
+  filter: none;
+}
+.card:where([data-fx]:not([data-fx='classic'])) .card-desc { color: var(--rarity, var(--ink-dim)); text-shadow: none; }
+.card:where([data-fx]:not([data-fx='classic'])) .card-extract { color: var(--ink-dim); }
+.card:where([data-fx]:not([data-fx='classic'])) .card-price { color: var(--positive); text-shadow: none; }
+.card:where([data-fx]:not([data-fx='classic'])) .card-views { color: var(--ink-faint); }
+.card:where([data-fx]:not([data-fx='classic'])) .rarity-badge {
+  border: 1px solid var(--rarity, var(--line));
+  background: color-mix(in srgb, var(--rarity, var(--line)) 14%, transparent);
+  color: var(--rarity, var(--ink));
+  text-shadow: none;
+  box-shadow: none;
+}
+/* The blown-up card hides the travelling layer for the tiers; a treatment IS
+   the layer here, so it comes back. */
+.giant-card[data-fx]:not([data-fx='classic']) .fx-b { display: block; }
 
-/* =================== COMMON: paper, pencil and the press ================= */
 
-/* --- Pencil: hatching, laid twice and crossed ---------------------------- */
-.card[data-fx='pencil'] .fx-p::before {
-  background: repeating-linear-gradient(48deg,
-    transparent 0 4px, color-mix(in srgb, var(--fx-dark) 60%, transparent) 4px 5px);
-  opacity: 0.55;
+@keyframes bx-spin { to { transform: rotate(1turn); } }
+.card[data-fx='cardstock'] .card-front {
+  background: #2b2e37;
+  box-shadow: inset 0 0 0 2px rgba(154,165,177,.42);
 }
-.card[data-fx='pencil'] .fx-p::after {
-  inset: -14%;
-  background: repeating-linear-gradient(-40deg,
-    transparent 0 7px, color-mix(in srgb, var(--fx-deep) 40%, transparent) 7px 8px);
-  opacity: 0.4;
-}
-.card.is-lit[data-fx='pencil'] .fx-p::after { animation: fx-pencil 9s ease-in-out infinite alternate; }
-@keyframes fx-pencil { from { transform: translate3d(-2%, -1%, 0); } to { transform: translate3d(2%, 1%, 0); } }
-
-/* --- Folded: one crease, a lit half and a shaded one --------------------- */
-.card[data-fx='fold'] .fx-p::before {
-  background: linear-gradient(102deg,
-    color-mix(in srgb, var(--fx-pale) 22%, transparent) 0 49%,
-    color-mix(in srgb, var(--fx-dark) 32%, transparent) 51% 100%);
-}
-.card[data-fx='fold'] .fx-p::after {
-  background: linear-gradient(102deg,
-    transparent 48.2%, color-mix(in srgb, var(--fx-pale) 85%, transparent) 49.4%,
-    color-mix(in srgb, var(--fx-dark) 70%, transparent) 50.6%, transparent 51.8%);
-}
-.card.is-lit[data-fx='fold'] .fx-p::after { animation: fx-fold 5s ease-in-out infinite; }
-@keyframes fx-fold { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
-
-/* --- Postmark: a cancelled stamp, kept to the foot ----------------------- */
-.card[data-fx='postmark'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
-}
-.card[data-fx='postmark'] .fx-p::before {
-  inset: auto auto 8.4cqw 8%;
-  width: 30cqw;
-  height: 30cqw;
-  border-radius: 50%;
-  border: 2px dashed color-mix(in srgb, var(--fx-deep) 75%, transparent);
-  box-shadow: inset 0 0 0 3px transparent, inset 0 0 0 4px color-mix(in srgb, var(--fx-deep) 45%, transparent);
-  opacity: 0.7;
-}
-.card[data-fx='postmark'] .fx-p::after {
-  inset: auto auto 18.2cqw 40%;
-  width: 42cqw;
-  height: 12cqw;
-  background: repeating-linear-gradient(0deg,
-    transparent 0 3px, color-mix(in srgb, var(--fx-deep) 55%, transparent) 3px 4.5px);
-  transform: rotate(-4deg);
-  opacity: 0.6;
-}
-.card.is-lit[data-fx='postmark'] .fx-p::before { animation: fx-postmark 26s linear infinite; }
-@keyframes fx-postmark { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-/* --- Dust: motes in a shaft of light, never on the picture --------------- */
-.card[data-fx='dust'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
-}
-.card[data-fx='dust'] .fx-p::before {
-  background: linear-gradient(112deg, transparent 30%,
-    color-mix(in srgb, var(--fx-pale) 30%, transparent) 45%,
-    color-mix(in srgb, var(--fx-pale) 10%, transparent) 56%, transparent 68%);
-}
-.card[data-fx='dust'] .fx-p::after {
-  inset: -100% 0 0 0;
-  background:
-    radial-gradient(circle, var(--fx-pale) 0 0.7px, transparent 1.4px) 0 0 / 23px 31px,
-    radial-gradient(circle, var(--fx-lite) 0 1px, transparent 1.8px) 11px 17px / 43px 53px;
-  opacity: 0.75;
-}
-.card.is-lit[data-fx='dust'] .fx-p::after { animation: fx-drift-up 15s linear infinite; }
-@keyframes fx-drift-up { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 50%, 0); } }
-
-/* --- Halftone: a press screen, slightly out of register ------------------ */
-.card[data-fx='halftone'] .fx-p::before {
-  inset: -25%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--fx-dark) 75%, transparent) 0 1.2px, transparent 1.9px) 0 0 / 5px 5px;
-  transform: rotate(14deg);
-  opacity: 0.7;
-}
-.card[data-fx='halftone'] .fx-p::after {
-  inset: -25%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--fx-lite) 55%, transparent) 0 1px, transparent 1.7px) 2px 2px / 5px 5px;
-  transform: rotate(14deg);
-  opacity: 0.5;
-}
-.card.is-lit[data-fx='halftone'] .fx-p::after { animation: fx-halftone 1.6s steps(2, end) infinite; }
-@keyframes fx-halftone {
-  0%, 100% { transform: rotate(14deg) translate(0, 0); }
-  50% { transform: rotate(14deg) translate(0.7px, -0.5px); }
-}
-
-/* ================ UNCOMMON: things that grow on things =================== */
-
-/* --- Moss: blotches creeping in from the corners ------------------------- */
-.card[data-fx='moss'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
-}
-.card[data-fx='moss'] .fx-p::before {
-  background:
-    radial-gradient(ellipse 32% 24% at 2% 3%, var(--fx-deep) 0 48%, transparent 100%),
-    radial-gradient(ellipse 26% 20% at 99% 8%, var(--fx-core) 0 45%, transparent 100%),
-    radial-gradient(ellipse 40% 26% at 62% 101%, var(--fx-deep) 0 50%, transparent 100%),
-    radial-gradient(ellipse 22% 22% at 6% 96%, var(--fx-core) 0 45%, transparent 100%);
-  opacity: 0.6;
-}
-.card[data-fx='moss'] .fx-p::after {
-  background: radial-gradient(circle, var(--fx-lite) 0 0.8px, transparent 1.4px) 0 0 / 7px 9px;
-  opacity: 0.4;
-}
-.card.is-lit[data-fx='moss'] .fx-p::before { animation: fx-breathe 7s ease-in-out infinite alternate; }
-@keyframes fx-breathe { from { transform: scale(1); opacity: 0.5; } to { transform: scale(1.05); opacity: 0.72; } }
-
-/* --- Vines: stems climbing the two margins ------------------------------- */
-.card[data-fx='vines'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
-}
-.card[data-fx='vines'] .fx-p::before {
-  inset: -8%;
-  background: repeating-linear-gradient(-34deg,
-    transparent 0 22cqw,
-    color-mix(in srgb, var(--fx-deep) 85%, transparent) 22cqw calc(22cqw + 1.6px),
-    transparent calc(22cqw + 1.6px) 24cqw);
-  opacity: 0.75;
-}
-.card[data-fx='vines'] .fx-p::after {
-  inset: -8%;
-  background:
-    radial-gradient(ellipse 3cqw 1.5cqw at 50% 50%, var(--fx-core) 0 62%, transparent 68%) 0 0 / 11cqw 8cqw,
-    radial-gradient(ellipse 2.2cqw 1.2cqw at 50% 50%, var(--fx-lite) 0 62%, transparent 68%) 5cqw 4cqw / 11cqw 8cqw;
-  transform-origin: 0 100%;
-  opacity: 0.8;
-}
-.card.is-lit[data-fx='vines'] .fx-p::after { animation: fx-vines 6s ease-in-out infinite alternate; }
-@keyframes fx-vines { from { transform: scale(0.95) rotate(-1deg); } to { transform: scale(1) rotate(0deg); } }
-
-/* --- Dew: drops on the margins, a light crossing them -------------------- */
-.card[data-fx='dew'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
-}
-.card[data-fx='dew'] .fx-p::before {
-  /* Two sparse fields rather than one packed one: a drop every quarter of the
-     card, so the words behind them are still words. */
-  background:
-    radial-gradient(circle at 32% 30%, var(--fx-pale) 0 0.7px, color-mix(in srgb, var(--fx-lite) 34%, transparent) 2px,
-      color-mix(in srgb, var(--fx-core) 20%, transparent) 26%, color-mix(in srgb, var(--fx-dark) 26%, transparent) 32%, transparent 36%) 0 0 / 27cqw 25cqw,
-    radial-gradient(circle at 62% 66%, var(--fx-pale) 0 0.5px, color-mix(in srgb, var(--fx-lite) 26%, transparent) 1.4px,
-      color-mix(in srgb, var(--fx-core) 16%, transparent) 20%, color-mix(in srgb, var(--fx-dark) 20%, transparent) 25%, transparent 29%) 9cqw 13cqw / 38cqw 33cqw;
-  opacity: 0.72;
-}
-.card[data-fx='dew'] .fx-p::after {
-  inset: -40%;
-  background: linear-gradient(70deg, transparent 44%, color-mix(in srgb, var(--fx-pale) 55%, transparent) 50%, transparent 56%);
-}
-.card.is-lit[data-fx='dew'] .fx-p::after { animation: fx-sweep-x 6s ease-in-out infinite; }
-@keyframes fx-sweep-x { 0% { transform: translate3d(-45%, 0, 0); } 100% { transform: translate3d(45%, 0, 0); } }
-
-/* --- Verdigris: a patina washing in from every edge ---------------------- */
-.card[data-fx='verdigris'] .fx-p::before {
-  inset: -4%;
-  background:
-    radial-gradient(ellipse 58% 48% at 0 0, var(--fx-lite) 0, transparent 62%),
-    radial-gradient(ellipse 54% 58% at 100% 100%, var(--fx-core) 0, transparent 62%),
-    radial-gradient(ellipse 32% 40% at 100% 0, var(--fx-pale) 0, transparent 62%),
-    radial-gradient(ellipse 36% 34% at 0 100%, var(--fx-deep) 0, transparent 62%);
-  opacity: 0.5;
-  transform-origin: 50% 50%;
-}
-.card[data-fx='verdigris'] .fx-p::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: 120px 120px;
-  mix-blend-mode: overlay;
-  opacity: 0.4;
-}
-.card.is-lit[data-fx='verdigris'] .fx-p::before { animation: fx-breathe 11s ease-in-out infinite alternate; }
-
-/* --- Fern: a frond unrolling out of the bottom corner -------------------- */
-.card[data-fx='fern'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
-}
-.card[data-fx='fern'] .fx-p::before {
-  inset: auto auto -5.6cqw -6%;
-  width: 66cqw;
-  height: 40cqw;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cg fill='none' stroke='%23ffffff' stroke-linecap='round'%3E%3Cpath d='M4 58 C 22 44 46 30 92 8' stroke-width='2.4'/%3E%3Cpath d='M14 50 q-7 -5 -10 -12 M24 43 q-3 -9 1 -16 M34 36 q-9 -4 -14 -11 M44 30 q-2 -9 5 -15 M55 24 q-9 -3 -15 -9 M66 18 q0 -9 7 -13 M77 13 q-9 -2 -14 -7' stroke-width='1.8'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  transform-origin: 6% 94%;
-  opacity: 0.8;
-  filter: drop-shadow(0 0 2px var(--fx-deep));
+.card[data-fx='cardstock'] .fx-a {
+  z-index: 0;
+  background: var(--noise) 0 0 / 140px 140px;
+  opacity: .22;
   mix-blend-mode: soft-light;
 }
-.card[data-fx='fern'] .fx-p::after {
-  background: radial-gradient(ellipse 52% 32% at 4% 98%, color-mix(in srgb, var(--fx-core) 45%, transparent), transparent 72%);
+.card[data-fx='cardstock'] .card-art {
+  box-shadow: 0 0 0 1px rgba(154,165,177,.35);
 }
-.card.is-lit[data-fx='fern'] .fx-p::before { animation: fx-fern 7s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; }
-@keyframes fx-fern { from { transform: rotate(-14deg) scale(0.9); } to { transform: rotate(0deg) scale(1); } }
-
-/* ===================== RARE: water, ice and cold light =================== */
-
-/* --- Ripple: rings spreading from the middle ----------------------------- */
-.card[data-fx='ripple'] .fx-p::before,
-.card[data-fx='ripple'] .fx-p::after {
-  inset: -30%;
-  background: repeating-radial-gradient(circle at 50% 50%,
-    transparent 0 7cqw,
-    color-mix(in srgb, var(--fx-lite) 55%, transparent) 7cqw calc(7cqw + 1.6px),
-    transparent calc(7cqw + 1.6px) 14cqw);
-  opacity: 0.32;
+.card[data-fx='cardstock'] .card-art::after {
+  background: none;
 }
-.card.is-lit[data-fx='ripple'] .fx-p::before { animation: fx-ripple 6s linear infinite; }
-.card.is-lit[data-fx='ripple'] .fx-p::after { animation: fx-ripple 6s linear infinite; animation-delay: -3s; }
-@keyframes fx-ripple {
-  0% { transform: scale(0.82); opacity: 0.42; }
-  100% { transform: scale(1.32); opacity: 0; }
+.card[data-fx='cardstock'] .rarity-badge {
+  background: #9aa5b1;
+  color: #1b1e25;
+  border-color: #9aa5b1;
 }
-
-/* --- Frostbite: crystals reaching in from two corners -------------------- */
-.card[data-fx='frostbite'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
+.card[data-fx='slate'] .card-front {
+  background: #1c202a;
+  box-shadow: inset 0 0 0 2px rgba(154,165,177,.3), inset 0 0 0 6px #1c202a, inset 0 0 0 7px rgba(154,165,177,.18);
 }
-.card[data-fx='frostbite'] .fx-p::before,
-.card[data-fx='frostbite'] .fx-p::after {
-  background:
-    repeating-conic-gradient(from 0deg at 0 0,
-      transparent 0 7deg, color-mix(in srgb, var(--fx-pale) 70%, transparent) 7deg 8deg),
-    radial-gradient(ellipse 62% 56% at 0 0, color-mix(in srgb, var(--fx-lite) 45%, transparent) 0, transparent 72%);
-  mask-image: radial-gradient(ellipse 72% 66% at 0 0, #000 0 18%, transparent 76%);
-  -webkit-mask-image: radial-gradient(ellipse 72% 66% at 0 0, #000 0 18%, transparent 76%);
-  transform-origin: 0 0;
-  opacity: 0.8;
+.card[data-fx='slate'] .fx-a {
+  z-index: -1;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px);
 }
-.card[data-fx='frostbite'] .fx-p::after { transform: rotate(180deg); transform-origin: 50% 50%; }
-.card.is-lit[data-fx='frostbite'] .fx-p::before { animation: fx-frost 8s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='frostbite'] .fx-p::after { animation: fx-frost-b 8s ease-in-out infinite alternate; }
-@keyframes fx-frost { from { transform: scale(0.85); } to { transform: scale(1); } }
-@keyframes fx-frost-b { from { transform: rotate(180deg) scale(0.92); } to { transform: rotate(180deg) scale(1.06); } }
-
-/* --- Tide: a band of water at the foot, rising and falling --------------- */
-.card[data-fx='tide'] .fx-p::before {
-  inset: auto -12% -7cqw -12%;
-  height: 24cqw;
-  background: linear-gradient(to top, var(--fx-deep), color-mix(in srgb, var(--fx-core) 50%, transparent) 62%, transparent);
-  /* Wide, shallow swells: a waterline, not a row of spikes. */
-  mask-image: radial-gradient(ellipse 74% 128% at 50% 116%, #000 0 62%, transparent 64%);
-  -webkit-mask-image: radial-gradient(ellipse 74% 128% at 50% 116%, #000 0 62%, transparent 64%);
-  mask-size: 24cqw 100%;
-  -webkit-mask-size: 24cqw 100%;
-  mask-repeat: repeat-x;
-  -webkit-mask-repeat: repeat-x;
-  opacity: 0.8;
+.card[data-fx='slate'] .card-art {
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.12);
 }
-.card[data-fx='tide'] .fx-p::after {
-  inset: auto -12% 16cqw -12%;
-  height: 3.4cqw;
-  background: radial-gradient(circle at 50% 100%, var(--fx-pale) 0 26%, transparent 28%) 0 0 / 24cqw 100%;
-  opacity: 0.5;
+.card[data-fx='slate'] .card-art::after {
+  background: none;
 }
-.card.is-lit[data-fx='tide'] .fx-p::before { animation: fx-tide 5s ease-in-out infinite; }
-.card.is-lit[data-fx='tide'] .fx-p::after { animation: fx-tide 5s ease-in-out infinite; }
-@keyframes fx-tide {
-  0%, 100% { transform: translate3d(0, 6%, 0); }
-  50% { transform: translate3d(-8cqw, 0, 0); }
+.card[data-fx='slate'] .card-title {
+  color: #d5d9e2;
 }
-
-/* --- Sapphire: the face cut into facets, one sheen crossing them --------- */
-.card[data-fx='sapphire'] .fx-p {
-  mask-image: var(--fx-soft-art);
-  -webkit-mask-image: var(--fx-soft-art);
+.card[data-fx='slate'] .rarity-badge {
+  background: transparent;
 }
-.card[data-fx='sapphire'] .fx-p::before {
-  inset: -20%;
-  background:
-    repeating-conic-gradient(from 0deg at 50% 45%,
-      color-mix(in srgb, var(--fx-pale) 14%, transparent) 0 30deg,
-      color-mix(in srgb, var(--fx-dark) 22%, transparent) 30deg 60deg),
-    repeating-conic-gradient(from 15deg at 50% 45%,
-      color-mix(in srgb, var(--fx-lite) 9%, transparent) 0 45deg, transparent 45deg 90deg);
+.card[data-fx='runner'] .card-front {
+  box-shadow: inset 0 0 0 2px rgba(74,222,128,.12);
 }
-.card[data-fx='sapphire'] .fx-p::after {
-  inset: -40%;
-  background: linear-gradient(115deg, transparent 44%, color-mix(in srgb, var(--fx-pale) 48%, transparent) 50%, transparent 56%);
-  opacity: 0.62;
+.card[data-fx='runner'] .fx-ring {
+  padding: 3px;
 }
-.card.is-lit[data-fx='sapphire'] .fx-p::after { animation: fx-sweep-xy 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate; }
-@keyframes fx-sweep-xy { from { transform: translate3d(-38%, -18%, 0); } to { transform: translate3d(38%, 18%, 0); } }
-
-/* --- Constellation: stars and their lines, wheeling slowly --------------- */
-.card[data-fx='constellation'] .fx-p {
-  mask-image: var(--fx-soft-art);
-  -webkit-mask-image: var(--fx-soft-art);
+.card[data-fx='runner'] .fx-ring::before {
+  background: conic-gradient(from 0deg, transparent 0 .62turn, rgba(74,222,128,.4) .72turn, #4ade80 .82turn, rgba(74,222,128,.4) .92turn, transparent 1turn);
+  animation: bx-spin 7s linear infinite;
 }
-.card[data-fx='constellation'] .fx-p::before {
-  inset: -22%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg stroke='%23ffffff' stroke-opacity='.5' stroke-width='.6' fill='none'%3E%3Cpath d='M18 22 L34 40 L52 30 L70 48 L84 34 M34 40 L28 68 L50 88 L72 78 L70 48 M50 88 L46 116 L70 124 M28 68 L12 92'/%3E%3C/g%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='18' cy='22' r='1.6'/%3E%3Ccircle cx='34' cy='40' r='2.2'/%3E%3Ccircle cx='52' cy='30' r='1.3'/%3E%3Ccircle cx='70' cy='48' r='2'/%3E%3Ccircle cx='84' cy='34' r='1.2'/%3E%3Ccircle cx='28' cy='68' r='1.5'/%3E%3Ccircle cx='50' cy='88' r='2.4'/%3E%3Ccircle cx='72' cy='78' r='1.4'/%3E%3Ccircle cx='46' cy='116' r='1.7'/%3E%3Ccircle cx='70' cy='124' r='1.1'/%3E%3Ccircle cx='12' cy='92' r='1.3'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 100% 100%;
-  filter: drop-shadow(0 0 3px var(--fx-lite));
-  opacity: 0.85;
+.card[data-fx='runner'] .fx-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(74,222,128,.28);
 }
-.card[data-fx='constellation'] .fx-p::after {
-  background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--fx-core) 30%, transparent), transparent 72%);
+.card[data-fx='ripple'] .fx-ring {
+  padding: 3px;
 }
-.card.is-lit[data-fx='constellation'] .fx-p::before { animation: fx-turn 90s linear infinite; }
-@keyframes fx-turn { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-/* ================= EPIC: what is further out than the sky ================ */
-
-/* --- Nebula: two clouds drifting over each other ------------------------- */
-.card[data-fx='nebula'] .fx-p::before,
-.card[data-fx='nebula'] .fx-p::after {
-  inset: -30%;
-  filter: blur(7px);
-  opacity: 0.5;
+.card[data-fx='ripple'] .fx-ring::before {
+  inset: -100%;
+  background: linear-gradient(135deg, transparent 46%, rgba(74,222,128,.55) 48.5%, #d9ffe6 50%, rgba(74,222,128,.55) 51.5%, transparent 54%);
+  animation: bx-u-ripple 4.2s ease-in-out infinite;
 }
-.card[data-fx='nebula'] .fx-p::before {
-  background:
-    radial-gradient(ellipse 30% 26% at 30% 35%, var(--fx-lite), transparent 72%),
-    radial-gradient(ellipse 22% 30% at 68% 62%, var(--fx-deep), transparent 72%);
+.card[data-fx='ripple'] .fx-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(74,222,128,.22);
 }
-.card[data-fx='nebula'] .fx-p::after {
-  background:
-    radial-gradient(ellipse 26% 22% at 62% 30%, var(--fx-core), transparent 72%),
-    radial-gradient(ellipse 24% 28% at 34% 70%, var(--fx-pale), transparent 72%);
+.card[data-fx='ripple'] .fx-a {
+  z-index: -1;
+  background: radial-gradient(ellipse at 50% 100%, rgba(74,222,128,.16), transparent 60%);
+  animation: bx-u-wash 4.2s ease-in-out infinite;
 }
-.card.is-lit[data-fx='nebula'] .fx-p::before { animation: fx-nebula-a 15s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='nebula'] .fx-p::after { animation: fx-nebula-b 19s ease-in-out infinite alternate; }
-@keyframes fx-nebula-a { from { transform: translate3d(-6%, -4%, 0) rotate(0deg); } to { transform: translate3d(6%, 5%, 0) rotate(7deg); } }
-@keyframes fx-nebula-b { from { transform: translate3d(5%, 4%, 0) rotate(0deg); } to { transform: translate3d(-5%, -6%, 0) rotate(-9deg); } }
-
-/* --- Arcane: two rings of runes, turning against each other -------------- */
-.card[data-fx='arcane'] .fx-p {
-  mask-image: var(--fx-soft-art);
-  -webkit-mask-image: var(--fx-soft-art);
+@keyframes bx-u-ripple { 0% { transform: translate(-33%, -33%); opacity: 0 } 15% { opacity: 1 } 85% { opacity: 1 } 100% { transform: translate(33%, 33%); opacity: 0 } }
+@keyframes bx-u-wash { 0%, 100% { opacity: .4 } 50% { opacity: 1 } }
+.card[data-fx='glass'] .fx-b {
+  z-index: 3;
+  mix-blend-mode: screen;
+  overflow: hidden;
 }
-.card[data-fx='arcane'] .fx-p::before,
-.card[data-fx='arcane'] .fx-p::after {
-  inset: auto;
-  top: 50%;
-  left: 50%;
-  width: 118cqw;
-  aspect-ratio: 1;
-  margin: -59cqw 0 0 -59cqw;
+.card[data-fx='glass'] .fx-b::before {
+  content: '';
+  position: absolute;
+  left: -70%;
+  top: -20%;
+  width: 240%;
+  height: 140%;
+  background: linear-gradient(105deg, transparent 30%, rgba(59,130,246,.10) 40%, rgba(244,114,182,.12) 45%, rgba(255,255,255,.16) 50%, rgba(34,211,238,.12) 55%, rgba(99,102,241,.10) 60%, transparent 70%);
+  animation: bx-r-glass 7s ease-in-out infinite alternate;
+}
+@keyframes bx-r-glass { from { transform: translateX(-30%) } to { transform: translateX(30%) } }
+.card[data-fx='glass'] .card-title {
+  color: #bfdbfe;
+  text-shadow: 0 0 8px rgba(59,130,246,.55);
+  transition: color .9s, text-shadow .9s;
+}
+.card[data-fx='glass'] .card-desc {
+  color: #60a5fa;
+  text-shadow: 0 0 8px rgba(59,130,246,.5);
+  transition: color .9s, text-shadow .9s;
+}
+.card[data-fx='glass'].is-hot .card-title {
+  color: #f0f7ff;
+  text-shadow: 0 0 3px #fff, 0 0 12px #3b82f6, 0 0 28px #3b82f6;
+  text-decoration: underline;
+  text-decoration-color: #60a5fa;
+  text-underline-offset: .12em;
+  transition: color .15s, text-shadow .15s;
+}
+.card[data-fx='glass'].is-hot .card-desc {
+  color: #dbeafe;
+  text-shadow: 0 0 3px #fff, 0 0 12px #3b82f6;
+  transition: color .15s, text-shadow .15s;
+}
+.card[data-fx='prism'] .fx-a {
+  z-index: -1;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.07) 0 1px, transparent 1px 4px);
+}
+.card[data-fx='prism'] .fx-b {
+  z-index: 3;
+  mix-blend-mode: overlay;
+  -webkit-mask: repeating-linear-gradient(45deg, #000 0 1px, transparent 1px 4px);
+  mask: repeating-linear-gradient(45deg, #000 0 1px, transparent 1px 4px);
+  overflow: hidden;
+}
+.card[data-fx='prism'] .fx-b::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 300%;
+  background: linear-gradient(90deg, #3b82f6, #22d3ee, #a78bfa, #f472b6, #3b82f6) 0 0 / 120px 100% repeat-x;
+  opacity: .55;
+  animation: bx-r-prism 9s linear infinite;
+}
+@keyframes bx-r-prism { to { transform: translateX(-120px) } }
+.card[data-fx='prism'] .card-title {
+  color: #cfe3ff;
+  text-shadow: 0 0 1px #fff, 0 0 10px rgba(59,130,246,.75);
+  transition: color .9s, text-shadow .9s;
+}
+.card[data-fx='prism'] .card-desc {
+  transition: color .9s, text-shadow .9s;
+}
+.card[data-fx='prism'] .card-body::before {
+  content: '';
+  position: absolute;
+  left: 2cqw;
+  top: 1cqw;
+  width: 60%;
+  height: 9cqw;
   border-radius: 50%;
-  background: repeating-conic-gradient(from 0deg,
-    var(--fx-lite) 0 3deg, transparent 3deg 6deg,
-    var(--fx-lite) 6deg 7deg, transparent 7deg 14deg);
-  mask-image: radial-gradient(circle, transparent 0 41%, #000 42%, #000 47%, transparent 48%);
-  -webkit-mask-image: radial-gradient(circle, transparent 0 41%, #000 42%, #000 47%, transparent 48%);
-  opacity: 0.75;
+  background: radial-gradient(ellipse, rgba(59,130,246,.35), transparent 70%);
+  opacity: 0;
+  pointer-events: none;
 }
-.card[data-fx='arcane'] .fx-p::after {
-  width: 96cqw;
-  margin: -48cqw 0 0 -48cqw;
-  background: repeating-conic-gradient(from 5deg, var(--fx-core) 0 2deg, transparent 2deg 10deg);
-  mask-image: radial-gradient(circle, transparent 0 45%, #000 46%, #000 48.5%, transparent 49.5%);
-  -webkit-mask-image: radial-gradient(circle, transparent 0 45%, #000 46%, #000 48.5%, transparent 49.5%);
+.card[data-fx='prism'].is-hot .card-body::before {
+  animation: bx-r-pulse .9s ease-out;
 }
-.card.is-lit[data-fx='arcane'] .fx-p::before { animation: fx-turn 34s linear infinite; }
-.card.is-lit[data-fx='arcane'] .fx-p::after { animation: fx-turn 21s linear infinite reverse; }
-
-/* --- Voltage: a fork that strikes, in the margins ------------------------ */
-.card[data-fx='voltage'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
+.card[data-fx='prism'].is-hot .card-title {
+  color: #fff;
+  text-shadow: 0 0 2px #fff, 0 0 14px #3b82f6, 0 0 32px #60a5fa;
+  transition-duration: .15s;
 }
-.card[data-fx='voltage'] .fx-p::before,
-.card[data-fx='voltage'] .fx-p::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cpath d='M58 0 L44 42 L60 46 L36 96 L48 60 L30 56 Z' fill='%23ffffff' fill-opacity='.9'/%3E%3Cpath d='M44 42 L26 58 M60 46 L74 70' stroke='%23ffffff' stroke-opacity='.7' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
-  background-size: 100% 100%;
-  filter: drop-shadow(0 0 4px var(--fx-lite)) drop-shadow(0 0 12px var(--fx-core));
+.card[data-fx='prism'].is-hot .card-desc {
+  color: #dbeafe;
+  text-shadow: 0 0 10px #3b82f6;
+  transition-duration: .15s;
+}
+@keyframes bx-r-pulse { 0% { opacity: 1; transform: scale(.6) } 100% { opacity: 0; transform: scale(1.6) } }
+.card[data-fx='nebula'] .card-front {
+  background: linear-gradient(180deg, #2a1445, #14092b 45%, #1d0f3a);
+}
+.card[data-fx='nebula'] .fx-a {
+  z-index: -1;
+  overflow: hidden;
+}
+.card[data-fx='nebula'] .fx-a::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(ellipse at 30% 30%, rgba(168,85,247,.55), transparent 45%), radial-gradient(ellipse at 70% 65%, rgba(236,72,153,.35), transparent 40%), radial-gradient(ellipse at 55% 20%, rgba(99,102,241,.45), transparent 42%);
+  animation: bx-e-nebula 16s ease-in-out infinite alternate;
+}
+.card[data-fx='nebula'] .fx-a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #fff 0 .6px, transparent 1px) 3px 5px / 23px 29px, radial-gradient(circle, rgba(255,255,255,.8) 0 .5px, transparent 1px) 11px 17px / 37px 41px;
+  opacity: .55;
+}
+@keyframes bx-e-nebula { from { transform: translate(-6%, -4%) rotate(0) scale(1) } to { transform: translate(6%, 5%) rotate(12deg) scale(1.15) } }
+.card[data-fx='nebula'] .card-art img {
+  transform: scale(1.1) translate(calc(var(--tx) * -3.5%), calc(var(--ty) * -3.5%));
+}
+.card[data-fx='nebula'] .card-art {
+  box-shadow: 0 0 0 1px rgba(192,132,252,.6), 0 10px 24px -10px rgba(0,0,0,.6);
+}
+.card[data-fx='deepspace'] .card-front {
+  background: #0b0618;
+}
+.card[data-fx='deepspace'] .fx-a {
+  z-index: -1;
+  overflow: hidden;
+  transform: translate(calc(var(--tx) * 1.5%), calc(var(--ty) * 1.5%));
+}
+.card[data-fx='deepspace'] .fx-a::before {
+  content: '';
+  position: absolute;
+  left: -30%;
+  top: -20%;
+  width: 160%;
+  height: 140%;
+  background: conic-gradient(from 0deg at 50% 50%, #1a0b33, #6d28d9 40deg, #1a0b33 90deg, #db2777 150deg, #1a0b33 200deg, #7c3aed 260deg, #1a0b33 320deg, #1a0b33);
+  filter: blur(14px);
+  opacity: .8;
+  animation: bx-spin 48s linear infinite;
+}
+.card[data-fx='deepspace'] .fx-a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #fff 0 .6px, transparent 1px) 7px 3px / 29px 31px;
+  animation: bx-e-twinkle 3s ease-in-out infinite alternate;
+}
+.card[data-fx='deepspace'] .fx-c {
+  z-index: -1;
+  background: radial-gradient(circle, rgba(255,255,255,.9) 0 .5px, transparent 1px) 17px 13px / 41px 37px;
+  animation: bx-e-twinkle 3s ease-in-out infinite alternate-reverse;
+}
+@keyframes bx-e-twinkle { from { opacity: .4 } to { opacity: 1 } }
+.card[data-fx='deepspace'] .card-art img {
+  transform: scale(1.16) translate(calc(var(--tx) * -6%), calc(var(--ty) * -6%));
+}
+.card[data-fx='deepspace'] .fx-art {
+  box-shadow: inset 0 0 0 1px rgba(216,180,254,.55), inset 0 0 18px rgba(0,0,0,.6);
+}
+.card[data-fx='classicfoil'] .card-front {
+  background: linear-gradient(180deg, #2a2210, #171208 45%, #241b0a);
+  box-shadow: inset 0 0 0 7px rgba(60,40,5,.85), inset 0 0 0 8px rgba(255,225,140,.3);
+}
+.card[data-fx='classicfoil'] .fx-ring {
+  padding: 6px;
+}
+.card[data-fx='classicfoil'] .fx-ring::before {
+  inset: -50%;
+  background: linear-gradient(135deg, #6b4a0e, #c7962b 20%, #fff2b8 35%, #e2b53d 45%, #8a6414 58%, #f7dd86 74%, #b4841c 88%, #6b4a0e);
+  transform: translate(calc(var(--lx) * -18%), calc(var(--ly) * -18%));
+}
+.card[data-fx='classicfoil'] .fx-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.18), transparent 30% 70%, rgba(0,0,0,.25));
+}
+.card[data-fx='classicfoil'] .fx-p {
+  z-index: 5;
+  overflow: hidden;
+}
+.card[data-fx='classicfoil'] .fx-p i {
+  left: var(--x);
+  bottom: -4px;
+  width: 3px;
+  height: 3px;
+  background: #ffe9a3;
+  box-shadow: 0 0 6px 1px rgba(251,191,36,.8);
+  opacity: 0;
+  animation: bx-l-spark var(--d) linear infinite;
+  animation-delay: var(--delay);
+}
+@keyframes bx-l-spark { 0% { transform: translateY(0) scale(.6); opacity: 0 } 8% { opacity: 1 } 60% { opacity: .9 } 100% { transform: translateY(-150cqw) translateX(var(--sx)) scale(1); opacity: 0 } }
+.card[data-fx='classicfoil'] .rarity-badge {
+  background: linear-gradient(180deg, #f7dd86, #c7962b);
+  color: #2b1d05;
+  border-color: #a9791a;
+}
+.card[data-fx='ornate'] .card-front {
+  background: radial-gradient(ellipse at 50% 30%, #2c2410, #150f05 70%);
+  box-shadow: inset 0 0 0 7px #2d1f06, inset 0 0 0 8px rgba(255,236,170,.3), inset 0 0 40px -14px rgba(251,191,36,.55);
+}
+.card[data-fx='ornate'] .fx-ring {
+  padding: 6px;
+}
+.card[data-fx='ornate'] .fx-ring::before {
+  inset: -50%;
+  background: linear-gradient(120deg, #5c3f0b, #b8892a 25%, #ffe9a8 40%, #d4a73b 50%, #7d5a13 62%, #f6dc8f 80%, #6b4a0e);
+  transform: translate(calc(var(--lx) * -16%), calc(var(--ly) * -12%));
+}
+.card[data-fx='ornate'] .fx-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 2px, transparent 2px 6px);
+}
+.card[data-fx='ornate'] .fx-c, .card[data-fx='ornate'] .fx-b {
+  z-index: 5;
+}
+.card[data-fx='ornate'] .fx-c::before, .card[data-fx='ornate'] .fx-c::after, .card[data-fx='ornate'] .fx-b::before, .card[data-fx='ornate'] .fx-b::after {
+  content: '';
+  position: absolute;
+  width: 14cqw;
+  height: 14cqw;
+  background: var(--corner) center / contain no-repeat;
+  opacity: .9;
+}
+.card[data-fx='ornate'] .fx-c::before {
+  left: 2.4cqw;
+  top: 2.4cqw;
+}
+.card[data-fx='ornate'] .fx-c::after {
+  right: 2.4cqw;
+  top: 2.4cqw;
+  transform: scaleX(-1);
+}
+.card[data-fx='ornate'] .fx-b::before {
+  left: 2.4cqw;
+  bottom: 2.4cqw;
+  transform: scaleY(-1);
+}
+.card[data-fx='ornate'] .fx-b::after {
+  right: 2.4cqw;
+  bottom: 2.4cqw;
+  transform: scale(-1);
+}
+.card[data-fx='ornate'] .fx-p {
+  z-index: 5;
+  overflow: hidden;
+}
+.card[data-fx='ornate'] .fx-p i {
+  left: var(--x);
+  bottom: -3px;
+  width: var(--s, 2px);
+  height: var(--s, 2px);
+  background: #ffe7a0;
+  box-shadow: 0 0 4px rgba(251,191,36,.9);
+  opacity: 0;
+  animation: bx-l-dust var(--d) linear infinite;
+  animation-delay: var(--delay);
+}
+@keyframes bx-l-dust { 0% { transform: translateY(0); opacity: 0 } 10% { opacity: .7 } 90% { opacity: .5 } 100% { transform: translateY(-150cqw) translateX(var(--sx)); opacity: 0 } }
+.card[data-fx='ornate'] .card-title {
+  color: #ffe9a8;
+}
+.card[data-fx='ornate'] .rarity-badge {
+  background: linear-gradient(180deg, #ffe9a8, #b8892a);
+  color: #2b1d05;
+  border-color: #8a6414;
+}
+.card[data-fx='tear'] .card-front {
+  background: linear-gradient(180deg, #2a0b0f, #160507 45%, #2b0a06);
+  box-shadow: inset 0 0 0 2px rgba(224,33,52,.55), inset 0 0 30px -12px rgba(224,33,52,.6);
+}
+.card[data-fx='tear'] .fx-ring {
+  padding: 3px;
+}
+.card[data-fx='tear'] .fx-ring::before {
+  background: conic-gradient(#e02134, #ff7a1a .18turn, #7a0a12 .34turn, #ff3d2e .5turn, #e02134 .62turn, #ffb347 .78turn, #8a0f1a .9turn, #e02134);
+  animation: bx-m-ring-jitter 4s steps(1) infinite;
+}
+@keyframes bx-m-ring-jitter { 0%, 84% { transform: none; opacity: 1 } 85% { transform: translate(-2px, 1px); opacity: .7 } 86.5% { transform: translate(2px, -1px) scale(1.01); opacity: 1 } 88% { transform: translate(-1px, 0); opacity: .5 } 89.5% { transform: translate(1px, 1px); opacity: 1 } 91% { transform: translate(-2px, 0); opacity: .8 } 93%, 100% { transform: none; opacity: 1 } }
+.card[data-fx='tear'] .fx-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(#e02134, #ff7a1a .18turn, #7a0a12 .34turn, #ff3d2e .5turn, #e02134 .62turn, #ffb347 .78turn, #8a0f1a .9turn, #e02134);
+  clip-path: inset(30% 0 55% 0);
+  opacity: 0;
+  animation: bx-m-tear 4s steps(1) infinite;
+}
+@keyframes bx-m-tear { 0%, 84% { opacity: 0; transform: translateX(3px); clip-path: inset(30% 0 55% 0) } 85% { opacity: 1; transform: translateX(3px); clip-path: inset(30% 0 55% 0) } 87% { opacity: 1; transform: translateX(-3px); clip-path: inset(55% 0 20% 0) } 89% { opacity: 1; transform: translateX(2px); clip-path: inset(10% 0 70% 0) } 91%, 100% { opacity: 0; transform: translateX(3px); clip-path: inset(30% 0 55% 0) } }
+.card[data-fx='tear'] .card-art::before, .card[data-fx='tear'] .card-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#ff2a2a, #ff2a2a), var(--art) center / cover;
+  background-blend-mode: multiply;
+  mix-blend-mode: screen;
   opacity: 0;
 }
-.card[data-fx='voltage'] .fx-p::after { transform: scaleX(-1); }
-.card.is-lit[data-fx='voltage'] .fx-p::before { animation: fx-voltage 3.4s steps(1) infinite; }
-.card.is-lit[data-fx='voltage'] .fx-p::after { animation: fx-voltage 5.2s steps(1) infinite; animation-delay: -1.6s; }
-@keyframes fx-voltage {
-  0%, 6%, 100% { opacity: 0; }
-  7% { opacity: 0.95; }
-  9% { opacity: 0.2; }
-  11% { opacity: 0.8; }
-  16% { opacity: 0; }
-  58% { opacity: 0.5; }
-  60% { opacity: 0; }
+.card[data-fx='tear'] .card-art::before {
+  animation: bx-m-ghost-r 4s steps(1) infinite;
 }
-
-/* --- Velvet: a nap that catches the light where it turns ----------------- */
-.card[data-fx='velvet'] .fx-p::before {
-  background: repeating-linear-gradient(160deg,
-    color-mix(in srgb, var(--fx-pale) 12%, transparent) 0 3cqw,
-    color-mix(in srgb, var(--fx-dark) 30%, transparent) 3cqw 8cqw,
-    color-mix(in srgb, var(--fx-lite) 8%, transparent) 8cqw 12cqw);
+.card[data-fx='tear'] .card-art::after {
+  background-image: linear-gradient(#00e5ff, #00e5ff), var(--art);
+  animation: bx-m-ghost-c 4s steps(1) infinite;
 }
-.card[data-fx='velvet'] .fx-p::after {
-  inset: -20%;
-  background: radial-gradient(ellipse 42% 56% at 50% 45%, color-mix(in srgb, var(--fx-pale) 45%, transparent) 0, transparent 72%);
-  opacity: 0.85;
+@keyframes bx-m-ghost-r { 0%, 84% { opacity: 0; transform: none; clip-path: none } 85% { opacity: .9; transform: translateX(-4px); clip-path: inset(0 0 55% 0) } 87% { opacity: .9; transform: translateX(3px); clip-path: inset(20% 0 30% 0) } 89% { opacity: .9; transform: translateX(-2px); clip-path: inset(45% 0 5% 0) } 91% { opacity: .6; transform: translateX(-1px); clip-path: none } 93%, 100% { opacity: 0; transform: none; clip-path: none } }
+@keyframes bx-m-ghost-c { 0%, 84% { opacity: 0; transform: none; clip-path: none } 85% { opacity: .9; transform: translateX(4px); clip-path: inset(0 0 55% 0) } 87% { opacity: .9; transform: translateX(-3px); clip-path: inset(20% 0 30% 0) } 89% { opacity: .9; transform: translateX(2px); clip-path: inset(45% 0 5% 0) } 91% { opacity: .6; transform: translateX(1px); clip-path: none } 93%, 100% { opacity: 0; transform: none; clip-path: none } }
+.card[data-fx='tear'] .card-body {
+  animation: bx-m-text 4s steps(1) infinite;
 }
-.card.is-lit[data-fx='velvet'] .fx-p::after { animation: fx-velvet 7s ease-in-out infinite alternate; }
-@keyframes fx-velvet { from { transform: translate3d(-11%, -8%, 0); } to { transform: translate3d(11%, 8%, 0); } }
-
-/* --- Orbitals: two rings tilting at two speeds --------------------------- */
-.card[data-fx='orbitals'] .fx-p {
-  mask-image: var(--fx-soft-art);
-  -webkit-mask-image: var(--fx-soft-art);
+@keyframes bx-m-text { 0%, 84% { transform: none } 85% { transform: translateX(-3px) } 87% { transform: translateX(2px) } 89% { transform: translateX(-1px) } 91%, 100% { transform: none } }
+.card[data-fx='tear'] .card-title, .card[data-fx='tear'] .card-desc {
+  animation: bx-m-title-split 4s steps(1) infinite;
 }
-.card[data-fx='orbitals'] .fx-p::before,
-.card[data-fx='orbitals'] .fx-p::after {
-  inset: auto;
-  top: 50%;
-  left: 50%;
-  width: 132cqw;
-  height: 46cqw;
-  margin: -23cqw 0 0 -66cqw;
-  border-radius: 50%;
-  border: 1.6px solid var(--fx-lite);
-  background: radial-gradient(circle at 0 50%, var(--fx-pale) 0 2.2cqw, transparent 2.6cqw);
-  opacity: 0.8;
+@keyframes bx-m-title-split { 0%, 84% { text-shadow: none } 85% { text-shadow: -3px 0 rgba(255,40,40,.85), 3px 0 rgba(0,229,255,.85) } 87% { text-shadow: 2px 0 rgba(255,40,40,.85), -2px 0 rgba(0,229,255,.85) } 89% { text-shadow: -1px 0 rgba(255,40,40,.7), 1px 0 rgba(0,229,255,.7) } 91%, 100% { text-shadow: none } }
+.card[data-fx='tear'] .fx-b {
+  z-index: 3;
+  background: rgba(255,60,40,.15);
+  opacity: 0;
+  animation: bx-m-reset 4s linear infinite;
 }
-.card[data-fx='orbitals'] .fx-p::after {
-  width: 112cqw;
-  height: 62cqw;
-  margin: -31cqw 0 0 -56cqw;
-  border-color: var(--fx-core);
+@keyframes bx-m-reset { 0%, 90% { opacity: 0 } 91% { opacity: 1 } 100% { opacity: 0 } }
+.card[data-fx='tear'] .fx-a {
+  z-index: -1;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255,80,20,.45), transparent 55%);
 }
-.card.is-lit[data-fx='orbitals'] .fx-p::before { animation: fx-orbit-a 10s linear infinite; }
-.card.is-lit[data-fx='orbitals'] .fx-p::after { animation: fx-orbit-b 15s linear infinite; }
-@keyframes fx-orbit-a { from { transform: rotate(-26deg) rotateY(0deg); } to { transform: rotate(-26deg) rotateY(360deg); } }
-@keyframes fx-orbit-b { from { transform: rotate(38deg) rotateY(360deg); } to { transform: rotate(38deg) rotateY(0deg); } }
-
-/* =================== LEGENDARY: gold, and what it does =================== */
-
-/* --- Gilt: leaf laid in flakes, shimmering where it is thin -------------- */
-.card[data-fx='gilt'] .fx-p::before {
-  background:
-    radial-gradient(ellipse 12% 9% at 18% 22%, var(--fx-lite) 0 88%, transparent 100%),
-    radial-gradient(ellipse 9% 14% at 76% 18%, var(--fx-pale) 0 88%, transparent 100%),
-    radial-gradient(ellipse 14% 8% at 60% 46%, var(--fx-lite) 0 88%, transparent 100%),
-    radial-gradient(ellipse 8% 12% at 30% 58%, var(--fx-core) 0 88%, transparent 100%),
-    radial-gradient(ellipse 11% 10% at 84% 70%, var(--fx-lite) 0 88%, transparent 100%),
-    radial-gradient(ellipse 13% 7% at 44% 84%, var(--fx-pale) 0 88%, transparent 100%),
-    radial-gradient(ellipse 7% 9% at 12% 90%, var(--fx-core) 0 88%, transparent 100%);
-  opacity: 0.55;
+.card[data-fx='tear'] .card-desc {
+  color: #ff4d5e;
 }
-.card[data-fx='gilt'] .fx-p::after {
-  inset: -40%;
-  background: linear-gradient(120deg, transparent 42%, color-mix(in srgb, var(--fx-pale) 75%, transparent) 50%, transparent 58%);
-  opacity: 0.7;
+.card[data-fx='static'] .card-front {
+  background: #120406;
+  box-shadow: inset 0 0 0 2px rgba(224,33,52,.35);
 }
-.card.is-lit[data-fx='gilt'] .fx-p::after { animation: fx-sweep-xy 3.6s ease-in-out infinite alternate; }
-
-/* --- Sunburst: rays fanning from a corner ------------------------------- */
-.card[data-fx='sunburst'] .fx-p::before {
-  inset: auto;
-  top: 0;
+.card[data-fx='static'] .fx-ring {
+  padding: 3px;
+}
+.card[data-fx='static'] .fx-ring::before {
+  background: repeating-conic-gradient(#ff2d3a 0 .03turn, transparent .03turn .06turn);
+  animation: bx-m-dash 3s steps(1) infinite;
+}
+@keyframes bx-m-dash { 0% { transform: rotate(0); opacity: 1 } 17% { transform: rotate(.01turn); opacity: 1 } 33% { transform: rotate(-.006turn); opacity: .3 } 36% { transform: rotate(-.006turn); opacity: 1 } 50% { transform: rotate(.02turn); opacity: 1 } 70% { transform: rotate(.005turn); opacity: .15 } 73% { transform: rotate(.005turn); opacity: 1 } 85% { transform: rotate(-.012turn); opacity: 1 } 100% { transform: rotate(0); opacity: 1 } }
+.card[data-fx='static'] .fx-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(224,33,52,.35);
+}
+.card[data-fx='static'] .fx-b {
+  z-index: 5;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px);
+  opacity: .7;
+}
+.card[data-fx='static'] .fx-c {
+  z-index: 5;
+  overflow: hidden;
+}
+.card[data-fx='static'] .fx-c::before {
+  content: '';
+  position: absolute;
   left: 0;
-  width: 250cqw;
-  aspect-ratio: 1;
-  margin: -125cqw 0 0 -125cqw;
-  background: repeating-conic-gradient(from 0deg,
-    color-mix(in srgb, var(--fx-lite) 35%, transparent) 0 5deg, transparent 5deg 14deg);
-  opacity: 0.42;
+  right: 0;
+  top: -20%;
+  height: 20%;
+  background: linear-gradient(180deg, transparent, rgba(255,40,40,.14) 50%, transparent);
+  animation: bx-m-roll 4s linear infinite;
 }
-.card[data-fx='sunburst'] .fx-p::after {
-  background: radial-gradient(circle at 0 0, color-mix(in srgb, var(--fx-pale) 60%, transparent) 0, transparent 48%);
-  opacity: 0.55;
+@keyframes bx-m-roll { to { transform: translateY(600%) } }
+.card[data-fx='static'] .card-art::before, .card[data-fx='static'] .card-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#ff2a2a, #ff2a2a), var(--art) center / cover;
+  background-blend-mode: multiply;
+  mix-blend-mode: screen;
+  opacity: .35;
+  animation: bx-m-static-r 5s steps(1) infinite;
 }
-.card.is-lit[data-fx='sunburst'] .fx-p::before { animation: fx-turn 46s linear infinite; }
-.card.is-lit[data-fx='sunburst'] .fx-p::after { animation: fx-glow 4s ease-in-out infinite alternate; }
-@keyframes fx-glow { from { opacity: 0.36; } to { opacity: 0.68; } }
-
-/* --- Laurel: a wreath on the border and nowhere else --------------------- */
-.card[data-fx='laurel'] .fx-p::before,
-.card[data-fx='laurel'] .fx-p::after {
-  padding: 5.5%;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
+.card[data-fx='static'] .card-art::after {
+  background-image: linear-gradient(#00e5ff, #00e5ff), var(--art);
+  animation-name: bx-m-static-c;
 }
-.card[data-fx='laurel'] .fx-p::before {
-  background:
-    radial-gradient(ellipse 42% 28% at 50% 50%, var(--fx-deep) 0 58%, transparent 62%) 0 0 / 6cqw 4.4cqw,
-    radial-gradient(ellipse 30% 20% at 50% 50%, var(--fx-lite) 0 58%, transparent 62%) 3cqw 2.2cqw / 6cqw 4.4cqw,
-    var(--fx-dark);
-  opacity: 0.9;
+@keyframes bx-m-static-r { 0%, 19% { opacity: .35; transform: translateX(-1px); clip-path: none } 20% { opacity: .9; transform: translateX(-5px); clip-path: inset(10% 40% 70% 0) } 22% { opacity: .9; transform: translateX(3px); clip-path: inset(50% 0 20% 30%) } 24%, 61% { opacity: .35; transform: translateX(-1px); clip-path: none } 62% { opacity: .9; transform: translateX(4px); clip-path: inset(30% 0 40% 50%) } 64% { opacity: .9; transform: translateX(-4px); clip-path: inset(0 20% 80% 0) } 66%, 100% { opacity: .35; transform: translateX(-1px); clip-path: none } }
+@keyframes bx-m-static-c { 0%, 19% { opacity: .35; transform: translateX(1px); clip-path: none } 20% { opacity: .9; transform: translateX(5px); clip-path: inset(10% 40% 70% 0) } 22% { opacity: .9; transform: translateX(-3px); clip-path: inset(50% 0 20% 30%) } 24%, 61% { opacity: .35; transform: translateX(1px); clip-path: none } 62% { opacity: .9; transform: translateX(-4px); clip-path: inset(30% 0 40% 50%) } 64% { opacity: .9; transform: translateX(4px); clip-path: inset(0 20% 80% 0) } 66%, 100% { opacity: .35; transform: translateX(1px); clip-path: none } }
+.card[data-fx='static'] .card-title {
+  animation: bx-m-static-title 5s steps(1) infinite;
 }
-.card[data-fx='laurel'] .fx-p::after {
-  background: linear-gradient(120deg, transparent 40%, color-mix(in srgb, var(--fx-pale) 70%, transparent) 50%, transparent 60%);
+@keyframes bx-m-static-title { 0%, 19% { text-shadow: 1px 0 rgba(255,40,40,.5), -1px 0 rgba(0,229,255,.5); transform: none } 20% { text-shadow: 3px 0 rgba(255,40,40,.85), -3px 0 rgba(0,229,255,.85); transform: translateX(2px) } 22% { text-shadow: -2px 0 rgba(255,40,40,.85), 2px 0 rgba(0,229,255,.85); transform: translateX(-2px) } 24%, 61% { text-shadow: 1px 0 rgba(255,40,40,.5), -1px 0 rgba(0,229,255,.5); transform: none } 62% { text-shadow: -3px 0 rgba(255,40,40,.85), 3px 0 rgba(0,229,255,.85); transform: translateX(-2px) } 64% { text-shadow: 3px 0 rgba(255,40,40,.85), -3px 0 rgba(0,229,255,.85); transform: translateX(1px) } 66%, 100% { text-shadow: 1px 0 rgba(255,40,40,.5), -1px 0 rgba(0,229,255,.5); transform: none } }
+.card[data-fx='static'] .card-desc {
+  color: #ff5a63;
 }
-.card.is-lit[data-fx='laurel'] .fx-p::after { animation: fx-sweep-x 6s ease-in-out infinite; }
-
-/* --- Embers: sparks rising out of the foot ------------------------------- */
-.card[data-fx='embers'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
+.card[data-fx='projection'] .card-face, .card[data-fx='laseretch'] .card-face {
+  border-color: rgba(34,211,238,.35);
 }
-.card[data-fx='embers'] .fx-p::before {
-  background: linear-gradient(to top, color-mix(in srgb, var(--fx-core) 55%, transparent) 0,
-    color-mix(in srgb, var(--fx-deep) 30%, transparent) 22%, transparent 48%);
-  opacity: 0.75;
+@keyframes bx-x-scroll { to { transform: translateY(-50%) } }
+.card[data-fx='laseretch'] .card-front {
+  background: linear-gradient(180deg, rgba(5,25,35,.66), rgba(3,16,24,.58));
+  box-shadow: inset 0 0 0 1px rgba(34,211,238,.45), inset 0 0 0 2px rgba(34,211,238,.12);
 }
-.card[data-fx='embers'] .fx-p::after {
-  inset: 0 0 -100% 0;
-  background:
-    radial-gradient(circle, var(--fx-pale) 0 1px, var(--fx-core) 1.6px, transparent 2.2px) 0 0 / 29px 37px,
-    radial-gradient(circle, var(--fx-lite) 0 0.8px, transparent 1.5px) 13px 21px / 47px 59px;
-  filter: drop-shadow(0 0 3px var(--fx-core));
+.card[data-fx='laseretch'] .fx-a {
+  z-index: -1;
+  background: var(--trace) 0 0 / 120px 120px;
+  opacity: .55;
+  animation: bx-x-jitter 6s steps(1) infinite;
 }
-.card.is-lit[data-fx='embers'] .fx-p::after { animation: fx-rise 6s linear infinite; }
-.card.is-lit[data-fx='embers'] .fx-p::before { animation: fx-glow 2s ease-in-out infinite alternate; }
-@keyframes fx-rise { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, -50%, 0); } }
-
-/* --- Molten: seams of liquid gold running the margins -------------------- */
-.card[data-fx='molten'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
+@keyframes bx-x-jitter { 0%, 92% { transform: none } 93% { transform: translateX(1px) } 94% { transform: translateX(-1px) } 95%, 100% { transform: none } }
+.card[data-fx='laseretch'] .fx-a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--trace-nodes) 0 0 / 120px 120px;
+  animation: bx-x-nodes 2.6s ease-in-out infinite alternate;
 }
-.card[data-fx='molten'] .fx-p::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg fill='none' stroke='%23ffffff' stroke-linecap='round'%3E%3Cpath d='M-4 18 C 20 10 30 32 52 24 S 84 10 106 22' stroke-width='2.6'/%3E%3Cpath d='M-4 118 C 18 110 26 132 48 124 S 80 110 106 122' stroke-width='2'/%3E%3Cpath d='M-4 132 C 22 124 34 144 58 134 S 88 122 106 130' stroke-width='2.4'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 100% 100%;
-  filter: drop-shadow(0 0 4px var(--fx-core));
-  opacity: 0.85;
+@keyframes bx-x-nodes { from { opacity: .2 } to { opacity: 1 } }
+.card[data-fx='laseretch'] .fx-code {
+  z-index: -1;
+  overflow: hidden;
+  opacity: .24;
+  color: #67e8f9;
+  font: 600 3.2cqw / 1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre;
+  transform: rotate(-14deg) scale(1.3);
 }
-.card[data-fx='molten'] .fx-p::after {
-  inset: -30%;
-  background: linear-gradient(100deg, transparent 40%, color-mix(in srgb, var(--fx-pale) 80%, transparent) 50%, transparent 60%);
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cpath d='M-4 18 C 20 10 30 32 52 24 S 84 10 106 22' stroke-width='2.6'/%3E%3Cpath d='M-4 118 C 18 110 26 132 48 124 S 80 110 106 122' stroke-width='2'/%3E%3Cpath d='M-4 132 C 22 124 34 144 58 134 S 88 122 106 130' stroke-width='2.4'/%3E%3C/g%3E%3C/svg%3E");
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg fill='none' stroke='%23000' stroke-linecap='round'%3E%3Cpath d='M-4 18 C 20 10 30 32 52 24 S 84 10 106 22' stroke-width='2.6'/%3E%3Cpath d='M-4 118 C 18 110 26 132 48 124 S 80 110 106 122' stroke-width='2'/%3E%3Cpath d='M-4 132 C 22 124 34 144 58 134 S 88 122 106 130' stroke-width='2.4'/%3E%3C/g%3E%3C/svg%3E");
-  mask-size: 62.5% 62.5%;
-  -webkit-mask-size: 62.5% 62.5%;
-  mask-position: 50% 50%;
-  -webkit-mask-position: 50% 50%;
-  mask-repeat: no-repeat;
-  -webkit-mask-repeat: no-repeat;
+.card[data-fx='laseretch'] .fx-code .col {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  animation: bx-x-scroll var(--d) linear infinite;
 }
-.card.is-lit[data-fx='molten'] .fx-p::after { animation: fx-sweep-x 4.5s linear infinite; }
-.card.is-lit[data-fx='molten'] .fx-p::before { animation: fx-glow 2.8s ease-in-out infinite alternate; }
-
-/* ================== MYTHIC: red things, and old dark ones ================ */
-
-/* --- Blood Moon: a disc rising behind the foot of the card --------------- */
-.card[data-fx='bloodmoon'] .fx-p {
-  mask-image: var(--fx-soft-art);
-  -webkit-mask-image: var(--fx-soft-art);
+.card[data-fx='laseretch'] .card-art img {
+  filter: grayscale(1) sepia(1) hue-rotate(150deg) saturate(2.4) brightness(.95);
 }
-.card[data-fx='bloodmoon'] .fx-p::before {
-  inset: auto;
-  bottom: 2.8cqw;
-  left: 50%;
-  width: 56cqw;
-  aspect-ratio: 1;
-  margin-left: -28cqw;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 62% 42%, var(--fx-dark) 0 44%, transparent 46%),
-    radial-gradient(circle at 50% 50%, var(--fx-core) 0 47%, var(--fx-lite) 48%, transparent 50%);
-  filter: drop-shadow(0 0 14px var(--fx-core));
-  opacity: 0.85;
+.card[data-fx='laseretch'] .card-art {
+  box-shadow: 0 0 0 1px rgba(103,232,249,.7), 0 0 26px -2px rgba(34,211,238,.6);
 }
-.card[data-fx='bloodmoon'] .fx-p::after {
-  background: linear-gradient(to top, color-mix(in srgb, var(--fx-deep) 55%, transparent), transparent 52%);
-  opacity: 0.8;
+.card[data-fx='laseretch'] .card-art::after {
+  background: linear-gradient(180deg, rgba(34,211,238,.12), transparent 30% 70%, rgba(0,0,0,.35));
 }
-.card.is-lit[data-fx='bloodmoon'] .fx-p::before { animation: fx-moon 13s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='bloodmoon'] .fx-p::after { animation: fx-glow 4.5s ease-in-out infinite alternate; }
-@keyframes fx-moon { from { transform: translate3d(0, 12%, 0) scale(0.94); } to { transform: translate3d(0, 0, 0) scale(1); } }
-
-/* --- Dragonscale: overlapping scales, a highlight sweeping them ---------- */
-.card[data-fx='dragonscale'] .fx-p::before {
-  background:
-    radial-gradient(circle at 50% 0, transparent 0 54%, var(--fx-deep) 55% 62%, transparent 63%) 0 0 / 8cqw 6cqw,
-    radial-gradient(circle at 50% 0, transparent 0 54%, var(--fx-dark) 55% 62%, transparent 63%) 4cqw 3cqw / 8cqw 6cqw;
-  opacity: 0.8;
+.card[data-fx='laseretch'] .fx-ring::before {
+  background: linear-gradient(180deg, rgba(34,211,238,.9), rgba(34,211,238,.25) 50%, rgba(34,211,238,.9));
 }
-.card[data-fx='dragonscale'] .fx-p::after {
-  inset: -40%;
-  background: linear-gradient(135deg, transparent 41%, color-mix(in srgb, var(--fx-lite) 55%, transparent) 50%, transparent 59%);
-  opacity: 0.85;
-}
-.card.is-lit[data-fx='dragonscale'] .fx-p::after { animation: fx-sweep-xy 5.5s ease-in-out infinite alternate; }
-
-/* --- Inferno: flames licking the foot ----------------------------------- */
-.card[data-fx='inferno'] .fx-p {
-  mask-image: var(--fx-off-art);
-  -webkit-mask-image: var(--fx-off-art);
-}
-.card[data-fx='inferno'] .fx-p::before {
-  inset: auto 0 -11cqw 0;
-  height: 64cqw;
-  background:
-    radial-gradient(ellipse 12% 62% at 12% 100%, var(--fx-pale) 0 18%, var(--fx-core) 46%, transparent 72%),
-    radial-gradient(ellipse 14% 82% at 30% 100%, var(--fx-lite) 0 14%, var(--fx-core) 46%, transparent 72%),
-    radial-gradient(ellipse 12% 56% at 48% 100%, var(--fx-pale) 0 18%, var(--fx-core) 46%, transparent 72%),
-    radial-gradient(ellipse 15% 90% at 66% 100%, var(--fx-lite) 0 14%, var(--fx-deep) 46%, transparent 72%),
-    radial-gradient(ellipse 12% 66% at 86% 100%, var(--fx-pale) 0 18%, var(--fx-core) 46%, transparent 72%);
-  transform-origin: 50% 100%;
-  opacity: 0.85;
-}
-.card[data-fx='inferno'] .fx-p::after {
-  inset: -30% 0 0 0;
-  background: repeating-linear-gradient(180deg, transparent 0 6px, color-mix(in srgb, var(--fx-core) 14%, transparent) 6px 9px);
-}
-.card.is-lit[data-fx='inferno'] .fx-p::before { animation: fx-inferno 1s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='inferno'] .fx-p::after { animation: fx-rise 3.2s linear infinite; }
-@keyframes fx-inferno { from { transform: scaleY(0.9) skewX(-3deg); } to { transform: scaleY(1.06) skewX(3deg); } }
-
-/* --- Sigil: a seal pulsing under the words ------------------------------- */
-.card[data-fx='sigil'] .fx-p {
-  mask-image: var(--fx-soft-art);
-  -webkit-mask-image: var(--fx-soft-art);
-}
-.card[data-fx='sigil'] .fx-p::before,
-.card[data-fx='sigil'] .fx-p::after {
-  inset: auto;
-  bottom: 5.6cqw;
-  left: 50%;
-  width: 74cqw;
-  aspect-ratio: 1;
-  margin-left: -37cqw;
-  background-size: 100% 100%;
-  filter: drop-shadow(0 0 6px var(--fx-core));
-  opacity: 0.4;
-}
-.card[data-fx='sigil'] .fx-p::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1.4'%3E%3Cpolygon points='50,8 86,71 14,71'/%3E%3Cpolygon points='50,92 14,29 86,29'/%3E%3Ccircle cx='50' cy='50' r='16'/%3E%3Ccircle cx='50' cy='50' r='4'/%3E%3C/g%3E%3C/svg%3E");
-}
-.card[data-fx='sigil'] .fx-p::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1'%3E%3Ccircle cx='50' cy='50' r='46'/%3E%3Ccircle cx='50' cy='50' r='42' stroke-dasharray='2 3'/%3E%3C/g%3E%3C/svg%3E");
-}
-.card.is-lit[data-fx='sigil'] .fx-p::before { animation: fx-pulse 3s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='sigil'] .fx-p::after { animation: fx-turn 28s linear infinite; }
-@keyframes fx-pulse { from { transform: scale(0.95); opacity: 0.3; } to { transform: scale(1); opacity: 0.56; } }
-
-/* --- Thorns: a briar closing round the border --------------------------- */
-.card[data-fx='thorns'] .fx-p::before,
-.card[data-fx='thorns'] .fx-p::after {
-  padding: 6%;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-}
-.card[data-fx='thorns'] .fx-p::before {
-  background:
-    linear-gradient(45deg, transparent 50%, var(--fx-dark) 50%) 0 0 / 3.2cqw 3.2cqw,
-    linear-gradient(-45deg, transparent 50%, var(--fx-deep) 50%) 1.6cqw 0 / 3.2cqw 3.2cqw,
-    var(--fx-dark);
-  opacity: 0.9;
-}
-.card[data-fx='thorns'] .fx-p::after {
-  background: radial-gradient(circle, var(--fx-lite) 0 0.8px, transparent 1.4px) 0 0 / 4.8cqw 4.8cqw;
-  filter: drop-shadow(0 0 3px var(--fx-core));
-  opacity: 0.9;
-}
-.card.is-lit[data-fx='thorns'] .fx-p::before { animation: fx-breathe 6s ease-in-out infinite alternate; }
-
-/* ============= EXOTIC: what a screen does, and what a surface does ======= */
-
-/* --- Hologram: diffraction bands running the tones ----------------------- */
-.card[data-fx='hologram'] .fx-p::before {
-  inset: -30%;
-  background: repeating-linear-gradient(118deg,
-    var(--fx-pale) 0 6px, var(--fx-core) 6px 12px, var(--fx-deep) 12px 18px, var(--fx-lite) 18px 24px);
-  opacity: 0.3;
-}
-.card[data-fx='hologram'] .fx-p::after {
-  background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--fx-pale) 18%, transparent) 0 1px, transparent 1px 3px);
-}
-.card.is-lit[data-fx='hologram'] .fx-p::before { animation: fx-holo 7s linear infinite alternate; }
-@keyframes fx-holo { from { transform: translate3d(-8%, 0, 0); } to { transform: translate3d(8%, 0, 0); } }
-
-/* --- Glitch: bands torn sideways, never a copy of the picture ------------ */
-.card[data-fx='glitch'] .fx-p::before {
-  background:
-    linear-gradient(90deg, var(--fx-lite) 0 40%, transparent 40%) 0 12% / 100% 4%,
-    linear-gradient(90deg, transparent 0 55%, var(--fx-core) 55%) 0 63% / 100% 3%,
-    linear-gradient(90deg, var(--fx-deep) 0 28%, transparent 28%) 0 78% / 100% 5%;
-  background-repeat: no-repeat;
-  opacity: 0.7;
-}
-.card[data-fx='glitch'] .fx-p::after {
-  background:
-    linear-gradient(90deg, transparent 0 62%, var(--fx-pale) 62%) 0 34% / 100% 2.5%,
-    linear-gradient(90deg, var(--fx-core) 0 18%, transparent 18%) 0 88% / 100% 3.5%;
-  background-repeat: no-repeat;
-  opacity: 0.65;
-}
-.card.is-lit[data-fx='glitch'] .fx-p::before { animation: fx-glitch-a 2.6s steps(1) infinite; }
-.card.is-lit[data-fx='glitch'] .fx-p::after { animation: fx-glitch-b 2.6s steps(1) infinite; }
-@keyframes fx-glitch-a {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  10% { transform: translate3d(-4cqw, 0, 0); }
-  14% { transform: translate3d(3cqw, 0, 0); }
-  18% { transform: translate3d(0, 0, 0); }
-  62% { transform: translate3d(-6cqw, 0, 0); }
-  66% { transform: translate3d(0, 0, 0); }
-}
-@keyframes fx-glitch-b {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  10% { transform: translate3d(5cqw, 0, 0); }
-  14% { transform: translate3d(-3cqw, 0, 0); }
-  18% { transform: translate3d(0, 0, 0); }
-  62% { transform: translate3d(6cqw, 0, 0); }
-  66% { transform: translate3d(0, 0, 0); }
-}
-
-/* --- Plasma: two swirls turning against each other ----------------------- */
-.card[data-fx='plasma'] .fx-p::before,
-.card[data-fx='plasma'] .fx-p::after {
-  inset: -40%;
-  filter: blur(6px);
-  opacity: 0.45;
-}
-.card[data-fx='plasma'] .fx-p::before {
-  background: conic-gradient(from 0deg at 40% 45%, transparent 0, var(--fx-lite) 18%, transparent 36%, var(--fx-core) 58%, transparent 78%);
-}
-.card[data-fx='plasma'] .fx-p::after {
-  background: conic-gradient(from 180deg at 60% 55%, transparent 0, var(--fx-pale) 22%, transparent 44%, var(--fx-deep) 66%, transparent 86%);
-}
-.card.is-lit[data-fx='plasma'] .fx-p::before { animation: fx-turn 9s linear infinite; }
-.card.is-lit[data-fx='plasma'] .fx-p::after { animation: fx-turn 13s linear infinite reverse; }
-
-/* --- Oil Slick: thin film in puddles, sliding with the tilt -------------- */
-.card[data-fx='oilslick'] .fx-p::before {
-  inset: -30%;
-  background: repeating-linear-gradient(35deg,
-    var(--fx-pale) 0 8px, var(--fx-core) 8px 16px, var(--fx-deep) 16px 24px, var(--fx-lite) 24px 32px);
-  opacity: 0.42;
-  mask-image:
-    radial-gradient(ellipse 30% 22% at 30% 30%, #000 0 50%, transparent 100%),
-    radial-gradient(ellipse 36% 26% at 70% 62%, #000 0 50%, transparent 100%),
-    radial-gradient(ellipse 22% 30% at 40% 84%, #000 0 50%, transparent 100%);
-  -webkit-mask-image:
-    radial-gradient(ellipse 30% 22% at 30% 30%, #000 0 50%, transparent 100%),
-    radial-gradient(ellipse 36% 26% at 70% 62%, #000 0 50%, transparent 100%),
-    radial-gradient(ellipse 22% 30% at 40% 84%, #000 0 50%, transparent 100%);
-}
-.card[data-fx='oilslick'] .fx-p::after {
-  background:
-    radial-gradient(ellipse 30% 22% at 30% 30%, color-mix(in srgb, var(--fx-dark) 45%, transparent), transparent 72%),
-    radial-gradient(ellipse 36% 26% at 70% 62%, color-mix(in srgb, var(--fx-dark) 45%, transparent), transparent 72%);
-}
-.card.is-lit[data-fx='oilslick'] .fx-p::before { animation: fx-oil 8s ease-in-out infinite alternate; }
-@keyframes fx-oil { from { transform: translate3d(-7%, -4%, 0); } to { transform: translate3d(7%, 4%, 0); } }
-
-/* --- Scanlines: a cathode face and its rolling bar ----------------------- */
-.card[data-fx='scanlines'] .fx-p::before {
-  background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--fx-dark) 55%, transparent) 0 1px, transparent 1px 3px);
-  opacity: 0.75;
-}
-.card[data-fx='scanlines'] .fx-p::after {
-  inset: auto 0 auto 0;
-  top: -28cqw;
-  height: 25cqw;
-  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--fx-lite) 45%, transparent) 50%, transparent);
-  opacity: 0.5;
-}
-.card.is-lit[data-fx='scanlines'] .fx-p::after { animation: fx-scan 3.6s linear infinite; }
-@keyframes fx-scan { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 780%, 0); } }
-
-/* ================ PRISMATIC: the whole spectrum, and a crown ============= */
-
-/* The one tier whose colour is not a colour. Everywhere else the five tones
-   are one hue taken light to dark, because a Rare that goes yellow stops
-   reading as a Rare. Prismatic's identity IS the range, so here the tones are
-   spread across it instead of down it, and the five treatments below draw the
-   rainbow without a line of their own changing. */
-.card[data-rarity='prismatic'][data-fx]:not([data-fx='classic']) {
-  --fx-pale: #fffdf6;
-  --fx-lite: #7df0c8;
-  --fx-core: #7fb0ff;
-  --fx-deep: #c07bff;
-  --fx-dark: #2a1240;
-}
-
-
-/* --- Spectrum: the whole range sweeping the face ------------------------- */
-.card[data-fx='spectrum'] .fx-p::before {
+.card[data-fx='laseretch'] .fx-ring::after {
+  content: '';
+  position: absolute;
   inset: -60%;
-  /* Named for the full range, so it is the full range: the wheel itself,
-     turning once every twenty-four seconds. */
-  background: conic-gradient(from 0deg,
-    #ff9ec4, #ffcf86, #f6f39a, #a6f08a, #78e8dc, #8ab6ff, #b79bff, #f19ce0, #ff9ec4);
-  opacity: 0.5;
+  background: conic-gradient(from 0deg, transparent 0 .9turn, #e0fbff .95turn, transparent 1turn);
+  animation: bx-spin 6s linear infinite;
 }
-.card[data-fx='spectrum'] .fx-p::after {
-  background: radial-gradient(circle at 50% 45%, transparent 28%, color-mix(in srgb, var(--fx-dark) 40%, transparent) 100%);
+.card[data-fx='laseretch'] .card-title {
+  color: #cffafe;
+  text-shadow: 0 0 6px rgba(34,211,238,.6);
 }
-.card.is-lit[data-fx='spectrum'] .fx-p::before { animation: fx-turn 24s linear infinite; }
-
-/* --- Shatter: glass over the face, each shard its own tone --------------- */
-.card[data-fx='shatter'] .fx-p::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg stroke='%23ffffff' stroke-opacity='.7' stroke-width='.7' fill='%23ffffff'%3E%3Cpolygon points='0,0 42,0 30,38' fill-opacity='.12'/%3E%3Cpolygon points='42,0 100,0 70,28 30,38' fill-opacity='.05'/%3E%3Cpolygon points='100,0 100,60 70,28' fill-opacity='.16'/%3E%3Cpolygon points='0,0 30,38 0,70' fill-opacity='.07'/%3E%3Cpolygon points='30,38 70,28 56,74 20,82' fill-opacity='.03'/%3E%3Cpolygon points='70,28 100,60 100,110 56,74' fill-opacity='.1'/%3E%3Cpolygon points='0,70 20,82 8,140 0,140' fill-opacity='.14'/%3E%3Cpolygon points='20,82 56,74 50,140 8,140' fill-opacity='.04'/%3E%3Cpolygon points='56,74 100,110 100,140 50,140' fill-opacity='.09'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 100% 100%;
-  opacity: 0.9;
+.card[data-fx='laseretch'] .card-desc {
+  color: #67e8f9;
 }
-.card[data-fx='shatter'] .fx-p::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140'%3E%3Cg fill='%23ffffff'%3E%3Cpolygon points='42,0 100,0 70,28 30,38' fill-opacity='.25'/%3E%3Cpolygon points='30,38 70,28 56,74 20,82' fill-opacity='.22'/%3E%3Cpolygon points='20,82 56,74 50,140 8,140' fill-opacity='.2'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 100% 100%;
-  opacity: 0.25;
+.card[data-fx='projection'] .card-front {
+  background: linear-gradient(180deg, rgba(3,20,30,.48), rgba(2,14,22,.42));
+  box-shadow: inset 0 0 0 1px rgba(34,211,238,.35);
 }
-.card.is-lit[data-fx='shatter'] .fx-p::after { animation: fx-shatter 3.8s ease-in-out infinite alternate; }
-@keyframes fx-shatter { from { opacity: 0.08; } to { opacity: 0.5; } }
-
-/* --- Curtain: ribbons folding over the top margin ------------------------ */
-.card[data-fx='curtain'] .fx-p {
-  mask-image: var(--fx-soft-art);
-  -webkit-mask-image: var(--fx-soft-art);
+.card[data-fx='projection'] .fx-b, .card[data-fx='projection'] .fx-c {
+  z-index: -1;
 }
-.card[data-fx='curtain'] .fx-p::before,
-.card[data-fx='curtain'] .fx-p::after {
-  inset: -10% -30%;
-  background: repeating-linear-gradient(90deg,
-    transparent 0 4cqw, var(--fx-lite) 5cqw 8cqw, transparent 9cqw 12cqw,
-    var(--fx-core) 13cqw 15cqw, transparent 16cqw 22cqw,
-    var(--fx-pale) 23cqw 26cqw, transparent 27cqw 30cqw);
-  filter: blur(3px);
-  opacity: 0.5;
-  transform-origin: 50% 0;
+.card[data-fx='projection'] .fx-b::before, .card[data-fx='projection'] .fx-b::after, .card[data-fx='projection'] .fx-c::before, .card[data-fx='projection'] .fx-c::after {
+  content: '';
+  position: absolute;
+  width: 50%;
+  height: 40%;
+  background: radial-gradient(farthest-side at 0 0, rgba(165,243,252,.55), rgba(34,211,238,.18) 35%, transparent 70%);
+  animation: bx-x-emit 3s ease-in-out infinite alternate;
 }
-.card[data-fx='curtain'] .fx-p::after { opacity: 0.3; filter: blur(7px); }
-.card.is-lit[data-fx='curtain'] .fx-p::before { animation: fx-curtain-a 10s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='curtain'] .fx-p::after { animation: fx-curtain-b 14s ease-in-out infinite alternate; }
-@keyframes fx-curtain-a { from { transform: skewX(-13deg) translateX(-6cqw); } to { transform: skewX(13deg) translateX(6cqw); } }
-@keyframes fx-curtain-b { from { transform: skewX(15deg) translateX(-11cqw); } to { transform: skewX(-9deg) translateX(9cqw); } }
-
-/* --- Starfield: two depths of stars, drifting at two speeds -------------- */
-.card[data-fx='starfield'] .fx-p {
-  mask-image: var(--fx-soft-art);
-  -webkit-mask-image: var(--fx-soft-art);
+.card[data-fx='projection'] .fx-b::before {
+  left: 0;
+  top: 0;
 }
-.card[data-fx='starfield'] .fx-p::before,
-.card[data-fx='starfield'] .fx-p::after { inset: -50% 0 0 0; }
-.card[data-fx='starfield'] .fx-p::before {
-  background:
-    radial-gradient(circle, var(--fx-pale) 0 0.7px, transparent 1.3px) 0 0 / 19px 23px,
-    radial-gradient(circle, var(--fx-lite) 0 0.5px, transparent 1px) 7px 11px / 29px 31px;
-  opacity: 0.9;
+.card[data-fx='projection'] .fx-b::after {
+  right: 0;
+  top: 0;
+  transform: scaleX(-1);
+  animation-delay: -.8s;
 }
-.card[data-fx='starfield'] .fx-p::after {
-  background:
-    radial-gradient(circle, var(--fx-lite) 0 1.1px, transparent 1.9px) 5px 9px / 43px 53px,
-    radial-gradient(circle, var(--fx-pale) 0 0.9px, transparent 1.6px) 21px 27px / 61px 67px;
-  filter: drop-shadow(0 0 2px var(--fx-core));
+.card[data-fx='projection'] .fx-c::before {
+  left: 0;
+  bottom: 0;
+  transform: scaleY(-1);
+  animation-delay: -1.6s;
 }
-.card.is-lit[data-fx='starfield'] .fx-p::before { animation: fx-starfield 44s linear infinite; }
-.card.is-lit[data-fx='starfield'] .fx-p::after { animation: fx-starfield 20s linear infinite; }
-@keyframes fx-starfield { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, 33.3%, 0); } }
-
-/* --- Crown: a radiant crown standing on the foot ------------------------- */
-.card[data-fx='crown'] .fx-p {
-  mask-image: var(--fx-soft-art);
-  -webkit-mask-image: var(--fx-soft-art);
+.card[data-fx='projection'] .fx-c::after {
+  right: 0;
+  bottom: 0;
+  transform: scale(-1);
+  animation-delay: -2.4s;
 }
-.card[data-fx='crown'] .fx-p::before {
-  inset: auto;
-  bottom: 7cqw;
+@keyframes bx-x-emit { from { opacity: .7 } to { opacity: 1 } }
+.card[data-fx='projection'] .fx-a {
+  z-index: -1;
+  background: var(--wave) 0 0 / 80px 20px;
+  opacity: .35;
+}
+.card[data-fx='projection'] .fx-code {
+  z-index: -1;
+  overflow: hidden;
+  opacity: .3;
+  color: #a5f3fc;
+  font: 600 3cqw / 1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: nowrap;
+}
+.card[data-fx='projection'] .fx-code .rowl {
+  position: absolute;
+  left: 0;
+  top: var(--y);
+  display: inline-block;
+  animation: bx-x-slide var(--d) linear infinite;
+}
+.card[data-fx='projection'] .fx-code .rowl.rev {
+  animation-direction: reverse;
+}
+@keyframes bx-x-slide { to { transform: translateX(-50%) } }
+.card[data-fx='projection'] .fx-v {
+  z-index: 5;
+  overflow: hidden;
+}
+.card[data-fx='projection'] .fx-v::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -14%;
+  width: 14%;
+  background: linear-gradient(90deg, transparent, rgba(165,243,252,.22) 50%, transparent);
+  animation: bx-x-refresh 4.5s ease-in-out infinite;
+}
+@keyframes bx-x-refresh { to { transform: translateX(820%) } }
+.card[data-fx='projection'] .card-art {
+  opacity: .9;
+  animation: bx-x-holo 6s steps(1) infinite;
+  box-shadow: 0 0 0 1px rgba(34,211,238,.5), 0 0 22px -6px rgba(34,211,238,.7);
+}
+@keyframes bx-x-holo { 0% { opacity: .8 } 15% { opacity: .95 } 30% { opacity: .85 } 50% { opacity: .9 } 66% { opacity: .75 } 70% { opacity: .9 } 100% { opacity: .9 } }
+.card[data-fx='projection'] .card-art::after {
+  background: linear-gradient(180deg, rgba(34,211,238,.25), rgba(34,211,238,.08) 40%, rgba(34,211,238,.25));
+  mix-blend-mode: screen;
+}
+.card[data-fx='projection'] .card-title {
+  color: #ecfeff;
+  text-shadow: 0 0 10px rgba(34,211,238,.8);
+}
+.card[data-fx='projection'] .card-desc {
+  color: #67e8f9;
+}
+.card[data-fx='parchment'] .fav-button, .card[data-fx='marble'] .fav-button, .card[data-fx='ivory'] .fav-button {
+  background: rgba(0,0,0,.35);
+}
+.card[data-fx='marble'] {
+  --ink: #2a2318;
+  --ink-dim: #5f5340;
+  --ink-faint: #8d7f66;
+  --positive: #2f6b4f;
+}
+.card[data-fx='marble'] .card-face {
+  border-color: rgba(201,162,39,.5);
+}
+.card[data-fx='marble'] .card-front {
+  background: var(--marble) center / cover, #f1ece2;
+  box-shadow: inset 0 0 0 1px rgba(201,162,39,.7);
+}
+.card[data-fx='marble'] .fx-a {
+  z-index: -1;
+  background: var(--gold-circuit) 0 0 / 120px 120px;
+  opacity: .42;
+}
+.card[data-fx='marble'] .fx-b {
+  z-index: -1;
+  -webkit-mask: var(--gold-circuit) 0 0 / 120px 120px;
+  mask: var(--gold-circuit) 0 0 / 120px 120px;
+  overflow: hidden;
+}
+.card[data-fx='marble'] .fx-b::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(circle at 50% 50%, #fff3b0, rgba(251,191,36,.9) 30%, transparent 70%);
+  animation: bx-a-travel 9s ease-in-out infinite alternate;
+}
+@keyframes bx-a-travel { from { transform: translate(-22%, -20%) } to { transform: translate(22%, 24%) } }
+.card[data-fx='marble'] .fx-v {
+  z-index: 0;
+  inset: 5px;
+  border: 1px solid rgba(201,162,39,.45);
+  border-radius: calc(var(--card-radius) - 5px);
+}
+.card[data-fx='marble'] .card-art {
+  box-shadow: 0 0 0 1px #c9a227, 0 0 0 4px #f1ece2, 0 0 0 5px rgba(201,162,39,.5);
+}
+.card[data-fx='marble'] .card-art::after {
+  background: linear-gradient(180deg, rgba(0,0,0,.08), transparent 24% 70%, rgba(0,0,0,.18));
+}
+.card[data-fx='marble'] .card-desc {
+  color: #9a7412;
+}
+.card[data-fx='marble'] .rarity-badge {
+  background: linear-gradient(180deg, #f5d67a, #c9a227);
+  color: #3a2c0a;
+  border-color: #b48f1e;
+}
+.card[data-fx='marble'] .fx-ring {
+  padding: 2px;
+}
+.card[data-fx='marble'] .fx-ring::before {
+  inset: -50%;
+  background: linear-gradient(135deg, #a67c17, #e8c765 30%, #fff3c4 50%, #d4ab3b 70%, #8f6a14);
+  transform: translate(calc(var(--lx) * -10%), calc(var(--ly) * -10%));
+}
+.card[data-fx='parchment'] {
+  --ink: #3b2a14;
+  --ink-dim: #6b5430;
+  --ink-faint: #9b8460;
+  --positive: #3d6b2f;
+}
+.card[data-fx='parchment'] .card-face {
+  border-color: rgba(120,80,20,.5);
+}
+.card[data-fx='parchment'] .card-front {
+  background: var(--parchment) center / cover, #e6d5ae;
+  box-shadow: inset 0 0 0 1px rgba(120,80,20,.5), inset 0 0 34px -6px rgba(92,55,10,.75), inset 0 0 90px -40px rgba(70,40,5,.5);
+}
+.card[data-fx='parchment'] .fx-a {
+  z-index: -1;
+  overflow: hidden;
+}
+.card[data-fx='parchment'] .fx-a::before {
+  content: '';
+  position: absolute;
   left: 50%;
-  width: 46cqw;
-  height: 28cqw;
-  margin-left: -23cqw;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cpath d='M8 52 L4 14 L30 34 L50 4 L70 34 L96 14 L92 52 Z' fill='%23ffffff' fill-opacity='.85' stroke='%23ffffff' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='4' cy='14' r='3'/%3E%3Ccircle cx='50' cy='4' r='3.5'/%3E%3Ccircle cx='96' cy='14' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  top: 26%;
+  width: 120cqw;
+  height: 120cqw;
+  margin: -60cqw 0 0 -60cqw;
+  background: var(--mandala) center / contain no-repeat;
+  opacity: .55;
+  animation: bx-spin 90s linear infinite;
+}
+.card[data-fx='parchment'] .fx-a::after {
+  content: '';
+  position: absolute;
+  inset: 55% 0 0;
+  background: var(--gold-circuit) 0 0 / 120px 120px;
+  opacity: .28;
+  -webkit-mask: linear-gradient(180deg, transparent, #000 30%);
+  mask: linear-gradient(180deg, transparent, #000 30%);
+}
+.card[data-fx='parchment'] .fx-v {
+  z-index: -1;
+  inset: 55% 0 0;
+  -webkit-mask: var(--gold-circuit) 0 0 / 120px 120px;
+  mask: var(--gold-circuit) 0 0 / 120px 120px;
+  overflow: hidden;
+}
+.card[data-fx='parchment'] .fx-v::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(circle at 50% 50%, #fff0b5, rgba(251,191,36,.85) 25%, transparent 60%);
+  animation: bx-a-travel 11s ease-in-out infinite alternate;
+}
+.card[data-fx='parchment'] .fx-b, .card[data-fx='parchment'] .fx-c {
+  z-index: 5;
+}
+.card[data-fx='parchment'] .fx-c::before, .card[data-fx='parchment'] .fx-c::after, .card[data-fx='parchment'] .fx-b::before, .card[data-fx='parchment'] .fx-b::after {
+  content: '';
+  position: absolute;
+  width: 12cqw;
+  height: 12cqw;
+  background: var(--corner) center / contain no-repeat;
+  opacity: .85;
+}
+.card[data-fx='parchment'] .fx-c::before {
+  left: 2cqw;
+  top: 2cqw;
+}
+.card[data-fx='parchment'] .fx-c::after {
+  right: 2cqw;
+  top: 2cqw;
+  transform: scaleX(-1);
+}
+.card[data-fx='parchment'] .fx-b::before {
+  left: 2cqw;
+  bottom: 2cqw;
+  transform: scaleY(-1);
+}
+.card[data-fx='parchment'] .fx-b::after {
+  right: 2cqw;
+  bottom: 2cqw;
+  transform: scale(-1);
+}
+.card[data-fx='parchment'] .card-art img {
+  filter: sepia(.25) contrast(.95);
+}
+.card[data-fx='parchment'] .card-art {
+  box-shadow: 0 0 0 1px #b48f1e, 0 0 0 3px #e6d5ae, 0 0 0 4px rgba(120,80,20,.45);
+}
+.card[data-fx='parchment'] .card-art::after {
+  background: linear-gradient(180deg, rgba(60,30,0,.12), transparent 24% 70%, rgba(60,30,0,.2));
+}
+.card[data-fx='parchment'] .card-desc {
+  color: #8a5a12;
+}
+.card[data-fx='parchment'] .rarity-badge {
+  background: #c9a227;
+  color: #2c1e06;
+  border-color: #8a6a12;
+}
+.card[data-fx='parchment'] .fx-ring {
+  padding: 2px;
+}
+.card[data-fx='parchment'] .fx-ring::before {
+  inset: -50%;
+  background: linear-gradient(135deg, #8a6a12, #d4ab3b 35%, #f5e2a0 50%, #c9a227 65%, #7a5a10);
+  transform: translate(calc(var(--lx) * -8%), calc(var(--ly) * -8%));
+}
+.card[data-fx='ivory'] {
+  --ink: #2b2416;
+  --ink-dim: #5c5140;
+  --ink-faint: #8f836b;
+  --positive: #2f6b4f;
+}
+.card[data-fx='ivory'] .card-face {
+  border-color: rgba(160,120,30,.5);
+}
+.card[data-fx='ivory'] .card-front {
+  background: var(--ivory) center / cover, #efe9da;
+  box-shadow: inset 0 0 0 8px #cfae4a, inset 0 0 0 9px rgba(80,55,5,.5), inset 0 0 30px -12px rgba(201,162,39,.55);
+}
+.card[data-fx='ivory'] .card-art {
+  margin: 4.2% 4.2% 0;
+  box-shadow: 0 0 0 1px #b8912a, 0 0 0 3px #efe9da, 0 0 0 4px #cfae4a;
+}
+.card[data-fx='ivory'] .fx-ring {
+  padding: 8px;
+}
+.card[data-fx='ivory'] .fx-ring::before {
+  inset: -50%;
+  background: linear-gradient(135deg, #7d5a13, #cfae4a 18%, #fff1bf 34%, #d9b64b 46%, #8f6a14 60%, #f2d98a 76%, #a67c17);
+  transform: translate(calc(var(--lx) * -14%), calc(var(--ly) * -14%));
+}
+.card[data-fx='ivory'] .fx-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--runes) 0 0 / 9px 9px;
+  opacity: .8;
+}
+.card[data-fx='ivory'] .fx-v {
+  z-index: 4;
+  border-radius: var(--card-radius);
+  padding: 8px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  overflow: hidden;
+}
+.card[data-fx='ivory'] .fx-v::before {
+  content: '';
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(from 0deg, transparent 0 .8turn, rgba(255,255,255,.6) .9turn, transparent 1turn);
+  animation: bx-spin 12s linear infinite;
+}
+.card[data-fx='ivory'] .fx-a {
+  z-index: -1;
+  background: var(--gold-circuit) 0 0 / 110px 110px;
+  opacity: .38;
+  -webkit-mask: radial-gradient(ellipse 70% 60% at 50% 60%, #000, transparent);
+  mask: radial-gradient(ellipse 70% 60% at 50% 60%, #000, transparent);
+}
+.card[data-fx='ivory'] .fx-b {
+  z-index: 0;
+  border-radius: var(--card-radius);
+  box-shadow: inset 0 0 40px -8px rgba(251,191,36,.6);
+  animation: bx-a-pulse 4s ease-in-out infinite alternate;
+}
+@keyframes bx-a-pulse { from { opacity: .3 } to { opacity: 1 } }
+.card[data-fx='ivory'] .card-art::after {
+  background: linear-gradient(180deg, rgba(0,0,0,.08), transparent 24% 70%, rgba(0,0,0,.18));
+}
+.card[data-fx='ivory'] .card-desc {
+  color: #9a7412;
+}
+.card[data-fx='ivory'] .rarity-badge {
+  background: linear-gradient(180deg, #f5d67a, #c9a227);
+  color: #3a2c0a;
+  border-color: #b48f1e;
+}
+@property --a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes bx-turn-a { to { --a: 360deg; } }
+@keyframes bx-hue { to { filter: hue-rotate(1turn); } }
+@keyframes bx-pearl { to { background-position: 250% 0; } }
+@keyframes bx-glow-shift { 0% { text-shadow: 0 0 6px rgba(255,61,127,.85), 0 0 14px rgba(61,217,255,.5); } 33% { text-shadow: 0 0 6px rgba(255,225,77,.85), 0 0 14px rgba(217,77,255,.5); } 66% { text-shadow: 0 0 6px rgba(61,217,255,.85), 0 0 14px rgba(77,255,154,.5); } 100% { text-shadow: 0 0 6px rgba(255,61,127,.85), 0 0 14px rgba(61,217,255,.5); } }
+.card[data-fx='oilslick'], .card[data-fx='cutcrystal'], .card[data-fx='spectrumbeam'], .card[data-fx='holofoil'] {
+  --spectrum: #ff3d7f, #ff8a3d, #ffe14d, #4dff9a, #3dd9ff, #6b7dff, #d94dff, #ff3d7f;
+}
+.card[data-fx='oilslick'] .card-face, .card[data-fx='cutcrystal'] .card-face, .card[data-fx='spectrumbeam'] .card-face, .card[data-fx='holofoil'] .card-face {
+  border-color: rgba(255,255,255,.4);
+}
+.card[data-fx='oilslick'] .card-front, .card[data-fx='cutcrystal'] .card-front, .card[data-fx='spectrumbeam'] .card-front, .card[data-fx='holofoil'] .card-front {
+  color: #fdf4ff;
+}
+.card[data-fx='oilslick'] .card-extract, .card[data-fx='cutcrystal'] .card-extract, .card[data-fx='spectrumbeam'] .card-extract, .card[data-fx='holofoil'] .card-extract {
+  color: rgba(253,244,255,.76);
+}
+.card[data-fx='oilslick'] .card-views, .card[data-fx='cutcrystal'] .card-views, .card[data-fx='spectrumbeam'] .card-views, .card[data-fx='holofoil'] .card-views {
+  color: rgba(253,244,255,.62);
+}
+.card[data-fx='oilslick'] .card-price, .card[data-fx='cutcrystal'] .card-price, .card[data-fx='spectrumbeam'] .card-price, .card[data-fx='holofoil'] .card-price {
+  color: #a7f3d0;
+  text-shadow: 0 0 10px rgba(167,243,208,.45);
+}
+.card[data-fx='oilslick'] .card-desc, .card[data-fx='cutcrystal'] .card-desc, .card[data-fx='spectrumbeam'] .card-desc, .card[data-fx='holofoil'] .card-desc {
+  color: #fff;
+  animation: bx-glow-shift 6s linear infinite;
+}
+.card[data-fx='oilslick'] .fx-art, .card[data-fx='cutcrystal'] .fx-art, .card[data-fx='spectrumbeam'] .fx-art, .card[data-fx='holofoil'] .fx-art {
+  z-index: 1;
+}
+.card[data-fx='oilslick'] .fx-art::before, .card[data-fx='cutcrystal'] .fx-art::before, .card[data-fx='spectrumbeam'] .fx-art::before, .card[data-fx='holofoil'] .fx-art::before, .card[data-fx='oilslick'] .fx-art::after, .card[data-fx='cutcrystal'] .fx-art::after, .card[data-fx='spectrumbeam'] .fx-art::after, .card[data-fx='holofoil'] .fx-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--art) center / cover;
+  mix-blend-mode: screen;
+  opacity: .5;
+}
+.card[data-fx='oilslick'] .fx-art::before, .card[data-fx='cutcrystal'] .fx-art::before, .card[data-fx='spectrumbeam'] .fx-art::before, .card[data-fx='holofoil'] .fx-art::before {
+  filter: grayscale(1) sepia(1) saturate(12) hue-rotate(-32deg) brightness(.85);
+  transform: translate(calc(var(--lx) * -1.5cqw), calc(var(--ly) * -.4cqw));
+}
+.card[data-fx='oilslick'] .fx-art::after, .card[data-fx='cutcrystal'] .fx-art::after, .card[data-fx='spectrumbeam'] .fx-art::after, .card[data-fx='holofoil'] .fx-art::after {
+  filter: grayscale(1) sepia(1) saturate(12) hue-rotate(140deg) brightness(.85);
+  transform: translate(calc(var(--lx) * 1.5cqw), calc(var(--ly) * .4cqw));
+}
+.card[data-fx='oilslick'] .fx-b, .card[data-fx='cutcrystal'] .fx-b, .card[data-fx='spectrumbeam'] .fx-b, .card[data-fx='holofoil'] .fx-b {
+  z-index: 3;
+  overflow: hidden;
+  mix-blend-mode: screen;
+}
+.card[data-fx='oilslick'] .fx-b::before, .card[data-fx='cutcrystal'] .fx-b::before, .card[data-fx='spectrumbeam'] .fx-b::before, .card[data-fx='holofoil'] .fx-b::before, .card[data-fx='oilslick'] .fx-b::after, .card[data-fx='cutcrystal'] .fx-b::after, .card[data-fx='spectrumbeam'] .fx-b::after, .card[data-fx='holofoil'] .fx-b::after {
+  content: '';
+  position: absolute;
+}
+.card[data-fx='oilslick'] .fx-ring::before, .card[data-fx='cutcrystal'] .fx-ring::before, .card[data-fx='spectrumbeam'] .fx-ring::before, .card[data-fx='holofoil'] .fx-ring::before {
+  content: '';
+  position: absolute;
+  inset: -60%;
+  animation: bx-turn-a 16s linear infinite;
+}
+.card[data-fx='holofoil'] .card-front {
+  background: linear-gradient(180deg, #1c1c26, #111119 50%, #17171f);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.34);
+}
+.card[data-fx='holofoil'] .fx-a {
+  z-index: -1;
+  overflow: hidden;
+}
+.card[data-fx='holofoil'] .fx-a::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  mix-blend-mode: color-dodge;
+  opacity: .5;
+  transform: translateX(calc(var(--lx) * 10%));
+  background: repeating-linear-gradient(112deg, #ff3d7f 0, #ff8a3d 3.5cqw, #ffe14d 7cqw, #4dff9a 10.5cqw, #3dd9ff 14cqw, #6b7dff 17.5cqw, #d94dff 21cqw, #ff3d7f 24.5cqw);
   background-size: 100% 100%;
-  filter: drop-shadow(0 0 6px var(--fx-lite));
-  transform-origin: 50% 100%;
+  animation: bx-p2-drift 12s linear infinite;
 }
-.card[data-fx='crown'] .fx-p::after {
-  inset: auto;
-  bottom: -46cqw;
-  left: 50%;
-  width: 150cqw;
-  aspect-ratio: 1;
-  margin-left: -75cqw;
-  background: repeating-conic-gradient(from 150deg at 50% 50%,
-    color-mix(in srgb, var(--fx-pale) 45%, transparent) 0 3deg, transparent 3deg 12deg);
-  mask-image: radial-gradient(circle, #000 0 20%, transparent 52%);
-  -webkit-mask-image: radial-gradient(circle, #000 0 20%, transparent 52%);
-  opacity: 0.45;
+@keyframes bx-p2-drift { to { background-position: 24.5cqw 0; } }
+.card[data-fx='holofoil'] .fx-a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--noise) 0 0 / 120px 120px;
+  mix-blend-mode: overlay;
+  opacity: .7;
 }
-.card.is-lit[data-fx='crown'] .fx-p::before { animation: fx-pulse 2.8s ease-in-out infinite alternate; }
-.card.is-lit[data-fx='crown'] .fx-p::after { animation: fx-turn 34s linear infinite; }
+.card[data-fx='holofoil'] .card-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.16), transparent 24% 70%, rgba(0,0,0,.3)), repeating-linear-gradient(112deg, rgba(255,61,127,.28) 0, rgba(255,225,77,.28) 5cqw, rgba(77,255,154,.28) 10cqw, rgba(61,217,255,.28) 15cqw, rgba(217,77,255,.28) 20cqw, rgba(255,61,127,.28) 25cqw);
+  background-position: 0 0, calc(var(--lx) * -12cqw) 0;
+}
+.card[data-fx='holofoil'] .fx-b::before {
+  inset: -20% -70%;
+  transform: translateX(calc(var(--lx) * 52%));
+  background: linear-gradient(112deg, transparent 40%, rgba(255,61,127,.4) 45%, rgba(255,225,77,.5) 47.5%, rgba(255,255,255,.55) 49.2%, rgba(255,255,255,.95) 50%, rgba(255,255,255,.55) 50.8%, rgba(61,217,255,.5) 52.5%, rgba(217,77,255,.4) 55%, transparent 60%);
+}
+.card[data-fx='holofoil'] .fx-b::after {
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.14), transparent 28% 72%, rgba(255,255,255,.08));
+}
+.card[data-fx='holofoil'] .fx-ring {
+  padding: 4px;
+}
+.card[data-fx='holofoil'] .fx-ring::before {
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 1px, transparent 1px 3px), conic-gradient(from var(--a), #e5e7eb, #ff3d7f 12%, #ffe14d 24%, #4dff9a 36%, #e5e7eb 48%, #3dd9ff 60%, #d94dff 72%, #e5e7eb 84%, #e5e7eb);
+  transform: rotate(calc(var(--lx) * 70deg));
+}
+.card[data-fx='holofoil'] .card-title {
+  background: linear-gradient(180deg, #fff, #cfd3dc 55%, #fff) 0 0 / 100% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,.3)) drop-shadow(calc(var(--lx) * -.45cqw) 0 rgba(255,61,127,.7)) drop-shadow(calc(var(--lx) * .45cqw) 0 rgba(61,217,255,.7));
+}
+.card[data-fx='holofoil'] .card-desc {
+  color: #e5e7eb;
+}
+.card[data-fx='holofoil'] .rarity-badge {
+  color: #111119;
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, #fff, #c4c9d4) padding-box, conic-gradient(from var(--a), var(--spectrum)) border-box;
+  animation: bx-turn-a 6s linear infinite;
+}
+.card[data-fx='oilslick'] .card-front {
+  background: linear-gradient(180deg, #08070d, #0d0b16 50%, #07060c);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.24);
+}
+.card[data-fx='oilslick'] .fx-a {
+  z-index: -1;
+  overflow: hidden;
+}
+.card[data-fx='oilslick'] .fx-a::before {
+  content: '';
+  position: absolute;
+  inset: -35%;
+  mix-blend-mode: screen;
+  opacity: .85;
+  filter: blur(14px) saturate(1.3);
+  background: radial-gradient(40% 32% at 30% 30%, rgba(0,224,192,.8), transparent 70%), radial-gradient(36% 30% at 70% 35%, rgba(255,43,214,.75), transparent 70%), radial-gradient(38% 34% at 55% 72%, rgba(91,60,255,.8), transparent 70%), radial-gradient(26% 22% at 25% 74%, rgba(255,210,63,.75), transparent 70%), radial-gradient(24% 20% at 80% 70%, rgba(255,106,61,.65), transparent 70%);
+  animation: bx-p3-swirl 24s ease-in-out infinite alternate;
+}
+@keyframes bx-p3-swirl { 0% { transform: rotate(0deg) scale(1); } 40% { transform: rotate(-18deg) scale(1.12) translate(-3%, 4%); } 100% { transform: rotate(22deg) scale(1.04) translate(4%, -3%); } }
+.card[data-fx='oilslick'] .fx-a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  opacity: .55;
+  background: repeating-radial-gradient(circle at calc(50% + var(--lx) * 32%) calc(46% + var(--ly) * 30%), transparent 0 3cqw, rgba(0,224,192,.3) 3.6cqw, rgba(255,43,214,.3) 4.4cqw, rgba(255,210,63,.24) 5.2cqw, rgba(91,60,255,.3) 6cqw, transparent 6.6cqw 8.4cqw);
+}
+.card[data-fx='oilslick'] .fx-b::before {
+  inset: -20% -70%;
+  filter: blur(6px);
+  transform: translateX(calc(var(--lx) * 44%));
+  background: linear-gradient(100deg, transparent 30%, rgba(0,224,192,.5) 40%, rgba(255,43,214,.55) 47%, rgba(255,255,255,.7) 50%, rgba(255,210,63,.5) 53%, rgba(91,60,255,.5) 60%, transparent 70%);
+}
+.card[data-fx='oilslick'] .fx-b::after {
+  inset: 0;
+  background: linear-gradient(165deg, rgba(255,255,255,.2), transparent 32%);
+}
+.card[data-fx='oilslick'] .fx-ring {
+  padding: 3px;
+}
+.card[data-fx='oilslick'] .fx-ring::before {
+  background: conic-gradient(from var(--a), #00e0c0, #5b3cff, #ff2bd6, #ffd23f, #ff6a3d, #00e0c0);
+  transform: rotate(calc(var(--lx) * 50deg));
+}
+.card[data-fx='oilslick'] .card-title {
+  background: linear-gradient(100deg, #fff 0 20%, #ffe6fb 38%, #e0fff9 56%, #fff 74% 100%) 0 0 / 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: bx-pearl 6s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(0,224,192,.4)) drop-shadow(0 0 2px rgba(255,43,214,.5)) drop-shadow(calc(var(--lx) * -.45cqw) 0 rgba(255,43,214,.6)) drop-shadow(calc(var(--lx) * .45cqw) 0 rgba(0,224,192,.6));
+}
+.card[data-fx='oilslick'] .card-desc {
+  animation-duration: 8s;
+}
+.card[data-fx='oilslick'] .rarity-badge {
+  color: #fff;
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, #15131f, #08070d) padding-box, conic-gradient(from var(--a), #00e0c0, #5b3cff, #ff2bd6, #ffd23f, #00e0c0) border-box;
+  text-shadow: 0 0 8px rgba(0,224,192,.6);
+  animation: bx-turn-a 7s linear infinite;
+}
+.card[data-fx='cutcrystal'] .card-front {
+  background: linear-gradient(180deg, #0b0f2a, #120b2b 50%, #0a0a22);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.32);
+}
+.card[data-fx='cutcrystal'] .fx-a {
+  z-index: -1;
+  overflow: hidden;
+}
+.card[data-fx='cutcrystal'] .fx-a::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--facets) center / 100% 100%;
+  animation: bx-hue 18s linear infinite;
+}
+.card[data-fx='cutcrystal'] .fx-a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(11,15,42,0), rgba(11,15,42,.7) 78%);
+}
+.card[data-fx='cutcrystal'] .fx-b {
+  -webkit-mask: var(--facetmask) center / 100% 100%;
+  mask: var(--facetmask) center / 100% 100%;
+}
+.card[data-fx='cutcrystal'] .fx-b::before {
+  inset: -20% -70%;
+  transform: translateX(calc(var(--lx) * 48%));
+  background: linear-gradient(110deg, transparent 36%, rgba(255,255,255,.6) 46%, rgba(255,255,255,.95) 50%, rgba(255,255,255,.6) 54%, transparent 64%);
+}
+.card[data-fx='cutcrystal'] .fx-b::after {
+  inset: -20% -70%;
+  transform: translateX(calc(var(--lx) * 48%));
+  filter: blur(.6px);
+  opacity: .9;
+  background: linear-gradient(110deg, transparent 43%, #ff3d7f 45%, #ffe14d 46.5%, #4dff9a 48%, #3dd9ff 49.5%, #d94dff 51%, transparent 53%);
+}
+.card[data-fx='cutcrystal'] .fx-art::before {
+  transform: translate(calc(var(--lx) * -1.8cqw), calc(var(--ly) * -1.2cqw));
+}
+.card[data-fx='cutcrystal'] .fx-art::after {
+  transform: translate(calc(var(--lx) * 1.8cqw), calc(var(--ly) * 1.2cqw));
+}
+.card[data-fx='cutcrystal'] .fx-ring {
+  padding: 4px;
+}
+.card[data-fx='cutcrystal'] .fx-ring::before {
+  background: repeating-conic-gradient(rgba(255,255,255,.85) 0 1.5deg, transparent 1.5deg 12deg), conic-gradient(from var(--a), var(--spectrum));
+  transform: rotate(calc(var(--lx) * 45deg));
+}
+.card[data-fx='cutcrystal'] .card-title {
+  background: linear-gradient(100deg, #fff 0 22%, #dff4ff 38%, #fff 50%, #f2e2ff 62%, #fff 78% 100%) 0 0 / 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: bx-pearl 4s linear infinite;
+  filter: drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 0 7px rgba(255,255,255,.3)) drop-shadow(calc(var(--lx) * -.5cqw) 0 rgba(255,61,127,.7)) drop-shadow(calc(var(--lx) * .5cqw) 0 rgba(61,217,255,.7));
+}
+.card[data-fx='cutcrystal'] .rarity-badge {
+  color: #fff;
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,.08)) padding-box, conic-gradient(from var(--a), var(--spectrum)) border-box;
+  text-shadow: 0 0 8px rgba(255,255,255,.6);
+  animation: bx-turn-a 5s linear infinite;
+}
+.card[data-fx='spectrumbeam'] .card-front {
+  background: linear-gradient(180deg, #05060c, #0a0a14 50%, #05060c);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.42);
+}
+.card[data-fx='spectrumbeam'] .fx-a {
+  z-index: -1;
+  overflow: hidden;
+  background: radial-gradient(60% 40% at 50% 104%, rgba(217,77,255,.5), transparent 70%), radial-gradient(50% 36% at 14% 96%, rgba(61,217,255,.35), transparent 70%), radial-gradient(50% 36% at 86% 96%, rgba(255,61,127,.35), transparent 70%);
+  animation: bx-hue 14s linear infinite;
+}
+.card[data-fx='spectrumbeam'] .fx-a::before, .card[data-fx='spectrumbeam'] .fx-a::after {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background: var(--caustic) 0 0 / 60cqw 60cqw;
+  mix-blend-mode: screen;
+  opacity: .4;
+  filter: blur(.8px);
+}
+.card[data-fx='spectrumbeam'] .fx-a::before {
+  animation: bx-p5-drift-a 26s linear infinite;
+}
+.card[data-fx='spectrumbeam'] .fx-a::after {
+  background-size: 46cqw 46cqw;
+  opacity: .28;
+  animation: bx-p5-drift-b 19s linear infinite;
+}
+@keyframes bx-p5-drift-a { to { transform: translate(-30cqw, -12cqw) rotate(6deg); } }
+@keyframes bx-p5-drift-b { to { transform: translate(18cqw, -23cqw) rotate(-8deg); } }
+.card[data-fx='spectrumbeam'] .fx-b::before {
+  inset: -20% -70%;
+  filter: blur(.5px);
+  transform: translateX(calc(var(--lx) * 50%));
+  background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.95) 46.8%, rgba(255,255,255,.95) 47.4%, rgba(255,61,127,.85) 48.6%, rgba(255,138,61,.85) 50%, rgba(255,225,77,.85) 51.4%, rgba(77,255,154,.85) 52.8%, rgba(61,217,255,.85) 54.2%, rgba(107,125,255,.85) 55.6%, rgba(217,77,255,.8) 57%, transparent 62%);
+}
+.card[data-fx='spectrumbeam'] .fx-b::after {
+  inset: 0;
+  background: radial-gradient(circle at calc(50% + var(--lx) * 40%) calc(30% + var(--ly) * 30%), rgba(255,255,255,.14), transparent 40%);
+}
+.card[data-fx='spectrumbeam'] .fx-art::before {
+  opacity: .6;
+  transform: translate(calc(var(--lx) * -2.4cqw), calc(var(--ly) * -.6cqw));
+}
+.card[data-fx='spectrumbeam'] .fx-art::after {
+  opacity: .6;
+  transform: translate(calc(var(--lx) * 2.4cqw), calc(var(--ly) * .6cqw));
+}
+.card[data-fx='spectrumbeam'] .fx-ring {
+  padding: 3.5px;
+}
+.card[data-fx='spectrumbeam'] .fx-ring::before {
+  background: conic-gradient(from var(--a), #e5e7eb 0 52%, #ff3d7f 58%, #ffe14d 64%, #4dff9a 70%, #3dd9ff 76%, #d94dff 82%, #e5e7eb 90%);
+  transform: rotate(calc(var(--lx) * 90deg));
+  animation-duration: 8s;
+}
+.card[data-fx='spectrumbeam'] .card-title {
+  color: #fff;
+  text-shadow: calc(var(--lx) * -.8cqw) 0 rgba(255,61,127,.8), calc(var(--lx) * .8cqw) 0 rgba(61,217,255,.8), 0 0 1px #fff, 0 0 12px rgba(255,255,255,.35);
+}
+.card[data-fx='spectrumbeam'] .card-desc {
+  text-shadow: calc(var(--lx) * -.4cqw) 0 rgba(255,61,127,.9), calc(var(--lx) * .4cqw) 0 rgba(61,217,255,.9), 0 0 8px rgba(255,255,255,.4);
+  animation: none;
+}
+.card[data-fx='spectrumbeam'] .card-price {
+  text-shadow: calc(var(--lx) * -.4cqw) 0 rgba(255,61,127,.7), calc(var(--lx) * .4cqw) 0 rgba(61,217,255,.7);
+}
+.card[data-fx='spectrumbeam'] .rarity-badge {
+  color: #fff;
+  border-color: rgba(255,255,255,.85);
+  background: rgba(255,255,255,.06);
+  text-shadow: 0 0 8px rgba(255,255,255,.5);
+  box-shadow: calc(var(--lx) * -.6cqw) 0 0 0 rgba(255,61,127,.75), calc(var(--lx) * .6cqw) 0 0 0 rgba(61,217,255,.75);
+  animation: bx-hue 9s linear infinite;
+}
 
-/* Low power holds every chosen effect still, as it does the tiers' own. */
-html[data-lowpower='1'] .card[data-fx] .fx-p::before,
-html[data-lowpower='1'] .card[data-fx] .fx-p::after,
+/* Two of the twenty-one want the sparks the tier already builds: the gold
+   ones a Legendary card carries. Everywhere else they stay hidden. */
+.card[data-fx='classicfoil'] .fx-p i,
+.card[data-fx='ornate'] .fx-p i { display: block; }
+
+/* The exotic wikitext is written into .fx-code as columns; Projection wants
+   them lying down, so it turns the columns into rows rather than asking the
+   card to be built differently. */
+.card[data-fx='projection'] .fx-code .col {
+  left: 0;
+  top: var(--x);
+  width: 200%;
+  white-space: nowrap;
+  animation-name: bx-x-slide;
+}
+
+/* Battery saver holds every treatment still, as it does the tiers' own. */
+html[data-lowpower='1'] .card[data-fx] .fx-a,
+html[data-lowpower='1'] .card[data-fx] .fx-a::before,
+html[data-lowpower='1'] .card[data-fx] .fx-a::after,
+html[data-lowpower='1'] .card[data-fx] .fx-b,
 html[data-lowpower='1'] .card[data-fx] .fx-b::before,
-html[data-lowpower='1'] .card[data-fx] .fx-b::after { animation: none !important; }
+html[data-lowpower='1'] .card[data-fx] .fx-b::after,
+html[data-lowpower='1'] .card[data-fx] .fx-c::before,
+html[data-lowpower='1'] .card[data-fx] .fx-c::after,
+html[data-lowpower='1'] .card[data-fx] .fx-v::before,
+html[data-lowpower='1'] .card[data-fx] .fx-v::after,
+html[data-lowpower='1'] .card[data-fx] .fx-p i,
+html[data-lowpower='1'] .card[data-fx] .fx-ring::before,
+html[data-lowpower='1'] .card[data-fx] .fx-ring::after,
+html[data-lowpower='1'] .card[data-fx] .fx-code .col,
+html[data-lowpower='1'] .card[data-fx] .card-art,
+html[data-lowpower='1'] .card[data-fx] .card-art::before,
+html[data-lowpower='1'] .card[data-fx] .card-art::after,
+html[data-lowpower='1'] .card[data-fx] .card-body,
+html[data-lowpower='1'] .card[data-fx] .card-title,
+html[data-lowpower='1'] .card[data-fx] .card-desc,
+html[data-lowpower='1'] .card[data-fx] .rarity-badge { animation: none !important; }
 
 /* Prices hidden, for a collection read as a collection rather than a ledger.
    Settings, Show card values. */

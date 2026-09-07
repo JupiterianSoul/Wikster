@@ -44,11 +44,20 @@ check('an effect is owned for one rarity only', !ink.ownsFx(profile, 'epic', 'ti
 check('an unknown kind is ignored', (ink.grant(profile, 'hats', 'x'), profile.owned.hats === undefined));
 
 /* --- the tables ----------------------------------------------------------- */
-check('five effects for each of the eight rarities', RARITIES.every((r) => (fx.FX_BY_RARITY[r.id] ?? []).length === 5) && fx.ALL_FX.length === 40);
-check('no two effects share an id', new Set(fx.ALL_FX.map((s) => s.id)).size === 40);
-check('no two effects share a name', new Set(fx.ALL_FX.map((s) => s.name.en)).size === 40 && new Set(fx.ALL_FX.map((s) => s.name.fr)).size === 40);
-check('classic leads every rarity', RARITIES.every((r) => fx.fxForRarity(r.id)[0].id === 'classic' && fx.fxForRarity(r.id).length === 6));
-check('an effect exists for its own rarity only', fx.fxExists('rare', 'tide') && !fx.fxExists('common', 'tide') && fx.fxExists('common', 'classic'));
+/* The table is what the two design boards held once the picked execution per
+   tier had become that tier's own drawing: two left for most tiers, seven for
+   Prismatic, twenty-one bought in all. The counts are not round on purpose. */
+const BOUGHT = fx.ALL_FX.length - 1;
+check('every rarity has at least one bought effect', RARITIES.every((r) => (fx.FX_BY_RARITY[r.id] ?? []).length >= 1));
+check('twenty-one of them, the boards\' own', BOUGHT === 21, String(BOUGHT));
+check('and Prismatic carries the seven it was drawn', (fx.FX_BY_RARITY.prismatic ?? []).length === 7, String((fx.FX_BY_RARITY.prismatic ?? []).length));
+check('no two effects share an id', new Set(fx.ALL_FX.map((s) => s.id)).size === fx.ALL_FX.length);
+check('no two effects share a name', new Set(fx.ALL_FX.map((s) => s.name.en)).size === fx.ALL_FX.length && new Set(fx.ALL_FX.map((s) => s.name.fr)).size === fx.ALL_FX.length);
+check('every effect is named and noted in both languages', fx.ALL_FX.every((s) => s.name.en && s.name.fr && s.note.en && s.note.fr));
+check('classic leads every rarity', RARITIES.every((r) => fx.fxForRarity(r.id)[0].id === 'classic'
+  && fx.fxForRarity(r.id).length === (fx.FX_BY_RARITY[r.id] ?? []).length + 1));
+check('an effect exists for its own rarity only', fx.fxExists('rare', 'glass') && !fx.fxExists('common', 'glass') && !fx.fxExists('common', 'classic'));
+check('and a choice that is no longer in the table reads as classic', !fx.fxExists('rare', 'tide') && fx.fxById('tide').id === 'classic');
 check('an unknown id is not an effect', !fx.fxExists('rare', 'sheen') && fx.fxById('sheen').id === 'classic');
 check('ten frames on the Atelier shelf', frames.INK_FRAMES.length === 10 && frames.INK_FRAMES.every((s) => s.minLevel === 1));
 check('none of them is a code or a level frame', frames.INK_FRAMES.every((s) => !s.code) && new Set(frames.FRAME_STYLES.map((s) => s.id)).size === frames.FRAME_STYLES.length);

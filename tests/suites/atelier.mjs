@@ -8,6 +8,7 @@ import { launchOptions } from '../lib/browser.mjs';
 import { installStubs } from '../lib/stubs.mjs';
 import { EXCHANGE_RATE, FRAME_PRICE, THEME_PRICE, fxPrice, inkForLevel } from '../../src/ink.js';
 import { RELEASES } from '../../src/data/releases.js';
+import { ALL_FX } from '../../src/data/fx.js';
 
 let fails = 0;
 const check = (l, c, e = '') => { if (!c) fails++; console.log(`${c ? 'PASS' : 'FAIL'}  ${l}${e ? '  ' + e : ''}`); };
@@ -22,7 +23,7 @@ await p.addInitScript(() => {
   localStorage.setItem('wikster.profile.v1', JSON.stringify({ started: true, createdAt: now, playMs: 0, boostersOpened: 6, rarityCounts: {}, progress: { level: 12, xp: 0 }, pendingLevels: [], daily: { lastDay: Math.floor(now / 86400000), shownDay: Math.floor(now / 86400000), claimed: 1, board: 0 }, timed: { count: 0, stamp: now }, freeTaken: { window: 0, ids: [] } }));
   localStorage.setItem('wikster.wallet.v1', '20000');
   // A stale choice from before the table was redrawn: it must read as classic.
-  localStorage.setItem('wikster.cardFx.v1', JSON.stringify({ rare: 'sheen' }));
+  localStorage.setItem('wikster.cardFx.v1', JSON.stringify({ rare: 'tide' }));
   // Last here two releases ago: the what's-new sheet has something to say.
   localStorage.setItem('wikster.seenRelease.v1', 'seasons');
 });
@@ -74,8 +75,15 @@ check('it sits under the shop tab', await p.evaluate(() => document.querySelecto
 check('nine themes on the shelf', await p.locator('#atelier-themes .theme-card').count() === 9);
 check('no season or code theme among them', await p.evaluate(() => ![...document.querySelectorAll('#atelier-themes .theme-card')].some((c) => /apotheosis|hellfire|frost|yule|rire/.test(c.dataset.theme))));
 check('ten frames on the shelf', await p.locator('#atelier-frames .frame-card').count() === 10);
-check('forty effects, five a rarity', await p.locator('#atelier-fx .fx-chip').count() === 40 && await p.locator('#atelier-fx .fx-tier').count() === 8);
-check('every effect is its own name', await p.evaluate(() => new Set([...document.querySelectorAll('#atelier-fx .fx-chip-name')].map((n) => n.textContent)).size === 40));
+// Twenty-one, because that is what the two boards held once the picked one
+// per tier had become that tier's own drawing: two for most tiers, seven for
+// Prismatic. The table is the count, so it cannot drift from the shelf.
+const BOUGHT = ALL_FX.length - 1;
+check('every board design is on the shelf, on its own tier',
+  await p.locator('#atelier-fx .fx-chip').count() === BOUGHT && await p.locator('#atelier-fx .fx-tier').count() === 8, String(BOUGHT));
+check('every effect is its own name', await p.evaluate((n) => new Set([...document.querySelectorAll('#atelier-fx .fx-chip-name')].map((x) => x.textContent)).size === n, BOUGHT));
+check('and each is shown on a card of its tier',
+  await p.locator('#atelier-fx .fx-chip .fx-sample').count() === BOUGHT);
 check('prices are in Ink', await p.locator('#atelier-themes .atelier-buy .ink-drop').count() === 9);
 check('and dim while the purse is short', await p.locator('#atelier-themes .atelier-buy.is-short').count() === 9);
 await p.locator('#atelier-themes .theme-card[data-theme="paper"] .atelier-buy').click();
@@ -101,15 +109,15 @@ await p.locator('#atelier-frames .frame-card[data-frame="comet"] .atelier-buy').
 await p.waitForTimeout(800);
 check('a frame costs its price', (await inkHeld()) === 450 - THEME_PRICE - FRAME_PRICE);
 check('and is owned', (await profile()).owned?.frames?.includes('comet'));
-const rareChip = p.locator('#atelier-fx .fx-chip[data-fx="tide"]');
+const rareChip = p.locator('#atelier-fx .fx-chip[data-fx="glass"]');
 await rareChip.locator('.atelier-buy').click();
 await p.waitForTimeout(800);
 check('an effect costs its rarity\'s price', (await inkHeld()) === 450 - THEME_PRICE - FRAME_PRICE - fxPrice('rare'));
-check('and is owned for that rarity', (await profile()).owned?.fx?.includes('rare:tide'));
+check('and is owned for that rarity', (await profile()).owned?.fx?.includes('rare:glass'));
 check('the wear button on the effect is there', /wear/i.test(await rareChip.locator('.atelier-buy').textContent()));
 await rareChip.locator('.atelier-buy').click();
 await p.waitForTimeout(600);
-check('wearing it from the shelf works', await p.evaluate(() => window.__wikster.state.cardFx.rare === 'tide'));
+check('wearing it from the shelf works', await p.evaluate(() => window.__wikster.state.cardFx.rare === 'glass'));
 check('the shelf marks it worn', /worn/i.test(await rareChip.locator('.atelier-buy').textContent()));
 
 section('customization');
@@ -130,24 +138,40 @@ check('the theme goes on', await p.evaluate(() => document.documentElement.datas
 await p.evaluate(() => window.__wikster.setTheme('aurora'));
 
 section('a card wearing it');
+/* Two cards of the same tier, one plain and one dressed, read side by side:
+   what a treatment has to do is look different from the tier it replaces. */
 const worn = await p.evaluate(() => {
   const rare = window.__wikster.RARITIES.find((r) => r.id === 'rare');
-  const card = document.createElement('div');
-  card.className = 'card is-lit';
-  card.innerHTML = `<div class="card-inner"><div class="card-face card-front"><div class="fx fx-a"></div><div class="card-art"></div><div class="fx-p"></div><div class="fx fx-b"></div><div class="fx-ring"></div></div></div>`;
-  document.body.appendChild(card);
-  window.__wikster.debugRarity('rare');
-  card.dataset.rarity = 'rare'; card.style.setProperty('--rarity', rare.color);
-  card.dataset.fx = window.__wikster.state.cardFx.rare;
-  const plate = card.querySelector('.fx-p');
-  const before = getComputedStyle(plate, '::before');
-  const out = { fx: card.dataset.fx, height: before.height, anim: before.animationName, classicHidden: getComputedStyle(card.querySelector('.fx-b')).display };
-  card.remove();
-  return out;
+  const build = (fx) => {
+    const card = document.createElement('div');
+    card.className = 'card is-lit';
+    card.innerHTML = '<div class="card-inner"><div class="card-face card-front">'
+      + '<div class="fx fx-a"></div><div class="card-art"></div><div class="fx-p"></div>'
+      + '<div class="fx fx-b"></div><div class="fx fx-c"></div><div class="fx fx-v"></div>'
+      + '<div class="fx-ring"></div></div></div>';
+    document.body.appendChild(card);
+    card.dataset.rarity = 'rare';
+    card.style.setProperty('--rarity', rare.color);
+    if (fx) card.dataset.fx = fx;
+    const front = card.querySelector('.card-front');
+    const read = () => ({
+      plate: getComputedStyle(front).backgroundImage,
+      sheen: getComputedStyle(card.querySelector('.fx-b'), '::before').backgroundImage,
+      anim: getComputedStyle(card.querySelector('.fx-b'), '::before').animationName,
+      // The ring is a border because a mask cuts its middle out; lose that and
+      // it floods the whole face.
+      ringMask: getComputedStyle(card.querySelector('.fx-ring')).maskImage
+    });
+    const out = read();
+    card.remove();
+    return out;
+  };
+  return { plain: build(null), dressed: build(window.__wikster.state.cardFx.rare), fx: window.__wikster.state.cardFx.rare };
 });
-check('a rare card carries the effect', worn.fx === 'tide', JSON.stringify(worn));
-check('the effect paints and moves', worn.height !== 'auto' && worn.anim === 'fx-tide', JSON.stringify(worn));
-check('the tier\'s own dressing steps aside', worn.classicHidden === 'none');
+check('a rare card carries the effect', worn.fx === 'glass', JSON.stringify(worn.fx));
+check('the treatment paints and moves', /gradient/.test(worn.dressed.sheen) && worn.dressed.anim === 'bx-r-glass', JSON.stringify(worn.dressed.anim));
+check('the tier\'s own plate steps aside', worn.dressed.plate !== worn.plain.plate, `${worn.plain.plate.slice(0, 40)} vs ${worn.dressed.plate.slice(0, 40)}`);
+check('and the ring is still a ring, not a flood', /gradient/.test(worn.dressed.ringMask), worn.dressed.ringMask.slice(0, 60));
 
 section('a level pays Ink');
 const inkBefore = await inkHeld();
