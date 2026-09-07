@@ -2,6 +2,7 @@
 
 import { iconSvg, logoSvg } from '../data/icons.js';
 import { checkWhatsNew } from './whatsnew.js';
+import { checkNotices } from './notices.js';
 import { LANGUAGES, getLanguage, languageChosen, loadLanguage, setLanguage, t, tx } from '../i18n.js';
 import { Bar, NavBar, Odometer, Rail, Ring, Segmented, Sheet, press, trackDrag } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
@@ -401,6 +402,8 @@ export function init() {
   setTimeout(lookForUpdate, 4000);
   // What changed since the last visit, once the launch sheets are done.
   setTimeout(() => checkWhatsNew({ fresh: !state.profile.started }), 1200);
+  // Anything the creator has to say, after the launch sheets have had their turn.
+  checkNotices();
   setTimeout(registerShell, 3000);
   setTimeout(warmDrawer, 2500);
   sayWipeNote();

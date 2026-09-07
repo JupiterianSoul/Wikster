@@ -2066,6 +2066,19 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .ring.has-face .ring-label { display: none; }
 .hero-id { gap: 18px; }
 .index-counts .wish-match { flex: none; margin-left: auto; white-space: nowrap; }
+/* A word from the creator, and the reason an account has been stopped. Read
+   once and dismissed, so it is a sheet rather than anything that lingers. */
+.notice-sheet { display: grid; gap: 12px; }
+.notice-body { margin: 0; font-size: 0.92rem; line-height: 1.55; }
+.notice-reason {
+  margin: 0; padding: 11px 13px; border-radius: var(--radius);
+  border: var(--border) var(--border-style) var(--line);
+  border-left: 3px solid var(--warning, #fbbf24);
+  background: var(--surface); font-size: 0.86rem; line-height: 1.5;
+}
+.notice-until { margin: 0; font-size: 0.8rem; color: var(--ink-dim); }
+.notice-warning .notice-body { color: var(--ink); }
+
 .whatsnew { display: grid; gap: 14px; }
 .whatsnew-lead { font-size: 0.86rem; color: var(--ink-dim); }
 .whatsnew-item { display: grid; gap: 6px; padding: 12px 14px; border-radius: var(--radius); border: var(--border) var(--border-style) var(--line); border-left: 3px solid var(--tl, var(--accent)); background: var(--surface); }

@@ -289,6 +289,33 @@ rest.
 **Themes** other than the seasons' and the codes' are sold in the Atelier too;
 the default is free, and the one being worn always stays in the picker.
 
+### A word from the creator
+
+Two things arrive from the server rather than from the build. Both are
+read-only to a player, and neither is allowed to matter: an announcement that
+fails to load, a project whose schema has not been updated, or a device with no
+connection all end with the game carrying on exactly as before.
+
+**Announcements** are a short sheet on launch, in the player's language, shown
+once and then forgotten. One aimed at everyone reaches a player with no account
+too, because the game is playable without one and that is exactly the person
+who would not hear about an outage any other way. One aimed at a single player
+waits for them to sign in, since a signed-out reader cannot be told apart from
+anyone else.
+
+**Suspensions** stop an account acting on other people, and say so. Muted is
+chat and guild messages; on hold is chat, trades, listings and guilds. Neither
+touches the collection: a binder that took months is not something to take away
+over a word in a chat, so a stopped account still opens the game, still sees
+everything it owns and still opens boosters.
+
+Both are enforced by Postgres, with triggers rather than policies, because this
+schema drops and recreates its own policies every time it runs and a rule
+written anywhere else would silently disappear on the next update. Neither
+table can be written from the game: that is the creator's own tooling, behind
+its own gate. The tables and the enforcement are V15 in `supabase/schema.sql`;
+the reader is `src/app/notices.js`.
+
 ## Accounts and the social side
 
 Wherever a player is named, their picture sits inside their level frame:

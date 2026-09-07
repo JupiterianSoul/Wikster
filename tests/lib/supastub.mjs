@@ -40,6 +40,8 @@ export const newDatabase = () => ({
   guildMatches: [],         // { week, guild_a, guild_b, score_a, score_b }
   challenges: [],           // { id, kind, challenger, opponent, status, payload, reply, result, claimed, created_at, updated_at }
   guildMatchClaims: [],     // { week, user_id }
+  announcements: [],        // { id, title_en, title_fr, body_en, body_fr, kind, starts_at, ends_at, target_user }
+  suspensions: [],          // { user_id, reason, until, muted }: written by the creator's tools, read here
   goalKind: null,           // a suite may pin the week's goal kind
   tokens: new Map(),        // access_token -> user id
   seq: 0
@@ -321,8 +323,11 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
     const params = url.searchParams;
 
     // Signed out, the bearer token is just the anon key. The schema grants
-    // that role exactly one thing, so this stub does too.
-    if (!me && path !== 'rpc/username_available') {
+    // that role two things, and this stub grants the same two: whether a
+    // username is free, and an announcement meant for everyone, because a
+    // player with no account is exactly the one who would not hear about an
+    // outage any other way.
+    if (!me && !['rpc/username_available', 'announcements'].includes(path)) {
       return fail(route, 'JWT expired', 401);
     }
 
@@ -856,6 +861,28 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
         return rows(route, [], 201);
       }
     }
+    /* The creator's announcements. The policy hands over only the live ones
+       that are either for everyone or for this player, so the stub does too:
+       a stub that returns more than the server would is a suite that passes
+       on a bug. */
+    if (path === 'announcements') {
+      if (method !== 'GET') return fail(route, 'permission denied for table announcements', 403);
+      const now = Date.now();
+      return rows(route, db.announcements.filter((a) =>
+        new Date(a.starts_at ?? 0).getTime() <= now
+        && (!a.ends_at || new Date(a.ends_at).getTime() > now)
+        // Signed out, only the ones meant for everyone: a reader with no
+        // account cannot be told apart from any other, so a targeted one
+        // cannot be theirs.
+        && (a.target_user ? a.target_user === me : true)));
+    }
+
+    /* A player reads their own suspension and nobody else's. */
+    if (path === 'suspensions') {
+      if (method !== 'GET') return fail(route, 'permission denied for table suspensions', 403);
+      return rows(route, db.suspensions.filter((x) => x.user_id === me));
+    }
+
     if (path === 'wishlists') {
       if (schema === 'v1') return fail(route, 'relation "public.wishlists" does not exist', 404);
       if (method === 'GET') {

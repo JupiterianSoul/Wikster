@@ -2237,3 +2237,159 @@ end $$;
 do $$ begin
   alter publication supabase_realtime add table public.challenges;
 exception when others then null; end $$;
+
+/* ============================================================================
+   V15: WHAT THE CREATOR CAN SAY, AND WHO IS NOT ALLOWED TO SPEAK
+   ============================================================================
+   Two tables the game itself reads, and the enforcement that goes with one of
+   them. They live here, in the file that is re-run whenever the schema moves,
+   rather than in the private tools repository, and the reason is worth writing
+   down: this file DROPS AND RECREATES its own policies every time it runs. A
+   policy added from somewhere else would quietly vanish the next time anyone
+   updated the game, and a suspension would stop biting with nobody noticing.
+
+   So the parts a player touches are here. What is not here is who counts as
+   the creator: that is a separate table in a private repository, and nothing
+   in this file grants anyone the right to write either of these tables. A
+   player can read an announcement and read their own suspension. That is all.
+   ============================================================================ */
+
+-- --- suspensions ---------------------------------------------------------------
+
+create table if not exists public.suspensions (
+  user_id   uuid primary key references auth.users on delete cascade,
+  reason    text not null default '',
+  until     timestamptz,                     -- null: until it is lifted by hand
+  muted     boolean not null default false,  -- chat only; the rest still works
+  at        timestamptz not null default now(),
+  by        uuid references auth.users on delete set null
+);
+
+alter table public.suspensions enable row level security;
+
+/* A suspended player is told why rather than left wondering, so they may read
+   their own row. Nobody may read anyone else's, and no policy here lets anyone
+   write one: that is the creator's tools, through their own gate. */
+drop policy if exists "a player reads their own suspension" on public.suspensions;
+create policy "a player reads their own suspension"
+  on public.suspensions for select to authenticated
+  using (auth.uid() = user_id);
+
+grant select on public.suspensions to authenticated;
+
+create or replace function public.is_muted(who uuid default auth.uid())
+returns boolean language sql stable security definer set search_path = public, pg_temp as $$
+  select exists (
+    select 1 from public.suspensions s
+    where s.user_id = who and (s.until is null or s.until > now())
+  );
+$$;
+
+/* Muted is chat only. Suspended is everything social. A muted row is not a
+   suspended one, which is why this asks for muted = false. */
+create or replace function public.is_suspended(who uuid default auth.uid())
+returns boolean language sql stable security definer set search_path = public, pg_temp as $$
+  select exists (
+    select 1 from public.suspensions s
+    where s.user_id = who and s.muted = false
+      and (s.until is null or s.until > now())
+  );
+$$;
+
+grant execute on function public.is_muted(uuid) to authenticated;
+grant execute on function public.is_suspended(uuid) to authenticated;
+
+/*
+ * The bite.
+ *
+ * A suspended account can still sign in and look at the collection it spent
+ * months on. Locking someone out of their own cards is a harsher punishment
+ * than anything anyone can do in a card game, and it is not one this schema
+ * hands out. What a suspended account cannot do is act on anybody else.
+ *
+ * A trigger rather than a policy, because several of these tables are only
+ * ever written through security definer functions, which bypass policies but
+ * not triggers.
+ */
+create or replace function public.refuse_if_suspended()
+returns trigger language plpgsql security definer set search_path = public, pg_temp as $$
+begin
+  if to_regclass('public.admins') is not null
+     and exists (select 1 from public.admins a where a.id = auth.uid()) then
+    return new;
+  end if;
+  if tg_table_name in ('messages', 'guild_messages') then
+    if public.is_muted() then
+      raise exception 'this account is muted' using errcode = 'check_violation';
+    end if;
+  elsif public.is_suspended() then
+    raise exception 'this account is suspended' using errcode = 'check_violation';
+  end if;
+  return new;
+end $$;
+
+do $$
+declare t text;
+begin
+  foreach t in array array[
+    'messages', 'guild_messages', 'auctions', 'trades', 'deliveries',
+    'guilds', 'guild_invites', 'showcase_kudos', 'challenges', 'scores'
+  ]
+  loop
+    if to_regclass('public.' || t) is null then continue; end if;
+    execute format('drop trigger if exists refuse_if_suspended on public.%I', t);
+    execute format(
+      'create trigger refuse_if_suspended before insert on public.%I
+         for each row execute function public.refuse_if_suspended()', t);
+  end loop;
+end $$;
+
+-- --- announcements ----------------------------------------------------------------
+
+/* What the creator wants every player to read. The game shows the newest live
+   one that this player has not already dismissed. */
+create table if not exists public.announcements (
+  id           bigserial primary key,
+  title_en     text not null default '',
+  title_fr     text not null default '',
+  body_en      text not null,
+  body_fr      text not null default '',
+  kind         text not null default 'note' check (kind in ('note', 'warning', 'gift', 'event')),
+  starts_at    timestamptz not null default now(),
+  ends_at      timestamptz,
+  target_user  uuid references auth.users on delete cascade,
+  target_guild uuid,
+  created_at   timestamptz not null default now(),
+  created_by   uuid references auth.users on delete set null
+);
+
+create index if not exists announcements_live_idx on public.announcements (starts_at desc);
+
+alter table public.announcements enable row level security;
+
+/* Live, and either for everyone or for this player. Nothing here lets a player
+   write one. */
+drop policy if exists "players read live announcements" on public.announcements;
+create policy "players read live announcements"
+  on public.announcements for select to authenticated
+  using (
+    starts_at <= now()
+    and (ends_at is null or ends_at > now())
+    and (target_user is null or target_user = auth.uid())
+  );
+
+/* The game is playable without an account, and "everyone" has to mean everyone
+   or the word is doing no work: a player with no account is exactly the one who
+   will not hear about an outage any other way. An announcement aimed at a
+   single player is not in this, because a signed-out reader is not that player
+   and could not be told apart from anyone else. */
+drop policy if exists "anyone reads a live announcement meant for everyone" on public.announcements;
+create policy "anyone reads a live announcement meant for everyone"
+  on public.announcements for select to anon
+  using (
+    starts_at <= now()
+    and (ends_at is null or ends_at > now())
+    and target_user is null
+  );
+
+grant select on public.announcements to authenticated, anon;
