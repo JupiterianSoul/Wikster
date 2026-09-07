@@ -372,6 +372,10 @@ export function whenText(iso) {
 
 export const HELP = {
   packs:   { steps: 3, tip: true },
+  profile: { steps: 3, tip: true },
+  ach:     { steps: 3, tip: true },
+  badges:  { steps: 3, tip: true },
+  customize: { steps: 3, tip: true },
   timed:   { steps: 4, tip: true },
   shop:    { steps: 3, tip: true },
   binder:  { steps: 3, tip: true },

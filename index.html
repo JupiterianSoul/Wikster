@@ -200,6 +200,10 @@
 
         <!-- PROFILE ---------------------------------------------------------- -->
         <section id="screen-profile" class="screen">
+          <div class="screen-head">
+            <h2 id="profile-title"></h2>
+            <button class="help-btn" data-help="profile" type="button" aria-label="What is this?">?</button>
+          </div>
           <div class="hero-card panel">
             <div class="hero-id">
               <span id="profile-ring"></span>
@@ -346,8 +350,9 @@
         <section id="screen-ach" class="screen">
           <div class="screen-head">
             <h2 id="ach-title"></h2>
+            <button class="help-btn" data-help="ach" type="button" aria-label="What is this?">?</button>
           </div>
-          <p class="pad muted" id="ach-sub" style="padding-bottom:14px;font-size:.86rem"></p>
+          <p class="screen-sub pad" id="ach-sub"></p>
           <div class="ach-list pad" id="ach-list"></div>
         </section>
 
@@ -617,8 +622,9 @@
         <section id="screen-badges" class="screen">
           <div class="screen-head">
             <h2 id="badges-title"></h2>
-            <p id="badges-intro"></p>
+            <button class="help-btn" data-help="badges" type="button" aria-label="What is this?">?</button>
           </div>
+          <p class="screen-sub pad" id="badges-intro"></p>
           <div class="badge-grid is-all" id="badges-all"></div>
         </section>
 
@@ -655,7 +661,10 @@
 
         <!-- CUSTOMIZATION: how the app, and you, look ------------------------ -->
         <section id="screen-customize" class="screen">
-          <div class="screen-head"><h2 id="customize-title"></h2></div>
+          <div class="screen-head">
+            <h2 id="customize-title"></h2>
+            <button class="help-btn" data-help="customize" type="button" aria-label="What is this?">?</button>
+          </div>
           <div class="settings-list" id="customize-door"></div>
 
           <div class="section-head"><h3 class="label" id="theme-label"></h3></div>

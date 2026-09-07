@@ -1250,6 +1250,34 @@ const STRINGS = {
     creatorInShop: 'On sale in the Shop',
 
     // help
+    help_profile_title: 'Profile',
+    help_profile_lead: 'Who you are in the app: your level, the badges you wear, and what the collection adds up to.',
+    help_profile_1: 'The ring is your *level*, and your picture sits inside it. Everything you do pays experience towards the next one.',
+    help_profile_2: 'The *showcase* is the shelf friends see first. Put your best cards on it and they can leave a heart.',
+    help_profile_3: 'The *badges* below it are the four you chose to wear. The rest are on the Badges screen.',
+    help_profile_tip: 'The stats at the foot are the ones friends can compare against, so they are the ones the leaderboard reads.',
+
+    help_ach_title: 'Achievements',
+    help_ach_lead: 'A long list of things worth doing, each paying Buckarooz and Ink when you claim it.',
+    help_ach_1: 'They sort themselves: *ready to claim* first, then the ones you are closest to, then the ones already taken.',
+    help_ach_2: 'Nothing is paid until you *tap Claim*. Reaching the number is not claiming it.',
+    help_ach_3: 'Many run in *chains*: the same thing asked again at a bigger number, each step paying more than the last.',
+    help_ach_tip: 'The bar under each line is how far along you are, so a list of near misses reads at a glance.',
+
+    help_badges_title: 'Badges',
+    help_badges_lead: 'One badge per thing you have proved, and four of them worn on your profile at a time.',
+    help_badges_1: 'A badge is earned by *finishing the achievements behind it*, and is drawn for that badge alone.',
+    help_badges_2: 'Many carry a *rank*, marked in numerals: the same badge, earned again at a harder number.',
+    help_badges_3: 'Tap one to read what it takes, and to *wear it* if you have it. Four at once, and the rest stay on this shelf.',
+    help_badges_tip: 'A friend sees the four you wear, and can open the rest of your shelf from your page.',
+
+    help_customize_title: 'Customization',
+    help_customize_lead: 'Where everything you own is put on: the theme, your level frame, and the treatment each rarity wears.',
+    help_customize_1: 'A *theme* changes the whole app, its colours and its sounds together.',
+    help_customize_2: 'A *level frame* is the ring your picture sits in, wherever your name appears.',
+    help_customize_3: 'A *card effect* is worn by one rarity at a time, shown here on a real card before you choose it.',
+    help_customize_tip: 'Nothing is bought here. The Atelier sells it for Ink; this is where it goes on.',
+
     help_packs_title: 'Boosters',
     help_packs_lead: 'This is your shelf: the packs you own and have not opened yet.',
     help_packs_1: 'Swipe the shelf sideways to *pick a booster*.',

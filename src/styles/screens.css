@@ -25,6 +25,16 @@
 }
 .screen-head .help-btn { order: 2; }
 .screen-head p { order: 3; }
+/* A screen's subtitle, whether it sits inside the head or under it: one
+   treatment, so a tab that keeps its lead-in outside the title block still
+   reads like the tab next to it. */
+.screen-sub {
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 46ch;
+  margin: -10px 0 16px;
+}
 
 .section-head {
   display: flex;

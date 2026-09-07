@@ -158,6 +158,7 @@ bind({
   binderEmptyText: $('#binder-empty-text'),
   filterOpen: $('#filter-open'), filterCount: $('#filter-count'),
 
+  profileTitle: $('#profile-title'),
   profileRing: $('#profile-ring'), profileLevel: $('#profile-level'), profileRank: $('#profile-rank'),
   xpBar: $('#xp-bar'), xpLine: $('#xp-line'), nextRewardLabel: $('#next-reward-label'),
   nextReward: $('#next-reward'), statsLabel: $('#stats-label'), statGrid: $('#stat-grid'),

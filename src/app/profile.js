@@ -43,6 +43,8 @@ export function renderProfile() {
   const rank = rankFor(level);
   const atMax = level >= MAX_LEVEL;
 
+  // The screen names itself, as every other tab does.
+  el.profileTitle.textContent = t('profileTitle');
   live.profileRing.set(levelFraction(progress), String(level));
   paintFrameInto(el.profileRing, frameStyle(), frameTier(level));
   // The ring shows the face rather than the number: the number is spelled
