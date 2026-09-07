@@ -2079,6 +2079,44 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
 .notice-until { margin: 0; font-size: 0.8rem; color: var(--ink-dim); }
 .notice-warning .notice-body { color: var(--ink); }
 
+/*
+ * The four kinds of announcement, drawn differently.
+ *
+ * The kind was being stored and doing nothing, which made it a field the
+ * creator filled in for no reason. It is the band down the left and the word
+ * above the text: an outage should not arrive looking like a gift, and a gift
+ * should not arrive looking like a warning.
+ */
+.notice-sheet::before {
+  content: attr(data-kind-label);
+  justify-self: start; padding: 3px 9px; border-radius: 999px;
+  font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--kind, var(--accent)); border: 1px solid currentColor; opacity: 0.9;
+}
+.notice-sheet[data-kind-label='']::before { display: none; }
+.notice-sheet .notice-body {
+  padding-left: 13px; border-left: 3px solid var(--kind, var(--accent));
+}
+.notice-note    { --kind: var(--accent); }
+.notice-warning { --kind: var(--warning, #fbbf24); }
+.notice-gift    { --kind: var(--good, #34d399); }
+.notice-event   { --kind: var(--ink-accent, #818cf8); }
+
+/* What the creator handed over, itemised, because a note that says "here is
+   something from me" and shows nothing is not an answer. */
+.gift-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.gift-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px; border-radius: var(--radius);
+  border: var(--border) var(--border-style) var(--line); background: var(--surface);
+}
+.gift-item b { font-size: 0.92rem; min-width: 0; overflow-wrap: anywhere; }
+.gift-art {
+  width: 38px; height: 38px; flex: none; border-radius: 8px;
+  object-fit: cover; background: var(--line);
+}
+.gift-note { border-left-color: var(--good, #34d399); }
+
 .whatsnew { display: grid; gap: 14px; }
 .whatsnew-lead { font-size: 0.86rem; color: var(--ink-dim); }
 .whatsnew-item { display: grid; gap: 6px; padding: 12px 14px; border-radius: var(--radius); border: var(--border) var(--border-style) var(--line); border-left: 3px solid var(--tl, var(--accent)); background: var(--surface); }

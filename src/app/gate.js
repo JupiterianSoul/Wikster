@@ -356,7 +356,11 @@ export let socialTimer = null;
 export function startSocialPoll() {
   stopSocialPoll();
   if (!signedIn() || document.visibilityState !== 'visible') return;
-  socialTimer = setInterval(syncSocial, SOCIAL_POLL);
+  socialTimer = setInterval(() => {
+    syncSocial();
+    // A gift handed over while the app is open should not wait for a relaunch.
+    import('./gifts.js').then((m) => m.collectGifts()).catch(() => {});
+  }, SOCIAL_POLL);
 }
 
 export function stopSocialPoll() {
@@ -380,6 +384,13 @@ export async function resumeAccount() {
   syncSocial();
   startSocialPoll();
   startLiveSocial();
+  /*
+   * Anything the creator handed over, now that there is an account to hand it
+   * to. The launch pass runs before the gate is answered on a cold start, so
+   * without this a gift waited a full poll cycle - a minute of the player
+   * looking at a purse that had not changed.
+   */
+  import('./gifts.js').then((m) => m.collectGifts()).catch(() => {});
   leaderboard.flushScores().catch(() => {});
   // Which guild is mine, for the panel and the board, without opening the screen.
   import('./guilds.js').then((m) => m.loadMyGuild({ fresh: true })).catch(() => {});
@@ -413,6 +424,13 @@ export async function enterApp() {
   syncSocial();
   startSocialPoll();
   startLiveSocial();
+  /*
+   * Anything the creator handed over, now that there is an account to hand it
+   * to. The launch pass runs before the gate is answered on a cold start, so
+   * without this a gift waited a full poll cycle - a minute of the player
+   * looking at a purse that had not changed.
+   */
+  import('./gifts.js').then((m) => m.collectGifts()).catch(() => {});
   leaderboard.flushScores().catch(() => {});
   // Which guild is mine, for the panel and the board, without opening the screen.
   import('./guilds.js').then((m) => m.loadMyGuild({ fresh: true })).catch(() => {});

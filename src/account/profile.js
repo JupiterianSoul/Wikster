@@ -61,9 +61,19 @@ export async function publishStats(userId, stats) {
     best_rarity: stats.bestRarity,
     play_ms: stats.playMs
   };
-  // The badge shelf rides along where the project has the column (V12);
-  // an older project takes the rest of the stats without it.
-  if (Array.isArray(stats.badges) && live.badgeColumn !== false) {
+  /*
+   * The badge shelf rides along where the project has the column (V12); an
+   * older project takes the rest of the stats without it.
+   *
+   * This used to test Array.isArray(stats.badges), which was right for exactly
+   * as long as the shelf was a plain array of everything earned. It became
+   * { worn, earned, ach } when a player was given a choice of what to show, and
+   * the guard was not moved with it - so the column stopped being written at
+   * all, silently. Friends saw no badges, and the achievements figure on a
+   * profile read as an ellipsis, because null is what "not published" looks
+   * like from the other side.
+   */
+  if (stats.badges && typeof stats.badges === 'object' && live.badgeColumn !== false) {
     const { error } = await supabase.from('profiles').update({ ...row, badges: stats.badges }).eq('id', userId);
     if (!error) { live.badgeColumn = true; return; }
     if (!isSchemaGap(error)) throw error;

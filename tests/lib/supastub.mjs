@@ -42,6 +42,7 @@ export const newDatabase = () => ({
   guildMatchClaims: [],     // { week, user_id }
   announcements: [],        // { id, title_en, title_fr, body_en, body_fr, kind, starts_at, ends_at, target_user }
   suspensions: [],          // { user_id, reason, until, muted }: written by the creator's tools, read here
+  grants: [],               // { id, user_id, at, kind, payload, note_en, note_fr, claimed_at }: the creator's queue
   goalKind: null,           // a suite may pin the week's goal kind
   tokens: new Map(),        // access_token -> user id
   seq: 0
@@ -875,6 +876,36 @@ export async function installSupabase(page, { log = null, db = newDatabase(), sc
         // account cannot be told apart from any other, so a targeted one
         // cannot be theirs.
         && (a.target_user ? a.target_user === me : true)));
+    }
+
+    /*
+     * What the creator handed over. A player reads their own unclaimed rows and
+     * may set claimed_at on them, exactly as the policy allows - and nothing
+     * else. A stub that let a player insert one, or read somebody else's, would
+     * be a suite passing on a hole.
+     */
+    if (path === 'grants') {
+      /* A project whose owner has not re-run schema.sql has no such table, and
+         the game has to shrug that off rather than break a launch over it. */
+      if (schema === 'v1') return noTable(route, 'grants');
+      if (!me) return fail(route, 'permission denied for table grants', 401);
+      if (method === 'GET') {
+        let found = db.grants.filter((g) => g.user_id === me);
+        if ((params.get('claimed_at') ?? '') === 'is.null') found = found.filter((g) => !g.claimed_at);
+        found.sort((a, b) => new Date(a.at) - new Date(b.at));
+        return rows(route, found);
+      }
+      if (method === 'PATCH') {
+        const body = JSON.parse(route.request().postData() ?? '{}');
+        const idParam = params.get('id') ?? '';
+        const wanted = idParam.startsWith('in.')
+          ? idParam.slice(4, -1).split(',').map((x) => Number(x.replace(/"/g, '')))
+          : [Number(idParam.slice(3))];
+        const hit = db.grants.filter((g) => wanted.includes(g.id) && g.user_id === me && !g.claimed_at);
+        for (const g of hit) g.claimed_at = body.claimed_at ?? new Date().toISOString();
+        return rows(route, hit);
+      }
+      return fail(route, 'permission denied for table grants', 403);
     }
 
     /* A player reads their own suspension and nobody else's. */

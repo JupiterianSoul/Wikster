@@ -100,6 +100,27 @@ check('as a version 2 envelope', first?.data?.version === 2, String(first?.data?
 check('with a stamp per key', typeof first?.data?.stamps === 'object' && COL in first.data.stamps);
 check('the device remembers whose save it holds', (await local(a, 'wikster.syncedUser')) === idA);
 
+/*
+ * The shelf a friend sees rides on the profile row, and it stopped being
+ * written at all. The guard tested Array.isArray(stats.badges), which was true
+ * for exactly as long as the shelf was a plain array of everything earned; it
+ * became { worn, earned, ach } when players got to choose what to show, and
+ * the guard was not moved with it. Nothing errored - the column was simply
+ * never written, so friends saw no badges and the achievements figure on a
+ * profile read as an ellipsis, which is what "not published" looks like from
+ * the other side.
+ */
+/* The stats ride on a debounced flush, so give it the flush. */
+await a.evaluate(() => window.__wikster?.flushSync?.()).catch(() => {});
+await a.waitForTimeout(2500);
+const shelf = shared.profiles.get(idA)?.badges;
+check('the badge shelf is published with the stats', shelf && typeof shelf === 'object' && !Array.isArray(shelf),
+  JSON.stringify(shelf));
+check('carrying what is worn and what is earned',
+  Array.isArray(shelf?.worn) && Array.isArray(shelf?.earned));
+check('and how many achievements are unlocked, as a number not an ellipsis',
+  Number.isFinite(shelf?.ach), String(shelf?.ach));
+
 /* --- another device wrote meanwhile: the push merges ---------------------- */
 section('a push merges');
 await a.evaluate(() => window.__wikster.store.saveWallet(60000));   // stamped now, and queued for sync

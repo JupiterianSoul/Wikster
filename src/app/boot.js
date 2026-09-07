@@ -3,6 +3,7 @@
 import { iconSvg, logoSvg } from '../data/icons.js';
 import { checkWhatsNew } from './whatsnew.js';
 import { checkNotices } from './notices.js';
+import { collectGifts } from './gifts.js';
 import { LANGUAGES, getLanguage, languageChosen, loadLanguage, setLanguage, t, tx } from '../i18n.js';
 import { Bar, NavBar, Odometer, Rail, Ring, Segmented, Sheet, press, trackDrag } from '../ui/components.js';
 import { synth } from '../ui/sound.js';
@@ -404,6 +405,10 @@ export function init() {
   setTimeout(() => checkWhatsNew({ fresh: !state.profile.started }), 1200);
   // Anything the creator has to say, after the launch sheets have had their turn.
   checkNotices();
+  // And anything the creator has handed over: put away here, on this device,
+  // through the game's own writers, rather than written into the save from
+  // outside where the shapes drift and the merge throws it away.
+  setTimeout(() => { collectGifts(); }, 1800);
   setTimeout(registerShell, 3000);
   setTimeout(warmDrawer, 2500);
   sayWipeNote();
@@ -765,6 +770,9 @@ window.__wikster = {
   topRead: fetchTopRead, todayRarity: todayRarityForRank,
   // A suite signs a player out the way the Settings row does, wires and all.
   signOut: () => leaveAccount(),
+  // The sync is debounced by design, so a suite that wants to look at what was
+  // published has to be able to ask for the flush rather than sleep and hope.
+  flushSync,
   // A suite moves the guild's weekly goal the way a booster or a Wikdle would.
   guildGoal: (metric, detail) => { reportGuildGoal(metric, detail); return flushGuildGoal(); },
   // And the season's track the same way; seasonAt says which season it is.

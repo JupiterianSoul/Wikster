@@ -309,12 +309,59 @@ touches the collection: a binder that took months is not something to take away
 over a word in a chat, so a stopped account still opens the game, still sees
 everything it owns and still opens boosters.
 
+An announcement is drawn as what it is: a gift, a heads-up, an event and a
+plain note are labelled and coloured differently, because an outage arriving
+in the same shape as a present is a wasted field.
+
 Both are enforced by Postgres, with triggers rather than policies, because this
 schema drops and recreates its own policies every time it runs and a rule
 written anywhere else would silently disappear on the next update. Neither
 table can be written from the game: that is the creator's own tooling, behind
 its own gate. The tables and the enforcement are V15 in `supabase/schema.sql`;
 the reader is `src/app/notices.js`.
+
+### Something arrived
+
+A third thing arrives from the server: whatever the creator has handed over.
+It is a queue (`public.grants`, V16) rather than an edit to the save, and the
+game empties it on the device in `src/app/gifts.js` before marking each row
+claimed.
+
+The queue exists because the obvious alternative was built, shipped, and failed
+two ways at once, neither of which announced itself.
+
+**The shapes drift.** The save is this app's storage and its shapes are this
+app's. An inventory slot is `{ spec, count }` filed under an id derived from the
+spec, not a number filed under a booster's name. A card carries `rarityId`, and
+`rarityById()` of anything else answers Common without complaint. Anything
+written from outside restates those shapes, and a restatement that has fallen
+behind does not fail - it lands, and the game reads past it. Boosters handed
+over that way were not on the shelf. Cards sent as Legendary arrived Common.
+
+**The merge is not neutral.** A device merges key by key and the newer stamp
+wins, and `wikster.profile.v1` is rewritten immediately before every push
+because that is when play time is flushed. So a profile written from outside was
+always the older of the two by the time they met, and was discarded every time.
+Level, play time, boosters opened and every owned cosmetic were being thrown
+away by design.
+
+Applied on the device, through `addBooster`, `recordPulls`, `saveWallet`,
+`addInk` and `saveProfile`, neither can happen: the shapes are whatever the game
+says they are today, and the write is the newest by construction. A card handed
+over is priced the way an identical pulled card is priced, from the article's
+readership and its tier, rather than from a number typed somewhere else.
+
+The player is shown what arrived, itemised - the pack and how many, the card
+with its picture and its tier in its own colour, the coins, the Ink - with the
+creator's note beside it rather than instead of it. The note travels on the same
+row as the gift, so the two cannot arrive separately.
+
+A row naming a kind this build does not know is left unclaimed rather than
+swallowed, so a later build hands it over. A project whose schema has not been
+updated has no such table, and the game shrugs and carries on.
+`tests/suites/gifts.mjs` drives every kind and checks the thing a player would
+look at - the pack on the shelf, the tier on the card in the binder, the number
+on the profile - because a test that reads back what it wrote proves nothing.
 
 ## Accounts and the social side
 

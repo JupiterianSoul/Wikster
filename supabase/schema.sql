@@ -2393,3 +2393,75 @@ create policy "anyone reads a live announcement meant for everyone"
   );
 
 grant select on public.announcements to authenticated, anon;
+
+
+-- ============================================================================
+--  V16: THINGS THE CREATOR HANDS OVER, AND THE GAME PUTS AWAY ITSELF
+-- ============================================================================
+--
+-- The control app used to give a player something by editing their save on the
+-- server: read the envelope, change one key, write it back stamped now. That is
+-- wrong in two ways that both showed up the moment it was used in anger.
+--
+-- The first is a shape problem. The save is the game's own storage, and its
+-- shapes are the game's: an inventory is { specId: { spec, count } }, not
+-- { id: count }; a card carries `rarityId`, not `rarity`. Anything written from
+-- outside is writing a guess at those shapes, and a guess that is close but
+-- wrong does not error - it lands, and the game reads past it. Boosters granted
+-- that way were invisible, and cards granted that way came out Common whatever
+-- tier was asked for.
+--
+-- The second is a race, and it is the worse one. The device merges key by key
+-- and the newer stamp wins. `wikster.profile.v1` is written every single time
+-- the game flushes play time, which is immediately before every push. So a
+-- profile written from the control at T was always older than the device's own
+-- copy at T+something by the time the two met, and was always discarded. Level,
+-- play time, boosters opened and every owned cosmetic were being thrown away by
+-- design, silently, one hundred percent of the time.
+--
+-- A queue fixes both. The creator does not write the save at all: they write a
+-- row here saying what to hand over. The game reads its own unclaimed rows,
+-- applies each one THROUGH ITS OWN FUNCTIONS - addBooster, recordPulls,
+-- saveWallet, addInk - so the shapes cannot drift and the writes are the
+-- device's own and therefore the newest, and then marks the row claimed. The
+-- player is shown exactly what arrived.
+
+create table if not exists public.grants (
+  id          bigserial primary key,
+  user_id     uuid not null references auth.users on delete cascade,
+  at          timestamptz not null default now(),
+  kind        text not null,
+  payload     jsonb not null default '{}'::jsonb,
+  -- What to say when it lands. Empty means it lands quietly.
+  note_en     text not null default '',
+  note_fr     text not null default '',
+  created_by  uuid references auth.users on delete set null,
+  claimed_at  timestamptz
+);
+
+create index if not exists grants_waiting_idx
+  on public.grants (user_id, at) where claimed_at is null;
+
+alter table public.grants enable row level security;
+
+/* A player sees what is waiting for them and nothing else. */
+drop policy if exists "you see what was given to you" on public.grants;
+create policy "you see what was given to you"
+  on public.grants for select to authenticated
+  using (user_id = auth.uid());
+
+/* And may mark it claimed - only their own, and only claimed_at: the check
+   clause is what stops a player from re-writing the payload of a row they can
+   already see and handing themselves a hundred Prismatic packs. */
+drop policy if exists "you claim what was given to you" on public.grants;
+create policy "you claim what was given to you"
+  on public.grants for update to authenticated
+  using (user_id = auth.uid() and claimed_at is null)
+  with check (user_id = auth.uid() and claimed_at is not null);
+
+grant select, update on public.grants to authenticated;
+grant usage, select on sequence public.grants_id_seq to authenticated;
+
+/* Nothing here lets a player insert one. The creator's insert policy lives in
+   the control app's own gate SQL, beside every other is_admin() rule, so this
+   file has no opinion about who the creator is. */

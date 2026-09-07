@@ -88,11 +88,17 @@ const pick = (row, field) => {
   return String(row[`${field}_${lang}`] || row[`${field}_en`] || '').trim();
 };
 
+/* The kind is a word and a colour, not a column nobody reads. An outage must
+   not arrive looking like a gift. */
+const KINDS = { note: 'noticeKindNote', warning: 'noticeKindWarning', gift: 'noticeKindGift', event: 'noticeKindEvent' };
+
 export function openNotice(row) {
   markSeen(row.id);
+  const kind = KINDS[row.kind] ? row.kind : 'note';
   openSheet(pick(row, 'title') || t('noticeTitle'), (body) => {
     const wrap = document.createElement('div');
-    wrap.className = `notice-sheet notice-${row.kind ?? 'note'}`;
+    wrap.className = `notice-sheet notice-${kind}`;
+    wrap.dataset.kindLabel = t(KINDS[kind]);
     const text = document.createElement('p');
     text.className = 'notice-body';
     text.textContent = pick(row, 'body');
@@ -105,6 +111,7 @@ export function openSuspension(row) {
   openSheet(t(row.muted ? 'mutedTitle' : 'suspendedTitle'), (body) => {
     const wrap = document.createElement('div');
     wrap.className = 'notice-sheet notice-warning';
+    wrap.dataset.kindLabel = t('noticeKindWarning');
     const lead = document.createElement('p');
     lead.className = 'notice-body';
     lead.textContent = t(row.muted ? 'mutedLead' : 'suspendedLead');
