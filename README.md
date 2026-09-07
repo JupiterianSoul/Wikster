@@ -440,6 +440,31 @@ cd android && ./gradlew assembleRelease
 CI builds it on every push and publishes it as the rolling `apk-latest`
 release.
 
+### Two apps out of one wrapper
+
+The Android project builds two flavours from the same WebView. `game` is
+Wikster. `control` is the creator's tools: the same wrapper pointed at
+`/control/`, under its own applicationId so it installs beside the game rather
+than over it, with its own name and its own icon so the two are not confused on
+a home screen.
+
+The control flavour bundles nothing. The game carries a copy of itself in
+assets for when there is no connection, because a collection is worth looking
+at offline; the tools are useless without the database, so there is nothing to
+fall back to and no reason to make that APK ten megabytes larger pretending
+otherwise. With no connection it shows the browser's own "no connection" page,
+which at least says so, rather than a missing local file that reads as a broken
+app.
+
+```
+./gradlew assembleGameRelease      # wikster.apk
+./gradlew assembleControlRelease   # wikster-control.apk
+```
+
+Both are published to the rolling `apk-latest` release. The tools APK shows
+nothing at all unless the signed-in account is the one the database lists as
+the creator, so installing it is not how anyone gets in.
+
 ### Signing, and why the key is in the repo
 
 `android/keystore/` holds a signing key, committed deliberately, used by both

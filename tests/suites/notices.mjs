@@ -140,6 +140,29 @@ section('the ones that should not appear');
   await ctx.close();
 }
 
+/* --- one aimed at a single player, which is what a grant note is ---------- */
+section('an announcement for one player');
+{
+  const db = newDatabase();
+  const me = seed(db);
+  db.announcements.push({
+    id: 6, title_en: 'From the creator', body_en: 'Here are 5,000 coins for the trouble.',
+    kind: 'gift', starts_at: new Date(Date.now() - 60000).toISOString(), ends_at: null,
+    target_user: me
+  });
+  const { ctx, page } = await launch(db);
+  await page.waitForTimeout(4500);
+  check('it does not reach them before they sign in', (await page.locator('.notice-sheet').count()) === 0);
+  await signIn(page);
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  const shown = await until(async () => (await page.locator('.notice-sheet').count()) > 0);
+  check('it reaches them once signed in', shown);
+  if (shown) {
+    check('with what it was about', (await page.locator('.notice-body').textContent()).includes('5,000 coins'));
+  }
+  await ctx.close();
+}
+
 /* --- a suspension explains itself ----------------------------------------- */
 section('a suspended account is told why');
 {

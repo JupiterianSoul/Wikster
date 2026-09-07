@@ -65,6 +65,42 @@ android {
      * A release build drops that flag and is signed with the same key, so it
      * still installs straight over an existing copy and keeps the save.
      */
+    /*
+     * Two apps from one wrapper.
+     *
+     * `game` is Wikster. `control` is the creator's tools: the same WebView,
+     * pointed at a different path, under its own applicationId so it installs
+     * beside the game instead of replacing it, and with its own name and icon
+     * so the two are not confused on a home screen.
+     *
+     * The control flavour bundles nothing. The game carries a copy of itself
+     * in assets for when there is no connection, because a collection is worth
+     * looking at offline; the tools are useless without the database anyway,
+     * so there is nothing to fall back to and no reason to make the APK ten
+     * megabytes larger pretending otherwise.
+     */
+    buildFeatures {
+        buildConfig true
+    }
+
+    flavorDimensions += 'app'
+    productFlavors {
+        game {
+            dimension 'app'
+            applicationId 'com.wikster.app'
+            resValue 'string', 'app_name', 'Wikster'
+            buildConfigField 'String', 'LIVE_PATH', '"/Wikster/"'
+            buildConfigField 'boolean', 'HAS_BUNDLE', 'true'
+        }
+        control {
+            dimension 'app'
+            applicationId 'com.wikster.control'
+            resValue 'string', 'app_name', 'Wikster Control'
+            buildConfigField 'String', 'LIVE_PATH', '"/Wikster/control/"'
+            buildConfigField 'boolean', 'HAS_BUNDLE', 'false'
+        }
+    }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.shared

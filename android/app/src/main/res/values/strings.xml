@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Wikster</string>
     <string name="notify_channel">Friends and trades</string>
     <string name="notify_channel_note">Messages, friend requests, gifts and trades that arrive while the app is not on screen.</string>
 </resources>

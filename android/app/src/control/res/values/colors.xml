@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The control build's own icon colours. A flavour resource of the same name
+  wins over the shared one, so this repaints the launcher icon without a second
+  copy of every other colour in the project.
+
+  Deliberately not the game's dark blue: the two sit next to each other on a
+  home screen and the whole point is being able to tell at a glance which one
+  is about to change somebody's account.
+-->
+<resources>
+    <color name="ic_launcher_background">#08111C</color>
+</resources>

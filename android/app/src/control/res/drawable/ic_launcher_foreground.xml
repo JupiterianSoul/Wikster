@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A cyan W drawn on the safe area of an adaptive icon: 108dp canvas, artwork
+  kept inside the middle 72dp, because Android crops the rest to whatever mask
+  the launcher uses and a mark that fills the canvas loses its ends to a circle.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M30,40 L40,68 L54,50 L68,68 L78,40"
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

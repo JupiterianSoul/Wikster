@@ -1,0 +1,19 @@
+{
+  "name": "Wikster Control",
+  "short_name": "Control",
+  "description": "The creator's tools for Wikster.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#080b14",
+  "theme_color": "#080b14",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230b1020'/%3E%3Cpath d='M112 336 L176 176 L256 304 L336 176 L400 336' stroke='%2338bdf8' stroke-width='38' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

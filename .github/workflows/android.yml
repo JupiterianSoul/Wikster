@@ -76,16 +76,23 @@ jobs:
         # existing copy.
         env:
           BUILD_NUMBER: ${{ github.run_number }}
-        run: ./gradlew --no-daemon assembleRelease
+        run: ./gradlew --no-daemon assembleGameRelease assembleControlRelease
 
-      - name: Rename APK
-        run: cp android/app/build/outputs/apk/release/app-release.apk wikster.apk
+      # Two apps out of one wrapper, so two APKs and two names. Flavours put
+      # their output under <flavour><BuildType>/, not under release/.
+      - name: Rename the APKs
+        run: |
+          cp android/app/build/outputs/apk/game/release/app-game-release.apk wikster.apk
+          cp android/app/build/outputs/apk/control/release/app-control-release.apk wikster-control.apk
+          ls -lh wikster.apk wikster-control.apk
 
-      - name: Upload APK as a workflow artifact
+      - name: Upload the APKs as workflow artifacts
         uses: actions/upload-artifact@v4
         with:
           name: wikster-apk
-          path: wikster.apk
+          path: |
+            wikster.apk
+            wikster-control.apk
           if-no-files-found: error
 
       # A release asset gives a direct, tappable .apk link - an artifact only
@@ -103,13 +110,19 @@ jobs:
           done
           git tag -f apk-latest "$GITHUB_SHA"
           git push -f origin apk-latest
-          gh release create apk-latest wikster.apk \
+          gh release create apk-latest wikster.apk wikster-control.apk \
             --verify-tag \
             --title "Wikster - latest APK" \
             --notes "Sideloadable release build of \`$GITHUB_SHA\`.
 
           **Install:** download \`wikster.apk\` below, tap it, and allow
           your browser to install unknown apps when prompted.
+
+          \`wikster-control.apk\` is the creator's tools, not the game. It
+          installs beside Wikster rather than over it, and it shows nothing at
+          all unless the signed-in account is the one the database lists as the
+          creator. Anyone else who installs it gets a sign-in box and empty
+          screens.
 
           Android still offers to scan a sideloaded app with Play Protect;
           that check belongs to the device and no app can turn it off. You can

@@ -49,9 +49,11 @@ import androidx.webkit.WebViewAssetLoader;
  */
 public class MainActivity extends Activity {
 
-    /** Where the site lives. Only pages under this path stay inside the app. */
+    /** Where the site lives. Only pages under this path stay inside the app.
+     *  The path comes from the flavour: the game gets the game, the control
+     *  build gets the creator's tools. */
     private static final String LIVE_HOST = "jupiteriansoul.github.io";
-    private static final String LIVE_PATH = "/Wikster/";
+    private static final String LIVE_PATH = BuildConfig.LIVE_PATH;
     private static final String LIVE_URL = "https://" + LIVE_HOST + LIVE_PATH;
 
     /** Reserved by androidx.webkit for locally-served assets. */
@@ -175,7 +177,10 @@ public class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT));
 
         if (savedInstanceState == null) {
-            webView.loadUrl(online() ? LIVE_URL : START_URL);
+            // The control build carries no bundled copy: it is useless without
+            // the database, so falling back to a local page would only show an
+            // app that cannot answer anything. It waits for a connection instead.
+            webView.loadUrl((online() || !BuildConfig.HAS_BUNDLE) ? LIVE_URL : START_URL);
         } else {
             webView.restoreState(savedInstanceState);
         }
@@ -203,9 +208,16 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** Open the copy bundled at install time, once. */
+    /**
+     * Open the copy bundled at install time, once.
+     *
+     * The control build has no bundled copy, so there is nothing to fall back
+     * to: loading it would replace a failed page with a missing one, which
+     * reads as a broken app rather than as a lost connection. It is left alone
+     * to show the browser's own "no connection" page, which at least says so.
+     */
     private void fallBack() {
-        if (fellBack) return;
+        if (fellBack || !BuildConfig.HAS_BUNDLE) return;
         fellBack = true;
         webView.post(() -> webView.loadUrl(START_URL));
     }
