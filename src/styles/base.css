@@ -140,7 +140,18 @@ h1, h2, h3, h4 {
   position: sticky;
   top: 0;
   z-index: 40;
-  display: flex;
+  /*
+   * Three columns rather than a row, so the purse is centred on the BAR and
+   * not on whatever is left over after the buttons. As a flex row it sat in
+   * the left group and drifted with the width of its own number: the more
+   * money you had, the further off centre it went.
+   */
+  display: grid;
+  /* minmax(0, auto), not auto: an `auto` column refuses to shrink below what
+     is inside it, so on a 320px screen the purse kept its full width and ran
+     straight through the bell. This lets the number ellipsise instead, which
+     is what min-width:0 on the chip was always for. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
   align-items: center;
   gap: 12px;
   padding: calc(var(--safe-top) + 10px) var(--gutter) 10px;
@@ -155,17 +166,36 @@ h1, h2, h3, h4 {
 }
 
 /*
- * The purse rides with the menu on the left, where it has the whole width to
- * grow into; the bell and your level sit on the right. The daily gift is a
- * drawer link, so the bar is four things and never crowds.
+ * The menu and Ink on the left, the purse in the middle, the bell and your
+ * level on the right. The two sides are equal columns, so the purse holds the
+ * centre of the bar whatever it says and whatever the sides are doing.
  */
 .appbar-side { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.appbar-side.is-left { flex: 1 1 auto; }
-.appbar-side.is-right { flex: none; justify-content: flex-end; }
+.appbar-side.is-left { justify-self: start; }
+.appbar-side.is-right { justify-self: end; justify-content: flex-end; }
 /* The number gives way before the bar does: a six-figure purse ellipsises
    rather than pushing the level off the edge. */
-.appbar .wallet-chip { min-width: 0; }
+.appbar .wallet-chip { justify-self: center; min-width: 0; max-width: 100%; }
 .appbar .wallet-chip #wallet-amount { min-width: 0; overflow: hidden; }
+
+/*
+ * On a very narrow phone, four buttons and a purse genuinely do not fit at
+ * full size: menu, Ink, the purse, the bell and your level come to more than
+ * 320px can hold. Something has to give, and it is spacing rather than any of
+ * the targets, which all need a thumb to land on. The purse gives up its
+ * padding, the bar gives up its gaps and its gutter, and the level ring comes
+ * down to the size of the other buttons.
+ *
+ * Measured rather than guessed: without this the purse overlapped the bell by
+ * ten pixels at 320px, because a grid column will not shrink a side below the
+ * buttons inside it and the overflow lands on whatever is next to it.
+ */
+@media (max-width: 380px) {
+  .appbar { gap: 6px; padding-left: 10px; padding-right: 10px; }
+  .appbar .wallet-chip { padding: 0 10px; font-size: 0.9rem; }
+  .appbar-side { gap: 6px; }
+  .appbar .ring { transform: scale(0.84); transform-origin: center; margin: 0 -4px; }
+}
 
 /* The unread count on the bell. Sits on the icon rather than beside it, so a
    two-digit count does not push the level badge off the row. */

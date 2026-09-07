@@ -1497,7 +1497,7 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
    The same tiles as Customization, each with one button: the price, then
    "wear it" once owned. Ink is indigo wherever it is shown, so a price in
    Ink never reads as a price in Buckarooz. */
-.is-ink, .wallet-ink, .atelier-door-ink, .reward-ink, .atelier-balances [data-ink] { color: var(--ink-accent, #818cf8); }
+.is-ink, .atelier-door-ink, .reward-ink, .atelier-balances [data-ink] { color: var(--ink-accent, #818cf8); }
 .atelier-banner { flex-wrap: wrap; row-gap: 10px; }
 .atelier-banner #atelier-exchange { flex-basis: 100%; }
 .atelier-banner .shop-banner-cell:first-child b { color: var(--ink-accent, #818cf8); }

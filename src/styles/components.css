@@ -123,14 +123,15 @@
   backdrop-filter: var(--blur);
 }
 [data-theme='arcade'] .wallet-chip { border-radius: var(--radius); }
-/* Ink sits in the same chip, past a thin rule, in its own colour. */
-.wallet-ink {
-  display: inline-flex; align-items: center; gap: 3px;
-  margin-left: 4px; padding-left: 9px;
-  border-left: 1px solid var(--line);
-  font-size: 0.82rem;
-}
-.wallet-ink:empty { display: none; }
+
+/*
+ * Ink used to ride inside the purse, past a thin rule. Two numbers in one
+ * chip made it wide, and a wide chip cannot sit in the middle of a bar
+ * without pushing something off the end of it. It is its own button now, the
+ * same size as the bell, and it opens the same sheet the number did.
+ */
+#ink-btn { color: var(--ink-soft, #9db4ff); }
+#ink-btn .ink-drop { height: 17px; width: auto; }
 
 /* --- odometer --------------------------------------------------------------- */
 

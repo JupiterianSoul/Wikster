@@ -169,7 +169,7 @@ bind({
   customizeTitle: $('#customize-title'), identityLabel: $('#identity-label'), identityList: $('#identity-list'),
   framesLabel: $('#frames-label'), framesNote: $('#frames-note'), frameStyles: $('#frame-styles'),
   fxLabel: $('#fx-label'), fxNote: $('#fx-note'), fxTiers: $('#fx-tiers'), customizeDoor: $('#customize-door'),
-  walletInk: $('#wallet-ink'),
+  inkBtn: $('#ink-btn'), inkIcon: $('#ink-icon'),
   atelierTitle: $('#atelier-title'), atelierLead: $('#atelier-lead'), atelierPurseLabel: $('#atelier-purse-label'), atelierPurse: $('#atelier-purse'),
   atelierCoinsLabel: $('#atelier-coins-label'), atelierCoins: $('#atelier-coins'), atelierExchange: $('#atelier-exchange'),
   atelierThemesLabel: $('#atelier-themes-label'), atelierThemes: $('#atelier-themes'), atelierFramesLabel: $('#atelier-frames-label'), atelierFrames: $('#atelier-frames'),
@@ -478,13 +478,16 @@ export function init() {
   renderBinder();
   // Pack art is language-specific, so it waits until a language exists.
 
-  [el.wallet, el.menuBtn, el.bell, el.levelBadge, el.packsOpen, el.timedOpen,
+  [el.wallet, el.menuBtn, el.inkBtn, el.bell, el.levelBadge, el.packsOpen, el.timedOpen,
    el.filterOpen, el.openBack, el.openSkip, el.openDone, el.sheetClose, el.starterGo,
    el.timedOpenAll,
    el.packsEmptyCta, el.creatorGo, el.findGo, el.friendBack,
    el.friendRemove, el.gateAlt, el.oddsBtn, el.albumBack, el.chatBack, el.quizBack].forEach((node) => press(node));
 
   el.wallet.addEventListener('click', openWallet);
+  // Ink has its own button beside the menu now, and it opens what the number
+  // inside the purse used to lead to.
+  el.inkBtn?.addEventListener('click', () => { import('./atelier.js').then((m) => m.openInkSheet()); });
   el.bell.addEventListener('click', openNotifications);
   el.menuBtn.addEventListener('click', () => (el.drawer.hidden ? openDrawer() : closeDrawer()));
   el.drawerScrim.addEventListener('click', closeDrawer);

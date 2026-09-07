@@ -56,6 +56,11 @@
     width: 100%;
   }
   .appbar {
+    /* Back to a flex row here. A phone centres the purse on the bar, which
+       needs three grid columns; a pointer puts the whole header on one
+       toolbar at the right, which needs `display: contents` on the wings and
+       `order` on the children, and neither of those does anything in a grid. */
+    display: flex;
     padding: 12px max(var(--gutter), calc((100% - var(--deck)) / 2)) 10px;
     justify-content: flex-end;
     gap: 8px;
@@ -63,14 +68,17 @@
   }
 
   /* --- the toolbar ------------------------------------------------------- */
-  /* A phone puts the purse on the left, where a thumb finds it. A pointer
-     does not need it there: both wings dissolve and the header becomes one
-     toolbar on the right, in a line: purse, menu, bell, level. */
+  /* A phone centres the purse on the bar, with the menu and Ink to its left
+     and the bell and your level to its right. A pointer does not need it
+     centred: both wings dissolve and the header becomes one toolbar on the
+     right, in a line: purse, Ink, menu, bell, level. */
   .appbar-side { flex: none; display: contents; }
+  .appbar .wallet-chip { justify-self: auto; }
   #wallet { order: 1; }
-  #menu-btn { order: 2; }
-  #bell { order: 3; }
-  #level-badge { order: 4; margin-left: 4px; }
+  #ink-btn { order: 2; }
+  #menu-btn { order: 3; }
+  #bell { order: 4; }
+  #level-badge { order: 5; margin-left: 4px; }
 
   /* A pointer has no thumb reach to respect, and hover is real input. */
   .card:hover, .booster:hover { cursor: pointer; }

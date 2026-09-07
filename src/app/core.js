@@ -361,7 +361,6 @@ export function refreshWallet() {
   state.ink = loadInk();
   live.walletOdo.set(state.wallet);
   if (el.shopPurse) el.shopPurse.innerHTML = money(state.wallet);
-  if (el.walletInk) el.walletInk.innerHTML = ink(state.ink);
   if (el.atelierPurse) el.atelierPurse.innerHTML = ink(state.ink);
   if (el.atelierCoins) el.atelierCoins.innerHTML = money(state.wallet);
   el.wallet.setAttribute('aria-label', `${t('walletTitle')}: ${formatAmount(state.wallet)}`);
@@ -389,6 +388,7 @@ export function applyStrings() {
   document.documentElement.lang = getLanguage();
   el.menuIcon.innerHTML = iconSvg('menu', { size: 20 });
   el.bellIcon.innerHTML = iconSvg('bell', { size: 19 });
+  if (el.inkIcon) el.inkIcon.innerHTML = inkSvg({ size: 17 });
   el.walletMark.innerHTML = buckSvg({ size: 12 });
   el.sheetClose.innerHTML = iconSvg('close', { size: 17 });
   el.openBack.innerHTML = iconSvg('chevronLeft', { size: 18 });
@@ -399,6 +399,7 @@ export function applyStrings() {
   el.packsEmptyCta.textContent = t('goShop');
   el.menuBtn.setAttribute('aria-label', t('menu'));
   el.bell.setAttribute('aria-label', t('notifTitle'));
+  el.inkBtn?.setAttribute('aria-label', t('walletInkMore'));
 
   live.nav?.setLabels({
     packs: t('tabBoosters'), timed: t('tabTimed'), shop: t('tabShop'),

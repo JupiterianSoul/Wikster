@@ -58,7 +58,10 @@ const profile = () => p.evaluate(() => JSON.parse(localStorage.getItem('wikster.
 
 section('the purse');
 check('a fresh save holds no Ink', (await inkHeld()) === 0);
-check('the app bar shows it beside the coins', /0/.test(await p.locator('#wallet-ink').textContent()) && await p.locator('#wallet-ink .ink-drop').count() === 1);
+// Ink left the purse and became its own button beside the menu: two numbers
+// in one chip made it too wide to sit in the middle of the bar.
+check('Ink has its own button in the app bar', await p.locator('#ink-btn .ink-drop').count() === 1);
+check('and the purse carries the coins alone', !(await p.locator('#wallet-ink').count()));
 check('a stale effect choice reads as classic', await p.evaluate(() => Object.keys(window.__wikster.state.cardFx).length === 0));
 await p.locator('#wallet').click();
 await p.waitForTimeout(700);
