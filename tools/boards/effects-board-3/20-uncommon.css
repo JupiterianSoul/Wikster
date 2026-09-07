@@ -1,0 +1,159 @@
+/* ============ UNCOMMON: alive. Everything here grows, drifts or breathes. ============ */
+[data-variant^="uncommon"] .card-front { --rarity: #4ade80; }
+
+/* 1 Fern Frond: pinnate leaves layered over the plate, unfurling on a slow breath */
+[data-variant="uncommon-1"] .card-front { background: linear-gradient(180deg, #0e2417, #12301e 55%, #0b1e12); box-shadow: inset 0 0 0 2px rgba(74,222,128,.4); }
+[data-variant="uncommon-1"] { --ink: #e7f7ec; --ink-dim: #9ecbaf; --ink-faint: #6f9b80; }
+[data-variant="uncommon-1"] .fx-a { z-index: 0; opacity: .55; background:
+  repeating-linear-gradient(64deg, transparent 0 8px, rgba(74,222,128,.16) 8px 9.4px, transparent 9.4px 17px),
+  repeating-linear-gradient(-64deg, transparent 0 8px, rgba(52,180,100,.13) 8px 9.4px, transparent 9.4px 17px);
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 26px); mask: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 26px); }
+[data-variant="uncommon-1"] .fx-b { z-index: 2; opacity: .8; background:
+  repeating-linear-gradient(90deg, transparent 0 24px, rgba(120,240,170,.5) 24px 25.2px, transparent 25.2px 26px);
+  -webkit-mask: linear-gradient(180deg, transparent, #000 30% 84%, transparent); mask: linear-gradient(180deg, transparent, #000 30% 84%, transparent);
+  transform-origin: 50% 100%; animation: u-unfurl 9s ease-in-out infinite; }
+[data-variant="uncommon-1"] .fx-c { z-index: 3; mix-blend-mode: screen; background: radial-gradient(ellipse 70% 50% at calc(50% + var(--lx) * 26%) 18%, rgba(150,255,190,.2), transparent 66%); }
+[data-variant="uncommon-1"] .fx-ring::before { background: conic-gradient(from 0deg, #14532d, #4ade80, #166534, #86efac, #14532d); animation: spin 16s linear infinite; }
+[data-variant="uncommon-1"] .card-art { box-shadow: 0 0 0 1px rgba(74,222,128,.6), 0 3cqw 6cqw -3cqw #000; }
+@keyframes u-unfurl { 0%, 100% { transform: skewX(-2.4deg) scaleY(.97) } 50% { transform: skewX(2.4deg) scaleY(1) } }
+
+/* 2 Moss: velvet clumps with a fuzzy silhouette, damp and slowly brightening */
+[data-variant="uncommon-2"] .card-front { background: radial-gradient(ellipse 120% 80% at 50% 0%, #1b3a22, #0c1f13 70%); box-shadow: inset 0 0 0 2px rgba(110,200,130,.35); }
+[data-variant="uncommon-2"] { --ink: #eaf6ea; --ink-dim: #a7c9ad; --ink-faint: #7a9b81; }
+[data-variant="uncommon-2"] .fx-a { z-index: 0; filter: blur(.4px); background:
+  radial-gradient(circle at 50% 50%, rgba(96,190,110,.5) 0 1.1px, transparent 1.6px) 0 0 / 5px 5px,
+  radial-gradient(circle at 50% 50%, rgba(140,220,150,.4) 0 .9px, transparent 1.4px) 2.5px 3px / 7px 6px,
+  radial-gradient(circle at 50% 50%, rgba(60,140,80,.55) 0 1.3px, transparent 1.8px) 1px 4px / 9px 9px; }
+[data-variant="uncommon-2"] .fx-b { z-index: 1; mix-blend-mode: screen; opacity: .5; background:
+  radial-gradient(ellipse 44% 30% at 22% 26%, rgba(160,255,180,.5), transparent 70%),
+  radial-gradient(ellipse 38% 26% at 74% 64%, rgba(120,230,150,.45), transparent 70%),
+  radial-gradient(ellipse 30% 20% at 46% 88%, rgba(180,255,200,.4), transparent 70%);
+  animation: u-damp 7.5s ease-in-out infinite; }
+[data-variant="uncommon-2"] .fx-c { z-index: 4; background: radial-gradient(circle at calc(50% + var(--lx) * 30%) calc(38% + var(--ly) * 22%), rgba(210,255,220,.16), transparent 52%); mix-blend-mode: screen; }
+[data-variant="uncommon-2"] .card-art img { filter: saturate(1.15) hue-rotate(-8deg); }
+[data-variant="uncommon-2"] .card-art { border-radius: 40% 12% 34% 14% / 22% 30% 18% 28%; }
+@keyframes u-damp { 0%, 100% { opacity: .34; transform: scale(1) } 50% { opacity: .62; transform: scale(1.04) } }
+
+/* 3 Lichen: pale crusts creeping outward over slate in rings */
+[data-variant="uncommon-3"] .card-front { background: linear-gradient(160deg, #26362b, #17251b 60%, #213226); box-shadow: inset 0 0 0 2px rgba(154,214,170,.32); }
+[data-variant="uncommon-3"] { --ink: #e6f0e8; --ink-dim: #a8bdae; --ink-faint: #7f9285; }
+[data-variant="uncommon-3"] .fx-a { z-index: 0; opacity: .8; background:
+  repeating-radial-gradient(circle at 18% 22%, rgba(176,222,180,.3) 0 1.2px, transparent 1.2px 6px),
+  repeating-radial-gradient(circle at 78% 66%, rgba(200,230,190,.26) 0 1px, transparent 1px 5px),
+  repeating-radial-gradient(circle at 44% 92%, rgba(150,200,165,.22) 0 1.4px, transparent 1.4px 7px);
+  -webkit-mask: radial-gradient(circle at 18% 22%, #000 0 36%, transparent 62%), radial-gradient(circle at 78% 66%, #000 0 28%, transparent 54%), radial-gradient(circle at 44% 92%, #000 0 22%, transparent 46%);
+  mask: radial-gradient(circle at 18% 22%, #000 0 36%, transparent 62%), radial-gradient(circle at 78% 66%, #000 0 28%, transparent 54%), radial-gradient(circle at 44% 92%, #000 0 22%, transparent 46%);
+  animation: u-creep 14s ease-in-out infinite; }
+[data-variant="uncommon-3"] .fx-b { z-index: 0; opacity: .35; background: radial-gradient(circle, rgba(255,255,255,.35) .4px, transparent .8px) 0 0 / 4px 4px; mix-blend-mode: overlay; }
+[data-variant="uncommon-3"] .card-art { box-shadow: 0 0 0 1px rgba(176,222,180,.45), inset 0 0 22px rgba(0,0,0,.5); }
+[data-variant="uncommon-3"] .card-art img { filter: saturate(.7) contrast(1.05); }
+[data-variant="uncommon-3"] .rarity-badge { border-radius: 4px; }
+@keyframes u-creep { 0%, 100% { background-size: 100% 100%; transform: scale(1) } 50% { transform: scale(1.03) } }
+
+/* 4 Ivy Border: a vine that has taken the frame, leaves nodding in the draught */
+[data-variant="uncommon-4"] .card-front { background: linear-gradient(180deg, #0f2318, #16311f 50%, #0d1e14); box-shadow: inset 0 0 0 2px rgba(74,222,128,.34); }
+[data-variant="uncommon-4"] { --ink: #eaf7ee; --ink-dim: #a4ceb2; --ink-faint: #78a186; }
+[data-variant="uncommon-4"] .fx-a { z-index: 4; background:
+  repeating-linear-gradient(90deg, transparent 0 9px, rgba(64,180,96,.75) 9px 12px, transparent 12px 21px) 0 0 / 100% 5cqw no-repeat,
+  repeating-linear-gradient(90deg, transparent 0 9px, rgba(64,180,96,.75) 9px 12px, transparent 12px 21px) 0 100% / 100% 5cqw no-repeat,
+  repeating-linear-gradient(0deg, transparent 0 9px, rgba(64,180,96,.7) 9px 12px, transparent 12px 21px) 0 0 / 5cqw 100% no-repeat,
+  repeating-linear-gradient(0deg, transparent 0 9px, rgba(64,180,96,.7) 9px 12px, transparent 12px 21px) 100% 0 / 5cqw 100% no-repeat;
+  -webkit-mask: radial-gradient(circle, #000 44%, transparent 60%) 0 0 / 7px 7px; mask: radial-gradient(circle, #000 44%, transparent 60%) 0 0 / 7px 7px;
+  animation: u-nod 6s ease-in-out infinite; }
+[data-variant="uncommon-4"] .fx-b { z-index: 4; opacity: .85; background:
+  repeating-linear-gradient(90deg, transparent 0 15px, rgba(134,239,172,.6) 15px 16.4px, transparent 16.4px 30px);
+  -webkit-mask: linear-gradient(#000 0 0) 0 0 / 100% 2.2cqw no-repeat, linear-gradient(#000 0 0) 0 100% / 100% 2.2cqw no-repeat;
+  mask: linear-gradient(#000 0 0) 0 0 / 100% 2.2cqw no-repeat, linear-gradient(#000 0 0) 0 100% / 100% 2.2cqw no-repeat; }
+[data-variant="uncommon-4"] .fx-ring::before { background: conic-gradient(from 90deg, #14532d, #4ade80 20%, #14532d 40%, #86efac 60%, #14532d 80%, #4ade80); animation: spin 22s linear infinite; }
+[data-variant="uncommon-4"] .card-art { box-shadow: 0 0 0 1px rgba(74,222,128,.55); }
+@keyframes u-nod { 0%, 100% { transform: translateX(-1px) } 50% { transform: translateX(1px) } }
+
+/* 5 Chlorophyll: leaf tissue on a lightbox, cell walls glowing where the sun gets through */
+[data-variant="uncommon-5"] .card-front { background: linear-gradient(180deg, #123d1d, #1c5c2c 48%, #0f3418); box-shadow: inset 0 0 0 2px rgba(163,255,163,.4); }
+[data-variant="uncommon-5"] { --ink: #f0ffef; --ink-dim: #b5e6b8; --ink-faint: #85b98c; }
+[data-variant="uncommon-5"] .fx-a { z-index: 0; opacity: .7; background:
+  repeating-conic-gradient(from 30deg at 50% 50%, rgba(190,255,190,.16) 0 60deg, transparent 60deg 120deg) 0 0 / 16px 28px,
+  repeating-conic-gradient(from 30deg at 50% 50%, rgba(120,220,130,.12) 0 60deg, transparent 60deg 120deg) 8px 14px / 16px 28px; }
+[data-variant="uncommon-5"] .fx-b { z-index: 1; mix-blend-mode: screen; background:
+  radial-gradient(ellipse 55% 60% at calc(50% + var(--lx) * 34%) calc(46% + var(--ly) * 26%), rgba(200,255,180,.45), rgba(90,220,120,.16) 40%, transparent 74%);
+  animation: u-photo 6.5s ease-in-out infinite; }
+[data-variant="uncommon-5"] .fx-c { z-index: 1; opacity: .5; background: linear-gradient(102deg, transparent 42%, rgba(220,255,210,.5) 50%, transparent 58%); animation: sweepx 5.5s ease-in-out infinite alternate; }
+[data-variant="uncommon-5"] .card-art img { filter: saturate(1.3) brightness(1.06); }
+[data-variant="uncommon-5"] .card-art { box-shadow: 0 0 0 1px rgba(163,255,163,.6), 0 0 26px -8px rgba(120,255,140,.8); }
+@keyframes u-photo { 0%, 100% { opacity: .55 } 50% { opacity: 1 } }
+
+/* 6 Algae Bloom: green clouds turning in still water, bubbles finding the surface */
+[data-variant="uncommon-6"] .card-front { background: linear-gradient(180deg, #06231f, #0a3830 55%, #041a17); box-shadow: inset 0 0 0 2px rgba(52,211,153,.4); }
+[data-variant="uncommon-6"] { --ink: #e6fff6; --ink-dim: #93d6c1; --ink-faint: #6ba795; }
+[data-variant="uncommon-6"] .fx-a { z-index: 0; filter: blur(6px); opacity: .75; background:
+  radial-gradient(ellipse 50% 34% at 24% 30%, rgba(52,211,153,.7), transparent 70%),
+  radial-gradient(ellipse 44% 30% at 76% 58%, rgba(110,231,183,.6), transparent 70%),
+  radial-gradient(ellipse 56% 26% at 44% 84%, rgba(16,185,129,.6), transparent 70%);
+  animation: u-turnover 17s ease-in-out infinite; }
+[data-variant="uncommon-6"] .fx-b { z-index: 1; opacity: .35; background: repeating-linear-gradient(0deg, transparent 0 6px, rgba(180,255,230,.2) 6px 7px); animation: scrolly 9s linear infinite; background-size: 100% 200%; }
+[data-variant="uncommon-6"] .fx-p i { background: radial-gradient(circle at 34% 32%, rgba(255,255,255,.9), rgba(190,255,230,.28) 46%, transparent 70%); box-shadow: 0 0 4px rgba(190,255,230,.5); animation: rise linear infinite; }
+[data-variant="uncommon-6"] .card-art img { filter: saturate(1.2) hue-rotate(-12deg) brightness(.96); }
+[data-variant="uncommon-6"] .card-art { box-shadow: 0 0 0 1px rgba(52,211,153,.5), inset 0 0 30px rgba(4,60,50,.6); }
+@keyframes u-turnover { 0%, 100% { transform: translate(0, 0) scale(1) } 33% { transform: translate(4%, -3%) scale(1.06) } 66% { transform: translate(-3%, 3%) scale(1.03) } }
+
+/* 7 Bamboo: culms and nodes, a whole grove leaning together when the wind comes */
+[data-variant="uncommon-7"] .card-front { background: linear-gradient(180deg, #16321c, #1e4425 60%, #122a17); box-shadow: inset 0 0 0 2px rgba(132,204,22,.4); }
+[data-variant="uncommon-7"] { --ink: #f2fbe8; --ink-dim: #bdd9a0; --ink-faint: #90ab78; }
+[data-variant="uncommon-7"] .fx-a { z-index: 0; background:
+  repeating-linear-gradient(90deg, transparent 0 12px, rgba(150,210,90,.28) 12px 13px, rgba(180,230,120,.4) 13px 22px, rgba(110,170,60,.3) 22px 23px, transparent 23px 34px); }
+[data-variant="uncommon-7"] .fx-b { z-index: 1; background:
+  repeating-linear-gradient(0deg, transparent 0 26px, rgba(90,140,50,.55) 26px 28px, rgba(200,240,150,.3) 28px 29.5px, transparent 29.5px 56px);
+  -webkit-mask: repeating-linear-gradient(90deg, transparent 0 13px, #000 13px 22px, transparent 22px 34px); mask: repeating-linear-gradient(90deg, transparent 0 13px, #000 13px 22px, transparent 22px 34px); }
+[data-variant="uncommon-7"] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .4; background: linear-gradient(90deg, transparent, rgba(230,255,190,.5) calc(50% + var(--lx) * 30%), transparent); }
+[data-variant="uncommon-7"] .fx-a, [data-variant="uncommon-7"] .fx-b { transform-origin: 50% 100%; animation: u-lean 8s ease-in-out infinite; }
+[data-variant="uncommon-7"] .fx-b { animation-delay: -.6s; }
+[data-variant="uncommon-7"] .card-art { box-shadow: 0 0 0 1px rgba(132,204,22,.55); }
+@keyframes u-lean { 0%, 100% { transform: skewX(-1.6deg) } 50% { transform: skewX(1.6deg) } }
+
+/* 8 Terrarium: glass over green, condensation gathering and running down the inside */
+[data-variant="uncommon-8"] .card-front { background: linear-gradient(180deg, #143726, #1d4c33 52%, #0e2a1c); box-shadow: inset 0 0 0 2px rgba(167,243,208,.45); }
+[data-variant="uncommon-8"] { --ink: #ecfdf5; --ink-dim: #a7d8bd; --ink-faint: #7ba892; }
+[data-variant="uncommon-8"] .fx-a { z-index: 3; mix-blend-mode: screen; opacity: .55; background:
+  radial-gradient(ellipse 120% 46% at 50% -6%, rgba(255,255,255,.42), transparent 62%),
+  radial-gradient(ellipse 90% 40% at 50% 106%, rgba(255,255,255,.18), transparent 62%),
+  linear-gradient(96deg, rgba(255,255,255,.14) 0 12%, transparent 22%); }
+[data-variant="uncommon-8"] .fx-b { z-index: 3; opacity: .5; background:
+  radial-gradient(circle at 50% 50%, rgba(255,255,255,.55) 0 .9px, transparent 1.5px) 0 0 / 11px 13px,
+  radial-gradient(circle at 50% 50%, rgba(255,255,255,.4) 0 .6px, transparent 1.1px) 6px 7px / 15px 9px; }
+[data-variant="uncommon-8"] .fx-c { z-index: 3; background:
+  linear-gradient(180deg, transparent, rgba(255,255,255,.6) 50%, transparent) 22% 0 / 1.2px 26cqw no-repeat,
+  linear-gradient(180deg, transparent, rgba(255,255,255,.45) 50%, transparent) 61% 0 / 1px 20cqw no-repeat,
+  linear-gradient(180deg, transparent, rgba(255,255,255,.5) 50%, transparent) 84% 0 / 1.1px 30cqw no-repeat;
+  animation: u-run 6s linear infinite; }
+[data-variant="uncommon-8"] .card-art { box-shadow: 0 0 0 1px rgba(167,243,208,.6), inset 0 0 24px rgba(255,255,255,.14); }
+@keyframes u-run { 0% { background-position: 22% -30cqw, 61% -46cqw, 84% -20cqw } 100% { background-position: 22% 140cqw, 61% 130cqw, 84% 150cqw } }
+
+/* 9 Pollen: motes caught in one shaft of afternoon light, going nowhere in particular */
+[data-variant="uncommon-9"] .card-front { background: linear-gradient(180deg, #1a2a15, #24371b 55%, #16240f); box-shadow: inset 0 0 0 2px rgba(190,242,100,.38); }
+[data-variant="uncommon-9"] { --ink: #f7ffe8; --ink-dim: #c4dc9e; --ink-faint: #96ac76; }
+[data-variant="uncommon-9"] .fx-a { z-index: 1; mix-blend-mode: screen; opacity: .5; background: linear-gradient(104deg, transparent 24%, rgba(240,255,190,.34) 38%, rgba(240,255,190,.1) 50%, transparent 62%); animation: u-shaft 11s ease-in-out infinite alternate; }
+[data-variant="uncommon-9"] .fx-b { z-index: 0; background: radial-gradient(ellipse 80% 60% at calc(38% + var(--lx) * 18%) 22%, rgba(200,240,120,.22), transparent 70%); }
+[data-variant="uncommon-9"] .fx-p i { background: radial-gradient(circle, rgba(255,255,220,.95), rgba(220,255,150,.4) 40%, transparent 68%); box-shadow: 0 0 5px rgba(230,255,160,.8); animation: u-float linear infinite; }
+[data-variant="uncommon-9"] .card-art img { filter: saturate(1.05) brightness(1.04) sepia(.1); }
+[data-variant="uncommon-9"] .card-art { box-shadow: 0 0 0 1px rgba(190,242,100,.5), 0 0 24px -10px rgba(220,255,140,.7); }
+@keyframes u-shaft { 0% { transform: translateX(-8%) } 100% { transform: translateX(8%) } }
+@keyframes u-float { 0% { transform: translate(0, 0); opacity: 0 } 12% { opacity: 1 } 50% { transform: translate(var(--sx, 6cqw), -34cqw) } 88% { opacity: 1 } 100% { transform: translate(calc(var(--sx, 6cqw) * -1), -70cqw); opacity: 0 } }
+
+/* 10 Seedling: dry soil cracked open, one shoot up, roots feeling their way down */
+[data-variant="uncommon-10"] .card-front { background: linear-gradient(180deg, #2b2116, #1d1710 46%, #14210f); box-shadow: inset 0 0 0 2px rgba(74,222,128,.35); }
+[data-variant="uncommon-10"] { --ink: #edf7e9; --ink-dim: #b0c6a4; --ink-faint: #86997c; }
+[data-variant="uncommon-10"] .fx-a { z-index: 0; opacity: .6; background:
+  repeating-linear-gradient(58deg, transparent 0 14px, rgba(20,12,6,.7) 14px 15.6px, transparent 15.6px 30px),
+  repeating-linear-gradient(-46deg, transparent 0 19px, rgba(24,15,8,.6) 19px 20.4px, transparent 20.4px 38px); }
+[data-variant="uncommon-10"] .fx-b { z-index: 1; background:
+  linear-gradient(180deg, transparent 0 54%, rgba(74,222,128,.7) 54% 55.4%, transparent 55.4%) 50% 0 / 1.6px 100% no-repeat,
+  radial-gradient(ellipse 3.4cqw 1.8cqw at 46% 56%, rgba(134,239,172,.85), transparent 70%),
+  radial-gradient(ellipse 3.4cqw 1.8cqw at 54% 59%, rgba(74,222,128,.8), transparent 70%);
+  transform-origin: 50% 100%; animation: u-grow 8s ease-in-out infinite; }
+[data-variant="uncommon-10"] .fx-c { z-index: 0; opacity: .45; background:
+  repeating-linear-gradient(104deg, transparent 0 7px, rgba(180,230,190,.3) 7px 7.8px, transparent 7.8px 15px),
+  repeating-linear-gradient(76deg, transparent 0 9px, rgba(180,230,190,.24) 9px 9.8px, transparent 9.8px 19px);
+  -webkit-mask: linear-gradient(180deg, transparent 62%, #000 92%); mask: linear-gradient(180deg, transparent 62%, #000 92%); }
+[data-variant="uncommon-10"] .card-art img { filter: saturate(1.1) contrast(1.05); }
+[data-variant="uncommon-10"] .card-art { box-shadow: 0 0 0 1px rgba(74,222,128,.45); }
+@keyframes u-grow { 0%, 100% { transform: scaleY(.94) rotate(-1.2deg) } 50% { transform: scaleY(1) rotate(1.2deg) } }

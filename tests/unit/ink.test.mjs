@@ -49,8 +49,11 @@ check('an unknown kind is ignored', (ink.grant(profile, 'hats', 'x'), profile.ow
    Prismatic, twenty-one bought in all. The counts are not round on purpose. */
 const BOUGHT = fx.ALL_FX.length - 1;
 check('every rarity has at least one bought effect', RARITIES.every((r) => (fx.FX_BY_RARITY[r.id] ?? []).length >= 1));
-check('twenty-one of them, the boards\' own', BOUGHT === 21, String(BOUGHT));
-check('and Prismatic carries the seven it was drawn', (fx.FX_BY_RARITY.prismatic ?? []).length === 7, String((fx.FX_BY_RARITY.prismatic ?? []).length));
+check('eighteen of them, the boards\' own', BOUGHT === 18, String(BOUGHT));
+check('and Prismatic carries the four drawn for Prismatic itself', (fx.FX_BY_RARITY.prismatic ?? []).length === 4, String((fx.FX_BY_RARITY.prismatic ?? []).length));
+/* The Artifact tier became Prismatic long ago; the three treatments drawn for
+   it before that are gone rather than re-badged. */
+check('nothing Artifact-era is still sold', !fx.ALL_FX.some((f) => ['marble', 'parchment', 'ivory'].includes(f.id)));
 check('no two effects share an id', new Set(fx.ALL_FX.map((s) => s.id)).size === fx.ALL_FX.length);
 check('no two effects share a name', new Set(fx.ALL_FX.map((s) => s.name.en)).size === fx.ALL_FX.length && new Set(fx.ALL_FX.map((s) => s.name.fr)).size === fx.ALL_FX.length);
 check('every effect is named and noted in both languages', fx.ALL_FX.every((s) => s.name.en && s.name.fr && s.note.en && s.note.fr));

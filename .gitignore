@@ -12,3 +12,6 @@ tests/out/
 
 # Stray screenshots at the root: suites write theirs to tests/out
 /*.png
+
+# The effects board is 400kb of generated html: rebuild it, do not commit it
+tools/boards/*/board.html

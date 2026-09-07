@@ -1,0 +1,171 @@
+/* ============ MYTHIC: red, and something has gone wrong with it. ============ */
+[data-variant^="mythic"] .card-front { --rarity: #e02134; }
+
+/* 1 Corrupted: the file is damaged. Blocks of it are being read from the wrong place. */
+[data-variant="mythic-1"] .card-front { background: linear-gradient(180deg, #1a0508, #2a070c 48%, #120306); box-shadow: inset 0 0 0 2px rgba(224,33,52,.6); }
+[data-variant="mythic-1"] { --ink: #ffeaec; --ink-dim: #d99aa2; --ink-faint: #a8737a; }
+[data-variant="mythic-1"] .fx-a { z-index: 0; opacity: .5; background:
+  repeating-linear-gradient(0deg, rgba(224,33,52,.35) 0 2px, transparent 2px 5px, rgba(20,4,7,.7) 5px 8px, transparent 8px 14px); }
+[data-variant="mythic-1"] .fx-b { z-index: 2; mix-blend-mode: screen; background:
+  linear-gradient(90deg, rgba(255,60,80,.7) 0 26%, transparent 26% 42%, rgba(60,220,255,.4) 42% 55%, transparent 55%) 0 22% / 100% 2.6cqw no-repeat,
+  linear-gradient(90deg, transparent 0 18%, rgba(255,80,90,.6) 18% 48%, transparent 48%) 0 56% / 100% 1.8cqw no-repeat,
+  linear-gradient(90deg, rgba(80,240,255,.35) 0 12%, transparent 12% 64%, rgba(255,60,80,.55) 64% 88%, transparent 88%) 0 78% / 100% 2.2cqw no-repeat;
+  animation: m-glitch 3.4s steps(1, end) infinite; }
+[data-variant="mythic-1"] .fx-c { z-index: 3; mix-blend-mode: screen; opacity: .3; background: repeating-linear-gradient(0deg, rgba(255,255,255,.2) 0 1px, transparent 1px 3px); }
+[data-variant="mythic-1"] .card-art img { filter: saturate(1.3) contrast(1.15); animation: m-shift 3.4s steps(1, end) infinite; }
+[data-variant="mythic-1"] .card-title { animation: m-type 3.4s steps(1, end) infinite; }
+[data-variant="mythic-1"] .card-art { box-shadow: 0 0 0 1px rgba(224,33,52,.7); }
+@keyframes m-glitch { 0%, 22%, 100% { transform: translateX(0); opacity: .5 } 24% { transform: translateX(-3%); opacity: .95 } 26% { transform: translateX(4%); opacity: .8 } 28% { transform: translateX(0); opacity: .5 } 66% { transform: translateX(2.5%); opacity: .9 } 68% { transform: translateX(0); opacity: .5 } }
+@keyframes m-shift { 0%, 23%, 100% { filter: saturate(1.3) contrast(1.15) } 24%, 26% { filter: saturate(2.4) contrast(1.4) hue-rotate(-12deg) } 67% { filter: saturate(.4) contrast(1.6) } }
+@keyframes m-type { 0%, 23%, 100% { text-shadow: none } 24%, 26% { text-shadow: 2px 0 rgba(255,40,60,.9), -2px 0 rgba(60,220,255,.7) } 67% { text-shadow: 1.5px 0 rgba(255,40,60,.7) } }
+
+/* 2 Ember Storm: the fire is out, and it is still throwing pieces of itself upward */
+[data-variant="mythic-2"] .card-front { background: linear-gradient(180deg, #170403, #300806 46%, #0d0202); box-shadow: inset 0 0 0 2px rgba(239,68,68,.55); }
+[data-variant="mythic-2"] { --ink: #ffeee9; --ink-dim: #d9a196; --ink-faint: #a87a71; }
+[data-variant="mythic-2"] .fx-a { z-index: 0; filter: blur(6px); background:
+  radial-gradient(ellipse 60% 30% at 50% 104%, rgba(239,68,68,.8), transparent 72%),
+  radial-gradient(ellipse 36% 22% at 24% 92%, rgba(251,146,60,.6), transparent 72%),
+  radial-gradient(ellipse 32% 20% at 78% 96%, rgba(220,38,38,.6), transparent 72%);
+  animation: m-updraft 6s ease-in-out infinite; }
+[data-variant="mythic-2"] .fx-b { z-index: 1; opacity: .35; background: repeating-linear-gradient(0deg, transparent 0 12px, rgba(120,60,40,.4) 12px 14px); background-size: 100% 200%; animation: scrolly 6s linear infinite; filter: blur(1.4px); }
+[data-variant="mythic-2"] .fx-p i { background: radial-gradient(circle, rgba(255,236,180,.98), rgba(251,113,60,.6) 40%, transparent 70%); box-shadow: 0 0 6px rgba(251,113,60,.9); animation: rise linear infinite; }
+[data-variant="mythic-2"] .fx-c { z-index: 3; mix-blend-mode: screen; background: radial-gradient(ellipse 90% 40% at 50% 100%, rgba(255,150,80,.28), transparent 70%); animation: breathe 3.2s ease-in-out infinite; }
+[data-variant="mythic-2"] .card-art img { filter: saturate(1.25) contrast(1.1) brightness(.96); }
+[data-variant="mythic-2"] .card-art { box-shadow: 0 0 0 1px rgba(239,68,68,.7), 0 0 30px -10px rgba(251,146,60,.9); }
+@keyframes m-updraft { 0%, 100% { transform: scaleY(1) translateY(0) } 50% { transform: scaleY(1.14) translateY(-3%) } }
+
+/* 3 Blood Rite: a circle drawn on purpose, turning slowly, still wet at the bottom */
+[data-variant="mythic-3"] .card-front { background: radial-gradient(ellipse 84% 66% at 50% 44%, #2a0409, #100103 78%); box-shadow: inset 0 0 0 2px rgba(190,18,60,.6); }
+[data-variant="mythic-3"] { --ink: #ffe9ec; --ink-dim: #d0919c; --ink-faint: #9e6d77; }
+[data-variant="mythic-3"] .fx-a { z-index: 0; opacity: .8; background:
+  repeating-conic-gradient(from 0deg at 50% 44%, rgba(225,29,72,.4) 0 1.4deg, transparent 1.4deg 12deg);
+  -webkit-mask: radial-gradient(circle at 50% 44%, transparent 0 26%, #000 28% 40%, transparent 44%); mask: radial-gradient(circle at 50% 44%, transparent 0 26%, #000 28% 40%, transparent 44%);
+  animation: spin 34s linear infinite; }
+[data-variant="mythic-3"] .fx-b { z-index: 0; background:
+  radial-gradient(circle at 50% 44%, transparent 0 25.4%, rgba(244,63,94,.85) 25.4% 26.4%, transparent 26.4%),
+  radial-gradient(circle at 50% 44%, transparent 0 40.6%, rgba(190,18,60,.8) 40.6% 41.8%, transparent 41.8%),
+  conic-gradient(from 0deg at 50% 44%, transparent 0 8%, rgba(244,63,94,.5) 8.4% 9%, transparent 9% 33%, rgba(244,63,94,.5) 33.4% 34%, transparent 34% 58%, rgba(244,63,94,.5) 58.4% 59%, transparent 59% 83%, rgba(244,63,94,.5) 83.4% 84%, transparent 84%);
+  filter: drop-shadow(0 0 5px rgba(225,29,72,.8)); animation: breathe 4.4s ease-in-out infinite; }
+[data-variant="mythic-3"] .fx-c { z-index: 3; background:
+  linear-gradient(180deg, rgba(190,18,60,.9), rgba(120,10,36,.4) 70%, transparent) 18% 0 / 1.6px 22cqw no-repeat,
+  linear-gradient(180deg, rgba(225,29,72,.85), rgba(120,10,36,.35) 70%, transparent) 57% 0 / 1.4px 15cqw no-repeat,
+  linear-gradient(180deg, rgba(190,18,60,.8), rgba(120,10,36,.3) 70%, transparent) 81% 0 / 1.5px 27cqw no-repeat;
+  animation: m-drip 8s ease-in infinite; }
+[data-variant="mythic-3"] .card-art img { filter: saturate(1.2) contrast(1.12) brightness(.9); }
+[data-variant="mythic-3"] .card-art { box-shadow: 0 0 0 1px rgba(190,18,60,.75), inset 0 0 28px rgba(20,2,6,.8); }
+@keyframes m-drip { 0% { background-position: 18% -26cqw, 57% -40cqw, 81% -14cqw } 100% { background-position: 18% 130cqw, 57% 122cqw, 81% 142cqw } }
+
+/* 4 Fracture: the plate is broken and something behind it is lit */
+[data-variant="mythic-4"] .card-front { background: linear-gradient(180deg, #1c1c20, #2a2a30 48%, #131316); box-shadow: inset 0 0 0 2px rgba(224,33,52,.55); }
+[data-variant="mythic-4"] { --ink: #f2eef0; --ink-dim: #b39ea2; --ink-faint: #8a7679; }
+[data-variant="mythic-4"] .fx-a { z-index: 1; background:
+  linear-gradient(74deg, transparent 47.4%, rgba(255,70,90,.9) 47.8% 48.6%, transparent 49%),
+  linear-gradient(-58deg, transparent 61.4%, rgba(255,60,80,.75) 61.8% 62.5%, transparent 62.9%),
+  linear-gradient(104deg, transparent 32.6%, rgba(255,90,110,.6) 33% 33.6%, transparent 34%);
+  filter: drop-shadow(0 0 5px rgba(224,33,52,.9)); animation: m-flare 4.6s ease-in-out infinite; }
+[data-variant="mythic-4"] .fx-b { z-index: 1; background:
+  linear-gradient(74deg, transparent 47%, rgba(10,10,12,.9) 47.4% 49.2%, transparent 49.6%),
+  linear-gradient(-58deg, transparent 61%, rgba(10,10,12,.85) 61.4% 63%, transparent 63.4%);
+  filter: blur(1.2px); }
+[data-variant="mythic-4"] .fx-c { z-index: 0; background: radial-gradient(ellipse 60% 44% at 52% 46%, rgba(224,33,52,.22), transparent 74%); animation: breathe 4.6s ease-in-out infinite; }
+[data-variant="mythic-4"] .fx-v { z-index: 2; mix-blend-mode: overlay; opacity: .4; background: repeating-linear-gradient(112deg, rgba(255,255,255,.1) 0 2px, transparent 2px 9px); }
+[data-variant="mythic-4"] .card-art { box-shadow: 0 0 0 1px rgba(224,33,52,.6), inset 0 0 18px rgba(0,0,0,.6); }
+@keyframes m-flare { 0%, 100% { opacity: .7 } 50% { opacity: 1 } }
+
+/* 5 Signal Lost: the transmission is failing, and the red channel is the first to go */
+[data-variant="mythic-5"] .card-front { background: linear-gradient(180deg, #100309, #1c0510 52%, #0a0206); box-shadow: inset 0 0 0 2px rgba(244,63,94,.5); }
+[data-variant="mythic-5"] { --ink: #ffe9f0; --ink-dim: #cf94a6; --ink-faint: #9e6f7f; }
+[data-variant="mythic-5"] .fx-a { z-index: 2; mix-blend-mode: screen; opacity: .35; background: repeating-linear-gradient(0deg, rgba(255,255,255,.24) 0 1px, transparent 1px 3px); }
+[data-variant="mythic-5"] .fx-b { z-index: 2; mix-blend-mode: screen; opacity: .5; background: linear-gradient(180deg, transparent, rgba(255,220,235,.5) 48% 52%, transparent); background-size: 100% 26%; background-repeat: no-repeat; animation: m-roll 3.8s linear infinite; }
+[data-variant="mythic-5"] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .5; background:
+  radial-gradient(ellipse 120% 90% at 50% 50%, transparent 40%, rgba(190,18,60,.5) 96%); }
+[data-variant="mythic-5"] .fx-v { z-index: 3; opacity: .3; background: radial-gradient(circle, rgba(255,255,255,.5) 0 .4px, transparent .8px) 0 0 / 3px 3px; animation: m-snow .28s steps(3, end) infinite; }
+[data-variant="mythic-5"] .card-art img { filter: saturate(1.4) contrast(1.2); }
+[data-variant="mythic-5"] .card-art { box-shadow: 0 0 0 1px rgba(244,63,94,.6), inset 0 0 26px rgba(0,0,0,.7); }
+[data-variant="mythic-5"] .card-title { font-family: var(--mono); font-size: 5.2cqw; letter-spacing: .02em; text-shadow: 1.5px 0 rgba(255,40,80,.55), -1.5px 0 rgba(60,200,255,.35); }
+@keyframes m-roll { 0% { background-position: 0 -30% } 100% { background-position: 0 130% } }
+@keyframes m-snow { 0% { background-position: 0 0 } 33% { background-position: 1px 2px } 66% { background-position: 2px 1px } 100% { background-position: 0 0 } }
+
+/* 6 Meltdown: hazard stripes, a warning that nobody is left to read, an alarm still lit */
+[data-variant="mythic-6"] .card-front { background: linear-gradient(180deg, #1d0d02, #2e1503 46%, #140902); box-shadow: inset 0 0 0 2px rgba(234,88,12,.65); }
+[data-variant="mythic-6"] { --ink: #fff0e0; --ink-dim: #d9ab86; --ink-faint: #a88265; }
+[data-variant="mythic-6"] .fx-a { z-index: 3; opacity: .85; background:
+  repeating-linear-gradient(-45deg, rgba(234,88,12,.85) 0 8px, rgba(24,10,2,.9) 8px 16px) 0 0 / 100% 3.6cqw no-repeat,
+  repeating-linear-gradient(-45deg, rgba(234,88,12,.85) 0 8px, rgba(24,10,2,.9) 8px 16px) 0 100% / 100% 3.6cqw no-repeat;
+  animation: m-crawl 3s linear infinite; }
+[data-variant="mythic-6"] .fx-b { z-index: 0; background: radial-gradient(ellipse 76% 56% at 50% 46%, rgba(220,38,38,.5), transparent 74%); animation: m-alarm 1.8s ease-in-out infinite; }
+[data-variant="mythic-6"] .fx-c { z-index: 1; opacity: .5; background: repeating-radial-gradient(circle at 50% 46%, transparent 0 11px, rgba(251,146,60,.32) 11px 12.4px); animation: m-wave 3.4s linear infinite; }
+[data-variant="mythic-6"] .fx-v { z-index: 4; mix-blend-mode: screen; opacity: .3; background: repeating-linear-gradient(0deg, rgba(255,255,255,.18) 0 1px, transparent 1px 4px); }
+[data-variant="mythic-6"] .card-art img { filter: saturate(1.3) contrast(1.12) sepia(.14); }
+[data-variant="mythic-6"] .card-art { box-shadow: 0 0 0 2px rgba(234,88,12,.8), 0 0 28px -10px rgba(220,38,38,.9); }
+[data-variant="mythic-6"] .rarity-badge { border-radius: 2px; background: #ea580c; color: #140902; border-color: #ea580c; }
+@keyframes m-crawl { to { background-position: 22.7px 0, -22.7px 100% } }
+@keyframes m-alarm { 0%, 100% { opacity: .35 } 50% { opacity: 1 } }
+@keyframes m-wave { 0% { transform: scale(1); opacity: .7 } 100% { transform: scale(1.5); opacity: 0 } }
+
+/* 7 Furnace Gate: something is open that should be shut, and the air above it is bending */
+[data-variant="mythic-7"] .card-front { background: radial-gradient(ellipse 74% 60% at 50% 68%, #61140a, #150302 76%); box-shadow: inset 0 0 0 2px rgba(220,38,38,.6); }
+[data-variant="mythic-7"] { --ink: #ffece6; --ink-dim: #f0c4b6; --ink-faint: #b98d80; }
+[data-variant="mythic-7"] .fx-a { z-index: 0; background:
+  radial-gradient(ellipse 26% 30% at 50% 86%, rgba(255,214,140,.9), rgba(239,68,68,.6) 46%, transparent 76%);
+  animation: m-mouth 5.6s ease-in-out infinite; }
+[data-variant="mythic-7"] .fx-b { z-index: 1; opacity: .55; background:
+  repeating-linear-gradient(0deg, transparent 0 4px, rgba(255,180,120,.24) 4px 5px);
+  -webkit-mask: radial-gradient(ellipse 60% 56% at 50% 86%, #000, transparent 84%); mask: radial-gradient(ellipse 60% 56% at 50% 86%, #000, transparent 84%);
+  animation: m-haze 4.2s ease-in-out infinite; }
+[data-variant="mythic-7"] .fx-c { z-index: 2; mix-blend-mode: screen; background: radial-gradient(ellipse 44% 22% at 50% 86%, rgba(255,244,214,.5), transparent 74%); animation: breathe 2.6s ease-in-out infinite; }
+[data-variant="mythic-7"] .fx-p i { background: radial-gradient(circle, rgba(255,230,170,.95), rgba(239,68,68,.5) 42%, transparent 72%); box-shadow: 0 0 5px rgba(255,140,80,.9); animation: rise linear infinite; }
+[data-variant="mythic-7"] .card-art img { filter: saturate(1.3) contrast(1.14) brightness(.92); }
+[data-variant="mythic-7"] .card-art { box-shadow: 0 0 0 1px rgba(220,38,38,.75), 0 0 34px -8px rgba(255,140,60,.95); }
+@keyframes m-mouth { 0%, 100% { transform: scaleY(.94) scaleX(1); opacity: .8 } 50% { transform: scaleY(1.12) scaleX(1.05); opacity: 1 } }
+@keyframes m-haze { 0%, 100% { transform: translateY(0) skewX(0deg) } 50% { transform: translateY(-3px) skewX(1.4deg) } }
+
+/* 8 Overload: pushed past what it was rated for, and now arcing to whatever is nearest */
+[data-variant="mythic-8"] .card-front { background: linear-gradient(180deg, #150408, #22060c 50%, #0d0205); box-shadow: inset 0 0 0 2px rgba(248,113,113,.55); }
+[data-variant="mythic-8"] { --ink: #ffecef; --ink-dim: #d59aa1; --ink-faint: #a2727a; }
+[data-variant="mythic-8"] .fx-a { z-index: 0; opacity: .5; background:
+  repeating-linear-gradient(90deg, transparent 0 15px, rgba(248,113,113,.32) 15px 16px, transparent 16px 34px),
+  repeating-linear-gradient(0deg, transparent 0 19px, rgba(248,113,113,.26) 19px 20px, transparent 20px 42px); }
+[data-variant="mythic-8"] .fx-b { z-index: 1; background: radial-gradient(circle, rgba(255,190,190,.95) 0 1.4px, transparent 2.4px) 15px 19px / 34px 42px; filter: drop-shadow(0 0 4px rgba(255,80,90,.9)); animation: m-arcnode 1.5s ease-in-out infinite; }
+[data-variant="mythic-8"] .fx-c { z-index: 2; background:
+  linear-gradient(66deg, transparent 39.4%, rgba(255,220,225,.9) 39.8% 40.4%, transparent 40.8%),
+  linear-gradient(-72deg, transparent 55.4%, rgba(255,200,210,.8) 55.8% 56.4%, transparent 56.8%);
+  filter: drop-shadow(0 0 6px rgba(255,90,110,.95)); animation: m-arc 2.7s steps(1, end) infinite; }
+[data-variant="mythic-8"] .fx-v { z-index: 3; mix-blend-mode: screen; background: radial-gradient(ellipse 90% 70% at 50% 46%, rgba(248,113,113,.2), transparent 76%); animation: m-surge 2.7s steps(1, end) infinite; }
+[data-variant="mythic-8"] .card-art { box-shadow: 0 0 0 1px rgba(248,113,113,.7), 0 0 26px -10px rgba(239,68,68,.9); }
+@keyframes m-arcnode { 0%, 100% { opacity: .4 } 50% { opacity: 1 } }
+@keyframes m-arc { 0%, 40%, 100% { opacity: 0 } 42%, 44% { opacity: 1 } 43% { opacity: .2 } 74% { opacity: .8 } 76% { opacity: 0 } }
+@keyframes m-surge { 0%, 40%, 100% { opacity: .3 } 42%, 44% { opacity: 1 } 74% { opacity: .7 } }
+
+/* 9 Predator: seen in heat, where the cold parts of the world stop existing */
+[data-variant="mythic-9"] .card-front { background: linear-gradient(180deg, #0b0217, #14031f 52%, #06010e); box-shadow: inset 0 0 0 2px rgba(224,33,52,.5); }
+[data-variant="mythic-9"] { --ink: #ffeef0; --ink-dim: #c793a0; --ink-faint: #96707c; }
+[data-variant="mythic-9"] .fx-a { z-index: 1; mix-blend-mode: screen; opacity: .7; background:
+  radial-gradient(ellipse 40% 30% at 34% 34%, rgba(255,240,180,.6), rgba(239,68,68,.4) 46%, rgba(88,28,135,.3) 70%, transparent 84%),
+  radial-gradient(ellipse 34% 26% at 70% 62%, rgba(251,146,60,.5), rgba(190,18,60,.35) 50%, transparent 80%);
+  animation: m-thermal 8s ease-in-out infinite; }
+[data-variant="mythic-9"] .fx-b { z-index: 2; opacity: .55; background: repeating-radial-gradient(ellipse 40% 30% at 34% 34%, transparent 0 5px, rgba(255,190,120,.28) 5px 6px), repeating-radial-gradient(ellipse 34% 26% at 70% 62%, transparent 0 6px, rgba(255,150,120,.22) 6px 7px); }
+[data-variant="mythic-9"] .fx-c { z-index: 3; opacity: .28; background: repeating-linear-gradient(0deg, rgba(255,255,255,.18) 0 1px, transparent 1px 4px); }
+[data-variant="mythic-9"] .fx-v { z-index: 4; background:
+  linear-gradient(90deg, rgba(224,33,52,.9) 0 1.4px, transparent 1.4px) 6cqw 0 / 100% 100% no-repeat,
+  linear-gradient(0deg, rgba(224,33,52,.9) 0 1.4px, transparent 1.4px) 0 32cqw / 100% 100% no-repeat;
+  -webkit-mask: radial-gradient(circle at calc(30% + var(--lx) * 20%) calc(34% + var(--ly) * 16%), #000 0 18%, transparent 34%); mask: radial-gradient(circle at calc(30% + var(--lx) * 20%) calc(34% + var(--ly) * 16%), #000 0 18%, transparent 34%); }
+[data-variant="mythic-9"] .card-art img { filter: grayscale(1) contrast(1.3) sepia(1) hue-rotate(-42deg) saturate(4) brightness(.95); }
+[data-variant="mythic-9"] .card-art { box-shadow: 0 0 0 1px rgba(224,33,52,.6), inset 0 0 24px rgba(10,2,20,.7); }
+@keyframes m-thermal { 0%, 100% { transform: scale(1) translate(0, 0) } 50% { transform: scale(1.06) translate(1.5%, -1.5%) } }
+
+/* 10 Rift: the card has a tear in it, and the tear has depth */
+[data-variant="mythic-10"] .card-front { background: linear-gradient(180deg, #16070a, #240a0f 48%, #0d0406); box-shadow: inset 0 0 0 2px rgba(190,18,60,.55); }
+[data-variant="mythic-10"] { --ink: #ffe9ed; --ink-dim: #cf939e; --ink-faint: #9d6d79; }
+[data-variant="mythic-10"] .fx-a { z-index: 1; background: linear-gradient(84deg, transparent 44%, rgba(0,0,0,.95) 46% 54%, transparent 56%); filter: blur(.6px); }
+[data-variant="mythic-10"] .fx-b { z-index: 1; background:
+  linear-gradient(84deg, transparent 46.6%, rgba(255,90,110,.85) 47.4% 48.6%, rgba(255,220,225,.95) 49.4% 50.6%, rgba(255,90,110,.85) 51.4% 52.6%, transparent 53.4%);
+  filter: drop-shadow(0 0 8px rgba(225,29,72,.95)); animation: m-rift 5s ease-in-out infinite; }
+[data-variant="mythic-10"] .fx-c { z-index: 0; background: radial-gradient(ellipse 34% 70% at 50% 50%, rgba(190,18,60,.42), transparent 78%); animation: breathe 5s ease-in-out infinite; }
+[data-variant="mythic-10"] .fx-v { z-index: 2; opacity: .5; background:
+  repeating-linear-gradient(84deg, transparent 0 3px, rgba(255,140,160,.3) 3px 3.7px, transparent 3.7px 9px);
+  -webkit-mask: linear-gradient(84deg, transparent 40%, #000 46% 54%, transparent 60%); mask: linear-gradient(84deg, transparent 40%, #000 46% 54%, transparent 60%);
+  animation: scrolly 4s linear infinite; background-size: 100% 200%; }
+[data-variant="mythic-10"] .card-art img { filter: saturate(1.2) contrast(1.1) brightness(.92); }
+[data-variant="mythic-10"] .card-art { box-shadow: 0 0 0 1px rgba(190,18,60,.7), inset 0 0 22px rgba(0,0,0,.7); }
+@keyframes m-rift { 0%, 100% { transform: scaleX(.9); opacity: .8 } 50% { transform: scaleX(1.12); opacity: 1 } }

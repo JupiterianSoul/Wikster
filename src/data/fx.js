@@ -50,9 +50,6 @@ export const FX_BY_RARITY = {
     s('projection', 'Projection', 'Projection', 'The most translucent: four corner emitters, code running sideways, a refresh bar and a flickering image.', 'La plus translucide : quatre émetteurs aux coins, du code qui défile de côté, une barre de rafraîchissement et une image qui vacille.')
   ],
   prismatic: [
-    s('marble', 'White Marble', 'Marbre blanc', 'White marble with grey and gold veins; a gold glow travels along the circuit lattice.', 'Un marbre blanc veiné de gris et d’or ; une lueur dorée parcourt le réseau de circuits.'),
-    s('parchment', 'Parchment', 'Parchemin', 'Aged parchment with a slowly turning mandala, filigree corners and circuits waking below.', 'Un parchemin vieilli, un mandala qui tourne lentement, des coins en filigrane et des circuits qui s’éveillent en dessous.'),
-    s('ivory', 'Ivory Relic', 'Relique d’ivoire', 'An ivory plate in a fat gold frame stamped with runes that light in sequence.', 'Une plaque d’ivoire dans un large cadre doré frappé de runes qui s’allument l’une après l’autre.'),
     s('holofoil', 'Holo Foil', 'Holo', 'The trading-card rainbow: dense spectrum bands sliding with the tilt over charcoal foil and glitter.', 'L’arc-en-ciel des cartes à collectionner : des bandes spectrales denses qui glissent à l’inclinaison sur une feuille anthracite pailletée.'),
     s('oilslick', 'Oil Slick', 'Irisation', 'Thin-film iridescence on black gloss, with interference rings that follow the light.', 'Une irisation en couche mince sur un noir laqué, avec des anneaux d’interférence qui suivent la lumière.'),
     s('cutcrystal', 'Cut Crystal', 'Cristal taillé', 'A faceted gem plate, every facet its own hue; the streak lights them one by one.', 'Une plaque de gemme à facettes, chacune sa teinte ; le trait de lumière les allume une à une.'),

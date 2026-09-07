@@ -1,0 +1,155 @@
+/* ============ LEGENDARY: gold, and the different things people do with it. ============ */
+[data-variant^="legendary"] .card-front { --rarity: #fbbf24; }
+
+/* 1 Sunburst Leaf: beaten gold leaf with rays struck out from behind the art */
+[data-variant="legendary-1"] .card-front { background: linear-gradient(180deg, #3a2508, #533512 46%, #2a1a05); box-shadow: inset 0 0 0 2px rgba(251,191,36,.6); }
+[data-variant="legendary-1"] { --ink: #fff8e6; --ink-dim: #dcc189; --ink-faint: #ab9464; }
+[data-variant="legendary-1"] .fx-a { z-index: 0; opacity: .75; background: repeating-conic-gradient(from 0deg at 50% 30%, rgba(253,224,71,.32) 0 2.6deg, transparent 2.6deg 7.2deg); animation: spin 60s linear infinite; }
+[data-variant="legendary-1"] .fx-b { z-index: 0; mix-blend-mode: overlay; opacity: .6; background:
+  repeating-linear-gradient(38deg, rgba(255,255,255,.2) 0 3px, transparent 3px 11px),
+  repeating-linear-gradient(-52deg, rgba(0,0,0,.18) 0 2px, transparent 2px 9px); }
+[data-variant="legendary-1"] .fx-c { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(104deg + var(--lx) * 30deg), transparent 34%, rgba(255,247,214,.75) 48%, transparent 62%); animation: sweepx 6s ease-in-out infinite alternate; }
+[data-variant="legendary-1"] .fx-v { z-index: 1; background: linear-gradient(180deg, transparent 42%, rgba(24,14,2,.68)); }
+[data-variant="legendary-1"] .fx-ring::before { background: conic-gradient(from var(--a), #78350f, #fde68a, #b45309, #fffbeb, #78350f); animation: turn-a 8s linear infinite; }
+[data-variant="legendary-1"] .card-art img { filter: sepia(.24) saturate(1.15) contrast(1.04); }
+[data-variant="legendary-1"] .card-art { box-shadow: 0 0 0 2px rgba(253,224,71,.75), 0 0 30px -10px rgba(251,191,36,.9); }
+
+/* 2 Filigree: wire scrollwork, soldered corner to corner, catching a slow light */
+[data-variant="legendary-2"] .card-front { background: linear-gradient(180deg, #241a06, #33260c 50%, #1a1204); box-shadow: inset 0 0 0 2px rgba(253,224,71,.55); }
+[data-variant="legendary-2"] { --ink: #fdf6e3; --ink-dim: #d5bd85; --ink-faint: #a48f5f; }
+[data-variant="legendary-2"] .fx-a { z-index: 3; opacity: .85; background:
+  repeating-radial-gradient(circle at 50% 50%, transparent 0 4.2px, rgba(253,224,71,.55) 4.2px 5px, transparent 5px 9px) 0 0 / 14px 14px,
+  repeating-radial-gradient(circle at 0% 0%, transparent 0 3px, rgba(217,164,42,.45) 3px 3.7px, transparent 3.7px 7px) 7px 7px / 14px 14px;
+  -webkit-mask: linear-gradient(#000 0 0) 0 0 / 100% 7cqw no-repeat, linear-gradient(#000 0 0) 0 100% / 100% 7cqw no-repeat, linear-gradient(#000 0 0) 0 0 / 7cqw 100% no-repeat, linear-gradient(#000 0 0) 100% 0 / 7cqw 100% no-repeat;
+  mask: linear-gradient(#000 0 0) 0 0 / 100% 7cqw no-repeat, linear-gradient(#000 0 0) 0 100% / 100% 7cqw no-repeat, linear-gradient(#000 0 0) 0 0 / 7cqw 100% no-repeat, linear-gradient(#000 0 0) 100% 0 / 7cqw 100% no-repeat; }
+[data-variant="legendary-2"] .fx-b { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(112deg + var(--lx) * 24deg), transparent 40%, rgba(255,250,220,.85) 50%, transparent 60%); animation: sweepx 5s ease-in-out infinite alternate; }
+[data-variant="legendary-2"] .fx-c { z-index: 0; opacity: .5; background: repeating-conic-gradient(from 24deg at 50% 50%, rgba(180,120,30,.16) 0 6deg, transparent 6deg 20deg); }
+[data-variant="legendary-2"] .card-art { box-shadow: 0 0 0 1px rgba(253,224,71,.7), 0 0 0 4px rgba(120,80,16,.6), 0 0 0 5px rgba(253,224,71,.5); }
+[data-variant="legendary-2"] .rarity-badge { border-radius: 3px; }
+
+/* 3 Molten Gold: not yet set. It is still moving, and it is still hot. */
+[data-variant="legendary-3"] .card-front { background: linear-gradient(180deg, #2b1502, #4a2604 46%, #1c0e01); box-shadow: inset 0 0 0 2px rgba(251,146,60,.6); }
+[data-variant="legendary-3"] { --ink: #fff4e0; --ink-dim: #f3d5b2; --ink-faint: #c4a37a; }
+[data-variant="legendary-3"] .fx-a { z-index: 0; filter: blur(4px); background:
+  radial-gradient(ellipse 50% 26% at 26% 28%, rgba(253,186,116,.85), transparent 70%),
+  radial-gradient(ellipse 44% 22% at 74% 54%, rgba(251,191,36,.8), transparent 70%),
+  radial-gradient(ellipse 56% 24% at 46% 84%, rgba(234,88,12,.7), transparent 72%);
+  animation: l-pour 12s ease-in-out infinite; }
+[data-variant="legendary-3"] .fx-b { z-index: 1; mix-blend-mode: screen; background:
+  linear-gradient(96deg, transparent 12%, rgba(255,236,180,.7) 26%, transparent 36%, rgba(255,214,120,.6) 54%, transparent 66%, rgba(255,246,214,.7) 84%, transparent 94%);
+  background-size: 250% 100%; animation: pearl 6s linear infinite; }
+[data-variant="legendary-3"] .fx-c { z-index: 2; mix-blend-mode: screen; opacity: .35; background: repeating-linear-gradient(0deg, rgba(255,220,150,.35) 0 1px, transparent 1px 7px); background-size: 100% 200%; animation: scrolly 7s linear infinite; }
+[data-variant="legendary-3"] .fx-v { z-index: 1; background: linear-gradient(180deg, transparent 40%, rgba(22,10,1,.74)); }
+[data-variant="legendary-3"] .card-art img { filter: sepia(.4) saturate(1.5) contrast(1.06) brightness(1.02); }
+[data-variant="legendary-3"] .card-art { box-shadow: 0 0 0 1px rgba(253,186,116,.8), 0 0 34px -8px rgba(251,146,60,.95); }
+@keyframes l-pour { 0%, 100% { transform: translate(0, 0) scale(1) } 50% { transform: translate(-3%, 2.5%) scale(1.08) } }
+
+/* 4 Laurel Crown: given for winning something, worn by someone who wanted it badly */
+[data-variant="legendary-4"] .card-front { background: linear-gradient(180deg, #2e2409, #443512 52%, #211a06); box-shadow: inset 0 0 0 2px rgba(234,179,8,.55); }
+[data-variant="legendary-4"] { --ink: #fdf8e7; --ink-dim: #d8c48c; --ink-faint: #a89566; }
+[data-variant="legendary-4"] .fx-a { z-index: 3; background:
+  repeating-linear-gradient(72deg, transparent 0 6px, rgba(234,179,8,.7) 6px 8.4px, transparent 8.4px 15px) 0 0 / 9cqw 100% no-repeat,
+  repeating-linear-gradient(-72deg, transparent 0 6px, rgba(234,179,8,.7) 6px 8.4px, transparent 8.4px 15px) 100% 0 / 9cqw 100% no-repeat;
+  -webkit-mask: radial-gradient(ellipse 100% 60% at 50% 50%, #000 40%, transparent 88%); mask: radial-gradient(ellipse 100% 60% at 50% 50%, #000 40%, transparent 88%); }
+[data-variant="legendary-4"] .fx-b { z-index: 3; background:
+  radial-gradient(ellipse 2cqw 1.1cqw at 50% 50%, rgba(253,224,71,.9), transparent 74%) 4cqw 0 / 5cqw 8cqw,
+  radial-gradient(ellipse 2cqw 1.1cqw at 50% 50%, rgba(202,138,4,.8), transparent 74%) 91cqw 4cqw / 5cqw 8cqw;
+  -webkit-mask: radial-gradient(ellipse 100% 64% at 50% 50%, #000 36%, transparent 90%); mask: radial-gradient(ellipse 100% 64% at 50% 50%, #000 36%, transparent 90%);
+  animation: l-sway 8s ease-in-out infinite; }
+[data-variant="legendary-4"] .fx-c { z-index: 0; opacity: .5; background: radial-gradient(ellipse 70% 54% at calc(50% + var(--lx) * 22%) calc(40% + var(--ly) * 16%), rgba(253,224,71,.3), transparent 72%); }
+[data-variant="legendary-4"] .card-art { box-shadow: 0 0 0 1px rgba(234,179,8,.7), 0 0 24px -10px rgba(234,179,8,.8); }
+@keyframes l-sway { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-2px) } }
+
+/* 5 Reliquary: gold case, enamel panels, a small blue stone at every join */
+[data-variant="legendary-5"] .card-front { background: linear-gradient(180deg, #40300d, #57411a 44%, #2c2008); box-shadow: inset 0 0 0 3px rgba(253,224,71,.7); }
+[data-variant="legendary-5"] { --ink: #fffaea; --ink-dim: #ddc793; --ink-faint: #ab9769; }
+[data-variant="legendary-5"] .fx-a { z-index: 0; opacity: .7; background:
+  repeating-linear-gradient(45deg, rgba(30,64,175,.4) 0 8px, rgba(153,27,27,.32) 8px 16px, rgba(6,78,59,.34) 16px 24px, rgba(30,64,175,.4) 24px 32px);
+  -webkit-mask: repeating-linear-gradient(0deg, #000 0 11px, transparent 11px 14px), repeating-linear-gradient(90deg, #000 0 11px, transparent 11px 14px);
+  mask: repeating-linear-gradient(0deg, #000 0 11px, transparent 11px 14px), repeating-linear-gradient(90deg, #000 0 11px, transparent 11px 14px); }
+[data-variant="legendary-5"] .fx-b { z-index: 3; background:
+  radial-gradient(circle at 8% 8%, rgba(147,197,253,.95) 0 1.3cqw, rgba(30,64,175,.7) 1.9cqw, transparent 2.3cqw),
+  radial-gradient(circle at 92% 8%, rgba(252,165,165,.95) 0 1.3cqw, rgba(153,27,27,.7) 1.9cqw, transparent 2.3cqw),
+  radial-gradient(circle at 8% 92%, rgba(167,243,208,.95) 0 1.3cqw, rgba(6,78,59,.7) 1.9cqw, transparent 2.3cqw),
+  radial-gradient(circle at 92% 92%, rgba(253,224,71,.95) 0 1.3cqw, rgba(180,83,9,.7) 1.9cqw, transparent 2.3cqw);
+  animation: breathe 5.5s ease-in-out infinite; }
+[data-variant="legendary-5"] .fx-c { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(108deg + var(--lx) * 22deg), transparent 42%, rgba(255,250,225,.7) 50%, transparent 58%); animation: sweepx 6.5s ease-in-out infinite alternate; }
+[data-variant="legendary-5"] .card-art { border-radius: 3px; box-shadow: 0 0 0 2px rgba(253,224,71,.85), 0 0 0 4px rgba(70,50,10,.9); }
+[data-variant="legendary-5"] .rarity-badge { border-radius: 2px; }
+
+/* 6 Gilded Age: deco fans, stepped rules, and no doubt at all about itself */
+[data-variant="legendary-6"] .card-front { background: linear-gradient(180deg, #14100a, #1e1810 46%, #0e0b06); box-shadow: inset 0 0 0 2px rgba(251,191,36,.6); }
+[data-variant="legendary-6"] { --ink: #fdf4dd; --ink-dim: #cdb887; --ink-faint: #9c8c63; }
+[data-variant="legendary-6"] .fx-a { z-index: 0; opacity: .6; background:
+  repeating-conic-gradient(from 180deg at 50% 100%, rgba(251,191,36,.3) 0 3deg, transparent 3deg 9deg) 0 0 / 100% 42%,
+  repeating-conic-gradient(from 0deg at 50% 0%, rgba(217,151,20,.24) 0 3deg, transparent 3deg 9deg) 0 100% / 100% 38%;
+  background-repeat: no-repeat; }
+[data-variant="legendary-6"] .fx-b { z-index: 3; background:
+  linear-gradient(180deg, rgba(251,191,36,.85) 0 1.5px, transparent 1.5px 4px, rgba(251,191,36,.6) 4px 5px, transparent 5px) 0 6cqw / 100% 6px no-repeat,
+  linear-gradient(0deg, rgba(251,191,36,.85) 0 1.5px, transparent 1.5px 4px, rgba(251,191,36,.6) 4px 5px, transparent 5px) 0 calc(100% - 6cqw) / 100% 6px no-repeat; }
+[data-variant="legendary-6"] .fx-c { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(100deg + var(--lx) * 26deg), transparent 38%, rgba(255,244,200,.6) 50%, transparent 62%); animation: sweepx 7s ease-in-out infinite alternate; }
+[data-variant="legendary-6"] .card-title { letter-spacing: .04em; text-transform: uppercase; font-size: 5.1cqw; }
+[data-variant="legendary-6"] .card-art { border-radius: 0; box-shadow: 0 0 0 1px rgba(251,191,36,.75), 0 0 0 3px #14100a, 0 0 0 4px rgba(251,191,36,.45); }
+[data-variant="legendary-6"] .rarity-badge { border-radius: 0; }
+
+/* 7 Hammered: planished by hand, every dent holding its own small piece of the sun */
+[data-variant="legendary-7"] .card-front { background: linear-gradient(180deg, #3d2d0c, #5a4413 48%, #2c2008); box-shadow: inset 0 0 0 2px rgba(217,164,42,.6); }
+[data-variant="legendary-7"] { --ink: #fff9e8; --ink-dim: #d9c28c; --ink-faint: #a89468; }
+[data-variant="legendary-7"] .fx-a { z-index: 0; background:
+  radial-gradient(circle at 34% 30%, rgba(255,244,200,.4) 0 22%, rgba(90,60,10,.3) 46%, transparent 60%) 0 0 / 18px 18px,
+  radial-gradient(circle at 66% 70%, rgba(255,238,180,.32) 0 20%, rgba(70,48,8,.3) 44%, transparent 58%) 9px 9px / 18px 18px; }
+[data-variant="legendary-7"] .fx-b { z-index: 1; mix-blend-mode: screen; background:
+  radial-gradient(circle at 34% 30%, rgba(255,255,255,.55) 0 12%, transparent 30%) 0 0 / 18px 18px,
+  radial-gradient(circle at 66% 70%, rgba(255,255,255,.4) 0 10%, transparent 28%) 9px 9px / 18px 18px;
+  -webkit-mask: radial-gradient(ellipse 60% 50% at calc(50% + var(--lx) * 34%) calc(44% + var(--ly) * 28%), #000, transparent 78%);
+  mask: radial-gradient(ellipse 60% 50% at calc(50% + var(--lx) * 34%) calc(44% + var(--ly) * 28%), #000, transparent 78%);
+  animation: breathe 5s ease-in-out infinite; }
+[data-variant="legendary-7"] .fx-c { z-index: 1; mix-blend-mode: overlay; opacity: .4; background: repeating-linear-gradient(24deg, rgba(255,255,255,.16) 0 1px, transparent 1px 6px); }
+[data-variant="legendary-7"] .fx-v { z-index: 1; background: linear-gradient(180deg, transparent 42%, rgba(30,20,2,.62)); }
+[data-variant="legendary-7"] .card-art { box-shadow: 0 0 0 2px rgba(217,164,42,.8), inset 0 0 20px rgba(60,40,6,.5); }
+
+/* 8 Sunspot: the photosphere at close range, granulating, with one cooler patch */
+[data-variant="legendary-8"] .card-front { background: radial-gradient(ellipse 92% 70% at 50% 42%, #b45309, #4a1d02 76%); box-shadow: inset 0 0 0 2px rgba(253,224,71,.6); }
+[data-variant="legendary-8"] { --ink: #fff8e2; --ink-dim: #f0cf94; --ink-faint: #c2a06a; }
+[data-variant="legendary-8"] .fx-a { z-index: 0; opacity: .65; background:
+  radial-gradient(circle at 50% 50%, rgba(255,237,160,.5) 0 24%, transparent 46%) 0 0 / 13px 13px,
+  radial-gradient(circle at 50% 50%, rgba(180,60,4,.5) 0 26%, transparent 48%) 6.5px 6.5px / 13px 13px;
+  animation: l-granule 6s ease-in-out infinite; }
+[data-variant="legendary-8"] .fx-b { z-index: 1; background: radial-gradient(ellipse 22% 16% at 64% 58%, rgba(30,12,2,.9) 0 46%, rgba(120,50,4,.6) 72%, transparent 92%); animation: l-spot 15s ease-in-out infinite; }
+[data-variant="legendary-8"] .fx-c { z-index: 2; mix-blend-mode: screen; background: radial-gradient(ellipse 60% 44% at calc(46% + var(--lx) * 26%) calc(36% + var(--ly) * 20%), rgba(255,250,220,.4), transparent 72%); animation: breathe 4s ease-in-out infinite; }
+[data-variant="legendary-8"] .fx-p i { background: radial-gradient(circle, rgba(255,246,200,.95), rgba(251,146,60,.4) 44%, transparent 72%); animation: rise linear infinite; }
+[data-variant="legendary-8"] .card-art img { filter: sepia(.34) saturate(1.4) brightness(1.05); }
+[data-variant="legendary-8"] .card-art { box-shadow: 0 0 0 1px rgba(253,224,71,.85), 0 0 36px -8px rgba(251,146,60,1); }
+@keyframes l-granule { 0%, 100% { transform: scale(1); opacity: .5 } 50% { transform: scale(1.06); opacity: .8 } }
+@keyframes l-spot { 0%, 100% { transform: translate(0, 0) scale(1) } 50% { transform: translate(-5%, 4%) scale(1.14) } }
+
+/* 9 Coronation: ermine ground, heraldic diaper, one gold band across the plate */
+[data-variant="legendary-9"] .card-front { background: linear-gradient(180deg, #4a0f1a, #63161f 46%, #370a12); box-shadow: inset 0 0 0 2px rgba(251,191,36,.65); }
+[data-variant="legendary-9"] { --ink: #fff6e6; --ink-dim: #e0bd94; --ink-faint: #b0926d; }
+[data-variant="legendary-9"] .fx-a { z-index: 0; opacity: .5; background:
+  repeating-linear-gradient(45deg, rgba(251,191,36,.22) 0 1px, transparent 1px 13px),
+  repeating-linear-gradient(-45deg, rgba(251,191,36,.22) 0 1px, transparent 1px 13px); }
+[data-variant="legendary-9"] .fx-b { z-index: 1; background:
+  radial-gradient(ellipse .9cqw 1.6cqw at 50% 34%, rgba(20,10,12,.85), transparent 70%) 0 0 / 13cqw 15cqw,
+  radial-gradient(circle at 42% 62%, rgba(20,10,12,.7) 0 .5cqw, transparent .8cqw) 0 0 / 13cqw 15cqw,
+  radial-gradient(circle at 58% 62%, rgba(20,10,12,.7) 0 .5cqw, transparent .8cqw) 0 0 / 13cqw 15cqw;
+  -webkit-mask: linear-gradient(180deg, transparent 0 58%, #000 68%); mask: linear-gradient(180deg, transparent 0 58%, #000 68%); opacity: .8; }
+[data-variant="legendary-9"] .fx-c { z-index: 3; background: linear-gradient(180deg, transparent 0 50%, rgba(251,191,36,.9) 50% 51.4%, rgba(120,53,15,.8) 51.4% 53%, rgba(253,224,71,.7) 53% 54%, transparent 54%); }
+[data-variant="legendary-9"] .fx-v { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(104deg + var(--lx) * 22deg), transparent 44%, rgba(255,245,210,.55) 51%, transparent 58%); animation: sweepx 8s ease-in-out infinite alternate; }
+[data-variant="legendary-9"] .card-art { box-shadow: 0 0 0 2px rgba(251,191,36,.8), 0 0 0 4px rgba(55,10,18,.9); }
+[data-variant="legendary-9"] .rarity-badge { background: #fbbf24; color: #3a0b12; border-color: #fde68a; }
+
+/* 10 Ingot: no ornament. Weight, a stamped face, and a bevel that says nothing bends here. */
+[data-variant="legendary-10"] .card-front { background: linear-gradient(168deg, #a17a1a, #d4a72c 26%, #8a6512 52%, #e2ba46 68%, #7d5b10); box-shadow: inset 0 0 0 2px rgba(120,80,10,.7); }
+[data-variant="legendary-10"] { --ink: #2b1e04; --ink-dim: #5a4310; --ink-faint: #7d6220; --positive: #1f4a2c; }
+[data-variant="legendary-10"] .fx-a { z-index: 3; background:
+  linear-gradient(180deg, rgba(255,244,190,.6) 0 2.2cqw, transparent 2.2cqw),
+  linear-gradient(0deg, rgba(60,38,2,.55) 0 2.2cqw, transparent 2.2cqw),
+  linear-gradient(90deg, rgba(255,244,190,.45) 0 2.2cqw, transparent 2.2cqw),
+  linear-gradient(270deg, rgba(60,38,2,.45) 0 2.2cqw, transparent 2.2cqw); }
+[data-variant="legendary-10"] .fx-b { z-index: 1; mix-blend-mode: overlay; opacity: .5; background: repeating-linear-gradient(78deg, rgba(255,255,255,.2) 0 1px, transparent 1px 5px), repeating-linear-gradient(102deg, rgba(0,0,0,.14) 0 1px, transparent 1px 8px); }
+[data-variant="legendary-10"] .fx-c { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(96deg + var(--lx) * 34deg), transparent 36%, rgba(255,255,235,.7) 48%, transparent 60%); animation: sweepx 5s ease-in-out infinite alternate; }
+[data-variant="legendary-10"] .fx-v { z-index: 3; opacity: .35; background: radial-gradient(ellipse 22cqw 8cqw at 50% 88%, transparent 0 62%, rgba(60,38,2,.7) 66%, transparent 70%); }
+[data-variant="legendary-10"] .card-art { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(60,38,2,.7), 0 2cqw 4cqw -2cqw rgba(50,32,2,.8); }
+[data-variant="legendary-10"] .card-art img { filter: sepia(.45) saturate(1.2) contrast(1.05); }
+[data-variant="legendary-10"] .rarity-badge { border-radius: 2px; background: #2b1e04; color: #e2ba46; border-color: #2b1e04; }

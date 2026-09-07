@@ -1,0 +1,147 @@
+/* ============ EPIC: violet, and mostly very far away. Gravity, light and one flower. ============ */
+[data-variant^="epic"] .card-front { --rarity: #c084fc; }
+
+/* 1 Event Horizon: the disc, the lensing ring, and the part where nothing comes back */
+[data-variant="epic-1"] .card-front { background: radial-gradient(ellipse 90% 66% at 50% 42%, #1a0733, #0a0318 74%); box-shadow: inset 0 0 0 2px rgba(192,132,252,.5); }
+[data-variant="epic-1"] { --ink: #f5ecff; --ink-dim: #c1a3e0; --ink-faint: #9377b4; }
+[data-variant="epic-1"] .fx-a { z-index: 0; background: radial-gradient(circle at 50% 42%, #000 0 12.5%, transparent 13.5%), radial-gradient(circle at 50% 42%, rgba(216,180,254,.85) 13%, rgba(192,132,252,.35) 15.5%, transparent 19%); }
+[data-variant="epic-1"] .fx-b { z-index: 0; mix-blend-mode: screen; background: conic-gradient(from var(--a) at 50% 42%, transparent 0 12%, rgba(233,213,255,.75) 26%, rgba(147,51,234,.5) 44%, transparent 60%, rgba(216,180,254,.6) 82%, transparent);
+  -webkit-mask: radial-gradient(ellipse 44% 15% at 50% 42%, transparent 0 44%, #000 52% 96%, transparent); mask: radial-gradient(ellipse 44% 15% at 50% 42%, transparent 0 44%, #000 52% 96%, transparent);
+  animation: turn-a 5.5s linear infinite; }
+[data-variant="epic-1"] .fx-c { z-index: 1; background: radial-gradient(circle at 50% 42%, transparent 0 16%, rgba(233,213,255,.22) 17%, transparent 24%); animation: e-lens 8s ease-in-out infinite; }
+[data-variant="epic-1"] .fx-v { z-index: 0; background: radial-gradient(circle, rgba(255,255,255,.8) 0 .6px, transparent 1.1px) 0 0 / 34px 41px, radial-gradient(circle, rgba(216,180,254,.6) 0 .5px, transparent .9px) 17px 23px / 53px 29px; animation: breathe 6s ease-in-out infinite; }
+[data-variant="epic-1"] .card-art { box-shadow: 0 0 0 1px rgba(192,132,252,.7), 0 0 34px -8px rgba(147,51,234,.9); }
+@keyframes e-lens { 0%, 100% { transform: scale(1); opacity: .6 } 50% { transform: scale(1.08); opacity: 1 } }
+
+/* 2 Pulsar: a lighthouse with a rotation period of eleven milliseconds, slowed down for you */
+[data-variant="epic-2"] .card-front { background: radial-gradient(ellipse 70% 60% at 50% 40%, #180a30, #07031a 76%); box-shadow: inset 0 0 0 2px rgba(168,85,247,.55); }
+[data-variant="epic-2"] { --ink: #f6efff; --ink-dim: #bfa5dd; --ink-faint: #8e77ad; }
+[data-variant="epic-2"] .fx-a { z-index: 0; mix-blend-mode: screen; background: conic-gradient(from 0deg at 50% 40%, rgba(233,213,255,.6) 0 5deg, transparent 5deg 176deg, rgba(233,213,255,.6) 176deg 184deg, transparent 184deg 356deg, rgba(233,213,255,.6) 356deg);
+  filter: blur(2px); animation: e-beam 3.2s linear infinite; }
+[data-variant="epic-2"] .fx-b { z-index: 1; background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.95) 0 1.4cqw, rgba(216,180,254,.6) 2.6cqw, transparent 5cqw); animation: e-pulse 1.6s ease-out infinite; }
+[data-variant="epic-2"] .fx-c { z-index: 0; background: repeating-radial-gradient(circle at 50% 40%, transparent 0 9px, rgba(168,85,247,.16) 9px 10px); animation: e-shell 4.8s linear infinite; }
+[data-variant="epic-2"] .fx-v { z-index: 0; background: radial-gradient(circle, rgba(255,255,255,.7) 0 .5px, transparent 1px) 0 0 / 29px 37px; }
+[data-variant="epic-2"] .card-art { box-shadow: 0 0 0 1px rgba(168,85,247,.7), 0 0 30px -10px rgba(233,213,255,.9); }
+@keyframes e-beam { to { transform: rotate(1turn) } }
+@keyframes e-pulse { 0% { transform: scale(.8); opacity: 1 } 70%, 100% { transform: scale(1.5); opacity: .25 } }
+@keyframes e-shell { 0% { transform: scale(1); opacity: .8 } 100% { transform: scale(1.6); opacity: 0 } }
+
+/* 3 Violet Storm: thunderheads stacked to the top of the card, lit from inside */
+[data-variant="epic-3"] .card-front { background: linear-gradient(180deg, #1d1036, #2a1550 46%, #120a24); box-shadow: inset 0 0 0 2px rgba(196,150,255,.5); }
+[data-variant="epic-3"] { --ink: #f3ecff; --ink-dim: #bda8e0; --ink-faint: #8e7cae; }
+[data-variant="epic-3"] .fx-a { z-index: 0; filter: blur(7px); opacity: .8; background:
+  radial-gradient(ellipse 54% 34% at 26% 24%, rgba(120,60,190,.8), transparent 70%),
+  radial-gradient(ellipse 46% 30% at 74% 46%, rgba(80,36,140,.85), transparent 70%),
+  radial-gradient(ellipse 60% 30% at 46% 78%, rgba(140,80,220,.6), transparent 72%);
+  animation: e-roll 19s ease-in-out infinite; }
+[data-variant="epic-3"] .fx-b { z-index: 1; mix-blend-mode: screen; background: radial-gradient(ellipse 40% 26% at 34% 32%, rgba(240,225,255,.9), transparent 66%); animation: e-flash 5.4s steps(1, end) infinite; }
+[data-variant="epic-3"] .fx-c { z-index: 2; background:
+  linear-gradient(196deg, transparent 46.5%, rgba(245,235,255,.95) 47%, transparent 47.6%) 0 0 / 100% 60% no-repeat,
+  linear-gradient(166deg, transparent 52%, rgba(230,215,255,.75) 52.5%, transparent 53.2%) 0 34% / 100% 46% no-repeat;
+  filter: drop-shadow(0 0 6px rgba(216,180,254,.9)); animation: e-bolt 5.4s steps(1, end) infinite; }
+[data-variant="epic-3"] .card-art img { filter: saturate(1.15) contrast(1.08) brightness(.94); }
+[data-variant="epic-3"] .card-art { box-shadow: 0 0 0 1px rgba(196,150,255,.65), inset 0 0 26px rgba(20,8,40,.7); }
+@keyframes e-roll { 0%, 100% { transform: translate(0, 0) scale(1) } 50% { transform: translate(-3%, 2%) scale(1.08) } }
+@keyframes e-flash { 0%, 84%, 100% { opacity: 0 } 85%, 87% { opacity: .9 } 86% { opacity: .2 } 89% { opacity: .45 } }
+@keyframes e-bolt { 0%, 84%, 100% { opacity: 0 } 85%, 86.5% { opacity: 1 } 85.8% { opacity: .2 } }
+
+/* 4 Wormhole: rings receding into a place the card does not have room for */
+[data-variant="epic-4"] .card-front { background: radial-gradient(ellipse 80% 62% at 50% 44%, #2c0f4d, #0b0320 78%); box-shadow: inset 0 0 0 2px rgba(192,132,252,.5); }
+[data-variant="epic-4"] { --ink: #f4ecff; --ink-dim: #bfa4e2; --ink-faint: #8d76ae; }
+[data-variant="epic-4"] .fx-a { z-index: 0; background: repeating-radial-gradient(circle at 50% 44%, rgba(216,180,254,.5) 0 1.4px, transparent 1.4px 16px), repeating-radial-gradient(circle at 50% 44%, rgba(126,34,206,.4) 0 1px, transparent 1px 8px);
+  animation: e-tunnel 5s linear infinite; }
+[data-variant="epic-4"] .fx-b { z-index: 0; mix-blend-mode: screen; opacity: .55; background: repeating-conic-gradient(from 0deg at 50% 44%, rgba(233,213,255,.3) 0 3deg, transparent 3deg 15deg); animation: spin 24s linear infinite; }
+[data-variant="epic-4"] .fx-c { z-index: 1; background: radial-gradient(circle at 50% 44%, rgba(255,255,255,.5) 0 2%, rgba(216,180,254,.25) 6%, transparent 14%); animation: breathe 3.4s ease-in-out infinite; }
+[data-variant="epic-4"] .fx-v { z-index: 1; background: radial-gradient(ellipse 120% 100% at 50% 44%, transparent 46%, rgba(6,2,16,.8) 92%); }
+[data-variant="epic-4"] .card-art { box-shadow: 0 0 0 1px rgba(192,132,252,.65), 0 0 32px -12px rgba(168,85,247,.95); }
+@keyframes e-tunnel { 0% { transform: scale(1); opacity: .9 } 100% { transform: scale(1.9); opacity: 0 } }
+
+/* 5 Amethyst Geode: the inside of a rock that turned out to be worth opening */
+[data-variant="epic-5"] .card-front { background: linear-gradient(180deg, #2a1442, #3d1c60 44%, #1a0c2c); box-shadow: inset 0 0 0 2px rgba(216,180,254,.55); }
+[data-variant="epic-5"] { --ink: #f8f1ff; --ink-dim: #ddc9f5; --ink-faint: #ab93cb; }
+[data-variant="epic-5"] .fx-a { z-index: 0; background:
+  repeating-conic-gradient(from 8deg at 22% 20%, rgba(233,213,255,.22) 0 18deg, rgba(126,34,206,.16) 18deg 36deg),
+  repeating-conic-gradient(from 22deg at 78% 40%, rgba(216,180,254,.18) 0 14deg, rgba(88,28,135,.2) 14deg 28deg),
+  repeating-conic-gradient(from 44deg at 44% 88%, rgba(233,213,255,.2) 0 22deg, rgba(107,33,168,.18) 22deg 44deg); }
+[data-variant="epic-5"] .fx-b { z-index: 1; mix-blend-mode: screen; background:
+  conic-gradient(from calc(var(--lx) * 90deg) at calc(48% + var(--lx) * 22%) calc(42% + var(--ly) * 18%), rgba(255,255,255,.5), transparent 16%, rgba(216,180,254,.4) 30%, transparent 46%, rgba(255,255,255,.4) 64%, transparent 80%, rgba(192,132,252,.45));
+  animation: e-glint 6.5s ease-in-out infinite; }
+[data-variant="epic-5"] .fx-c { z-index: 1; background: radial-gradient(ellipse 120% 90% at 50% 34%, transparent 34%, rgba(14,6,26,.55) 74%), linear-gradient(180deg, transparent 46%, rgba(14,6,26,.72)); }
+[data-variant="epic-5"] .fx-ring::before { background: conic-gradient(from var(--a), #4c1d95, #d8b4fe, #6b21a8, #f3e8ff, #4c1d95); animation: turn-a 9s linear infinite; }
+[data-variant="epic-5"] .card-art { border-radius: 26% 8% 22% 10% / 14% 24% 12% 22%; box-shadow: 0 0 0 1px rgba(216,180,254,.7), inset 0 0 24px rgba(107,33,168,.5); }
+@keyframes e-glint { 0%, 100% { filter: brightness(.9) } 50% { filter: brightness(1.6) } }
+
+/* 6 Starless: no stars at all, only dust lanes and one thing burning behind them */
+[data-variant="epic-6"] .card-front { background: linear-gradient(180deg, #0a0616, #0f081f 55%, #060310); box-shadow: inset 0 0 0 2px rgba(147,51,234,.45); }
+[data-variant="epic-6"] { --ink: #ece4f8; --ink-dim: #a894c4; --ink-faint: #7a6a95; }
+[data-variant="epic-6"] .fx-a { z-index: 0; filter: blur(9px); opacity: .8; background:
+  radial-gradient(ellipse 34% 60% at 62% 40%, rgba(147,51,234,.55), transparent 72%),
+  radial-gradient(ellipse 50% 24% at 30% 66%, rgba(76,29,149,.6), transparent 74%);
+  animation: e-drift 22s ease-in-out infinite; }
+[data-variant="epic-6"] .fx-b { z-index: 1; opacity: .85; background:
+  repeating-linear-gradient(-24deg, transparent 0 11px, rgba(6,3,14,.75) 11px 15px, transparent 15px 30px),
+  repeating-linear-gradient(-24deg, transparent 0 26px, rgba(10,5,22,.6) 26px 34px, transparent 34px 62px);
+  filter: blur(1.6px); animation: e-lanes 26s linear infinite; }
+[data-variant="epic-6"] .fx-c { z-index: 2; mix-blend-mode: screen; background: radial-gradient(ellipse 26% 20% at calc(60% + var(--lx) * 12%) calc(40% + var(--ly) * 10%), rgba(233,213,255,.45), transparent 70%); animation: breathe 7s ease-in-out infinite; }
+[data-variant="epic-6"] .card-art img { filter: contrast(1.12) saturate(.85) brightness(.86); }
+[data-variant="epic-6"] .card-art { box-shadow: 0 0 0 1px rgba(147,51,234,.55), inset 0 0 34px rgba(4,2,10,.85); }
+@keyframes e-drift { 0%, 100% { transform: translate(0, 0) } 50% { transform: translate(-4%, 3%) } }
+@keyframes e-lanes { 0% { transform: translateX(0) } 100% { transform: translateX(-30px) } }
+
+/* 7 Magnetar: field lines you can see, and would rather not stand inside */
+[data-variant="epic-7"] .card-front { background: radial-gradient(ellipse 80% 64% at 50% 46%, #200a3c, #08021a 78%); box-shadow: inset 0 0 0 2px rgba(192,132,252,.55); }
+[data-variant="epic-7"] { --ink: #f4ecff; --ink-dim: #bda2e0; --ink-faint: #8b74ac; }
+[data-variant="epic-7"] .fx-a { z-index: 0; mix-blend-mode: screen; opacity: .8; background:
+  repeating-radial-gradient(ellipse 30% 90% at 50% 46%, transparent 0 6px, rgba(192,132,252,.4) 6px 7px),
+  repeating-radial-gradient(ellipse 90% 30% at 50% 46%, transparent 0 8px, rgba(147,51,234,.3) 8px 9px);
+  animation: e-field 6s ease-in-out infinite; }
+[data-variant="epic-7"] .fx-b { z-index: 1; mix-blend-mode: screen; background: radial-gradient(circle at 50% 46%, rgba(255,255,255,.85) 0 1.1cqw, rgba(216,180,254,.5) 2.6cqw, transparent 6cqw); animation: breathe 2.4s ease-in-out infinite; }
+[data-variant="epic-7"] .fx-c { z-index: 0; background: conic-gradient(from var(--a) at 50% 46%, transparent 0 40%, rgba(233,213,255,.28) 48%, transparent 56%, rgba(233,213,255,.28) 92%, transparent); animation: turn-a 11s linear infinite reverse; }
+[data-variant="epic-7"] .fx-v { z-index: 2; opacity: .28; background: repeating-linear-gradient(0deg, rgba(216,180,254,.3) 0 1px, transparent 1px 4px); animation: scrolly 3s linear infinite; background-size: 100% 200%; }
+[data-variant="epic-7"] .card-art { box-shadow: 0 0 0 1px rgba(192,132,252,.7), 0 0 28px -8px rgba(168,85,247,.9); }
+@keyframes e-field { 0%, 100% { transform: scale(1); opacity: .55 } 50% { transform: scale(1.05); opacity: .95 } }
+
+/* 8 Orchid: velvet petals, a throat of deeper purple, and pollen dust on the air */
+[data-variant="epic-8"] .card-front { background: linear-gradient(180deg, #2b1140, #3b1758 48%, #1c0a2c); box-shadow: inset 0 0 0 2px rgba(232,121,249,.45); }
+[data-variant="epic-8"] { --ink: #fdeeff; --ink-dim: #d2a8dd; --ink-faint: #a17cb0; }
+[data-variant="epic-8"] .fx-a { z-index: 0; opacity: .8; background:
+  radial-gradient(ellipse 30% 44% at 30% 34%, rgba(232,121,249,.5), transparent 68%),
+  radial-gradient(ellipse 26% 40% at 70% 38%, rgba(192,132,252,.45), transparent 68%),
+  radial-gradient(ellipse 34% 30% at 50% 74%, rgba(217,70,239,.4), transparent 70%);
+  filter: blur(3px); animation: e-bloom 10s ease-in-out infinite; }
+[data-variant="epic-8"] .fx-b { z-index: 1; opacity: .5; background:
+  repeating-conic-gradient(from 0deg at 50% 46%, rgba(255,255,255,.14) 0 2deg, transparent 2deg 9deg);
+  -webkit-mask: radial-gradient(ellipse 60% 54% at 50% 46%, #000 20%, transparent 76%); mask: radial-gradient(ellipse 60% 54% at 50% 46%, #000 20%, transparent 76%); }
+[data-variant="epic-8"] .fx-c { z-index: 2; mix-blend-mode: screen; background: radial-gradient(ellipse 30% 22% at calc(50% + var(--lx) * 24%) calc(42% + var(--ly) * 18%), rgba(255,240,255,.35), transparent 70%); }
+[data-variant="epic-8"] .fx-p i { background: radial-gradient(circle, rgba(255,244,255,.9), rgba(232,121,249,.3) 44%, transparent 70%); animation: rise linear infinite; }
+[data-variant="epic-8"] .card-art img { filter: saturate(1.2) hue-rotate(6deg); }
+[data-variant="epic-8"] .card-art { box-shadow: 0 0 0 1px rgba(232,121,249,.6), 0 0 24px -10px rgba(217,70,239,.8); }
+@keyframes e-bloom { 0%, 100% { transform: scale(1) rotate(0deg) } 50% { transform: scale(1.05) rotate(1.5deg) } }
+
+/* 9 Ultraviolet: blacklight in the room, and everything on the card fluorescing back */
+[data-variant="epic-9"] .card-front { background: linear-gradient(180deg, #150a2e, #1d0e3f 50%, #0d0620); box-shadow: inset 0 0 0 2px rgba(167,139,250,.6); }
+[data-variant="epic-9"] { --ink: #f0e9ff; --ink-dim: #b4a2e8; --ink-faint: #8676b8; }
+[data-variant="epic-9"] .fx-a { z-index: 0; mix-blend-mode: screen; background: radial-gradient(ellipse 100% 60% at 50% -6%, rgba(139,92,246,.55), transparent 70%); animation: e-lamp 5s ease-in-out infinite; }
+[data-variant="epic-9"] .fx-b { z-index: 1; mix-blend-mode: screen; opacity: .7; background:
+  repeating-linear-gradient(112deg, transparent 0 16px, rgba(196,181,253,.28) 16px 17.6px, transparent 17.6px 34px),
+  repeating-linear-gradient(-112deg, transparent 0 21px, rgba(167,139,250,.22) 21px 22.6px, transparent 22.6px 44px); }
+[data-variant="epic-9"] .fx-c { z-index: 3; mix-blend-mode: screen; opacity: .45; background: radial-gradient(circle, rgba(224,231,255,.7) 0 .6px, transparent 1.2px) 0 0 / 9px 11px; animation: breathe 4.4s ease-in-out infinite; }
+[data-variant="epic-9"] .card-art img { filter: saturate(1.8) hue-rotate(-24deg) brightness(1.08) contrast(1.1); }
+[data-variant="epic-9"] .card-art { box-shadow: 0 0 0 1px rgba(167,139,250,.8), 0 0 26px -6px rgba(139,92,246,.9); }
+[data-variant="epic-9"] .card-title { color: #ddd6fe; text-shadow: 0 0 10px rgba(167,139,250,.8); }
+[data-variant="epic-9"] .rarity-badge { box-shadow: 0 0 14px -4px rgba(167,139,250,.9); }
+@keyframes e-lamp { 0%, 100% { opacity: .6 } 50% { opacity: 1 } }
+
+/* 10 Comet Trail: a nucleus with a bad habit, dragging its ion tail across the plate */
+[data-variant="epic-10"] .card-front { background: linear-gradient(180deg, #0c0722, #150c33 52%, #070415); box-shadow: inset 0 0 0 2px rgba(192,132,252,.5); }
+[data-variant="epic-10"] { --ink: #f2ecff; --ink-dim: #b8a4de; --ink-faint: #8776aa; }
+[data-variant="epic-10"] .fx-a { z-index: 0; background: radial-gradient(circle, rgba(255,255,255,.75) 0 .5px, transparent 1px) 0 0 / 31px 39px, radial-gradient(circle, rgba(216,180,254,.55) 0 .4px, transparent .8px) 15px 21px / 47px 27px; }
+[data-variant="epic-10"] .fx-b { z-index: 1; mix-blend-mode: screen; background:
+  radial-gradient(ellipse 3cqw 1.4cqw at 88% 50%, rgba(255,255,255,.95), transparent 70%),
+  linear-gradient(268deg, rgba(233,213,255,.55) 0 8%, rgba(168,85,247,.3) 30%, transparent 62%);
+  -webkit-mask: linear-gradient(268deg, #000 0 60%, transparent 88%); mask: linear-gradient(268deg, #000 0 60%, transparent 88%);
+  animation: e-comet 9s linear infinite; }
+[data-variant="epic-10"] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .5; background: linear-gradient(268deg, rgba(125,211,252,.4) 0 6%, transparent 46%); animation: e-comet 9s linear infinite; animation-delay: -.3s; filter: blur(2px); }
+[data-variant="epic-10"] .fx-v { z-index: 0; background: radial-gradient(ellipse 90% 70% at 50% 44%, rgba(88,28,135,.36), transparent 74%); }
+[data-variant="epic-10"] .card-art { box-shadow: 0 0 0 1px rgba(192,132,252,.6), 0 0 26px -10px rgba(168,85,247,.85); }
+@keyframes e-comet { 0% { transform: translate(-118%, 28%) rotate(-9deg) } 100% { transform: translate(118%, -28%) rotate(-9deg) } }

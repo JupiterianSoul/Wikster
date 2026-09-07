@@ -1,0 +1,212 @@
+/* ============ PRISMATIC: the whole spectrum, ten different ways of splitting it. ============ */
+[data-variant^="prismatic"] .card-front { --rarity: #f472b6; }
+
+/* 1 Aurora Veil: curtains hanging off the magnetic field, folding and refolding all night */
+[data-variant="prismatic-1"] .card-front { background: linear-gradient(180deg, #050818, #080e26 48%, #03050f); box-shadow: inset 0 0 0 2px rgba(244,114,182,.5); }
+[data-variant="prismatic-1"] { --ink: #f6f2ff; --ink-dim: #b7aede; --ink-faint: #8880ac; }
+[data-variant="prismatic-1"] .fx-a { z-index: 0; mix-blend-mode: screen; filter: blur(5px); background:
+  linear-gradient(96deg, transparent 4%, rgba(52,211,153,.55) 18%, rgba(34,211,238,.5) 32%, transparent 44%),
+  linear-gradient(84deg, transparent 40%, rgba(192,132,252,.5) 56%, rgba(244,114,182,.45) 70%, transparent 84%);
+  -webkit-mask: linear-gradient(180deg, #000 0 66%, transparent 96%); mask: linear-gradient(180deg, #000 0 66%, transparent 96%);
+  animation: p-curtain 11s ease-in-out infinite; }
+[data-variant="prismatic-1"] .fx-b { z-index: 0; mix-blend-mode: screen; opacity: .7; background:
+  repeating-linear-gradient(94deg, transparent 0 5px, rgba(190,255,220,.4) 5px 6.4px, transparent 6.4px 13px);
+  -webkit-mask: linear-gradient(180deg, #000 0 54%, transparent 88%); mask: linear-gradient(180deg, #000 0 54%, transparent 88%);
+  animation: p-ripple 7s ease-in-out infinite; }
+[data-variant="prismatic-1"] .fx-c { z-index: 1; mix-blend-mode: screen; filter: blur(9px); opacity: .6; background:
+  linear-gradient(88deg, transparent 20%, rgba(129,140,248,.6) 40%, rgba(52,211,153,.5) 62%, transparent 80%);
+  animation: p-curtain 11s ease-in-out infinite reverse; }
+[data-variant="prismatic-1"] .fx-v { z-index: 0; background: radial-gradient(circle, rgba(255,255,255,.8) 0 .6px, transparent 1.1px) 0 0 / 33px 41px, radial-gradient(circle, rgba(220,235,255,.6) 0 .45px, transparent .9px) 17px 23px / 51px 29px; }
+[data-variant="prismatic-1"] .fx-ring::before { background: conic-gradient(from var(--a), #34d399, #22d3ee, #818cf8, #f472b6, #34d399); animation: turn-a 9s linear infinite; }
+[data-variant="prismatic-1"] .card-art { box-shadow: 0 0 0 1px rgba(244,114,182,.6), 0 0 32px -10px rgba(129,140,248,.9); }
+@keyframes p-curtain { 0%, 100% { transform: translateX(-6%) skewX(-5deg) scaleY(1) } 33% { transform: translateX(3%) skewX(4deg) scaleY(1.1) } 66% { transform: translateX(6%) skewX(-3deg) scaleY(.94) } }
+@keyframes p-ripple { 0%, 100% { transform: translateX(0) skewX(-2deg) } 50% { transform: translateX(9px) skewX(3deg) } }
+
+/* 2 Diffraction: one ruled grating, and white light doing what it always wanted to */
+[data-variant="prismatic-2"] .card-front { background: linear-gradient(180deg, #0a0714, #110b22 48%, #060410); box-shadow: inset 0 0 0 2px rgba(244,114,182,.55); }
+[data-variant="prismatic-2"] { --ink: #fbf3ff; --ink-dim: #c3aada; --ink-faint: #927fa6; }
+[data-variant="prismatic-2"] .fx-a { z-index: 0; opacity: .55; background: repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 1px, transparent 1px 3px); }
+[data-variant="prismatic-2"] .fx-b { z-index: 1; mix-blend-mode: screen; background:
+  repeating-linear-gradient(calc(96deg + var(--lx) * 22deg),
+    rgba(255,0,80,.42) 0 6px, rgba(255,170,0,.42) 6px 12px, rgba(180,255,0,.4) 12px 18px,
+    rgba(0,230,180,.42) 18px 24px, rgba(0,160,255,.42) 24px 30px, rgba(150,90,255,.42) 30px 36px, rgba(255,0,80,.42) 36px 42px);
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 3px); mask: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 3px);
+  animation: p-grate 6s linear infinite; }
+[data-variant="prismatic-2"] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .8; background:
+  linear-gradient(calc(96deg + var(--lx) * 22deg), transparent 36%, rgba(255,255,255,.9) 48%, transparent 60%);
+  filter: blur(1px); animation: sweepx 4.5s ease-in-out infinite alternate; }
+[data-variant="prismatic-2"] .fx-v { z-index: 0; background: radial-gradient(ellipse 90% 70% at calc(50% + var(--lx) * 22%) calc(44% + var(--ly) * 18%), rgba(255,255,255,.14), transparent 74%); }
+[data-variant="prismatic-2"] .fx-ring::before { background: conic-gradient(from var(--a), #ff0050, #ffaa00, #b4ff00, #00e6b4, #00a0ff, #965aff, #ff0050); animation: turn-a 5s linear infinite; }
+[data-variant="prismatic-2"] .card-art { box-shadow: 0 0 0 1px rgba(255,255,255,.5), 0 0 30px -10px rgba(244,114,182,.9); }
+@keyframes p-grate { to { background-position: 42px 0 } }
+
+/* 3 Soap Film: a few hundred nanometres thick, and thinning out at the top as it drains */
+[data-variant="prismatic-3"] .card-front { background: linear-gradient(180deg, #0b1020, #121a33 46%, #070b16); box-shadow: inset 0 0 0 2px rgba(167,243,208,.5); }
+[data-variant="prismatic-3"] { --ink: #f2fbff; --ink-dim: #a9c8d8; --ink-faint: #7e98a8; }
+[data-variant="prismatic-3"] .fx-a { z-index: 0; mix-blend-mode: screen; filter: blur(4px); background:
+  radial-gradient(ellipse 60% 42% at calc(32% + var(--lx) * 16%) 30%, rgba(255,120,200,.55), rgba(120,200,255,.4) 44%, rgba(180,255,180,.35) 66%, transparent 84%),
+  radial-gradient(ellipse 54% 38% at calc(70% + var(--lx) * -14%) 66%, rgba(255,220,120,.45), rgba(160,140,255,.4) 46%, transparent 82%);
+  animation: p-drain 13s ease-in-out infinite; }
+[data-variant="prismatic-3"] .fx-b { z-index: 1; mix-blend-mode: screen; opacity: .7; background:
+  repeating-radial-gradient(ellipse 70% 90% at 50% 108%,
+    rgba(255,140,200,.3) 0 5px, rgba(140,220,255,.3) 5px 10px, rgba(190,255,170,.28) 10px 15px, rgba(255,225,140,.28) 15px 20px);
+  animation: p-thin 9s ease-in-out infinite; }
+[data-variant="prismatic-3"] .fx-c { z-index: 2; mix-blend-mode: screen; opacity: .55; background: radial-gradient(ellipse 46% 30% at calc(40% + var(--lx) * 26%) calc(26% + var(--ly) * 18%), rgba(255,255,255,.6), transparent 74%); }
+[data-variant="prismatic-3"] .fx-v { z-index: 3; opacity: .35; background: linear-gradient(180deg, rgba(255,255,255,.28), transparent 22%); }
+[data-variant="prismatic-3"] .card-art img { filter: saturate(1.15) brightness(1.03); }
+[data-variant="prismatic-3"] .card-art { box-shadow: 0 0 0 1px rgba(190,230,255,.6), inset 0 0 26px rgba(255,255,255,.14); }
+@keyframes p-drain { 0%, 100% { transform: translate(0, 0) scale(1) } 50% { transform: translate(-3%, 4%) scale(1.1) } }
+@keyframes p-thin { 0%, 100% { transform: translateY(0) scaleY(1) } 50% { transform: translateY(-4%) scaleY(1.12) } }
+
+/* 4 Chromatic Bloom: colour opening out of the middle and running off the edges */
+[data-variant="prismatic-4"] .card-front { background: radial-gradient(ellipse 88% 68% at 50% 44%, #1a0a26, #06030d 78%); box-shadow: inset 0 0 0 2px rgba(244,114,182,.55); }
+[data-variant="prismatic-4"] { --ink: #fdf0ff; --ink-dim: #cba7d8; --ink-faint: #9a7ea6; }
+[data-variant="prismatic-4"] .fx-a { z-index: 0; mix-blend-mode: screen; background:
+  repeating-radial-gradient(circle at 50% 44%,
+    rgba(255,60,140,.45) 0 8px, rgba(255,180,60,.4) 8px 16px, rgba(120,255,160,.4) 16px 24px,
+    rgba(80,190,255,.42) 24px 32px, rgba(180,110,255,.42) 32px 40px);
+  animation: p-bloom 6.5s ease-out infinite; }
+[data-variant="prismatic-4"] .fx-b { z-index: 0; mix-blend-mode: screen; opacity: .6; background:
+  repeating-radial-gradient(circle at 50% 44%,
+    rgba(255,60,140,.4) 0 8px, rgba(255,180,60,.36) 8px 16px, rgba(120,255,160,.36) 16px 24px,
+    rgba(80,190,255,.38) 24px 32px, rgba(180,110,255,.38) 32px 40px);
+  animation: p-bloom 6.5s ease-out infinite; animation-delay: -3.25s; }
+[data-variant="prismatic-4"] .fx-c { z-index: 1; mix-blend-mode: screen; background: radial-gradient(circle at 50% 44%, rgba(255,255,255,.9) 0 2%, rgba(255,255,255,.3) 7%, transparent 16%); animation: breathe 3.2s ease-in-out infinite; }
+[data-variant="prismatic-4"] .fx-v { z-index: 1; background: radial-gradient(ellipse 116% 96% at 50% 44%, transparent 40%, rgba(4,2,9,.85) 96%); }
+[data-variant="prismatic-4"] .card-art img { filter: saturate(1.25) contrast(1.06); }
+[data-variant="prismatic-4"] .card-art { box-shadow: 0 0 0 1px rgba(244,114,182,.7), 0 0 34px -8px rgba(180,110,255,.95); }
+@keyframes p-bloom { 0% { transform: scale(.14); opacity: 1 } 100% { transform: scale(2.4); opacity: 0 } }
+
+/* 5 Refraction: one beam in at the top, seven colours out at the bottom, no negotiation */
+[data-variant="prismatic-5"] .card-front { background: linear-gradient(180deg, #070610, #0d0b1c 48%, #050409); box-shadow: inset 0 0 0 2px rgba(244,114,182,.5); }
+[data-variant="prismatic-5"] { --ink: #f7f2ff; --ink-dim: #b6a8d4; --ink-faint: #877ca1; }
+[data-variant="prismatic-5"] .fx-a { z-index: 1; mix-blend-mode: screen; background: linear-gradient(196deg, transparent 28%, rgba(255,255,255,.85) 30.6% 32%, transparent 34%);
+  -webkit-mask: linear-gradient(180deg, #000 0 42%, transparent 52%); mask: linear-gradient(180deg, #000 0 42%, transparent 52%); filter: blur(.6px); }
+[data-variant="prismatic-5"] .fx-b { z-index: 1; mix-blend-mode: screen; background:
+  conic-gradient(from 152deg at 46% 46%,
+    transparent 0 3%, rgba(255,40,90,.6) 4%, rgba(255,170,40,.6) 6%, rgba(230,255,60,.55) 8%,
+    rgba(60,255,150,.55) 10%, rgba(60,190,255,.6) 12%, rgba(150,90,255,.6) 14%, transparent 16%);
+  filter: blur(1.4px); animation: p-fan 8s ease-in-out infinite; }
+[data-variant="prismatic-5"] .fx-c { z-index: 1; background:
+  linear-gradient(152deg, transparent 41%, rgba(255,255,255,.16) 43% 55%, transparent 57%);
+  -webkit-mask: polygon(46% 30%, 74% 62%, 18% 62%); mask: polygon(46% 30%, 74% 62%, 18% 62%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+[data-variant="prismatic-5"] .fx-v { z-index: 1; background: linear-gradient(0deg, rgba(255,255,255,.7) 0 1px, transparent 1px) 0 0 / 100% 100% no-repeat;
+  -webkit-mask: polygon(46% 30%, 74% 62%, 18% 62%); mask: polygon(46% 30%, 74% 62%, 18% 62%); }
+[data-variant="prismatic-5"] .fx-ring::before { background: conic-gradient(from var(--a), #ff285a, #ffaa28, #e6ff3c, #3cff96, #3cbeff, #965aff, #ff285a); animation: turn-a 7s linear infinite; }
+[data-variant="prismatic-5"] .card-art { box-shadow: 0 0 0 1px rgba(255,255,255,.45), 0 0 30px -12px rgba(244,114,182,.9); }
+@keyframes p-fan { 0%, 100% { transform: rotate(-3deg); opacity: .8 } 50% { transform: rotate(3deg); opacity: 1 } }
+
+/* 6 Opal: play-of-colour, each fleck firing on its own schedule as the stone turns */
+[data-variant="prismatic-6"] .card-front { background: linear-gradient(180deg, #101426, #191f38 46%, #0a0d1a); box-shadow: inset 0 0 0 2px rgba(190,240,255,.5); }
+[data-variant="prismatic-6"] { --ink: #f4fbff; --ink-dim: #aec4d8; --ink-faint: #8194a8; }
+[data-variant="prismatic-6"] .fx-a { z-index: 0; mix-blend-mode: screen; opacity: .85; background:
+  radial-gradient(ellipse 8% 6% at 22% 22%, rgba(255,80,140,.85), transparent 72%),
+  radial-gradient(ellipse 7% 5% at 62% 18%, rgba(80,255,190,.8), transparent 72%),
+  radial-gradient(ellipse 9% 6% at 38% 46%, rgba(120,180,255,.8), transparent 72%),
+  radial-gradient(ellipse 6% 5% at 78% 42%, rgba(255,220,90,.8), transparent 72%),
+  radial-gradient(ellipse 8% 6% at 26% 72%, rgba(180,120,255,.8), transparent 72%),
+  radial-gradient(ellipse 7% 5% at 68% 78%, rgba(90,255,255,.8), transparent 72%);
+  animation: p-fire 5.5s ease-in-out infinite; }
+[data-variant="prismatic-6"] .fx-b { z-index: 0; mix-blend-mode: screen; opacity: .6; background:
+  radial-gradient(ellipse 6% 5% at 44% 30%, rgba(255,160,60,.8), transparent 72%),
+  radial-gradient(ellipse 7% 6% at 16% 54%, rgba(120,255,140,.75), transparent 72%),
+  radial-gradient(ellipse 6% 5% at 84% 62%, rgba(255,110,200,.8), transparent 72%),
+  radial-gradient(ellipse 8% 5% at 50% 88%, rgba(140,200,255,.75), transparent 72%);
+  animation: p-fire 5.5s ease-in-out infinite; animation-delay: -2.7s; }
+[data-variant="prismatic-6"] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .5; background:
+  repeating-conic-gradient(from 12deg at 50% 46%, rgba(255,255,255,.1) 0 4deg, transparent 4deg 13deg); }
+[data-variant="prismatic-6"] .fx-v { z-index: 2; mix-blend-mode: screen; background:
+  radial-gradient(ellipse 54% 40% at calc(50% + var(--lx) * 30%) calc(42% + var(--ly) * 24%), rgba(255,255,255,.3), transparent 74%); }
+[data-variant="prismatic-6"] .card-art { border-radius: 30% 10% 26% 12% / 16% 26% 14% 24%; box-shadow: 0 0 0 1px rgba(190,240,255,.6), inset 0 0 24px rgba(255,255,255,.16); }
+@keyframes p-fire { 0%, 100% { filter: hue-rotate(0deg) brightness(.9); transform: scale(1) } 50% { filter: hue-rotate(40deg) brightness(1.5); transform: scale(1.05) } }
+
+/* 7 Spectral Rain: it falls in colour, and each streak leaves the next one behind */
+[data-variant="prismatic-7"] .card-front { background: linear-gradient(180deg, #08061a, #0e0a2b 50%, #050410); box-shadow: inset 0 0 0 2px rgba(244,114,182,.5); }
+[data-variant="prismatic-7"] { --ink: #f7f1ff; --ink-dim: #b6a6dc; --ink-faint: #8a7ba8; }
+[data-variant="prismatic-7"] .fx-a { z-index: 0; mix-blend-mode: screen; background:
+  linear-gradient(180deg, transparent, rgba(255,60,140,.75) 40%, transparent) 14% 0 / 1.6px 42cqw no-repeat,
+  linear-gradient(180deg, transparent, rgba(80,220,255,.75) 40%, transparent) 34% 0 / 1.4px 34cqw no-repeat,
+  linear-gradient(180deg, transparent, rgba(180,255,120,.7) 40%, transparent) 58% 0 / 1.5px 48cqw no-repeat,
+  linear-gradient(180deg, transparent, rgba(190,120,255,.75) 40%, transparent) 78% 0 / 1.6px 38cqw no-repeat,
+  linear-gradient(180deg, transparent, rgba(255,200,70,.7) 40%, transparent) 92% 0 / 1.3px 30cqw no-repeat;
+  filter: drop-shadow(0 0 3px rgba(255,255,255,.4)); animation: p-rain 3.4s linear infinite; }
+[data-variant="prismatic-7"] .fx-b { z-index: 0; mix-blend-mode: screen; opacity: .7; background:
+  linear-gradient(180deg, transparent, rgba(255,160,60,.6) 40%, transparent) 24% 0 / 1.2px 36cqw no-repeat,
+  linear-gradient(180deg, transparent, rgba(120,255,200,.6) 40%, transparent) 46% 0 / 1.3px 44cqw no-repeat,
+  linear-gradient(180deg, transparent, rgba(140,160,255,.6) 40%, transparent) 68% 0 / 1.2px 32cqw no-repeat;
+  animation: p-rain 4.6s linear infinite; animation-delay: -1.8s; }
+[data-variant="prismatic-7"] .fx-c { z-index: 1; mix-blend-mode: screen; filter: blur(8px); opacity: .5; background:
+  linear-gradient(96deg, rgba(255,60,140,.4), rgba(80,220,255,.4) 40%, rgba(190,120,255,.4) 76%, transparent);
+  animation: pearl 8s linear infinite; background-size: 250% 100%; }
+[data-variant="prismatic-7"] .fx-v { z-index: 2; mix-blend-mode: screen; background: radial-gradient(ellipse 90% 24% at 50% 100%, rgba(244,114,182,.3), transparent 74%); animation: breathe 3.6s ease-in-out infinite; }
+[data-variant="prismatic-7"] .card-art { box-shadow: 0 0 0 1px rgba(244,114,182,.6), 0 0 28px -12px rgba(140,160,255,.95); }
+@keyframes p-rain { 0% { background-position: 14% -46cqw, 34% -60cqw, 58% -34cqw, 78% -52cqw, 92% -70cqw } 100% { background-position: 14% 146cqw, 34% 134cqw, 58% 152cqw, 78% 140cqw, 92% 128cqw } }
+
+/* 8 Kaleidoscope: six mirrors, one turn per twelve seconds, never the same figure twice */
+[data-variant="prismatic-8"] .card-front { background: radial-gradient(ellipse 86% 66% at 50% 44%, #170b28, #05030c 80%); box-shadow: inset 0 0 0 2px rgba(244,114,182,.55); }
+[data-variant="prismatic-8"] { --ink: #fdf1ff; --ink-dim: #c6a8d6; --ink-faint: #967ea6; }
+[data-variant="prismatic-8"] .fx-a { z-index: 0; mix-blend-mode: screen; background:
+  repeating-conic-gradient(from 0deg at 50% 44%,
+    rgba(255,60,140,.4) 0 10deg, rgba(255,180,60,.36) 10deg 20deg, rgba(120,255,170,.36) 20deg 30deg,
+    rgba(70,190,255,.4) 30deg 40deg, rgba(180,110,255,.4) 40deg 50deg, transparent 50deg 60deg);
+  animation: spin 22s linear infinite; }
+[data-variant="prismatic-8"] .fx-b { z-index: 0; mix-blend-mode: screen; opacity: .7; background:
+  repeating-conic-gradient(from 30deg at 50% 44%,
+    transparent 0 8deg, rgba(255,255,255,.3) 8deg 12deg, transparent 12deg 30deg);
+  animation: spin 14s linear infinite reverse; }
+[data-variant="prismatic-8"] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .8; background:
+  repeating-radial-gradient(circle at 50% 44%, transparent 0 9px, rgba(255,255,255,.24) 9px 10.4px);
+  animation: p-facets 9s ease-in-out infinite; }
+[data-variant="prismatic-8"] .fx-v { z-index: 1; background: radial-gradient(ellipse 112% 92% at 50% 44%, transparent 38%, rgba(4,2,9,.85) 96%); }
+[data-variant="prismatic-8"] .fx-ring::before { background: conic-gradient(from var(--a), #ff3c8c, #ffb43c, #78ffaa, #46beff, #b46eff, #ff3c8c); animation: turn-a 6s linear infinite; }
+[data-variant="prismatic-8"] .card-art { box-shadow: 0 0 0 1px rgba(244,114,182,.7), 0 0 32px -10px rgba(180,110,255,.95); }
+@keyframes p-facets { 0%, 100% { transform: scale(1); opacity: .55 } 50% { transform: scale(1.06); opacity: .95 } }
+
+/* 9 Iridescent Scale: overlapping plates, each one a slightly different angle to the light */
+[data-variant="prismatic-9"] .card-front { background: linear-gradient(180deg, #0a1622, #0f2233 46%, #060e17); box-shadow: inset 0 0 0 2px rgba(94,234,212,.5); }
+[data-variant="prismatic-9"] { --ink: #eefcff; --ink-dim: #a2c8cf; --ink-faint: #7a999f; }
+[data-variant="prismatic-9"] .fx-a { z-index: 0; background:
+  radial-gradient(circle at 50% 0%, transparent 0 7.4px, rgba(94,234,212,.34) 7.4px 8.6px, transparent 8.6px) 0 0 / 16px 9px,
+  radial-gradient(circle at 50% 0%, transparent 0 7.4px, rgba(244,114,182,.28) 7.4px 8.6px, transparent 8.6px) 8px 4.5px / 16px 9px; }
+[data-variant="prismatic-9"] .fx-b { z-index: 1; mix-blend-mode: screen; background:
+  radial-gradient(circle at 50% 0%, rgba(255,255,255,.4) 0 4px, transparent 8px) 0 0 / 16px 9px,
+  radial-gradient(circle at 50% 0%, rgba(190,255,240,.3) 0 3.4px, transparent 7px) 8px 4.5px / 16px 9px;
+  -webkit-mask: linear-gradient(calc(102deg + var(--lx) * 40deg), transparent 22%, #000 46% 56%, transparent 80%);
+  mask: linear-gradient(calc(102deg + var(--lx) * 40deg), transparent 22%, #000 46% 56%, transparent 80%);
+  animation: p-scale 6s ease-in-out infinite; }
+[data-variant="prismatic-9"] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .6; background:
+  linear-gradient(calc(96deg + var(--lx) * 26deg), rgba(94,234,212,.4), rgba(129,140,248,.4) 30%, rgba(244,114,182,.4) 58%, rgba(250,204,21,.36) 82%, rgba(94,234,212,.4));
+  background-size: 250% 100%; animation: pearl 7s linear infinite; }
+[data-variant="prismatic-9"] .fx-v { z-index: 2; mix-blend-mode: overlay; opacity: .4; background: radial-gradient(circle at 50% 0%, rgba(0,0,0,.4) 0 8.6px, transparent 9.4px) 0 0 / 16px 9px; }
+[data-variant="prismatic-9"] .card-art img { filter: saturate(1.2) brightness(1.02); }
+[data-variant="prismatic-9"] .card-art { box-shadow: 0 0 0 1px rgba(94,234,212,.65), 0 0 26px -12px rgba(244,114,182,.9); }
+@keyframes p-scale { 0%, 100% { opacity: .5 } 50% { opacity: 1 } }
+
+/* 10 Supernova: everything the star had, released across the whole spectrum at once */
+[data-variant="prismatic-10"] .card-front { background: radial-gradient(ellipse 90% 70% at 50% 44%, #2b0a2e, #060209 80%); box-shadow: inset 0 0 0 2px rgba(244,114,182,.6); }
+[data-variant="prismatic-10"] { --ink: #fff2fb; --ink-dim: #d1a9c8; --ink-faint: #a17f9b; }
+[data-variant="prismatic-10"] .fx-a { z-index: 0; mix-blend-mode: screen; background:
+  conic-gradient(from var(--a) at 50% 44%,
+    #ff2d6f, #ff9f2d, #f2ff2d, #35ff88, #2dc7ff, #7a5cff, #ff2d6f);
+  -webkit-mask: repeating-conic-gradient(from 0deg at 50% 44%, #000 0 .8deg, transparent .8deg 6deg);
+  mask: repeating-conic-gradient(from 0deg at 50% 44%, #000 0 .8deg, transparent .8deg 6deg);
+  animation: turn-a 7s linear infinite; }
+[data-variant="prismatic-10"] .fx-b { z-index: 0; mix-blend-mode: screen; background:
+  radial-gradient(circle at 50% 44%, rgba(255,255,255,.95) 0 3%, rgba(255,190,230,.6) 8%, rgba(122,92,255,.3) 18%, transparent 34%);
+  animation: p-nova 4.4s ease-out infinite; }
+[data-variant="prismatic-10"] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .8; background:
+  repeating-radial-gradient(circle at 50% 44%, transparent 0 10px, rgba(255,255,255,.24) 10px 11.4px);
+  animation: p-shock 4.4s cubic-bezier(.15,.75,.25,1) infinite; }
+[data-variant="prismatic-10"] .fx-v { z-index: 1; mix-blend-mode: screen; background:
+  linear-gradient(0deg, transparent 46%, rgba(255,255,255,.7) 50%, transparent 54%),
+  linear-gradient(90deg, transparent 46%, rgba(255,255,255,.55) 50%, transparent 54%);
+  -webkit-mask: radial-gradient(circle at 50% 44%, #000, transparent 62%); mask: radial-gradient(circle at 50% 44%, #000, transparent 62%);
+  filter: blur(1.4px); animation: p-flare 4.4s ease-out infinite; }
+[data-variant="prismatic-10"] .fx-p i { background: radial-gradient(circle, rgba(255,255,255,.98), rgba(244,114,182,.4) 42%, transparent 72%); box-shadow: 0 0 6px rgba(255,180,230,.9); animation: rise linear infinite; }
+[data-variant="prismatic-10"] .fx-ring::before { background: conic-gradient(from var(--a), #ff2d6f, #ff9f2d, #f2ff2d, #35ff88, #2dc7ff, #7a5cff, #ff2d6f); animation: turn-a 3.4s linear infinite; }
+[data-variant="prismatic-10"] .card-art img { filter: saturate(1.35) contrast(1.08) brightness(1.02); }
+[data-variant="prismatic-10"] .card-art { box-shadow: 0 0 0 1.5px rgba(255,255,255,.6), 0 0 40px -6px rgba(244,114,182,1); }
+@keyframes p-nova { 0% { transform: scale(.5); opacity: 1 } 60% { transform: scale(1.35); opacity: .7 } 100% { transform: scale(1.7); opacity: .35 } }
+@keyframes p-shock { 0% { transform: scale(.2); opacity: .95 } 100% { transform: scale(2.2); opacity: 0 } }
+@keyframes p-flare { 0%, 100% { opacity: .35; transform: scale(1) } 22% { opacity: 1; transform: scale(1.14) } }

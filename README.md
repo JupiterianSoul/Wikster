@@ -259,16 +259,22 @@ Customization holds two pickers beyond the theme, and shows only what is
 owned: the door to the rest is the Atelier.
 
 **Card effects** choose the look each rarity wears, one row per tier. Classic,
-the treatment drawn for that tier, is always there; the Atelier sells five
-alternates for each rarity, forty in all and no two built the same way. A
-Common can wear pencil hatching, a crease, a postmark, dust in a shaft of
-light or a halftone screen; a Prismatic a turning spectrum, shattered glass, an
-aurora curtain, a starfield or a crown. Each is bought for one rarity and
-dresses every card of that tier; the alternates that paint a colour paint in
-the rarity's own, so a choice never costs the ladder its legibility. A chosen
-effect takes the tier's own dressing off and paints its own on the plate over
-the art and under the text. The table is `src/data/fx.js`; the CSS lives under
-`[data-fx]` in `src/styles/cards.css`.
+the treatment drawn for that tier, is always there; the Atelier sells the
+alternates. Every one of them comes off a design board rather than being
+invented for the shop: two boards were drawn and shown before any of this, one
+with three executions for each of the eight tiers and one with five more for
+Prismatic. The pick from each tier became that tier's own drawing, which is what
+Classic means, and the eighteen that were passed over are what the shop sells,
+kept exactly as they were drawn, on the tier they were drawn for. That is why
+the counts do not fall round: two for most tiers, four for Prismatic. A Common
+can wear cardstock or slate; a Prismatic holofoil, an oil slick, a cut crystal
+or a spectrum beam. Each is bought for one rarity and dresses every card of that
+tier; the ones that paint a colour paint in the rarity's own, so a choice never
+costs the ladder its legibility. A chosen effect takes the tier's own dressing
+off and restyles the whole face: plate, frame, ring, the artwork's mount, the
+title's colour and the tag. The table is `src/data/fx.js`; the CSS lives under
+`[data-fx]` in `src/styles/cards.css`, and the boards themselves are kept in
+`tools/boards/`.
 
 **Level frames** open at a level of their own, from 15 to 200 across eight
 styles, and a ninth, the Singularity, waits at the level cap of 500. A locked
@@ -751,6 +757,8 @@ tests/             the browser suites, their stubs, the runner, the unit checks
 tools/             split-module.mjs (the AST splitter), i18n-check.mjs,
                    sweep.mjs, economy-report.mjs, icons.mjs,
                    sync-game-tables.mjs, slots-rtp.mjs
+  boards/          the card effect design boards, kept so the drawings
+                   behind the shop can be found again
 ```
 
 ## The names underneath

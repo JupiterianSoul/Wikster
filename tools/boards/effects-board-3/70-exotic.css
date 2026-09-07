@@ -1,0 +1,172 @@
+/* ============ EXOTIC: instruments, not ornament. Cyan, measured, and switched on. ============ */
+[data-variant^="exotic"] .card-front { --rarity: #22d3ee; }
+
+/* 1 Wireframe: the model before anyone textured it, turning on its own axis */
+[data-variant="exotic-1"] .card-front { background: linear-gradient(180deg, #04121a, #062130 52%, #030d14); box-shadow: inset 0 0 0 2px rgba(34,211,238,.55); }
+[data-variant="exotic-1"] { --ink: #e2fbff; --ink-dim: #8dc5d4; --ink-faint: #6796a4; }
+[data-variant="exotic-1"] .fx-a { z-index: 0; opacity: .6; background:
+  repeating-linear-gradient(60deg, rgba(34,211,238,.28) 0 1px, transparent 1px 16px),
+  repeating-linear-gradient(-60deg, rgba(34,211,238,.28) 0 1px, transparent 1px 16px),
+  repeating-linear-gradient(0deg, rgba(34,211,238,.2) 0 1px, transparent 1px 14px); }
+[data-variant="exotic-1"] .fx-b { z-index: 1; opacity: .8; background:
+  repeating-conic-gradient(from 0deg at 50% 46%, rgba(103,232,249,.3) 0 1deg, transparent 1deg 15deg),
+  repeating-radial-gradient(circle at 50% 46%, transparent 0 13px, rgba(103,232,249,.32) 13px 14px);
+  -webkit-mask: radial-gradient(circle at 50% 46%, #000 0 40%, transparent 56%); mask: radial-gradient(circle at 50% 46%, #000 0 40%, transparent 56%);
+  animation: x-turn 18s linear infinite; }
+[data-variant="exotic-1"] .fx-c { z-index: 1; background: radial-gradient(circle, rgba(165,243,252,.95) 0 1.2px, transparent 2px) 0 0 / 16px 14px; opacity: .55; animation: breathe 4.6s ease-in-out infinite; }
+[data-variant="exotic-1"] .card-art img { filter: saturate(.5) contrast(1.15) hue-rotate(-12deg) brightness(.94); }
+[data-variant="exotic-1"] .card-art { border-radius: 2px; box-shadow: 0 0 0 1px rgba(34,211,238,.7), 0 0 24px -10px rgba(34,211,238,.9); }
+@keyframes x-turn { 0%, 100% { transform: perspective(400px) rotateY(-16deg) } 50% { transform: perspective(400px) rotateY(16deg) } }
+
+/* 2 Terminal: a session that has been open a long time, still printing */
+[data-variant="exotic-2"] .card-front { background: #030b0d; box-shadow: inset 0 0 0 2px rgba(34,211,238,.5); }
+[data-variant="exotic-2"] { --ink: #b8f5ff; --ink-dim: #63c0cf; --ink-faint: #47929f; }
+[data-variant="exotic-2"] .fx-a { z-index: 0; opacity: .3; background: repeating-linear-gradient(0deg, rgba(34,211,238,.28) 0 1px, transparent 1px 3px); }
+[data-variant="exotic-2"] .fx-b { z-index: 1; opacity: .5; background:
+  linear-gradient(90deg, rgba(34,211,238,.6) 0 8cqw, transparent 8cqw 9cqw, rgba(34,211,238,.35) 9cqw 26cqw, transparent 26cqw) 0 0 / 100% 2.6cqw,
+  linear-gradient(90deg, rgba(34,211,238,.45) 0 6cqw, transparent 6cqw 7cqw, rgba(34,211,238,.28) 7cqw 38cqw, transparent 38cqw) 0 2.6cqw / 100% 2.6cqw;
+  background-size: 100% 5.2cqw; background-repeat: repeat-y; animation: x-log 9s linear infinite; }
+[data-variant="exotic-2"] .fx-c { z-index: 3; background: linear-gradient(90deg, rgba(165,243,252,.9) 0 1.6cqw, transparent 1.6cqw) 5cqw calc(100% - 8cqw) / 100% 2.4cqw no-repeat; animation: x-caret 1.05s steps(1, end) infinite; }
+[data-variant="exotic-2"] .fx-v { z-index: 1; background: radial-gradient(ellipse 110% 90% at 50% 50%, transparent 46%, rgba(0,0,0,.75) 98%); }
+[data-variant="exotic-2"] .card-title { font-family: var(--mono); font-size: 5.1cqw; font-weight: 600; text-shadow: 0 0 8px rgba(34,211,238,.7); }
+[data-variant="exotic-2"] .card-desc, [data-variant="exotic-2"] .card-extract { font-family: var(--mono); }
+[data-variant="exotic-2"] .card-art img { filter: grayscale(1) sepia(1) hue-rotate(140deg) saturate(3.2) contrast(1.2) brightness(.9); }
+[data-variant="exotic-2"] .card-art { border-radius: 0; box-shadow: 0 0 0 1px rgba(34,211,238,.6); }
+[data-variant="exotic-2"] .rarity-badge { border-radius: 0; font-family: var(--mono); }
+@keyframes x-log { to { background-position: 0 -5.2cqw, 0 calc(2.6cqw - 5.2cqw) } }
+@keyframes x-caret { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+
+/* 3 Grid Runner: a floor that goes on forever and is coming toward you at speed */
+[data-variant="exotic-3"] .card-front { background: linear-gradient(180deg, #06091f, #0a1436 46%, #030616); box-shadow: inset 0 0 0 2px rgba(34,211,238,.55); }
+[data-variant="exotic-3"] { --ink: #e4faff; --ink-dim: #8cc3d6; --ink-faint: #6493a4; }
+[data-variant="exotic-3"] .fx-a { z-index: 0; background:
+  repeating-linear-gradient(0deg, transparent 0 5px, rgba(34,211,238,.45) 5px 6px);
+  -webkit-mask: linear-gradient(180deg, transparent 0 52%, #000 62%); mask: linear-gradient(180deg, transparent 0 52%, #000 62%);
+  transform-origin: 50% 100%; transform: perspective(180px) rotateX(62deg); animation: x-run 2.4s linear infinite; }
+[data-variant="exotic-3"] .fx-b { z-index: 0; background:
+  repeating-linear-gradient(90deg, transparent 0 9px, rgba(34,211,238,.4) 9px 10px);
+  -webkit-mask: linear-gradient(180deg, transparent 0 52%, #000 62%); mask: linear-gradient(180deg, transparent 0 52%, #000 62%);
+  transform-origin: 50% 100%; transform: perspective(180px) rotateX(62deg); }
+[data-variant="exotic-3"] .fx-c { z-index: 1; background: linear-gradient(180deg, transparent 46%, rgba(103,232,249,.55) 51.4% 52.4%, transparent 56%); filter: drop-shadow(0 0 7px rgba(34,211,238,.9)); }
+[data-variant="exotic-3"] .fx-v { z-index: 0; background: radial-gradient(ellipse 70% 26% at 50% 52%, rgba(34,211,238,.35), transparent 74%); animation: breathe 5s ease-in-out infinite; }
+[data-variant="exotic-3"] .card-art { box-shadow: 0 0 0 1px rgba(34,211,238,.7), 0 0 28px -10px rgba(34,211,238,.95); }
+@keyframes x-run { to { background-position: 0 6px } }
+
+/* 4 Photon: two slits, and the pattern you get when light refuses to pick a side */
+[data-variant="exotic-4"] .card-front { background: linear-gradient(180deg, #041016, #071e28 52%, #030b10); box-shadow: inset 0 0 0 2px rgba(103,232,249,.5); }
+[data-variant="exotic-4"] { --ink: #e6fcff; --ink-dim: #8ec9d6; --ink-faint: #679aa7; }
+[data-variant="exotic-4"] .fx-a { z-index: 0; mix-blend-mode: screen; background: repeating-radial-gradient(circle at 30% 46%, rgba(34,211,238,.4) 0 1.4px, transparent 1.4px 11px); animation: x-ripple-a 7s ease-in-out infinite; }
+[data-variant="exotic-4"] .fx-b { z-index: 0; mix-blend-mode: screen; background: repeating-radial-gradient(circle at 70% 46%, rgba(103,232,249,.4) 0 1.4px, transparent 1.4px 11px); animation: x-ripple-b 7s ease-in-out infinite; }
+[data-variant="exotic-4"] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .55; background: repeating-linear-gradient(90deg, rgba(165,243,252,.5) 0 2px, transparent 2px 15px);
+  -webkit-mask: linear-gradient(180deg, transparent 68%, #000 96%); mask: linear-gradient(180deg, transparent 68%, #000 96%); animation: breathe 3.6s ease-in-out infinite; }
+[data-variant="exotic-4"] .fx-v { z-index: 1; mix-blend-mode: screen; background: linear-gradient(calc(96deg + var(--lx) * 30deg), transparent 42%, rgba(224,255,255,.6) 50%, transparent 58%); animation: sweepx 5s ease-in-out infinite alternate; }
+[data-variant="exotic-4"] .card-art { box-shadow: 0 0 0 1px rgba(103,232,249,.7), 0 0 26px -10px rgba(34,211,238,.9); }
+@keyframes x-ripple-a { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.08) } }
+@keyframes x-ripple-b { 0%, 100% { transform: scale(1.08) } 50% { transform: scale(1) } }
+
+/* 5 Schematic: dimensioned, tolerance noted, drawn by somebody who checks twice */
+[data-variant="exotic-5"] .card-front { background: #071720; box-shadow: inset 0 0 0 2px rgba(34,211,238,.55); }
+[data-variant="exotic-5"] { --ink: #dff7ff; --ink-dim: #86bccb; --ink-faint: #628f9d; }
+[data-variant="exotic-5"] .fx-a { z-index: 0; opacity: .5; background:
+  repeating-linear-gradient(0deg, rgba(34,211,238,.16) 0 1px, transparent 1px 9px),
+  repeating-linear-gradient(90deg, rgba(34,211,238,.16) 0 1px, transparent 1px 9px); }
+[data-variant="exotic-5"] .fx-b { z-index: 3; background:
+  linear-gradient(90deg, rgba(103,232,249,.7) 0 1px, transparent 1px) 4cqw 0 / 100% 100% no-repeat,
+  linear-gradient(90deg, rgba(103,232,249,.7) 0 1px, transparent 1px) calc(100% - 4cqw) 0 / 100% 100% no-repeat,
+  linear-gradient(0deg, rgba(103,232,249,.5) 0 1px, transparent 1px) 0 4cqw / 100% 100% no-repeat,
+  repeating-linear-gradient(90deg, rgba(103,232,249,.55) 0 1px, transparent 1px 9cqw) 0 3cqw / 100% 2px no-repeat; }
+[data-variant="exotic-5"] .fx-c { z-index: 3; background:
+  radial-gradient(circle at 12cqw 34cqw, transparent 0 2.4cqw, rgba(34,211,238,.6) 2.4cqw 2.7cqw, transparent 2.7cqw),
+  radial-gradient(circle at 84cqw 62cqw, transparent 0 1.8cqw, rgba(34,211,238,.5) 1.8cqw 2.1cqw, transparent 2.1cqw),
+  linear-gradient(90deg, rgba(34,211,238,.45) 0 6cqw, transparent 6cqw) 12cqw 34cqw / 100% 1px no-repeat;
+  animation: breathe 6s ease-in-out infinite; }
+[data-variant="exotic-5"] .fx-v { z-index: 2; mix-blend-mode: screen; background: linear-gradient(112deg, transparent 44%, rgba(180,240,255,.35) 50%, transparent 56%); animation: sweepx 7s ease-in-out infinite alternate; }
+[data-variant="exotic-5"] .card-title { font-family: var(--mono); font-size: 5cqw; letter-spacing: .02em; }
+[data-variant="exotic-5"] .card-art img { filter: grayscale(.85) sepia(1) hue-rotate(150deg) saturate(2.4) contrast(1.1); }
+[data-variant="exotic-5"] .card-art { border-radius: 0; box-shadow: 0 0 0 1px rgba(34,211,238,.65); }
+[data-variant="exotic-5"] .rarity-badge { border-radius: 0; font-family: var(--mono); }
+
+/* 6 Quantum: the card is in two states, and looking at it does not settle the matter */
+[data-variant="exotic-6"] .card-front { background: linear-gradient(180deg, #050f1e, #0a1c33 50%, #030a15); box-shadow: inset 0 0 0 2px rgba(34,211,238,.5); }
+[data-variant="exotic-6"] { --ink: #e4f9ff; --ink-dim: #8bc4d6; --ink-faint: #6493a5; }
+[data-variant="exotic-6"] .fx-a { z-index: 0; mix-blend-mode: screen; filter: blur(3px); background:
+  radial-gradient(ellipse 34% 26% at 34% 36%, rgba(34,211,238,.55), transparent 72%),
+  radial-gradient(ellipse 30% 22% at 66% 58%, rgba(129,140,248,.45), transparent 72%);
+  animation: x-cloud 9s ease-in-out infinite; }
+[data-variant="exotic-6"] .fx-b { z-index: 1; mix-blend-mode: screen; opacity: .5; background: repeating-radial-gradient(circle at 50% 46%, transparent 0 7px, rgba(103,232,249,.3) 7px 8px); animation: x-collapse 5.4s ease-in-out infinite; }
+[data-variant="exotic-6"] .fx-c { z-index: 3; mix-blend-mode: screen; opacity: .5; background: radial-gradient(ellipse 70% 54% at calc(50% + var(--lx) * 22%) calc(44% + var(--ly) * 16%), rgba(165,243,252,.28), transparent 74%); }
+[data-variant="exotic-6"] .card-art img { filter: saturate(1.1) contrast(1.05); }
+[data-variant="exotic-6"] .card-art::before { content: ''; position: absolute; inset: 0; z-index: 2; mix-blend-mode: screen; background: linear-gradient(96deg, rgba(34,211,238,.22), transparent 42%, rgba(129,140,248,.22)); animation: x-superpose 5.4s ease-in-out infinite; }
+[data-variant="exotic-6"] .card-title { animation: x-superpose 5.4s ease-in-out infinite; }
+[data-variant="exotic-6"] .card-art { box-shadow: 0 0 0 1px rgba(34,211,238,.65), 0 0 26px -10px rgba(129,140,248,.9); animation: x-superpose 5.4s ease-in-out infinite; }
+@keyframes x-cloud { 0%, 100% { transform: translate(0, 0) scale(1) } 50% { transform: translate(3%, -2.4%) scale(1.08) } }
+@keyframes x-collapse { 0%, 100% { transform: scale(1); opacity: .3 } 46%, 54% { transform: scale(.72); opacity: .8 } }
+@keyframes x-superpose { 0%, 100% { text-shadow: 2.5px 0 rgba(34,211,238,.55), -2.5px 0 rgba(129,140,248,.5) } 48%, 56% { text-shadow: 0 0 rgba(34,211,238,0), 0 0 rgba(129,140,248,0) } }
+
+/* 7 Datastream: columns of it, falling faster than anyone is reading */
+[data-variant="exotic-7"] .card-front { background: #02090c; box-shadow: inset 0 0 0 2px rgba(34,211,238,.5); }
+[data-variant="exotic-7"] { --ink: #d8f9ff; --ink-dim: #6fbccb; --ink-faint: #4f8e9c; }
+[data-variant="exotic-7"] .fx-code { z-index: 0; opacity: 1; display: flex; justify-content: space-between; overflow: hidden; padding: 0 1px; }
+[data-variant="exotic-7"] .fx-code .col { display: flex; flex-direction: column; font: 600 3.1cqw/1.16 var(--mono); color: rgba(103,232,249,.65); text-shadow: 0 0 6px rgba(34,211,238,.7); white-space: pre; animation: x-fall linear infinite; }
+[data-variant="exotic-7"] .fx-a { z-index: 1; opacity: .3; background: repeating-linear-gradient(0deg, rgba(0,0,0,.5) 0 1px, transparent 1px 3px); }
+[data-variant="exotic-7"] .fx-b { z-index: 1; background: radial-gradient(ellipse 110% 88% at 50% 50%, transparent 40%, rgba(0,3,6,.9) 96%); }
+[data-variant="exotic-7"] .fx-c { z-index: 3; mix-blend-mode: screen; background: linear-gradient(180deg, transparent, rgba(165,243,252,.35) 48% 52%, transparent); background-size: 100% 30%; background-repeat: no-repeat; animation: x-scan 6s linear infinite; }
+[data-variant="exotic-7"] .card-title { font-family: var(--mono); font-size: 5.1cqw; font-weight: 600; text-shadow: 0 0 9px rgba(34,211,238,.8); }
+[data-variant="exotic-7"] .card-art img { filter: grayscale(1) sepia(1) hue-rotate(140deg) saturate(3.6) contrast(1.25) brightness(.86); }
+[data-variant="exotic-7"] .card-art { border-radius: 0; box-shadow: 0 0 0 1px rgba(34,211,238,.6); }
+[data-variant="exotic-7"] .rarity-badge { border-radius: 0; font-family: var(--mono); }
+@keyframes x-fall { from { transform: translateY(-50%) } to { transform: translateY(0) } }
+@keyframes x-scan { 0% { background-position: 0 -34% } 100% { background-position: 0 134% } }
+
+/* 8 Oscilloscope: one channel, one trace, and a graticule to argue with */
+[data-variant="exotic-8"] .card-front { background: radial-gradient(ellipse 90% 70% at 50% 46%, #05201f, #010c0c 78%); box-shadow: inset 0 0 0 2px rgba(45,212,191,.5); }
+[data-variant="exotic-8"] { --ink: #ddfdf7; --ink-dim: #7ec7bb; --ink-faint: #5c9990; }
+[data-variant="exotic-8"] .fx-a { z-index: 0; opacity: .5; background:
+  repeating-linear-gradient(0deg, rgba(45,212,191,.24) 0 1px, transparent 1px 11px),
+  repeating-linear-gradient(90deg, rgba(45,212,191,.24) 0 1px, transparent 1px 11px); }
+[data-variant="exotic-8"] .fx-b { z-index: 1; background:
+  repeating-radial-gradient(ellipse 9px 12cqw at 50% 46%, transparent 0 8.4px, rgba(94,234,212,.8) 8.4px 9.4px, transparent 9.4px);
+  -webkit-mask: linear-gradient(180deg, transparent 30%, #000 44% 56%, transparent 70%); mask: linear-gradient(180deg, transparent 30%, #000 44% 56%, transparent 70%);
+  filter: drop-shadow(0 0 6px rgba(45,212,191,.9)); animation: x-trace 3.2s linear infinite; }
+[data-variant="exotic-8"] .fx-c { z-index: 1; mix-blend-mode: screen; background: linear-gradient(90deg, transparent, rgba(190,255,244,.7) 50%, transparent); background-size: 12% 100%; background-repeat: no-repeat; filter: blur(2px); animation: x-sweep 3.2s linear infinite; }
+[data-variant="exotic-8"] .fx-v { z-index: 1; background: radial-gradient(ellipse 110% 90% at 50% 46%, transparent 44%, rgba(0,8,8,.85) 98%); }
+[data-variant="exotic-8"] .card-title { font-family: var(--mono); font-size: 5.1cqw; text-shadow: 0 0 8px rgba(45,212,191,.7); }
+[data-variant="exotic-8"] .card-art img { filter: grayscale(1) sepia(1) hue-rotate(112deg) saturate(2.8) contrast(1.2) brightness(.9); }
+[data-variant="exotic-8"] .card-art { border-radius: 2px; box-shadow: 0 0 0 1px rgba(45,212,191,.6); }
+@keyframes x-trace { 0% { background-position: 0 0 } 100% { background-position: 27px 0 } }
+@keyframes x-sweep { 0% { background-position: -14% 0 } 100% { background-position: 114% 0 } }
+
+/* 9 Nanite: a swarm mid-assembly, agreeing on a shape one row at a time */
+[data-variant="exotic-9"] .card-front { background: linear-gradient(180deg, #08131a, #0d222e 52%, #050d13); box-shadow: inset 0 0 0 2px rgba(34,211,238,.5); }
+[data-variant="exotic-9"] { --ink: #e3f9ff; --ink-dim: #8ac2d2; --ink-faint: #6592a1; }
+[data-variant="exotic-9"] .fx-a { z-index: 0; background:
+  radial-gradient(circle, rgba(34,211,238,.55) 0 1px, transparent 1.6px) 0 0 / 7px 7px,
+  radial-gradient(circle, rgba(103,232,249,.4) 0 .8px, transparent 1.3px) 3.5px 3.5px / 7px 7px;
+  animation: x-swarm 8s ease-in-out infinite; }
+[data-variant="exotic-9"] .fx-b { z-index: 1; background:
+  radial-gradient(circle, rgba(165,243,252,.85) 0 1.2px, transparent 1.9px) 0 0 / 7px 7px;
+  -webkit-mask: linear-gradient(180deg, #000 0 30%, transparent 46%); mask: linear-gradient(180deg, #000 0 30%, transparent 46%);
+  animation: x-assemble 5s ease-in-out infinite; }
+[data-variant="exotic-9"] .fx-c { z-index: 1; mix-blend-mode: screen; background: linear-gradient(180deg, transparent, rgba(165,243,252,.45) 48% 52%, transparent); background-size: 100% 22%; background-repeat: no-repeat; animation: x-scan 4.4s linear infinite; }
+[data-variant="exotic-9"] .fx-art { z-index: 1; inset: auto 0 0; height: 54%; background: linear-gradient(180deg, transparent, rgba(5,13,19,.7) 34%); border-radius: 0; }
+[data-variant="exotic-9"] .fx-v { z-index: 0; background: radial-gradient(ellipse 80% 60% at calc(50% + var(--lx) * 24%) calc(44% + var(--ly) * 18%), rgba(34,211,238,.22), transparent 74%); }
+[data-variant="exotic-9"] .card-art { box-shadow: 0 0 0 1px rgba(34,211,238,.65), 0 0 24px -10px rgba(34,211,238,.85); }
+@keyframes x-swarm { 0%, 100% { background-position: 0 0, 3.5px 3.5px } 50% { background-position: 2px 3px, 5.5px 1px } }
+@keyframes x-assemble { 0%, 100% { -webkit-mask-position: 0 -60%; mask-position: 0 -60% } 50% { -webkit-mask-position: 0 60%; mask-position: 0 60% } }
+
+/* 10 Ghost Protocol: mostly not there, and the edges are where it fails to hide */
+[data-variant="exotic-10"] .card-front { background: linear-gradient(180deg, rgba(6,20,26,.92), rgba(9,30,40,.86) 50%, rgba(4,14,19,.92)); box-shadow: inset 0 0 0 2px rgba(34,211,238,.4); }
+[data-variant="exotic-10"] { --ink: #ddf7ff; --ink-dim: #7fbccd; --ink-faint: #5c8d9c; }
+[data-variant="exotic-10"] .fx-a { z-index: 1; backdrop-filter: blur(1.2px) saturate(1.3); background: linear-gradient(122deg, rgba(34,211,238,.1), transparent 36%, rgba(129,140,248,.1)); }
+[data-variant="exotic-10"] .fx-b { z-index: 3; opacity: .8; background:
+  linear-gradient(180deg, rgba(165,243,252,.7) 0 1px, transparent 1px) 0 0 / 100% 100% no-repeat,
+  linear-gradient(0deg, rgba(165,243,252,.7) 0 1px, transparent 1px) 0 100% / 100% 100% no-repeat,
+  linear-gradient(90deg, rgba(165,243,252,.55) 0 1px, transparent 1px) 0 0 / 100% 100% no-repeat,
+  linear-gradient(270deg, rgba(165,243,252,.55) 0 1px, transparent 1px) 100% 0 / 100% 100% no-repeat;
+  filter: drop-shadow(0 0 6px rgba(34,211,238,.8)); animation: x-phase 6.5s ease-in-out infinite; }
+[data-variant="exotic-10"] .fx-c { z-index: 3; mix-blend-mode: screen; opacity: .35; background: repeating-linear-gradient(0deg, rgba(165,243,252,.4) 0 1px, transparent 1px 5px); background-size: 100% 200%; animation: scrolly 5s linear infinite; }
+[data-variant="exotic-10"] .fx-v { z-index: 1; background: radial-gradient(ellipse 100% 80% at 50% 46%, transparent 34%, rgba(3,12,18,.7) 94%); }
+[data-variant="exotic-10"] .card-art img { filter: saturate(.7) contrast(1.05) brightness(1.04) opacity(.82); }
+[data-variant="exotic-10"] .card-art { box-shadow: 0 0 0 1px rgba(165,243,252,.55); }
+[data-variant="exotic-10"] .card-title { text-shadow: 0 0 12px rgba(34,211,238,.6); animation: x-phase 6.5s ease-in-out infinite; }
+@keyframes x-phase { 0%, 100% { opacity: 1 } 44% { opacity: .42 } 52% { opacity: .95 } 60% { opacity: .55 } }

@@ -1,0 +1,144 @@
+/* ============ RARE: cold, cut and conductive. Blue that behaves like a material. ============ */
+[data-variant^="rare"] .card-front { --rarity: #3b82f6; }
+
+/* 1 Sapphire Cut: a gem's facets, each one catching the light at its own moment */
+[data-variant="rare-1"] .card-front { background: linear-gradient(180deg, #0a1633, #10245a 46%, #081128); box-shadow: inset 0 0 0 2px rgba(96,165,250,.5); }
+[data-variant="rare-1"] { --ink: #eaf1ff; --ink-dim: #a5bee8; --ink-faint: #7994c0; }
+[data-variant="rare-1"] .fx-a { z-index: 0; opacity: .8; background:
+  repeating-conic-gradient(from 0deg at 30% 24%, rgba(147,197,253,.22) 0 24deg, transparent 24deg 48deg),
+  repeating-conic-gradient(from 12deg at 74% 66%, rgba(59,130,246,.24) 0 30deg, transparent 30deg 60deg),
+  repeating-conic-gradient(from 40deg at 46% 96%, rgba(191,219,254,.18) 0 20deg, transparent 20deg 40deg); }
+[data-variant="rare-1"] .fx-b { z-index: 1; mix-blend-mode: screen; background:
+  conic-gradient(from calc(var(--lx) * 60deg) at calc(50% + var(--lx) * 20%) calc(44% + var(--ly) * 16%),
+    rgba(255,255,255,.5), transparent 14%, rgba(147,197,253,.42) 26%, transparent 40%, rgba(255,255,255,.36) 56%, transparent 70%, rgba(96,165,250,.4) 86%, rgba(255,255,255,.44));
+  animation: r-facet 7s ease-in-out infinite; }
+[data-variant="rare-1"] .fx-c { z-index: 1; mix-blend-mode: screen; opacity: .5; background: linear-gradient(112deg, transparent 40%, rgba(255,255,255,.85) 49%, transparent 58%); animation: sweepx 4.5s ease-in-out infinite alternate; }
+[data-variant="rare-1"] .fx-v { z-index: 1; background: linear-gradient(180deg, transparent 44%, rgba(5,10,26,.6)); }
+[data-variant="rare-1"] .fx-ring::before { background: conic-gradient(from var(--a), #1e3a8a, #93c5fd, #1d4ed8, #dbeafe, #1e3a8a); animation: turn-a 6s linear infinite; }
+[data-variant="rare-1"] .card-art { box-shadow: 0 0 0 1px rgba(147,197,253,.7), 0 0 30px -10px rgba(96,165,250,.9); }
+@keyframes r-facet { 0%, 100% { filter: brightness(1) } 50% { filter: brightness(1.5) } }
+
+/* 2 Frost Pane: crystals reaching in from the edges of cold glass */
+[data-variant="rare-2"] .card-front { background: linear-gradient(180deg, #0c1e2e, #123249 55%, #0a1826); box-shadow: inset 0 0 0 2px rgba(186,230,253,.5); }
+[data-variant="rare-2"] { --ink: #f0f9ff; --ink-dim: #a8cfe4; --ink-faint: #7ba5bd; }
+[data-variant="rare-2"] .fx-a { z-index: 1; opacity: .8; background:
+  repeating-linear-gradient(58deg, transparent 0 5px, rgba(224,246,255,.4) 5px 5.7px, transparent 5.7px 11px),
+  repeating-linear-gradient(-58deg, transparent 0 5px, rgba(224,246,255,.34) 5px 5.7px, transparent 5.7px 11px),
+  repeating-linear-gradient(0deg, transparent 0 8px, rgba(186,230,253,.28) 8px 8.7px, transparent 8.7px 16px);
+  -webkit-mask: radial-gradient(ellipse 74% 62% at 50% 50%, transparent 34%, #000 88%); mask: radial-gradient(ellipse 74% 62% at 50% 50%, transparent 34%, #000 88%);
+  animation: r-creep 10s ease-in-out infinite; }
+[data-variant="rare-2"] .fx-b { z-index: 0; background: radial-gradient(ellipse 80% 60% at calc(50% + var(--lx) * 24%) calc(46% + var(--ly) * 20%), rgba(190,235,255,.2), transparent 68%); }
+[data-variant="rare-2"] .fx-c { z-index: 2; opacity: .5; background: radial-gradient(circle, rgba(255,255,255,.8) 0 .7px, transparent 1.2px) 0 0 / 13px 15px, radial-gradient(circle, rgba(224,246,255,.6) 0 .5px, transparent 1px) 7px 9px / 19px 11px; animation: breathe 5s ease-in-out infinite; }
+[data-variant="rare-2"] .card-art img { filter: brightness(1.03) saturate(.82) hue-rotate(8deg); }
+[data-variant="rare-2"] .card-art { box-shadow: 0 0 0 1px rgba(186,230,253,.65), inset 0 0 26px rgba(190,235,255,.2); }
+@keyframes r-creep { 0%, 100% { opacity: .55; transform: scale(1.02) } 50% { opacity: 1; transform: scale(1) } }
+
+/* 3 Deep Current: caustics on the floor of somewhere very far down */
+[data-variant="rare-3"] .card-front { background: linear-gradient(180deg, #041228, #072044 50%, #030c1c); box-shadow: inset 0 0 0 2px rgba(56,189,248,.45); }
+[data-variant="rare-3"] { --ink: #e6f4ff; --ink-dim: #97c2e2; --ink-faint: #6d95b6; }
+[data-variant="rare-3"] .fx-a { z-index: 0; opacity: .6; filter: blur(1.4px); background:
+  repeating-radial-gradient(ellipse 32% 20% at 24% 30%, rgba(125,211,252,.5) 0 2px, transparent 2px 13px),
+  repeating-radial-gradient(ellipse 28% 24% at 74% 62%, rgba(56,189,248,.42) 0 2px, transparent 2px 15px);
+  animation: r-swell 13s ease-in-out infinite; }
+[data-variant="rare-3"] .fx-b { z-index: 1; mix-blend-mode: screen; opacity: .45; background: linear-gradient(178deg, rgba(186,230,253,.5) 0 1px, transparent 1px 22px); background-size: 100% 200%; animation: scrolly 12s linear infinite; }
+[data-variant="rare-3"] .fx-c { z-index: 1; background: linear-gradient(180deg, rgba(2,10,24,.6), transparent 34%, transparent 70%, rgba(2,10,24,.7)); }
+[data-variant="rare-3"] .fx-p i { background: radial-gradient(circle, rgba(220,245,255,.8), transparent 68%); animation: rise linear infinite; }
+[data-variant="rare-3"] .card-art img { filter: hue-rotate(-8deg) saturate(1.1) brightness(.94); }
+[data-variant="rare-3"] .card-art { box-shadow: 0 0 0 1px rgba(56,189,248,.55), inset 0 0 34px rgba(3,20,44,.7); }
+@keyframes r-swell { 0%, 100% { transform: translate(0, 0) scale(1) } 50% { transform: translate(2.5%, -2%) scale(1.05) } }
+
+/* 4 Cyan Circuit: a board that is powered up, with charge finding its way home */
+[data-variant="rare-4"] .card-front { background: linear-gradient(180deg, #04141c, #06232f 55%, #030f16); box-shadow: inset 0 0 0 2px rgba(34,211,238,.45); }
+[data-variant="rare-4"] { --ink: #e0fbff; --ink-dim: #b6e2ec; --ink-faint: #82adba; }
+[data-variant="rare-4"] .fx-a { z-index: 0; opacity: .55; background:
+  repeating-linear-gradient(90deg, transparent 0 17px, rgba(34,211,238,.35) 17px 18px, transparent 18px 40px),
+  repeating-linear-gradient(0deg, transparent 0 23px, rgba(34,211,238,.28) 23px 24px, transparent 24px 52px); }
+[data-variant="rare-4"] .fx-b { z-index: 1; background: radial-gradient(circle, rgba(103,232,249,.9) 0 1.5px, transparent 2.4px) 17px 23px / 40px 52px; box-shadow: none; filter: drop-shadow(0 0 3px rgba(34,211,238,.8)); animation: breathe 3.4s ease-in-out infinite; }
+[data-variant="rare-4"] .fx-c { z-index: 1; mix-blend-mode: screen; -webkit-mask: linear-gradient(180deg, #000 0 46%, transparent 62%); mask: linear-gradient(180deg, #000 0 46%, transparent 62%); background: linear-gradient(180deg, transparent, rgba(165,243,252,.6) 48% 52%, transparent); background-size: 100% 34%; background-repeat: no-repeat; animation: r-charge 4.2s linear infinite; }
+[data-variant="rare-4"] .fx-v { z-index: 1; mix-blend-mode: screen; -webkit-mask: linear-gradient(180deg, #000 0 46%, transparent 62%); mask: linear-gradient(180deg, #000 0 46%, transparent 62%); background: linear-gradient(90deg, transparent, rgba(34,211,238,.45) 48% 52%, transparent); background-size: 26% 100%; background-repeat: no-repeat; animation: r-charge-x 5.6s linear infinite; }
+[data-variant="rare-4"] .card-art { box-shadow: 0 0 0 1px rgba(34,211,238,.7), 0 0 26px -10px rgba(34,211,238,.9); }
+@keyframes r-charge { 0% { background-position: 0 -40% } 100% { background-position: 0 140% } }
+@keyframes r-charge-x { 0% { background-position: -30% 0 } 100% { background-position: 130% 0 } }
+
+/* 5 Blue Moire: two rulings laid over each other, the interference walking across the card */
+[data-variant="rare-5"] .card-front { background: linear-gradient(180deg, #0b1533, #101f4d 52%, #090f26); box-shadow: inset 0 0 0 2px rgba(129,140,248,.45); }
+[data-variant="rare-5"] { --ink: #edf0ff; --ink-dim: #a7b2e6; --ink-faint: #7c88bd; }
+[data-variant="rare-5"] .fx-a { z-index: 0; background: repeating-linear-gradient(0deg, rgba(147,197,253,.5) 0 1px, transparent 1px 4px); }
+[data-variant="rare-5"] .fx-b { z-index: 0; mix-blend-mode: screen; background: repeating-linear-gradient(0deg, rgba(129,140,248,.5) 0 1px, transparent 1px 4.35px); animation: r-moire 9s ease-in-out infinite; }
+[data-variant="rare-5"] .fx-c { z-index: 0; mix-blend-mode: screen; opacity: .5; background: repeating-linear-gradient(90deg, rgba(96,165,250,.4) 0 1px, transparent 1px 5.1px); animation: r-moire-x 11s ease-in-out infinite; }
+[data-variant="rare-5"] .fx-v { z-index: 1; background: radial-gradient(ellipse 70% 54% at calc(50% + var(--lx) * 26%) calc(46% + var(--ly) * 20%), rgba(199,210,254,.24), transparent 70%); mix-blend-mode: screen; }
+[data-variant="rare-5"] .card-art img { filter: saturate(1.1) contrast(1.05); }
+[data-variant="rare-5"] .card-art { box-shadow: 0 0 0 1px rgba(129,140,248,.6); }
+@keyframes r-moire { 0%, 100% { transform: translateY(0) rotate(0deg) } 50% { transform: translateY(2px) rotate(.7deg) } }
+@keyframes r-moire-x { 0%, 100% { transform: translateX(0) } 50% { transform: translateX(2.4px) } }
+
+/* 6 Rain Glass: the window of a bus at night, drops holding the city upside down */
+[data-variant="rare-6"] .card-front { background: linear-gradient(180deg, #0a1420, #0f2135 55%, #070f18); box-shadow: inset 0 0 0 2px rgba(148,197,255,.4); }
+[data-variant="rare-6"] { --ink: #e9f2ff; --ink-dim: #9db8d6; --ink-faint: #718aa8; }
+[data-variant="rare-6"] .fx-a { z-index: 2; background:
+  radial-gradient(circle at 40% 36%, rgba(255,255,255,.7) 0 .5px, rgba(180,215,255,.28) 1.1px, transparent 1.9px) 0 0 / 17px 21px,
+  radial-gradient(circle at 60% 44%, rgba(255,255,255,.55) 0 .4px, rgba(180,215,255,.2) .9px, transparent 1.5px) 8px 11px / 23px 15px,
+  radial-gradient(circle at 30% 60%, rgba(255,255,255,.8) 0 .7px, rgba(200,225,255,.3) 1.4px, transparent 2.3px) 13px 5px / 31px 29px; }
+[data-variant="rare-6"] .fx-b { z-index: 2; background:
+  radial-gradient(ellipse 1.1cqw 2.6cqw at 50% 50%, rgba(255,255,255,.75), rgba(170,210,255,.25) 55%, transparent 76%) 26% 0 / 6cqw 30cqw no-repeat,
+  radial-gradient(ellipse .9cqw 2.2cqw at 50% 50%, rgba(255,255,255,.6), rgba(170,210,255,.2) 55%, transparent 76%) 68% 0 / 5cqw 26cqw no-repeat;
+  animation: r-drip 5.5s linear infinite; }
+[data-variant="rare-6"] .fx-c { z-index: 1; backdrop-filter: blur(1px); background: linear-gradient(122deg, rgba(148,197,255,.14), transparent 40%, rgba(148,197,255,.1)); }
+[data-variant="rare-6"] .card-art img { filter: saturate(1.15) contrast(1.06) brightness(.96); }
+[data-variant="rare-6"] .card-art { box-shadow: 0 0 0 1px rgba(148,197,255,.55); }
+@keyframes r-drip { 0% { background-position: 26% -32cqw, 68% -18cqw } 100% { background-position: 26% 132cqw, 68% 146cqw } }
+
+/* 7 Neon Sign: bent tube, cold cathode buzz, one bad contact in the corner */
+[data-variant="rare-7"] .card-front { background: linear-gradient(180deg, #060b1c, #0a1230 60%, #040814); box-shadow: inset 0 0 0 2px rgba(59,130,246,.6); }
+[data-variant="rare-7"] { --ink: #e8f0ff; --ink-dim: #96b3e0; --ink-faint: #6c86b4; }
+[data-variant="rare-7"] .fx-a { z-index: 1; border-radius: var(--card-radius); box-shadow: inset 0 0 0 3px rgba(96,165,250,.9), inset 0 0 14px 3px rgba(59,130,246,.55), 0 0 22px rgba(59,130,246,.35); animation: r-buzz 6s steps(1, end) infinite; }
+[data-variant="rare-7"] .fx-b { z-index: 1; margin: 6cqw; border-radius: calc(var(--card-radius) * .6); box-shadow: inset 0 0 0 1.5px rgba(191,219,254,.7), inset 0 0 9px rgba(147,197,253,.5); opacity: .85; }
+[data-variant="rare-7"] .fx-c { z-index: 0; background: radial-gradient(ellipse 90% 70% at 50% 46%, rgba(59,130,246,.28), transparent 72%); animation: breathe 4s ease-in-out infinite; }
+[data-variant="rare-7"] .fx-v { z-index: 3; mix-blend-mode: screen; opacity: .3; background: repeating-linear-gradient(0deg, rgba(255,255,255,.14) 0 1px, transparent 1px 3px); }
+[data-variant="rare-7"] .card-title { text-shadow: 0 0 8px rgba(96,165,250,.9), 0 0 22px rgba(59,130,246,.5); }
+[data-variant="rare-7"] .card-art { box-shadow: 0 0 0 1.5px rgba(96,165,250,.85), 0 0 24px -6px rgba(59,130,246,.9); }
+@keyframes r-buzz { 0%, 46%, 52%, 58%, 100% { opacity: 1 } 48%, 55% { opacity: .45 } }
+
+/* 8 Cobalt Silk: a woven sheen that changes its mind as the card turns */
+[data-variant="rare-8"] .card-front { background: linear-gradient(180deg, #101c3d, #172a5c 48%, #0c1631); box-shadow: inset 0 0 0 2px rgba(125,152,255,.45); }
+[data-variant="rare-8"] { --ink: #eef1ff; --ink-dim: #cdd5ff; --ink-faint: #97a3d4; }
+[data-variant="rare-8"] .fx-a { z-index: 0; opacity: .55; background:
+  repeating-linear-gradient(90deg, rgba(255,255,255,.1) 0 1px, transparent 1px 3px),
+  repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px); }
+[data-variant="rare-8"] .fx-b { z-index: 1; mix-blend-mode: screen; background:
+  linear-gradient(calc(100deg + var(--lx) * 26deg), transparent 18%, rgba(147,197,253,.4) 34%, rgba(255,255,255,.5) 44%, rgba(129,140,248,.4) 56%, transparent 74%);
+  background-size: 250% 100%; animation: pearl 8s linear infinite; }
+[data-variant="rare-8"] .fx-c { z-index: 2; mix-blend-mode: overlay; opacity: .5; background: repeating-linear-gradient(58deg, rgba(255,255,255,.16) 0 2px, transparent 2px 7px); }
+[data-variant="rare-8"] .card-art img { filter: saturate(1.08) brightness(1.02); }
+[data-variant="rare-8"] .card-art { box-shadow: 0 0 0 1px rgba(125,152,255,.6), inset 0 0 20px rgba(129,140,248,.24); }
+[data-variant="rare-8"] .fx-v { z-index: 1; background: linear-gradient(180deg, transparent 44%, rgba(8,14,36,.55)); }
+[data-variant="rare-8"] .rarity-badge { border-radius: 3px; }
+
+/* 9 Sonar: something out there, and a ring going out every few seconds to find it */
+[data-variant="rare-9"] .card-front { background: radial-gradient(ellipse 90% 70% at 50% 44%, #06283a, #021420 72%); box-shadow: inset 0 0 0 2px rgba(56,189,248,.45); }
+[data-variant="rare-9"] { --ink: #e2f6ff; --ink-dim: #8fc3da; --ink-faint: #6794ab; }
+[data-variant="rare-9"] .fx-a { z-index: 0; opacity: .4; background:
+  repeating-radial-gradient(circle at 50% 44%, transparent 0 13px, rgba(56,189,248,.4) 13px 14px),
+  repeating-conic-gradient(from 0deg at 50% 44%, rgba(56,189,248,.3) 0 .6deg, transparent .6deg 30deg); }
+[data-variant="rare-9"] .fx-b { z-index: 1; background: repeating-radial-gradient(circle at 50% 44%, rgba(125,211,252,.7) 0 1.6px, transparent 1.6px 60px); animation: r-ping 3.6s cubic-bezier(.2,.7,.3,1) infinite; }
+[data-variant="rare-9"] .fx-c { z-index: 1; mix-blend-mode: screen; background: conic-gradient(from 0deg at 50% 44%, rgba(125,211,252,.4), transparent 22%); animation: spin 4.6s linear infinite; }
+[data-variant="rare-9"] .fx-v { z-index: 2; background: radial-gradient(circle at 66% 62%, rgba(190,242,255,.9) 0 1.4px, transparent 2.4px), radial-gradient(circle at 34% 30%, rgba(190,242,255,.6) 0 1.1px, transparent 2px); animation: breathe 2.8s ease-in-out infinite; }
+[data-variant="rare-9"] .card-art img { filter: grayscale(.3) hue-rotate(-10deg) saturate(1.3) brightness(.92); }
+[data-variant="rare-9"] .card-art { box-shadow: 0 0 0 1px rgba(56,189,248,.6), inset 0 0 30px rgba(2,25,40,.7); }
+@keyframes r-ping { 0% { transform: scale(.1); opacity: 1 } 100% { transform: scale(2.3); opacity: 0 } }
+
+/* 10 Ink Wash: indigo dropped on wet paper, still deciding where to go */
+[data-variant="rare-10"] .card-front { background: linear-gradient(180deg, #e8ecf3, #d8e0ee 60%, #cbd6e8); box-shadow: inset 0 0 0 2px rgba(30,64,175,.4); }
+[data-variant="rare-10"] { --ink: #14224a; --ink-dim: #3d5285; --ink-faint: #6d7fab; --positive: #1f5f4a; }
+[data-variant="rare-10"] .fx-a { z-index: 0; mix-blend-mode: multiply; filter: blur(5px); background:
+  radial-gradient(ellipse 44% 30% at 26% 26%, rgba(30,64,175,.65), transparent 68%),
+  radial-gradient(ellipse 38% 26% at 76% 56%, rgba(37,99,235,.55), transparent 68%),
+  radial-gradient(ellipse 52% 24% at 44% 86%, rgba(23,37,84,.5), transparent 70%);
+  animation: r-bleed 14s ease-in-out infinite; }
+[data-variant="rare-10"] .fx-b { z-index: 0; mix-blend-mode: multiply; opacity: .35; background: radial-gradient(circle, rgba(40,60,120,.4) .4px, transparent .9px) 0 0 / 4px 4px; }
+[data-variant="rare-10"] .fx-c { z-index: 1; mix-blend-mode: multiply; opacity: .5; background: repeating-linear-gradient(96deg, rgba(60,80,140,.18) 0 1px, transparent 1px 9px); }
+[data-variant="rare-10"] .card-art { border-radius: 3px; box-shadow: 0 0 0 1px rgba(30,64,175,.5); }
+[data-variant="rare-10"] .card-art img { filter: grayscale(.55) sepia(.2) hue-rotate(180deg) saturate(1.5) contrast(1.05); }
+[data-variant="rare-10"] .card-title { font-family: Georgia, 'Times New Roman', serif; }
+[data-variant="rare-10"] .rarity-badge { border-radius: 3px; background: #14224a; color: #e8ecf3; border-color: #14224a; }
+@keyframes r-bleed { 0%, 100% { transform: scale(1) translate(0, 0) } 50% { transform: scale(1.07) translate(-2%, 1.5%) } }

@@ -75,9 +75,8 @@ check('it sits under the shop tab', await p.evaluate(() => document.querySelecto
 check('nine themes on the shelf', await p.locator('#atelier-themes .theme-card').count() === 9);
 check('no season or code theme among them', await p.evaluate(() => ![...document.querySelectorAll('#atelier-themes .theme-card')].some((c) => /apotheosis|hellfire|frost|yule|rire/.test(c.dataset.theme))));
 check('ten frames on the shelf', await p.locator('#atelier-frames .frame-card').count() === 10);
-// Twenty-one, because that is what the two boards held once the picked one
-// per tier had become that tier's own drawing: two for most tiers, seven for
-// Prismatic. The table is the count, so it cannot drift from the shelf.
+// The count comes from the table, not a number written here, so the shelf and
+// the catalogue cannot drift apart: two for most tiers, four for Prismatic.
 const BOUGHT = ALL_FX.length - 1;
 check('every board design is on the shelf, on its own tier',
   await p.locator('#atelier-fx .fx-chip').count() === BOUGHT && await p.locator('#atelier-fx .fx-tier').count() === 8, String(BOUGHT));

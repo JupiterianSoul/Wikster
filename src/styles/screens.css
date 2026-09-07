@@ -2539,6 +2539,24 @@ input[type='search']::-webkit-search-cancel-button { filter: invert(1) opacity(0
   contain-intrinsic-size: auto 340px;
 }
 .fx-chip-sub { flex: 1; }
+/* A sample never gets a finger on it, and half these treatments are lit by
+   where the light is: the foil ring's highlight, the holo streak, the crystal
+   sweep all read from --lx and --ly, which the tilt engine writes and nothing
+   writes here. So the shop rocks them gently by itself. Registering the two
+   makes them animatable at all; a bare custom property jumps between keyframes
+   instead of travelling. */
+@property --lx { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --ly { syntax: '<number>'; inherits: true; initial-value: 0; }
+.card.fx-sample.is-lit { animation: fx-sample-sway 7s ease-in-out infinite; }
+@keyframes fx-sample-sway {
+  0%   { --lx: -0.85; --ly: -0.3; }
+  50%  { --lx: 0.85;  --ly: 0.35; }
+  100% { --lx: -0.85; --ly: -0.3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card.fx-sample.is-lit { animation: none; }
+}
+
 /* The sample: a real card, sized to the tile rather than to the reveal. */
 .fx-sample-slot { display: block; width: 100%; }
 .card.fx-sample {
