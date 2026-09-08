@@ -2807,3 +2807,199 @@ begin
   return 'imported';
 end $$;
 grant execute on function public.import_my_save() to authenticated;
+
+-- --- the draw, decided here ----------------------------------------------------
+
+/*
+ * WHY THE ROLL MOVES AND THE ARTICLE SEARCH DOES NOT
+ *
+ * A booster does two independent things: it rolls a print per card off the odds
+ * table, and it finds articles from its subject. stampPrints() zips them, and
+ * that independence is the whole design - an Epic pack deals Epics at its
+ * printed rate in every subject, thin or famous.
+ *
+ * Only the first of those is worth anything. The print is the loot box; the
+ * article is a Wikipedia search anybody can run. So the print is rolled here,
+ * the price is computed here from the article's real readership, and the pull
+ * is recorded here. The searching stays on the device, where it already works
+ * in four flavours and costs this server nothing.
+ *
+ * The rolled prints are deliberately NOT returned when a pull begins. If a
+ * device knew a Prismatic was coming in slot three it would go looking for the
+ * most-read article it could find for that slot. It learns the prints when the
+ * cards are recorded, which is after the articles are fixed.
+ */
+
+create table if not exists public.pulls (
+  nonce      uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users on delete cascade,
+  spec_id    text not null,
+  spec       jsonb not null,
+  -- The prints, in order, rolled at begin and applied at record.
+  wishes     text[] not null,
+  at         timestamptz not null default now(),
+  -- A pull the device never came back from is not a booster the player keeps:
+  -- it was consumed. But it must not sit claimable forever either.
+  expires_at timestamptz not null default now() + interval '30 minutes',
+  settled_at timestamptz
+);
+create index if not exists pulls_open_idx on public.pulls (user_id, at desc) where settled_at is null;
+
+alter table public.pulls enable row level security;
+drop policy if exists "you see your own pulls" on public.pulls;
+create policy "you see your own pulls"
+  on public.pulls for select to authenticated using (auth.uid() = user_id);
+grant select on public.pulls to authenticated;
+
+/* One roll off the odds table. The table is src/data/odds.js, column order the
+   same as RARITIES, every row summing to 100. Kept in two places on purpose:
+   the device shows the odds sheet from its copy, this one decides. They are
+   checked against each other by tests/suites/draw.mjs. */
+create or replace function public.roll_rarity(p_row text)
+returns text language plpgsql volatile set search_path = public as $$
+declare
+  tiers text[] := array['common','uncommon','rare','epic','legendary','mythic','exotic','prismatic'];
+  row_pct numeric[];
+  ticket numeric;
+  i integer;
+begin
+  row_pct := case lower(coalesce(p_row, 'none'))
+    when 'uncommon'  then array[50,28,13,5.5,2.2,0.9,0.35,0.05]
+    when 'rare'      then array[34,30,20,9,4.2,1.8,0.85,0.15]
+    when 'epic'      then array[20,26,26,16,7.5,3,1.3,0.2]
+    when 'legendary' then array[11,18,25,23,14,6,2.6,0.4]
+    when 'mythic'    then array[6,11,19,24,22,12,5,1]
+    when 'exotic'    then array[3,6,12,19,24,20,13,3]
+    when 'prismatic' then array[1.5,3,7,13,20,24,20,11.5]
+    else                  array[68,18,8,3.5,1.6,0.6,0.25,0.05]
+  end;
+  ticket := random() * 100;
+  for i in 1..array_length(row_pct, 1) loop
+    ticket := ticket - row_pct[i];
+    if ticket < 0 then return tiers[i]; end if;
+  end loop;
+  return tiers[1];
+end $$;
+
+/*
+ * Take a booster out of the inventory and roll its prints.
+ *
+ * The booster is consumed here, before anything is drawn, which is the same
+ * order the device already uses and for the same reason: a pack that tore and
+ * then failed must not be openable twice.
+ */
+create or replace function public.begin_pull(p_spec_id text)
+returns table (nonce uuid, cards integer)
+language plpgsql security definer set search_path = public as $$
+declare
+  me      uuid := auth.uid();
+  slot    inventory;
+  n       integer;
+  rolled  text[] := '{}';
+  best    integer := 0;
+  i       integer;
+  tier    text;
+  promise text;
+begin
+  if me is null then raise exception 'AUTH'; end if;
+  if public.is_suspended(me) then raise exception 'SUSPENDED'; end if;
+
+  select * into slot from inventory where user_id = me and spec_id = p_spec_id for update;
+  if slot.user_id is null or slot.count < 1 then raise exception 'NOT_HELD'; end if;
+
+  if slot.count > 1 then
+    update inventory set count = count - 1 where user_id = me and spec_id = p_spec_id;
+  else
+    delete from inventory where user_id = me and spec_id = p_spec_id;
+  end if;
+
+  n := greatest(1, least(10, coalesce((slot.spec->>'cards')::integer, 5)));
+  for i in 1..n loop
+    tier := public.roll_rarity(slot.spec->>'rarityId');
+    rolled := rolled || tier;
+    best := greatest(best, public.rarity_rank(tier));
+  end loop;
+
+  /* A tiered booster promises its tier. If the rolls missed it, one of them
+     becomes it - the promise lives in the draw, not in the odds row. */
+  promise := slot.spec->>'rarityId';
+  if promise is not null and public.rarity_rank(promise) > best then
+    rolled[1 + floor(random() * n)::integer] := promise;
+  end if;
+
+  return query
+    insert into pulls (user_id, spec_id, spec, wishes)
+    values (me, p_spec_id, slot.spec, rolled)
+    returning pulls.nonce, n;
+end $$;
+grant execute on function public.begin_pull(text) to authenticated;
+
+/*
+ * What a card is worth: the article's readership, then its print.
+ *
+ *   basePrice(pop) = 20 + 480 * pop^1.5          src/pricing.js
+ *   price          = basePrice * (1 + bonusPct/100)   src/data/rarities.js
+ *
+ * These numbers are the economy. Written from memory the first time and every
+ * one of them was wrong - a different curve and six wrong bonuses - which would
+ * have quietly repriced the whole game the moment the draw moved here.
+ * tests/suites/draw.mjs now checks this function against src/pricing.js across
+ * a grid of popularities and every tier, so the two cannot drift again.
+ */
+create or replace function public.price_for(p_pop numeric, p_rarity text)
+returns bigint language sql immutable set search_path = public as $$
+  select round(
+    (20 + 480 * power(least(1, greatest(0, coalesce(p_pop, 0))), 1.5))
+    * (1 + case lower(coalesce(p_rarity, 'common'))
+             when 'uncommon'  then 0.25
+             when 'rare'      then 0.60
+             when 'epic'      then 1.40
+             when 'legendary' then 3.20
+             when 'mythic'    then 7.00
+             when 'exotic'    then 15.00
+             when 'prismatic' then 32.00
+             when 'special'   then 32.00
+             else 0 end)
+  )::bigint;
+$$;
+
+/*
+ * Record what the pull became.
+ *
+ * Called by the open function with the service key, never by a device: the
+ * readership it passes is what sets the price, so a device that could call it
+ * would be setting its own prices. The prints come from the row, not from the
+ * caller.
+ */
+create or replace function public.record_pull(p_nonce uuid, p_cards jsonb)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare
+  pull    pulls;
+  card    jsonb;
+  i       integer := 0;
+  tier    text;
+  pop     numeric;
+  price   bigint;
+  out_arr jsonb := '[]'::jsonb;
+begin
+  select * into pull from pulls where nonce = p_nonce for update;
+  if pull.nonce is null then raise exception 'NO_PULL'; end if;
+  if pull.settled_at is not null then raise exception 'ALREADY_SETTLED'; end if;
+  if pull.expires_at < now() then raise exception 'PULL_EXPIRED'; end if;
+
+  for card in select * from jsonb_array_elements(p_cards) loop
+    i := i + 1;
+    exit when i > array_length(pull.wishes, 1);
+    if card->>'key' is null then continue; end if;
+    tier := pull.wishes[i];
+    pop := least(1, greatest(0, coalesce((card->>'popularity')::numeric, 0)));
+    price := public.price_for(pop, tier);
+    perform add_card(pull.user_id, card->>'key', coalesce(card->>'title', card->>'key'),
+                     tier, price, coalesce(card->>'lang', 'en'), pull.spec_id, 'pull', 1);
+    out_arr := out_arr || jsonb_build_object(
+      'key', card->>'key', 'rarityId', tier, 'price', price);
+  end loop;
+
+  update pulls set settled_at = now() where nonce = p_nonce;
+  return out_arr;
+end $$;
