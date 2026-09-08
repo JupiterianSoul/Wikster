@@ -2465,3 +2465,345 @@ grant usage, select on sequence public.grants_id_seq to authenticated;
 /* Nothing here lets a player insert one. The creator's insert policy lives in
    the control app's own gate SQL, beside every other is_admin() rule, so this
    file has no opinion about who the creator is. */
+
+
+-- ============================================================================
+--  V17: WHAT A PLAYER ACTUALLY OWNS
+-- ============================================================================
+--
+-- Until now the server stored a save it never read. Every row-level rule in
+-- this file answers "is this you"; not one of them could answer "is this true",
+-- because the things worth lying about - coins, cards, boosters, level - lived
+-- inside a jsonb blob the player owns and writes.
+--
+-- That was survivable while the only shared systems were read-only. It is not
+-- survivable in public, because of where a client-authored number leaks into
+-- somebody else's game:
+--
+--   place_bid() cannot check a bidder has the money, so settlement pays a
+--   seller from a balance that was never real. That is money creation, and it
+--   lands in an honest player's wallet.
+--
+--   create_auction() and guild_bank_donate() take a card as jsonb and cannot
+--   check the seller owns it, so any card can be listed without limit.
+--
+-- These four tables are the missing half. They are the server's own record of
+-- what each account holds, and nothing in them is writable by the account they
+-- describe: a player may read their own rows and that is all. Every write goes
+-- through a security definer function or the service key, which is the same
+-- shape submit_score() and the slots function already use and the reason a
+-- forged score cannot reach a leaderboard today.
+--
+-- The save keeps existing. It stays a fast local mirror the device can play
+-- from offline, and the server can rebuild it from these tables at any time.
+-- What changes is which of the two is believed when they disagree.
+
+-- --- the collection ----------------------------------------------------------
+
+/* One row per article an account holds, with its copies. Keyed the way the
+   game keys its own collection, so the two can be compared directly.
+
+   `rarity_id`, not `rarity`: that is the name the game reads, and a card
+   written under any other name is read as Common. It has already happened
+   once, through the creator's tools, and it was silent both times. */
+create table if not exists public.cards (
+  user_id     uuid not null references auth.users on delete cascade,
+  article_key text not null,
+  title       text not null,
+  rarity_id   text not null,
+  price       bigint not null default 0 check (price >= 0),
+  copies      integer not null default 1 check (copies > 0),
+  lang        text not null default 'en',
+  pack_id     text,
+  -- Where it came from. An imported card is one this server took on trust from
+  -- a save written before there was anything to check it against; a pulled one
+  -- was decided here. Worth being able to tell apart forever, not least when
+  -- something later looks wrong.
+  origin      text not null default 'pull'
+                check (origin in ('pull', 'trade', 'gift', 'bank', 'grant', 'import')),
+  first_at    timestamptz not null default now(),
+  last_at     timestamptz not null default now(),
+  primary key (user_id, article_key)
+);
+create index if not exists cards_owner_idx on public.cards (user_id);
+create index if not exists cards_article_idx on public.cards (article_key);
+
+alter table public.cards enable row level security;
+drop policy if exists "you read your own cards" on public.cards;
+create policy "you read your own cards"
+  on public.cards for select to authenticated using (auth.uid() = user_id);
+-- No insert, update or delete policy, on purpose. This table is the reason a
+-- listing can be checked, so a player writing it directly would defeat it.
+
+-- --- boosters held ------------------------------------------------------------
+
+/* Filed under the id derived from the spec, holding the spec, exactly as the
+   device does - so an inventory can be handed to the game as-is and a granted
+   booster cannot be filed somewhere the game does not look. */
+create table if not exists public.inventory (
+  user_id  uuid not null references auth.users on delete cascade,
+  spec_id  text not null,
+  spec     jsonb not null,
+  count    integer not null default 1 check (count > 0),
+  primary key (user_id, spec_id)
+);
+create index if not exists inventory_owner_idx on public.inventory (user_id);
+
+alter table public.inventory enable row level security;
+drop policy if exists "you read your own inventory" on public.inventory;
+create policy "you read your own inventory"
+  on public.inventory for select to authenticated using (auth.uid() = user_id);
+
+-- --- the purse ----------------------------------------------------------------
+
+create table if not exists public.wallets (
+  user_id    uuid primary key references auth.users on delete cascade,
+  coins      bigint not null default 0 check (coins >= 0),
+  ink        bigint not null default 0 check (ink >= 0),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.wallets enable row level security;
+drop policy if exists "you read your own wallet" on public.wallets;
+create policy "you read your own wallet"
+  on public.wallets for select to authenticated using (auth.uid() = user_id);
+
+-- --- every movement, kept ------------------------------------------------------
+
+/* Append-only. Not for the audit trail's own sake: without it a duplication
+   bug can be noticed but not undone, and "how much money exists and where did
+   it come from" is a question the economy cannot be balanced without. With it
+   both are one query.
+
+   No update or delete policy exists, and none should. */
+create table if not exists public.ledger (
+  id      bigserial primary key,
+  user_id uuid not null references auth.users on delete cascade,
+  at      timestamptz not null default now(),
+  kind    text not null,
+  coins   bigint not null default 0,
+  ink     bigint not null default 0,
+  reason  text,
+  detail  jsonb
+);
+create index if not exists ledger_owner_at_idx on public.ledger (user_id, at desc);
+create index if not exists ledger_at_idx on public.ledger (at desc);
+create index if not exists ledger_kind_idx on public.ledger (kind, at desc);
+
+alter table public.ledger enable row level security;
+drop policy if exists "you read your own ledger" on public.ledger;
+create policy "you read your own ledger"
+  on public.ledger for select to authenticated using (auth.uid() = user_id);
+
+grant select on public.cards, public.inventory, public.wallets, public.ledger to authenticated;
+
+-- --- moving money, in one place -------------------------------------------------
+
+/* The only way a balance changes. Writes the ledger row in the same statement,
+   so a movement without a record is not something a caller can forget to do -
+   it is not something a caller can express.
+
+   Refuses to overdraw rather than clamping: a purchase that silently took a
+   balance to zero instead of failing would be a bug that looks like a feature
+   until somebody notices what it cost them. */
+create or replace function public.move_funds(
+  p_user uuid, p_coins bigint, p_ink bigint, p_kind text, p_reason text default null,
+  p_detail jsonb default null)
+returns public.wallets language plpgsql security definer set search_path = public as $$
+declare w wallets;
+begin
+  insert into wallets (user_id) values (p_user) on conflict (user_id) do nothing;
+  update wallets
+     set coins = coins + p_coins, ink = ink + p_ink, updated_at = now()
+   where user_id = p_user
+  returning * into w;
+  if w.user_id is null then raise exception 'NO_WALLET'; end if;
+  insert into ledger (user_id, kind, coins, ink, reason, detail)
+    values (p_user, p_kind, p_coins, p_ink, p_reason, p_detail);
+  return w;
+exception when check_violation then
+  raise exception 'INSUFFICIENT_FUNDS';
+end $$;
+
+/* The tier ladder, so the upgrade rule below has an order to compare against.
+   Kept in step with src/data/rarities.js by name; an unknown tier sorts last
+   rather than throwing, because a save from a future build must not break an
+   import. */
+create or replace function public.rarity_rank(p_id text)
+returns integer language sql immutable set search_path = public as $$
+  select coalesce(array_position(
+    array['common','uncommon','rare','epic','legendary','mythic','exotic','prismatic','special'],
+    lower(coalesce(p_id, ''))), 0);
+$$;
+
+/* Adding cards, the one way. Copies accumulate and the better print wins, which
+   is the game's own rule: pulling an article again as a Legendary upgrades the
+   entry rather than filing a second one. */
+create or replace function public.add_card(
+  p_user uuid, p_key text, p_title text, p_rarity text, p_price bigint,
+  p_lang text default 'en', p_pack text default null, p_origin text default 'pull',
+  p_copies integer default 1)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  insert into cards (user_id, article_key, title, rarity_id, price, lang, pack_id, origin, copies)
+  values (p_user, p_key, p_title, p_rarity, greatest(0, p_price), p_lang, p_pack, p_origin, greatest(1, p_copies))
+  on conflict (user_id, article_key) do update
+    set copies  = cards.copies + greatest(1, p_copies),
+        last_at = now(),
+        -- Only ever upgraded, never downgraded, and the price follows the tier
+        -- it is upgraded to.
+        rarity_id = case when public.rarity_rank(excluded.rarity_id) > public.rarity_rank(cards.rarity_id)
+                         then excluded.rarity_id else cards.rarity_id end,
+        price     = case when public.rarity_rank(excluded.rarity_id) > public.rarity_rank(cards.rarity_id)
+                         then excluded.price else cards.price end;
+end $$;
+
+
+-- --- bringing the existing saves across --------------------------------------
+
+/*
+ * THE ONE PLACE THE SERVER TAKES A SAVE ON TRUST, AND WHY IT CLOSES ITSELF
+ *
+ * Seven accounts existed before any of this, and their saves are the only
+ * record of what they hold. Some of those cards came from personal codes and
+ * cannot be obtained any other way, so refusing to import would destroy them
+ * and starting everybody from zero would be a worse answer than the problem.
+ *
+ * So this reads the caller's own save and fills the tables above from it. That
+ * is, unavoidably, believing a blob the player could have written - which is
+ * exactly the thing the rest of V17 exists to stop. Three things keep it from
+ * being a hole:
+ *
+ *   It runs once per account. A second call returns 'already' and changes
+ *   nothing, so it cannot be looped for more.
+ *
+ *   It only serves accounts that existed before the cutover. An account created
+ *   after it has nothing legitimate to import - it was born into a world where
+ *   the server already decides - so it is refused. The window shuts on its own
+ *   as the playerbase grows, with nobody having to remember to shut it.
+ *
+ *   Everything it writes is marked origin 'import'. A balance or a card that
+ *   was taken on trust stays distinguishable from one this server decided,
+ *   permanently, which is what makes a later investigation possible.
+ *
+ * Set the cutover before opening signups. Until then it is the moment this
+ * file was first run, which is right for a project that has not launched.
+ */
+create table if not exists public.migration (
+  id           boolean primary key default true check (id),
+  cutover_at   timestamptz not null default now(),
+  note         text
+);
+insert into public.migration (id) values (true) on conflict (id) do nothing;
+alter table public.migration enable row level security;
+-- Nobody reads it but the functions, which are security definer.
+
+create table if not exists public.imported (
+  user_id    uuid primary key references auth.users on delete cascade,
+  at         timestamptz not null default now(),
+  cards      integer not null default 0,
+  coins      bigint not null default 0,
+  ink        bigint not null default 0,
+  boosters   integer not null default 0
+);
+alter table public.imported enable row level security;
+drop policy if exists "you see that your own save was imported" on public.imported;
+create policy "you see that your own save was imported"
+  on public.imported for select to authenticated using (auth.uid() = user_id);
+grant select on public.imported to authenticated;
+
+/* The id the game files an inventory slot under, derived from the spec's own
+   contents. It has to match src/booster.js exactly: a slot filed under any
+   other id is a booster the game does not find. */
+create or replace function public.spec_id(p jsonb)
+returns text language sql immutable set search_path = public as $$
+  select case
+    when p->>'kind' = 'timed'  then 'timed|'  || coalesce(p->>'timedLevel','1') || '|std|' || coalesce(p->>'cards','5')
+    when p->>'kind' = 'today'  then 'today|'  || coalesce(p->>'day','') || '|std|' || coalesce(p->>'cards','5')
+    when p->>'kind' = 'code'   then 'code|'   || coalesce(p->>'codeId','') || '|' || coalesce(p->>'rarityId','std') || '|' || coalesce(p->>'cards','5')
+    when p->>'kind' = 'custom' then 'custom|' || coalesce(p->>'customId','') || '|' || coalesce(p->>'rarityId','std') || '|' || coalesce(p->>'cards','5')
+    else coalesce(p->>'kind','open') || '|' || coalesce(p->>'themeId','any') || '|'
+         || coalesce(p->>'rarityId','std') || '|' || coalesce(p->>'cards','5')
+  end;
+$$;
+
+create or replace function public.import_my_save()
+returns text language plpgsql security definer set search_path = public as $$
+declare
+  me       uuid := auth.uid();
+  blob     jsonb;
+  cutover  timestamptz;
+  born     timestamptz;
+  entry    jsonb;
+  n_cards  integer := 0;
+  n_packs  integer := 0;
+  v_coins  bigint := 0;
+  v_ink    bigint := 0;
+  prof     jsonb;
+begin
+  if me is null then raise exception 'sign in'; end if;
+  if exists (select 1 from imported where user_id = me) then return 'already'; end if;
+
+  select m.cutover_at into cutover from migration m where m.id;
+  select u.created_at into born from auth.users u where u.id = me;
+  if born is null or born > cutover then return 'not eligible'; end if;
+
+  select s.data into blob from saves s where s.user_id = me;
+  if blob is null or blob->'data' is null then return 'nothing to import'; end if;
+
+  /* The save stores each key as a JSON *string*, so every read here parses
+     twice: once out of the envelope, once out of the string. A key that is
+     missing or malformed is skipped rather than failing the whole import -
+     half a collection is worth more than none. */
+  begin v_coins := greatest(0, (blob->'data'->>'wikster.wallet.v1')::numeric::bigint); exception when others then v_coins := 0; end;
+  begin v_ink := greatest(0, (blob->'data'->>'wikster.ink.v1')::numeric::bigint); exception when others then v_ink := 0; end;
+
+  begin
+    for entry in
+      select value from jsonb_each((blob->'data'->>'wikster.collection.v3')::jsonb->'entries')
+    loop
+      if entry->>'key' is null then continue; end if;
+      perform add_card(
+        me,
+        entry->>'key',
+        coalesce(entry->>'title', entry->>'key'),
+        coalesce(entry->>'rarityId', 'common'),
+        coalesce((entry->>'price')::numeric::bigint, 0),
+        coalesce(entry->>'lang', 'en'),
+        entry->>'packId',
+        'import',
+        greatest(1, coalesce((entry->>'count')::integer, 1)));
+      n_cards := n_cards + 1;
+    end loop;
+  exception when others then null;
+  end;
+
+  begin
+    for entry in
+      select value from jsonb_each((blob->'data'->>'wikster.inventory.v1')::jsonb)
+    loop
+      if entry->'spec' is null then continue; end if;
+      insert into inventory (user_id, spec_id, spec, count)
+      values (me, public.spec_id(entry->'spec'), entry->'spec',
+              greatest(1, coalesce((entry->>'count')::integer, 1)))
+      on conflict (user_id, spec_id) do update set count = inventory.count + excluded.count;
+      n_packs := n_packs + greatest(1, coalesce((entry->>'count')::integer, 1));
+    end loop;
+  exception when others then null;
+  end;
+
+  if v_coins > 0 or v_ink > 0 then
+    perform move_funds(me, v_coins, v_ink, 'import',
+      'carried over from the save this account already had', null);
+  end if;
+
+  /* The profile row keeps the level and the counters a friend sees; they were
+     self-reported before and are simply carried, since there is nothing to
+     check them against and nothing yet that spends them. */
+  begin prof := (blob->'data'->>'wikster.profile.v1')::jsonb; exception when others then prof := null; end;
+
+  insert into imported (user_id, cards, coins, ink, boosters)
+    values (me, n_cards, v_coins, v_ink, n_packs);
+  return 'imported';
+end $$;
+grant execute on function public.import_my_save() to authenticated;
