@@ -49,11 +49,26 @@ import androidx.webkit.WebViewAssetLoader;
  */
 public class MainActivity extends Activity {
 
-    /** Where the site lives. Only pages under this path stay inside the app.
-     *  The path comes from the flavour: the game gets the game, the control
-     *  build gets the creator's tools. */
-    private static final String LIVE_HOST = "jupiteriansoul.github.io";
+    /*
+     * Where the site lives.
+     *
+     * Both of these come from the flavour, because the site moved hosts and an
+     * installed APK cannot be told about it. The wrapper only follows links
+     * whose host it recognises - that is the point of isLive() - so an app
+     * built against the old host would refuse to follow a redirect to the new
+     * one and simply stop working. It would not fail loudly either; it would
+     * fall back to the bundled copy and look like a game that had stopped
+     * updating.
+     *
+     * So the build carries a primary host and a legacy one, and both are
+     * accepted. The old site keeps being published until the installs that
+     * point at it are gone; then LEGACY_HOST can be emptied and the two lines
+     * below collapse back into one.
+     */
+    private static final String LIVE_HOST = BuildConfig.LIVE_HOST;
+    private static final String LEGACY_HOST = BuildConfig.LEGACY_HOST;
     private static final String LIVE_PATH = BuildConfig.LIVE_PATH;
+    private static final String LEGACY_PATH = BuildConfig.LEGACY_PATH;
     private static final String LIVE_URL = "https://" + LIVE_HOST + LIVE_PATH;
 
     /** Reserved by androidx.webkit for locally-served assets. */
@@ -187,10 +202,16 @@ public class MainActivity extends Activity {
         ensureSomeIcon();
     }
 
-    /** Whether a url is a page of the published site. */
+    /**
+     * Whether a url is a page of the published site, on either host it may be
+     * published at. Anything else opens in the browser rather than in here.
+     */
     private boolean isLive(Uri url) {
-        return url != null && LIVE_HOST.equals(url.getHost())
-                && url.getPath() != null && url.getPath().startsWith(LIVE_PATH);
+        if (url == null || url.getPath() == null) return false;
+        String host = url.getHost();
+        String path = url.getPath();
+        if (LIVE_HOST.equals(host) && path.startsWith(LIVE_PATH)) return true;
+        return !LEGACY_HOST.isEmpty() && LEGACY_HOST.equals(host) && path.startsWith(LEGACY_PATH);
     }
 
     /** Whether the phone has any network at all. Not whether the site answers; that is what the fallback is for. */

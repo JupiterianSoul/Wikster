@@ -650,16 +650,52 @@ reckoning it already knows and a test can check the two agree.
 
 ## The website
 
-The site is the same `dist/`, published to GitHub Pages from the `gh-pages`
-branch. That branch holds build output only and is replaced wholesale on each
-publish. `.nojekyll` stops Pages filtering the build's filenames, and
-`404.html` is a copy of `index.html` so deep links land in the app.
+Cloudflare is the home now; GitHub Pages is still published beside it, and
+this section is mostly about why both.
 
-Cloudflare is supported as an alternative, either through its dashboard Git
-integration or through `.github/workflows/cloudflare.yml`, which deploys
-`wrangler.jsonc` as a Worker serving static assets once
-`CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` exist as repository
-secrets, and does nothing at all until then.
+Cloudflare serves `dist/` either through its dashboard Git integration
+(Workers & Pages > Create > Pages > Connect to Git, build command
+`npm run build`, output directory `dist`) or through
+`.github/workflows/cloudflare.yml`, which deploys `wrangler.jsonc` as a Worker
+serving static assets once `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`
+exist as repository secrets, and does nothing at all until then. The dashboard
+route is simpler and shares no token with this repository; pick one.
+
+GitHub Pages keeps publishing the same `dist/` from the `gh-pages` branch.
+`.nojekyll` stops Pages filtering the build's filenames, and `404.html` is a
+copy of `index.html` so deep links land in the app.
+
+### Why both, for now
+
+An installed APK cannot be told the site moved. The wrapper only follows links
+whose host it recognises - `isLive()` in `MainActivity.java`, which is what
+stops an arbitrary link opening inside the app - so a build made against the
+old address would refuse to follow a redirect to the new one. It would not fail
+loudly, either: it would fall back to the copy bundled in the APK and look like
+a game that had quietly stopped updating. The desktop launcher has the same
+shape, with its address compiled in.
+
+So both addresses are served and both are accepted. The wrapper carries a
+primary host and a legacy one (`liveHost` and `legacyHost` in
+`android/app/build.gradle`, either overridable with `-PliveHost=...`), and the
+launcher tries its primary and falls back to the legacy one, which is checked
+against a real dead port in `launcher/launcher_test.sh` rather than assumed.
+
+Once the installs pointing at `jupiteriansoul.github.io` are gone, `legacyHost`
+becomes an empty string, `legacyURL` in the launcher becomes `""`, the Pages
+workflow can be deleted, and both collapse back to one address.
+
+### Moving to a custom domain
+
+Nothing above hardcodes `wikster.pages.dev` anywhere but as a default. Point a
+domain at the Cloudflare project, then:
+
+```
+./gradlew assembleGameRelease -PliveHost=wikster.example.com
+go build -ldflags "-X main.defaultURL=https://wikster.example.com/control/index.html"
+```
+
+and the old address keeps working for everyone who has not updated.
 
 ### The live wire
 

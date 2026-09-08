@@ -83,20 +83,47 @@ android {
         buildConfig true
     }
 
+    /*
+     * WHERE THE SITE IS PUBLISHED
+     * ------------------------------------------------------------------
+     * One place, because it is pinned in three: the wrapper only follows
+     * links whose host it knows, so getting this wrong does not error, it
+     * silently falls back to the bundled copy and looks like a game that
+     * stopped updating.
+     *
+     * `legacyHost` is the address the site used to live at, and it is still
+     * accepted. An APK already on somebody's phone cannot be told the site
+     * moved: it would refuse to follow the redirect and strand itself. So
+     * the old address keeps being published until those installs are gone,
+     * and then legacyHost becomes an empty string and the pair collapses
+     * back to one.
+     *
+     * Override either at build time without editing this file:
+     *   ./gradlew assembleGameRelease -PliveHost=wikster.example.com
+     */
+    def liveHost = project.findProperty('liveHost') ?: 'wikster.pages.dev'
+    def legacyHost = project.findProperty('legacyHost') ?: 'jupiteriansoul.github.io'
+
     flavorDimensions += 'app'
     productFlavors {
         game {
             dimension 'app'
             applicationId 'com.wikster.app'
             resValue 'string', 'app_name', 'Wikster'
-            buildConfigField 'String', 'LIVE_PATH', '"/Wikster/"'
+            buildConfigField 'String', 'LIVE_HOST', "\"${liveHost}\""
+            buildConfigField 'String', 'LIVE_PATH', '"/"'
+            buildConfigField 'String', 'LEGACY_HOST', "\"${legacyHost}\""
+            buildConfigField 'String', 'LEGACY_PATH', '"/Wikster/"'
             buildConfigField 'boolean', 'HAS_BUNDLE', 'true'
         }
         control {
             dimension 'app'
             applicationId 'com.wikster.control'
             resValue 'string', 'app_name', 'Wikster Control'
-            buildConfigField 'String', 'LIVE_PATH', '"/Wikster/control/"'
+            buildConfigField 'String', 'LIVE_HOST', "\"${liveHost}\""
+            buildConfigField 'String', 'LIVE_PATH', '"/control/"'
+            buildConfigField 'String', 'LEGACY_HOST', "\"${legacyHost}\""
+            buildConfigField 'String', 'LEGACY_PATH', '"/Wikster/control/"'
             buildConfigField 'boolean', 'HAS_BUNDLE', 'false'
         }
     }

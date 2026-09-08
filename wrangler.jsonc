@@ -1,0 +1,31 @@
+// How Cloudflare serves the site.
+//
+// This is a Worker whose only job is to hand back static files: the built
+// `dist` directory, uploaded by .github/workflows/cloudflare.yml. No server
+// code runs here - the game talks to Supabase directly from the browser, the
+// same as it did on GitHub Pages.
+//
+// The alternative, and the simpler one if you would rather not hold an API
+// token in this repository at all, is to connect the repo in the Cloudflare
+// dashboard (Workers & Pages > Create > Pages > Connect to Git) and let
+// Cloudflare run `npm run build` itself. Then this file and that workflow are
+// both unnecessary. See the top of the workflow.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "wikster",
+  // A date, not a version: it pins the runtime's behaviour so an update to
+  // Cloudflare's platform cannot change how this serves without being asked.
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    // The game is a single-page app: every unknown path has to return
+    // index.html so a deep link and a refresh both work. Without this,
+    // reloading on any screen would 404, which is the classic way an SPA
+    // breaks the moment it stops being served by a dev server.
+    "not_found_handling": "single-page-application",
+    // /control/ is its own page and must not be swallowed by the rule above.
+    // Cloudflare serves an exact file match before it reaches the SPA
+    // fallback, so control/index.html is found on its own.
+    "html_handling": "auto-trailing-slash"
+  }
+}
