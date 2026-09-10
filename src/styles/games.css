@@ -295,6 +295,15 @@
 .quest-head { display: flex; align-items: center; gap: 8px; }
 .quest-head b { flex: 1; min-width: 0; font-size: 0.94rem; line-height: 1.3; }
 .quest-tier { flex: none; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; color: var(--tier); background: color-mix(in srgb, var(--tier) 16%, transparent); }
+/* What to actually do. The names alone read as riddles - "A three-pack
+   morning" does not tell anybody to open three boosters - so every quest
+   carries a plain line under it saying what counts and where. Two lines at
+   most; a quest without one simply has no line rather than an empty gap. */
+.quest-how {
+  margin: -3px 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--ink-dim);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.quest.is-claimed .quest-how { opacity: 0.8; }
 .quest-bar { position: relative; height: 18px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
 .quest-bar i { display: block; height: 100%; border-radius: 999px; background: var(--tier); transition: width 500ms var(--ease); }
 .quest.is-done .quest-bar i { background: var(--positive); }

@@ -196,10 +196,14 @@ function paintQuest() {
     <span class="quest-stripe" aria-hidden="true"></span>
     <div class="quest-main">
       <div class="quest-head"><b class="quest-name"></b><span class="quest-tier"></span></div>
+          <p class="quest-how"></p>
       <div class="quest-bar"><i></i><span class="quest-bar-text tabular"></span></div>
       <div class="quest-foot"><span class="quest-reward"></span><span class="quest-state"></span></div>
     </div>`;
   card.querySelector('.quest-name').textContent = tx(quest.name);
+      const how = card.querySelector('.quest-how');
+      how.textContent = quest.how ? tx(quest.how) : '';
+      how.hidden = !how.textContent;
   card.querySelector('.quest-tier').textContent = tx(seasonAt().season.name);
   card.querySelector('.quest-reward').innerHTML = `${money(quest.reward.money)} + ${esc(t('seasonQuestPays', { n: pointsForQuest() }))}`;
   card.querySelector('.quest-bar i').style.width = `${Math.round(100 * Math.min(1, today.progress / quest.target))}%`;

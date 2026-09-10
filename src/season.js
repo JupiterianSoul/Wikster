@@ -192,17 +192,29 @@ export function seasonQuests(season) {
   const themeId = `season-${season.id}`;
   return [
     { id: `${season.id}-open`, metric: 'open', where: { themeId }, target: 1, reward: { money: 120 },
-      name: { en: `Open a ${season.name.en} booster`, fr: `Ouvrez un booster ${season.name.fr}` } },
+      name: { en: `Open a ${season.name.en} booster`, fr: `Ouvrez un booster ${season.name.fr}` },
+      how: { en: `The season's own booster, in the Shop while ${season.name.en} runs.`,
+             fr: `Le booster de la saison, en boutique pendant ${season.name.fr}.` } },
     { id: `${season.id}-pull-3`, metric: 'pull', where: { themeId }, target: 3, reward: { money: 160 },
-      name: { en: `Pull three ${season.name.en} cards`, fr: `Tirez trois cartes ${season.name.fr}` } },
+      name: { en: `Pull 3 ${season.name.en} cards`, fr: `Tirez 3 cartes ${season.name.fr}` },
+      how: { en: 'Only cards out of the season booster count.',
+             fr: 'Seules les cartes issues du booster de saison comptent.' } },
     { id: `${season.id}-rare`, metric: 'pull', where: { themeId, minRarity: 'rare' }, target: 1, reward: { money: 260 },
-      name: { en: `A Rare or better from the ${season.name.en} booster`, fr: `Une Rare ou mieux dans le booster ${season.name.fr}` } },
+      name: { en: `Pull a ${season.name.en} card, Rare or better`, fr: `Tirez une carte ${season.name.fr}, Rare ou mieux` },
+      how: { en: 'From the season booster, at Rare or any tier above it.',
+             fr: 'Du booster de saison, en Rare ou tout palier supérieur.' } },
     { id: `${season.id}-wikdle`, metric: 'wikdle', where: { won: true }, target: 1, reward: { money: 140 },
-      name: { en: 'Solve today’s Wikdle', fr: 'Résolvez le Wikdle du jour' } },
+      name: { en: 'Solve today’s Wikdle', fr: 'Résolvez le Wikdle du jour' },
+      how: { en: 'In Minigames. Find the word within your six guesses.',
+             fr: 'Dans Mini-jeux. Trouvez le mot en six essais ou moins.' } },
     { id: `${season.id}-points`, metric: 'points', sum: 'amount', target: 400, reward: { money: 150 },
-      name: { en: '400 minigame points', fr: '400 points de mini-jeux' } },
+      name: { en: 'Score 400 minigame points', fr: 'Marquez 400 points en mini-jeux' },
+      how: { en: 'Every minigame adds to the same total.',
+             fr: 'Tous les mini-jeux alimentent le même total.' } },
     { id: `${season.id}-new-5`, metric: 'pull', where: { isNew: true }, target: 5, reward: { money: 150 },
-      name: { en: 'Five cards you had never seen', fr: 'Cinq cartes jamais vues' } }
+      name: { en: 'Pull 5 cards you do not own', fr: 'Tirez 5 cartes que vous n’avez pas' },
+      how: { en: 'Any booster. Duplicates do not count.',
+             fr: 'N’importe quel booster. Les doublons ne comptent pas.' } }
   ];
 }
 

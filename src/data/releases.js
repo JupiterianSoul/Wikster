@@ -727,5 +727,23 @@ export const RELEASES = [
       { en: 'Separately: the badges a friend sees on your profile, and the number of achievements you have unlocked, stopped being published when the shelf gained a choice of what to show. Nothing errored; the column was simply never written again, which is why a friend\u2019s achievements read as three dots. It is written again',
         fr: 'Par ailleurs : les badges qu\u2019un ami voit sur votre profil, et le nombre de succès débloqués, n\u2019étaient plus publiés depuis que l\u2019étagère permet de choisir ce qu\u2019on affiche. Aucune erreur ; la colonne n\u2019était simplement plus écrite, d\u2019où les trois points à la place des succès d\u2019un ami. Elle est réécrite' }
     ]
+  },
+  {
+    id: 'plainquests', icon: 'trophy', accent: '#4ade80',
+    title: { en: 'Quests that say what to do', fr: 'Des quêtes qui disent quoi faire' },
+    points: [
+      { en: 'Every daily quest is named for the thing it asks of you',
+        fr: 'Chaque quête quotidienne porte le nom de ce qu\u2019elle demande' },
+      { en: 'And carries a line underneath saying what counts, and where',
+        fr: 'Et porte une ligne en dessous indiquant ce qui compte, et o\u00f9' }
+    ],
+    changelog: [
+      { en: 'The quest names were riddles. "A three-pack morning" does not tell anybody to open three boosters, and "Three you had never seen" does not say that duplicates will not count. Every one of the hundred and fifteen has been rewritten to say the goal plainly, with the number in it: Open 3 boosters, Pull 3 cards you do not own, Solve the Wikdle in 3 guesses or fewer',
+        fr: 'Les noms des qu\u00eates \u00e9taient des devinettes. « Trois boosters ce matin » ne dit \u00e0 personne d\u2019ouvrir trois boosters, et « Trois jamais vues » ne pr\u00e9cise pas que les doublons ne comptent pas. Les cent quinze ont \u00e9t\u00e9 r\u00e9\u00e9crites pour \u00e9noncer clairement l\u2019objectif, chiffre compris : Ouvrez 3 boosters, Tirez 3 cartes que vous n\u2019avez pas, R\u00e9solvez le Wikdle en 3 essais ou moins' },
+      { en: 'And the name alone was never going to be enough, because half the difficulty was never the goal - it was the rules. So each quest now carries a second line saying what actually counts and where to go: that a tier quest wants exactly that tier and not a better one, that a subject quest only counts cards out of that subject\u2019s booster, that the duel and the reveal are in Minigames, that a gift needs a friend first',
+        fr: 'Et le nom seul n\u2019aurait pas suffi, car la difficult\u00e9 n\u2019a jamais \u00e9t\u00e9 l\u2019objectif : c\u2019\u00e9taient les r\u00e8gles. Chaque qu\u00eate porte donc une seconde ligne indiquant ce qui compte vraiment et o\u00f9 aller : qu\u2019une qu\u00eate de palier veut exactement ce palier et non un meilleur, qu\u2019une qu\u00eate de sujet ne compte que les cartes issues du booster de ce sujet, que le duel et la devinette sont dans Mini-jeux, qu\u2019un cadeau demande d\u2019abord un ami' },
+      { en: 'The six season quests were rewritten the same way, and read from the same place',
+        fr: 'Les six qu\u00eates de saison ont \u00e9t\u00e9 r\u00e9\u00e9crites de la m\u00eame fa\u00e7on, et se lisent au m\u00eame endroit' }
+    ]
   }
 ];

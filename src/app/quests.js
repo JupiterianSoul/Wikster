@@ -85,10 +85,14 @@ export function paintQuests(board) {
         <span class="quest-stripe" aria-hidden="true"></span>
         <div class="quest-main">
           <div class="quest-head"><b class="quest-name"></b><span class="quest-tier"></span></div>
+          <p class="quest-how"></p>
           <div class="quest-bar"><i></i><span class="quest-bar-text tabular"></span></div>
           <div class="quest-foot"><span class="quest-reward"></span><span class="quest-state"></span></div>
         </div>`;
       card.querySelector('.quest-name').textContent = tx(row.quest.name);
+      const how = card.querySelector('.quest-how');
+      how.textContent = row.quest.how ? tx(row.quest.how) : '';
+      how.hidden = !how.textContent;
       card.querySelector('.quest-tier').textContent = tx(tier.name);
       const rewardBits = [money(row.quest.reward.money)];
       if (row.quest.reward.booster) rewardBits.push(esc(specName(row.quest.reward.booster)));
